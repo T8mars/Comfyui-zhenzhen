@@ -1,0 +1,279 @@
+[
+    {
+        "name": "Conceptual art",
+        "prompt": "Conceptual art",
+        "negative_prompt": "ugly, deformed, noisy, blurry, NSFW"
+    },
+    {
+        "name": "Social realism",
+        "prompt": "Social realism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "interior architecture",
+        "prompt": "interior architecture",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "modern",
+        "prompt": "modern",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "anime",
+        "prompt": "anime",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Minimalism",
+        "prompt": "Minimalism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Romanticism",
+        "prompt": "Romanticism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Gothic art",
+        "prompt": "Gothic art",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "American propaganda poster",
+        "prompt": "American propaganda poster",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Expressionism",
+        "prompt": "Expressionism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Realism",
+        "prompt": "Realism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Contemporary art",
+        "prompt": "Contemporary art",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Dutch Golden Age painting",
+        "prompt": "Dutch Golden Age painting",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Pop art",
+        "prompt": "Pop art",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Monet",
+        "prompt": "Monet",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Northern Renaissance",
+        "prompt": "Northern Renaissance",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Dadaism",
+        "prompt": "Dadaism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Luminism",
+        "prompt": "Luminism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Art Deco",
+        "prompt": "Art Deco",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "rococo style",
+        "prompt": "rococo style",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Tonalism",
+        "prompt": "Tonalism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Fauvism",
+        "prompt": "Fauvism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Carl Larsson",
+        "prompt": "Carl Larsson",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Mannerism",
+        "prompt": "Mannerism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Action painting",
+        "prompt": "Action painting",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Cubist Futurism",
+        "prompt": "Cubist Futurism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Futurism",
+        "prompt": "Futurism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Neoclassicism",
+        "prompt": "Neoclassicism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Baroque",
+        "prompt": "Baroque",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Genre painting",
+        "prompt": "Genre painting",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Constructivism",
+        "prompt": "Constructivism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "by Alfons Mucha",
+        "prompt": "by Alfons Mucha",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "blind box toy style",
+        "prompt": "blind box toy style",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Ukiyo-e",
+        "prompt": "Ukiyo-e",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "high detail",
+        "prompt": "high detail",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Op art",
+        "prompt": "Op art",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Color Field painting",
+        "prompt": "Color Field painting",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Renaissance",
+        "prompt": "Renaissance",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Surrealism",
+        "prompt": "Surrealism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Bauhaus",
+        "prompt": "Bauhaus",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Abstract expressionism",
+        "prompt": "Abstract expressionism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Pre-Raphaelite Brotherhood",
+        "prompt": "Pre-Raphaelite Brotherhood",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Impressionism",
+        "prompt": "Impressionism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Classicism",
+        "prompt": "Classicism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Hyperrealism",
+        "prompt": "Hyperrealism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Ghibli-like colours",
+        "prompt": "Ghibli-like colours",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Abstractionism",
+        "prompt": "Abstractionism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "pre-rephaëlite painting",
+        "prompt": "pre-rephaëlite painting",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "En plein air",
+        "prompt": "En plein air",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Pointillism",
+        "prompt": "Pointillism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Verism",
+        "prompt": "Verism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "raised fist",
+        "prompt": "raised fist",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Ashcan School",
+        "prompt": "Ashcan School",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Pixar",
+        "prompt": "Pixar",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "Cubism",
+        "prompt": "Cubism",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    }
+    
+]
+

@@ -1,0 +1,78 @@
+[
+    {
+        "name": "UHD",
+        "prompt": "UHD",
+        "negative_prompt": "ugly, deformed, noisy, blurry, NSFW"
+    },
+    {
+        "name": "anatomically correct",
+        "prompt": "anatomically correct",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "ccurate",
+        "prompt": "ccurate",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "textured skin",
+        "prompt": "textured skin",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "super detail",
+        "prompt": "super detail",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "high details",
+        "prompt": "high details",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "award winning",
+        "prompt": "award winning",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "best quality",
+        "prompt": "best quality",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "high quality",
+        "prompt": "high quality",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "1080P",
+        "prompt": "1080P",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "retina",
+        "prompt": "retina",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "HD",
+        "prompt": "HD",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "16k",
+        "prompt": "16k",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "8k",
+        "prompt": "8k",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    },
+    {
+        "name": "4K",
+        "prompt": "4K",
+        "negative_prompt": "ugly, deformed, noisy, blurry, low contrast, realism, photorealistic"
+    }
+    
+]

@@ -1,0 +1,637 @@
+{
+  "last_node_id": 245,
+  "last_link_id": 294,
+  "nodes": [
+    {
+      "id": 234,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -900,
+        -960
+      ],
+      "size": [
+        590.6380615234375,
+        217.42532348632812
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 282,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6
+        }
+      ],
+      "title": "mjtext_view",
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "",
+        "A stylized illustration of a black cat wearing an orange baseball cap with \\\"LEO\\\" in black capital letters. The cat has bright green eyes, a small pink nose, and a simple, smiling mouth. Its fur is textured and slightly rough. The cat is anthropomorphized, with a human-like body, arms, and legs, and is wearing pink swim trunks with a repeating pattern and a logo.  The cat is surfing a large, dark teal and green wave with whitecaps, standing on a pink surfboard. The background is a cloudy sky. The illustration style is hand-drawn or painted.\\n , super detail, best quality, 8k --v 6.1 --ar 3:4"
+      ]
+    },
+    {
+      "id": 237,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -900,
+        -1189
+      ],
+      "size": [
+        588.4142456054688,
+        154.83099365234375
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 271,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6
+        }
+      ],
+      "title": "mjstyle_view",
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "",
+        ", super detail, best quality, 8k"
+      ]
+    },
+    {
+      "id": 127,
+      "type": "PreviewImage",
+      "pos": [
+        -82.0888900756836,
+        -629
+      ],
+      "size": [
+        788.0629272460938,
+        818.4010620117188
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 292,
+          "label": "images"
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 220,
+      "type": "PreviewImage",
+      "pos": [
+        -907,
+        -622
+      ],
+      "size": [
+        787.3584594726562,
+        815.804443359375
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 289
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 236,
+      "type": "Comfly_mjstyle",
+      "pos": [
+        -1468.6104736328125,
+        -1280.557861328125
+      ],
+      "size": [
+        515.4985961914062,
+        591.5321655273438
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "positive"
+          }
+        },
+        {
+          "name": "negative",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "negative"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "style_positive",
+          "type": "STRING",
+          "links": [
+            271,
+            279
+          ],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "style_negative",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_mjstyle",
+        "values": [
+          "super detail",
+          "best quality",
+          "8k"
+        ],
+        "style_positive": "super detail, best quality, 8k",
+        "style_negative": ""
+      },
+      "widgets_values": [
+        "mj_art",
+        "",
+        "",
+        "super detail,best quality,8k"
+      ]
+    },
+    {
+      "id": 239,
+      "type": "Comfly_Mj",
+      "pos": [
+        -1475,
+        -616
+      ],
+      "size": [
+        523.5960693359375,
+        815.4779663085938
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "no",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "no"
+          }
+        },
+        {
+          "name": "c",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "c"
+          }
+        },
+        {
+          "name": "s",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "s"
+          }
+        },
+        {
+          "name": "iw",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "iw"
+          }
+        },
+        {
+          "name": "r",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "r"
+          }
+        },
+        {
+          "name": "sw",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "sw"
+          }
+        },
+        {
+          "name": "cw",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "cw"
+          }
+        },
+        {
+          "name": "sv",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "sv"
+          }
+        },
+        {
+          "name": "cref",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "cref"
+          }
+        },
+        {
+          "name": "sref",
+          "type": "STRING",
+          "link": null,
+          "slot_index": 9,
+          "widget": {
+            "name": "sref"
+          }
+        },
+        {
+          "name": "positive",
+          "type": "STRING",
+          "link": 279,
+          "widget": {
+            "name": "positive"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            289
+          ],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": [
+            282
+          ],
+          "slot_index": 1,
+          "shape": 3
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "links": [
+            294
+          ],
+          "slot_index": 2,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_Mj"
+      },
+      "widgets_values": [
+        "relax mode",
+        "",
+        "A stylized illustration of a black cat wearing an orange baseball cap with \\\"LEO\\\" in black capital letters. The cat has bright green eyes, a small pink nose, and a simple, smiling mouth. Its fur is textured and slightly rough. The cat is anthropomorphized, with a human-like body, arms, and legs, and is wearing pink swim trunks with a repeating pattern and a logo.  The cat is surfing a large, dark teal and green wave with whitecaps, standing on a pink surfboard. The background is a cloudy sky. The illustration style is hand-drawn or painted.\\n",
+        "v 6.1",
+        "3:4",
+        "",
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        "1",
+        false,
+        false,
+        2101087553,
+        "randomize",
+        "none",
+        "1851638940",
+        ""
+      ]
+    },
+    {
+      "id": 244,
+      "type": "Comfly_Mju",
+      "pos": [
+        178.3460693359375,
+        -917.4812622070312
+      ],
+      "size": [
+        353.06658935546875,
+        166.67950439453125
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "link": 294,
+          "widget": {
+            "name": "taskId"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            292
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "links": [
+            293
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_Mju"
+      },
+      "widgets_values": [
+        "",
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 245,
+      "type": "Comfly_Mjv",
+      "pos": [
+        1005.7476196289062,
+        -967.2124633789062
+      ],
+      "size": [
+        374.2900085449219,
+        253.6300048828125
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "link": 293,
+          "widget": {
+            "name": "taskId"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            291
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_Mjv"
+      },
+      "widgets_values": [
+        "",
+        false,
+        false,
+        false,
+        1,
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 110,
+      "type": "PreviewImage",
+      "pos": [
+        760,
+        -629
+      ],
+      "size": [
+        852.7117919921875,
+        815.7576904296875
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 291,
+          "label": "images"
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      271,
+      236,
+      0,
+      237,
+      0,
+      "STRING"
+    ],
+    [
+      279,
+      236,
+      0,
+      239,
+      10,
+      "STRING"
+    ],
+    [
+      282,
+      239,
+      1,
+      234,
+      0,
+      "STRING"
+    ],
+    [
+      289,
+      239,
+      0,
+      220,
+      0,
+      "IMAGE"
+    ],
+    [
+      291,
+      245,
+      0,
+      110,
+      0,
+      "IMAGE"
+    ],
+    [
+      292,
+      244,
+      0,
+      127,
+      0,
+      "IMAGE"
+    ],
+    [
+      293,
+      244,
+      1,
+      245,
+      0,
+      "STRING"
+    ],
+    [
+      294,
+      239,
+      2,
+      244,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "",
+      "bounding": [
+        -1503,
+        -1381,
+        3170,
+        1682
+      ],
+      "color": "#88A",
+      "font_size": 35,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "🤩Comfly x Midjourney",
+      "bounding": [
+        -1503,
+        -1801,
+        3170,
+        420
+      ],
+      "color": "#e1ff00",
+      "font_size": 300,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "U1-U4",
+      "bounding": [
+        -100,
+        -1056,
+        829,
+        1254
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "More",
+      "bounding": [
+        747,
+        -1056,
+        881,
+        1255
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.35049389948139287,
+      "offset": [
+        2033.2303599279435,
+        2007.5497715180475
+      ]
+    },
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ]
+  },
+  "version": 0.4
+}

@@ -1,0 +1,12 @@
+aiohttp
+aiohttp-cors
+GitPython
+numpy
+Pillow
+requests
+torch
+GitPython
+matrix-client
+transformers
+huggingface-hub
+psutil

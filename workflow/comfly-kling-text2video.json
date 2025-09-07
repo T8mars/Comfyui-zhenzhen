@@ -1,0 +1,164 @@
+{
+  "last_node_id": 29,
+  "last_link_id": 33,
+  "nodes": [
+    {
+      "id": 6,
+      "type": "Comfly_kling_videoPreview",
+      "pos": [
+        988.9732055664062,
+        -209.64236450195312
+      ],
+      "size": [
+        635.3577880859375,
+        719.2203979492188
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 32
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Comfly_kling_videoPreview"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 29,
+      "type": "Comfly_kling_text2video",
+      "pos": [
+        522.1868896484375,
+        -53.700565338134766
+      ],
+      "size": [
+        428.344970703125,
+        559.221435546875
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            32
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            33
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_kling_text2video"
+      },
+      "widgets_values": [
+        "",
+        "kling-v1-6",
+        0.5,
+        "1:1",
+        "std",
+        "5",
+        1,
+        "",
+        0,
+        "randomize",
+        "none",
+        0
+      ]
+    },
+    {
+      "id": 10,
+      "type": "ShowText|pysssss",
+      "pos": [
+        530.5608520507812,
+        -211.59860229492188
+      ],
+      "size": [
+        413.10906982421875,
+        86.80906677246094
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 33,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      32,
+      29,
+      0,
+      6,
+      0,
+      "VIDEO"
+    ],
+    [
+      33,
+      29,
+      1,
+      10,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.620921323059155,
+      "offset": [
+        -87.07468637203304,
+        417.6518882089604
+      ]
+    }
+  },
+  "version": 0.4
+}

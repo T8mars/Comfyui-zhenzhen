@@ -1,0 +1,208 @@
+{
+  "id": "f6ca7c92-3b93-49d0-b107-4bc211e77151",
+  "revision": 0,
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        -106.79183197021484,
+        -1344.8896484375
+      ],
+      "size": [
+        355.26800537109375,
+        624.8040161132812
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "image_fx_ (30).jpg",
+        "image",
+        ""
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": [
+        775.0960083007812,
+        -1335.6016845703125
+      ],
+      "size": [
+        422.5010070800781,
+        596.8040161132812
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1254.6778564453125,
+        -1332.5792236328125
+      ],
+      "size": [
+        377.956298828125,
+        370.8584899902344
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "",
+        "**SeedEdit Request**\n\nPrompt: 把黑猫变成白猫\nScale: 0.5\nSeed: 1651735202\nTime: 2025-03-25 12:17:44\n\nSuccess!\n\nImage URL: https://p26-aiop-sign.byteimg.com/tos-cn-i-vuqhorh59i/2025032512183166658E08495CC1A2D49F-0~tplv-vuqhorh59i-image.image?rk3s=7f9e702d&x-expires=1742962724&x-signature=3S1CjM3qqtl6hHymu7Fhd4V%2BwoE%3D\n\nVLM Description: 一只穿着水手服滑雪的白猫在雪山上\nRequest ID: 2025032512183166658E08495CC1A2D49F\nProcessing Time: 12.836374606s\n"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "ComflySeededit",
+      "pos": [
+        315.6972351074219,
+        -1337.4764404296875
+      ],
+      "size": [
+        400,
+        276
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "edited_image",
+          "type": "IMAGE",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflySeededit"
+      },
+      "widgets_values": [
+        "把黑猫变成白猫",
+        0.5,
+        1543254865,
+        "randomize",
+        true,
+        "右下角",
+        "英文",
+        "ainewsto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7513148009015777,
+      "offset": [
+        276.43375323608717,
+        1607.2258088279223
+      ]
+    }
+  },
+  "version": 0.4
+}

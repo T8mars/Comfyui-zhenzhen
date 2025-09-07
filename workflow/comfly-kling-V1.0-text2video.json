@@ -1,0 +1,363 @@
+{
+  "last_node_id": 23,
+  "last_link_id": 23,
+  "nodes": [
+    {
+      "id": 12,
+      "type": "Comfly_kling_text2video",
+      "pos": [
+        508.3873596191406,
+        100.78446960449219
+      ],
+      "size": [
+        391.20001220703125,
+        426
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            14
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "links": [
+            20
+          ],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_kling_text2video"
+      },
+      "widgets_values": [
+        "一只粉色的猫在天上飞",
+        "kling-v1",
+        0.5,
+        "1:1",
+        "std",
+        "5",
+        1,
+        "",
+        1806499942,
+        "randomize",
+        "none",
+        0
+      ]
+    },
+    {
+      "id": 10,
+      "type": "ShowText|pysssss",
+      "pos": [
+        516.880126953125,
+        -64.20478820800781
+      ],
+      "size": [
+        372.1260986328125,
+        87.67584228515625
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 14,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 8,
+      "type": "Comfly_kling_videoPreview",
+      "pos": [
+        1432.8990478515625,
+        24.682924270629883
+      ],
+      "size": [
+        451.5916748046875,
+        480.7630310058594
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 5
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Comfly_kling_videoPreview"
+      },
+      "widgets_values": [
+        {
+          "hidden": false,
+          "paused": false,
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "ShowText|pysssss",
+      "pos": [
+        521.4036254882812,
+        -212.97837829589844
+      ],
+      "size": [
+        360.48590087890625,
+        72.04704284667969
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 20,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            23
+          ],
+          "shape": 6,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Comfly_video_extend",
+      "pos": [
+        1003.2788696289062,
+        -194.6882781982422
+      ],
+      "size": [
+        318.736083984375,
+        114.19198608398438
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "link": 23,
+          "widget": {
+            "name": "video_id"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_video_extend"
+      },
+      "widgets_values": [
+        "32b6cb35-1dbc-44d3-b1e8-494a70f1624e",
+        ""
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Comfly_kling_videoPreview",
+      "pos": [
+        953.5421752929688,
+        18.28876304626465
+      ],
+      "size": [
+        438.3602294921875,
+        496.71234130859375
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 12
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Comfly_kling_videoPreview"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1444.631103515625,
+        -190.37957763671875
+      ],
+      "size": [
+        334.32611083984375,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 6,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "",
+        "ca4bc1e3-cb5a-4490-a479-7b9e054cb847"
+      ]
+    }
+  ],
+  "links": [
+    [
+      5,
+      7,
+      0,
+      8,
+      0,
+      "VIDEO"
+    ],
+    [
+      6,
+      7,
+      1,
+      9,
+      0,
+      "STRING"
+    ],
+    [
+      12,
+      12,
+      0,
+      6,
+      0,
+      "VIDEO"
+    ],
+    [
+      14,
+      12,
+      1,
+      10,
+      0,
+      "STRING"
+    ],
+    [
+      20,
+      12,
+      3,
+      23,
+      0,
+      "STRING"
+    ],
+    [
+      23,
+      23,
+      0,
+      7,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6830134553650705,
+      "offset": [
+        -302.39015550392986,
+        383.69692544634916
+      ]
+    }
+  },
+  "version": 0.4
+}
