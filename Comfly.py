@@ -3620,6 +3620,242 @@ class Comfly_Doubao_Seedream:
             return (blank_tensor, error_message)
 
 
+class Comfly_Doubao_Seedream_4:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": ("STRING", {"default": "doubao-seedream-4-0-250828"}),
+                "response_format": (["url", "b64_json"], {"default": "url"}),
+                "aspect_ratio": (["1:1", "4:3", "3:4", "16:9", "9:16", "2:3", "3:2", "21:9", "9:21"], {"default": "1:1"}),
+                "resolution": (["1K", "2K", "4K"], {"default": "1K"}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
+                "sequential_image_generation": (["disabled", "auto"], {"default": "disabled"}),
+                "max_images": ("INT", {"default": 1, "min": 1, "max": 15, "step": 1}),
+                "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
+                "watermark": ("BOOLEAN", {"default": True}),
+                "stream": ("BOOLEAN", {"default": False}),
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "response", "image_url")
+    FUNCTION = "generate_image"
+    CATEGORY = "Comfly-v2/Doubao"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 900
+        self.size_mapping = {
+            
+            "1K": {
+                "1:1": "1024x1024",
+                "4:3": "1152x864",
+                "3:4": "864x1152",
+                "16:9": "1280x720",
+                "9:16": "720x1280",
+                "2:3": "832x1248",
+                "3:2": "1248x832",
+                "21:9": "1512x648",
+                "9:21": "648x1512"
+            },
+
+            "2K": {
+                "1:1": "2048x2048",
+                "4:3": "2048x1536",
+                "3:4": "1536x2048",
+                "16:9": "2048x1152",
+                "9:16": "1152x2048",
+                "2:3": "1536x2048",
+                "3:2": "2048x1536",
+                "21:9": "2048x864",
+                "9:21": "864x2048"
+            },
+
+            "4K": {
+                "1:1": "4096x4096",
+                "4:3": "4096x3072",
+                "3:4": "3072x4096",
+                "16:9": "4096x2304",
+                "9:16": "2304x4096",
+                "2:3": "3072x4096",
+                "3:2": "4096x3072",
+                "21:9": "4096x1728",
+                "9:21": "1728x4096"
+            }
+        }
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def image_to_base64(self, image_tensor):
+        """Convert tensor to base64 string"""
+        if image_tensor is None:
+            return None
+            
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{image_base64}"
+    
+    def generate_image(self, prompt, model, response_format="url", aspect_ratio="1:1", resolution="1K", 
+                       apikey="", image=None, sequential_image_generation="disabled", 
+                       max_images=1, seed=-1, watermark=True, stream=False):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, error_message, "")
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            if resolution in self.size_mapping and aspect_ratio in self.size_mapping[resolution]:
+                final_size = self.size_mapping[resolution][aspect_ratio]
+            else:
+                final_size = "1024x1024"
+                print(f"Warning: Combination of {resolution} resolution and {aspect_ratio} aspect ratio not found. Using {final_size}.")
+            
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "response_format": response_format,
+                "size": final_size,
+                "watermark": watermark,
+                "stream": stream
+            }
+
+            if sequential_image_generation == "auto":
+                payload["sequential_image_generation"] = sequential_image_generation
+                payload["sequential_image_generation_options"] = {
+                    "max_images": max_images
+                }
+                
+            if seed != -1:
+                payload["seed"] = seed
+            if image is not None:
+                batch_size = image.shape[0]
+                image_urls = []
+                
+                for i in range(batch_size):
+                    single_image = image[i:i+1]
+                    image_base64 = self.image_to_base64(single_image)
+                    if image_base64:
+                        image_urls.append(image_base64)
+                
+                if image_urls:
+                    payload["image"] = image_urls
+            
+            response = requests.post(
+                "https://ai.comfly.chat/v1/images/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            pbar.update_absolute(30)
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                blank_image = Image.new('RGB', (1024, 1024), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, error_message, "")
+                
+            result = response.json()
+            
+            pbar.update_absolute(50)
+            
+            if "data" not in result or not result["data"]:
+                error_message = "No image data in response"
+                print(error_message)
+                blank_image = Image.new('RGB', (1024, 1024), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, error_message, "")
+            
+            image_url = None
+            image_data = None
+            generated_images = []
+            image_urls = []
+            for item in result["data"]:
+                if response_format == "url":
+                    image_url = item.get("url")
+                    if not image_url:
+                        continue
+                    
+                    image_urls.append(image_url)
+                    
+                    try:
+                        img_response = requests.get(image_url, timeout=self.timeout)
+                        img_response.raise_for_status()
+                        image_data = BytesIO(img_response.content)
+                        
+                        pil_image = Image.open(image_data)
+                        tensor_image = pil2tensor(pil_image)
+                        generated_images.append(tensor_image)
+                    except Exception as e:
+                        print(f"Error downloading image: {str(e)}")
+                else:
+                    b64_data = item.get("b64_json")
+                    if not b64_data:
+                        continue
+                        
+                    image_data = BytesIO(base64.b64decode(b64_data))
+                    
+                    pil_image = Image.open(image_data)
+                    tensor_image = pil2tensor(pil_image)
+                    generated_images.append(tensor_image)
+            
+            pbar.update_absolute(80)
+            if not generated_images:
+                error_message = "Failed to process any images"
+                print(error_message)
+                blank_image = Image.new('RGB', (1024, 1024), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, error_message, "")
+            
+            combined_tensor = torch.cat(generated_images, dim=0)
+                
+            response_info = {
+                "prompt": prompt,
+                "model": model,
+                "aspect_ratio": aspect_ratio,
+                "resolution": resolution,
+                "size": final_size,
+                "seed": seed if seed != -1 else "auto",
+                "urls": image_urls if image_urls else [],
+                "sequential_image_generation": sequential_image_generation,
+                "max_images": max_images if sequential_image_generation == "auto" else 1,
+                "images_generated": len(generated_images)
+            }
+            
+            pbar.update_absolute(100)
+            first_image_url = image_urls[0] if image_urls else ""
+            return (combined_tensor, json.dumps(response_info, indent=2), first_image_url)
+                
+        except Exception as e:
+            error_message = f"Error generating image: {str(e)}"
+            print(error_message)
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, error_message, "")
+
+
 class Comfly_Doubao_Seededit:
     @classmethod
     def INPUT_TYPES(cls):
@@ -7530,6 +7766,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_qwen_image": Comfly_qwen_image,
     "Comfly_qwen_image_edit": Comfly_qwen_image_edit, 
     "Comfly_Doubao_Seedream": Comfly_Doubao_Seedream,
+    "Comfly_Doubao_Seedream_4": Comfly_Doubao_Seedream_4,
     "Comfly_Doubao_Seededit": Comfly_Doubao_Seededit,
     "Comfly_MiniMax_video": Comfly_MiniMax_video,
     "Comfly_nano_banana": Comfly_nano_banana,
@@ -7565,6 +7802,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_qwen_image": "Comfly_qwen_image",
     "Comfly_qwen_image_edit": "Comfly_qwen_image_edit",
     "Comfly_Doubao_Seedream": "Comfly Doubao Seedream3.0",
+    "Comfly_Doubao_Seedream_4": "Comfly Doubao Seedream4.0",
     "Comfly_Doubao_Seededit": "Comfly Doubao Seededit3.0",
     "Comfly_MiniMax_video": "Comfly MiniMax Hailuo Video",
     "Comfly_nano_banana": "Comfly_nano_banana",
