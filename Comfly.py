@@ -2367,6 +2367,10 @@ class Comfly_kling_image2video:
             "kling-v2-master": {
                 "std": {"5": False, "10": False},
                 "pro": {"5": False, "10": False}
+            },
+            "kling-v2-1": {
+                "std": {"5": False, "10": False},  
+                "pro": {"5": True, "10": True}  
             }
         }
 
@@ -2378,6 +2382,9 @@ class Comfly_kling_image2video:
         
     def check_tail_image_compatibility(self, model_name, mode, duration):
         try:
+            if model_name == "kling-v2-1":
+                return mode == "pro"
+            
             return self.model_compatibility.get(model_name, {}).get(mode, {}).get(duration, False)
         except:
             return False
@@ -2472,8 +2479,7 @@ class Comfly_kling_image2video:
                 json=payload,
                 timeout=self.timeout
             )
-            
-            # Log the response status
+
             print(f"Response status: {response.status_code}")
             if response.status_code != 200:
                 error_message = f"Error: {response.status_code} {response.reason} - {response.text}"
@@ -2500,11 +2506,9 @@ class Comfly_kling_image2video:
                 status_response.raise_for_status()
                 status_result = status_response.json()
                 last_status = status_result["data"]
-                
-                # Update progress based on the returned status
+
                 progress = 0
                 if status_result["data"]["task_status"] == "processing":
-                    # Estimate progress if not provided explicitly
                     progress = status_result["data"].get("progress", 50)
                 elif status_result["data"]["task_status"] == "succeed":
                     progress = 100
@@ -3633,7 +3637,11 @@ class Comfly_Doubao_Seedream_4:
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
-                "image": ("IMAGE",),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
                 "sequential_image_generation": (["disabled", "auto"], {"default": "disabled"}),
                 "max_images": ("INT", {"default": 1, "min": 1, "max": 15, "step": 1}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
@@ -3707,7 +3715,7 @@ class Comfly_Doubao_Seedream_4:
         return f"data:image/png;base64,{image_base64}"
     
     def generate_image(self, prompt, model, response_format="url", aspect_ratio="1:1", resolution="1K", 
-                       apikey="", image=None, sequential_image_generation="disabled", 
+                       apikey="", image1=None, image2=None, image3=None, image4=None, image5=None, sequential_image_generation="disabled", 
                        max_images=1, seed=-1, watermark=True, stream=False):
         if apikey.strip():
             self.api_key = apikey
@@ -3742,24 +3750,23 @@ class Comfly_Doubao_Seedream_4:
 
             if sequential_image_generation == "auto":
                 payload["sequential_image_generation"] = sequential_image_generation
-                payload["sequential_image_generation_options"] = {
-                    "max_images": max_images
-                }
+                payload["n"] = max_images
                 
             if seed != -1:
                 payload["seed"] = seed
-            if image is not None:
-                batch_size = image.shape[0]
-                image_urls = []
-                
-                for i in range(batch_size):
-                    single_image = image[i:i+1]
-                    image_base64 = self.image_to_base64(single_image)
-                    if image_base64:
-                        image_urls.append(image_base64)
-                
-                if image_urls:
-                    payload["image"] = image_urls
+
+            image_urls = []
+            for img in [image1, image2, image3, image4, image5]:
+                if img is not None:
+                    batch_size = img.shape[0]
+                    for i in range(batch_size):
+                        single_image = img[i:i+1]
+                        image_base64 = self.image_to_base64(single_image)
+                        if image_base64:
+                            image_urls.append(image_base64)
+            
+            if image_urls:
+                payload["image"] = image_urls
             
             response = requests.post(
                 "https://ai.comfly.chat/v1/images/generations",
@@ -3839,10 +3846,13 @@ class Comfly_Doubao_Seedream_4:
                 "size": final_size,
                 "seed": seed if seed != -1 else "auto",
                 "urls": image_urls if image_urls else [],
-                "sequential_image_generation": sequential_image_generation,
-                "max_images": max_images if sequential_image_generation == "auto" else 1,
-                "images_generated": len(generated_images)
+                "sequential_image_generation": sequential_image_generation
             }
+
+            if sequential_image_generation == "auto":
+                response_info["max_images"] = max_images
+            
+            response_info["images_generated"] = len(generated_images)
             
             pbar.update_absolute(100)
             first_image_url = image_urls[0] if image_urls else ""
@@ -6291,11 +6301,13 @@ class Comfly_Googel_Veo3:
                 "prompt": ("STRING", {"multiline": True}),
                 "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames"], {"default": "veo3"}),
                 "enhance_prompt": ("BOOLEAN", {"default": False}),
+                "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
                 "image": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "enable_upsample": ("BOOLEAN", {"default": False}),
             }
         }
     
@@ -6324,7 +6336,7 @@ class Comfly_Googel_Veo3:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def generate_video(self, prompt, model="veo3", enhance_prompt=False, apikey="", image=None, seed=0):
+    def generate_video(self, prompt, model="veo3", enhance_prompt=False, aspect_ratio="16:9", apikey="", image=None, seed=0, enable_upsample=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -6349,6 +6361,12 @@ class Comfly_Googel_Veo3:
  
             if seed > 0:
                 payload["seed"] = seed
+
+            if model in ["veo3", "veo3-fast", "veo3-pro"] and aspect_ratio:
+                payload["aspect_ratio"] = aspect_ratio
+
+            if model in ["veo3", "veo3-fast", "veo3-pro"] and enable_upsample:
+                payload["enable_upsample"] = enable_upsample
  
             if is_image_to_video:
                 image_base64 = self.image_to_base64(image)
@@ -6445,6 +6463,8 @@ class Comfly_Googel_Veo3:
                     "prompt": prompt,
                     "model": model,
                     "enhance_prompt": enhance_prompt,
+                    "aspect_ratio": aspect_ratio if model in ["veo3", "veo3-fast", "veo3-pro"] else "default",
+                    "enable_upsample": enable_upsample if model in ["veo3", "veo3-fast", "veo3-pro"] else False,
                     "video_url": video_url
                 }
                 
