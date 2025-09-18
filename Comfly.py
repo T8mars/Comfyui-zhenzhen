@@ -3,6 +3,7 @@ import io
 import math
 import random
 import torch
+import torchaudio
 import requests
 import time
 import numpy as np
@@ -19,10 +20,10 @@ import folder_paths
 import mimetypes
 import cv2
 import shutil
+import subprocess
 from .utils import pil2tensor, tensor2pil
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
-
 
 
 def get_config():
@@ -85,6 +86,82 @@ class ComflyVideoAdapter:
             except Exception as e:
                 print(f"Error saving video: {str(e)}")
                 return False
+
+
+def create_audio_object(audio_url):
+    """Create an audio object compatible with ComfyUI's audio nodes"""
+    if not audio_url:
+        return {
+            "waveform": torch.zeros((1, 1, 44100)),  
+            "sample_rate": 44100
+        }
+        
+    try:
+        temp_dir = os.path.join(folder_paths.get_temp_directory(), "suno_audio")
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_file = os.path.join(temp_dir, f"suno_{str(uuid.uuid4())[:8]}.mp3")
+        
+        response = requests.get(audio_url, stream=True)
+        response.raise_for_status()
+        
+        with open(temp_file, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        try:
+            waveform, sample_rate = torchaudio.load(temp_file)
+            if len(waveform.shape) == 2:  
+                waveform = waveform.unsqueeze(0)  
+            
+            return {
+                "waveform": waveform,
+                "sample_rate": sample_rate
+            }
+        except Exception as e:
+            print(f"Error loading audio with torchaudio: {str(e)}")
+
+            try:
+                if hasattr(folder_paths, "get_ffmpeg_path"):
+                    ffmpeg_path = folder_paths.get_ffmpeg_path()
+                else:
+                    ffmpeg_path = shutil.which("ffmpeg")
+                
+                if ffmpeg_path:
+                    temp_wav = temp_file.replace(".mp3", ".wav")
+                    subprocess.run([ffmpeg_path, "-y", "-i", temp_file, temp_wav], 
+                                  check=True, capture_output=True)
+
+                    waveform, sample_rate = torchaudio.load(temp_wav)
+                    if len(waveform.shape) == 2:  
+                        waveform = waveform.unsqueeze(0)  
+
+                    try:
+                        os.remove(temp_wav)
+                    except:
+                        pass
+                        
+                    return {
+                        "waveform": waveform,
+                        "sample_rate": sample_rate
+                    }
+                else:
+                    raise Exception("ffmpeg not found, can't process audio")
+            except Exception as ffmpeg_error:
+                print(f"Error with ffmpeg conversion: {str(ffmpeg_error)}")
+
+                return {
+                    "waveform": torch.zeros((1, 1, 44100)),  
+                    "sample_rate": 44100,
+                    "url": audio_url  
+                }
+        
+    except Exception as e:
+        print(f"Error downloading or processing audio: {str(e)}")
+
+    return {
+        "waveform": torch.zeros((1, 1, 44100)),
+        "sample_rate": 44100
+    }
 
 
 
@@ -3632,10 +3709,12 @@ class Comfly_Doubao_Seedream_4:
                 "prompt": ("STRING", {"multiline": True}),
                 "model": ("STRING", {"default": "doubao-seedream-4-0-250828"}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "aspect_ratio": (["1:1", "4:3", "3:4", "16:9", "9:16", "2:3", "3:2", "21:9", "9:21"], {"default": "1:1"}),
                 "resolution": (["1K", "2K", "4K"], {"default": "1K"}),
             },
             "optional": {
+                "aspect_ratio": (["1:1", "4:3", "3:4", "16:9", "9:16", "2:3", "3:2", "21:9", "9:21", "Custom"], {"default": "1:1"}),
+                "width": ("INT", {"default": 1024, "min": 64, "max": 8192, "step": 1}),
+                "height": ("INT", {"default": 1024, "min": 64, "max": 8192, "step": 1}),
                 "apikey": ("STRING", {"default": ""}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
@@ -3697,6 +3776,12 @@ class Comfly_Doubao_Seedream_4:
             }
         }
 
+        self.resolution_factors = {
+            "1K": 1,
+            "2K": 2,
+            "4K": 4
+        }
+
     def get_headers(self):
         return {
             "Content-Type": "application/json",
@@ -3714,9 +3799,11 @@ class Comfly_Doubao_Seedream_4:
         image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
         return f"data:image/png;base64,{image_base64}"
     
-    def generate_image(self, prompt, model, response_format="url", aspect_ratio="1:1", resolution="1K", 
-                       apikey="", image1=None, image2=None, image3=None, image4=None, image5=None, sequential_image_generation="disabled", 
-                       max_images=1, seed=-1, watermark=True, stream=False):
+    def generate_image(self, prompt, model, response_format="url", resolution="1K", 
+                  aspect_ratio="1:1", width=1024, height=1024, apikey="", 
+                  image1=None, image2=None, image3=None, image4=None, image5=None, 
+                  sequential_image_generation="disabled", max_images=1, seed=-1, 
+                  watermark=True, stream=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -3733,11 +3820,21 @@ class Comfly_Doubao_Seedream_4:
         try:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
-            if resolution in self.size_mapping and aspect_ratio in self.size_mapping[resolution]:
-                final_size = self.size_mapping[resolution][aspect_ratio]
+
+            if aspect_ratio == "Custom":
+
+                scale_factor = self.resolution_factors.get(resolution, 1)
+                scaled_width = int(width * scale_factor)
+                scaled_height = int(height * scale_factor)
+    
+                final_size = f"{scaled_width}x{scaled_height}"
+                print(f"Using custom dimensions with {resolution} scaling: {final_size}")
             else:
-                final_size = "1024x1024"
-                print(f"Warning: Combination of {resolution} resolution and {aspect_ratio} aspect ratio not found. Using {final_size}.")
+                if resolution in self.size_mapping and aspect_ratio in self.size_mapping[resolution]:
+                    final_size = self.size_mapping[resolution][aspect_ratio]
+                else:
+                    final_size = "1024x1024"
+                    print(f"Warning: Combination of {resolution} resolution and {aspect_ratio} aspect ratio not found. Using {final_size}.")
             
             payload = {
                 "model": model,
@@ -3841,14 +3938,18 @@ class Comfly_Doubao_Seedream_4:
             response_info = {
                 "prompt": prompt,
                 "model": model,
-                "aspect_ratio": aspect_ratio,
                 "resolution": resolution,
                 "size": final_size,
                 "seed": seed if seed != -1 else "auto",
                 "urls": image_urls if image_urls else [],
-                "sequential_image_generation": sequential_image_generation
+                "sequential_image_generation": sequential_image_generation,
+                "aspect_ratio": aspect_ratio
             }
 
+            if aspect_ratio == "Custom":
+                response_info["original_dimensions"] = f"{width}x{height}"
+                response_info["scaled_dimensions"] = final_size
+            
             if sequential_image_generation == "auto":
                 response_info["max_images"] = max_images
             
@@ -7756,6 +7857,600 @@ class Comfly_MiniMax_video:
 
 
 
+############################# Suno ###########################
+
+class Comfly_suno_description:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "title": ("STRING", {"default": ""}),
+                "description_prompt": ("STRING", {"multiline": True}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+"], {"default": "v4.5"}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "make_instrumental": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""})
+            }
+        }
+    
+    RETURN_TYPES = ("AUDIO", "AUDIO", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "prompt", "task_id", "response", "clip_id1", "clip_id2", "tags", "title")
+    FUNCTION = "generate_music"
+    CATEGORY = "Comfly-v2/Suno"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + self.api_key
+        }
+    
+    def generate_music(self, title, description_prompt, version="v4.5", seed=0, make_instrumental=False, apikey=""):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+
+            empty_audio = create_audio_object("")
+            return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
+        mv_mapping = {
+            "v3.0": "chirp-v3.0",
+            "v3.5": "chirp-v3.5", 
+            "v4": "chirp-v4",
+            "v4.5": "chirp-auk",
+            "v4.5+": "chirp-bluejay"
+        }
+        
+        mv = mv_mapping.get(version, "chirp-auk")
+            
+        try:
+            payload = {
+                "gpt_description_prompt": description_prompt,
+                "make_instrumental": make_instrumental,
+                "mv": mv,
+                "prompt": ""
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+            
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            
+            response = requests.post(
+                "https://ai.comfly.chat/suno/generate/description-mode",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            pbar.update_absolute(20)
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
+                
+            result = response.json()
+            
+            if "id" not in result:
+                error_message = "No task ID in response"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
+                
+            task_id = result.get("id")
+            
+            if "clips" not in result or len(result["clips"]) < 2:
+                error_message = "Expected at least 2 clips in the response"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
+                
+            clip_ids = [clip["id"] for clip in result["clips"]]
+            if len(clip_ids) < 2:
+                error_message = "Expected at least 2 clip IDs"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
+                
+            pbar.update_absolute(30)
+            max_attempts = 30
+            attempts = 0
+            final_clips = []
+            generated_prompt = ""
+            extracted_tags = ""
+            generated_title = ""  
+            
+            while attempts < max_attempts and len(final_clips) < 2:
+                time.sleep(5)
+                attempts += 1
+                
+                try:
+                    clip_response = requests.get(
+                        f"https://ai.comfly.chat/suno/feed/{','.join(clip_ids)}",
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    
+                    if clip_response.status_code != 200:
+                        continue
+                        
+                    clips_data = clip_response.json()
+                    
+                    progress = min(80, 30 + (attempts * 50 // max_attempts))
+                    pbar.update_absolute(progress)
+                    complete_clips = [
+                        clip for clip in clips_data 
+                        if clip.get("status") == "complete" and (clip.get("audio_url") or clip.get("state") == "succeeded")
+                    ]
+                    for clip in complete_clips:
+                        if clip.get("id") in clip_ids and clip not in final_clips:
+                            final_clips.append(clip)
+                            if not generated_prompt and "prompt" in clip:
+                                generated_prompt = clip["prompt"]
+                            if not extracted_tags and "tags" in clip:
+                                extracted_tags = clip["tags"]
+                            if not generated_title and "title" in clip and clip["title"]:
+                                generated_title = clip["title"]
+                    
+                    if len(final_clips) >= 2:
+                        break
+                        
+                except Exception as e:
+                    print(f"Error checking clip status: {str(e)}")
+            
+            if len(final_clips) < 2:
+                error_message = f"Only received {len(final_clips)} complete clips after {max_attempts} attempts"
+                print(error_message)
+                
+                if not final_clips:
+                    empty_audio = create_audio_object("")
+                    return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
+                
+            final_title = generated_title if generated_title else title
+
+            for clip in final_clips:
+                if "title" not in clip or not clip["title"]:
+                    clip["title"] = final_title
+                    
+            audio_urls = []
+            clip_id_values = []
+            
+            for clip in final_clips[:2]:  
+                audio_url = ""
+                if "audio_url" in clip and clip["audio_url"]:
+                    audio_url = clip["audio_url"]
+                elif "cdn1.suno.ai" in str(clip):
+                    match = re.search(r'https://cdn1\.suno\.ai/[^"\']+\.mp3', str(clip))
+                    if match:
+                        audio_url = match.group(0)
+                
+                if audio_url:
+                    print(f"Found audio URL: {audio_url}")
+                    audio_urls.append(audio_url)
+                else:
+                    print(f"No audio URL found in clip")
+                    audio_urls.append("")
+                    
+                clip_id_value = clip.get("id", "")
+                if clip_id_value:
+                    clip_id_values.append(clip_id_value)
+                else:
+                    clip_id_values.append("")
+                
+            while len(audio_urls) < 2:
+                audio_urls.append("")
+                
+            while len(clip_id_values) < 2:
+                clip_id_values.append("")
+
+            audio_objects = [create_audio_object(url) for url in audio_urls[:2]]
+            while len(audio_objects) < 2:
+                audio_objects.append(create_audio_object(""))
+            
+            pbar.update_absolute(100)
+            
+            response_info = {
+                "status": "success",
+                "prompt": generated_prompt,
+                "title": final_title, 
+                "version": version,
+                "seed": seed if seed > 0 else "auto",
+                "make_instrumental": make_instrumental,
+                "clips_generated": len(final_clips),
+                "tags": extracted_tags
+            }
+
+            return (
+                audio_objects[0],
+                audio_objects[1],
+                audio_urls[0],
+                audio_urls[1],
+                generated_prompt,
+                task_id,
+                json.dumps(response_info),
+                clip_id_values[0],
+                clip_id_values[1],
+                extracted_tags,
+                final_title  
+            )
+                
+        except Exception as e:
+            error_message = f"Error generating music: {str(e)}"
+            print(error_message)
+            empty_audio = create_audio_object("")
+            return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
+
+
+class Comfly_suno_lyrics:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""})
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("lyrics", "response", "title", "tags")
+    FUNCTION = "generate_lyrics"
+    CATEGORY = "Comfly-v2/Suno"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+        
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + self.api_key
+        }
+        
+    def generate_lyrics(self, prompt, seed=0, apikey=""):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+            return ("", json.dumps({"status": "error", "message": error_message}), "", "")
+            
+        try:
+            payload = {"prompt": prompt}
+            
+            if seed > 0:
+                payload["seed"] = seed
+
+            response = requests.post(
+                "https://ai.comfly.chat/suno/generate/lyrics/",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "")
+                
+            result = response.json()
+            
+            if "id" not in result:
+                error_message = "No task ID in response"
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "")
+                
+            task_id = result.get("id")
+
+            max_attempts = 30
+            attempts = 0
+            lyrics_text = ""
+            generated_title = ""  
+            tags = ""
+            
+            while attempts < max_attempts:
+                time.sleep(2)
+                attempts += 1
+                
+                try:
+                    lyrics_response = requests.get(
+                        f"https://ai.comfly.chat/suno/lyrics/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    
+                    if lyrics_response.status_code != 200:
+                        continue
+                        
+                    lyrics_data = lyrics_response.json()
+                    
+                    if lyrics_data.get("status") == "complete" or lyrics_data.get("status") == "succeed":
+                        lyrics_text = lyrics_data.get("text", "")
+                        generated_title = lyrics_data.get("title", "")  
+                        tags = lyrics_data.get("tags", "")
+                        break
+                        
+                except Exception as e:
+                    print(f"Error checking lyrics status: {str(e)}")
+            
+            if not lyrics_text:
+                error_message = f"Failed to generate lyrics after {max_attempts} attempts"
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "")
+            
+            success_response = {
+                "status": "success",
+                "title": generated_title,  
+                "prompt": prompt,
+                "seed": seed if seed > 0 else "auto",
+                "tags": tags
+            }
+            
+            return (lyrics_text, json.dumps(success_response), generated_title, tags)  
+                
+        except Exception as e:
+            error_message = f"Error generating lyrics: {str(e)}"
+            print(error_message)
+            return ("", json.dumps({"status": "error", "message": error_message}), "", "")
+
+
+
+class Comfly_suno_custom:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "title": ("STRING", {"default": ""}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+"], {"default": "v4.5"}),
+                "prompt": ("STRING", {"multiline": True}), 
+                "tags": ("STRING", {"default": ""}),  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""})
+            }
+        }
+    
+    RETURN_TYPES = ("AUDIO", "AUDIO", "STRING", "STRING", "STRING", "STRING", 
+                   "STRING", "STRING", "STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "task_id", "response",
+                   "clip_id1", "clip_id2", "image_large_url1", "image_large_url2", "tags", "title")
+    FUNCTION = "generate_music"
+    CATEGORY = "Comfly-v2/Suno"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + self.api_key
+        }
+
+    def generate_music(self, title, version="v4.5", prompt="", tags="", seed=0, apikey=""):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+
+            empty_audio = create_audio_object("")
+            return (empty_audio, empty_audio, "", "", "", error_message, 
+                "", "", "", "", "", "")
+        
+        mv_mapping = {
+            "v3.0": "chirp-v3.0",
+            "v3.5": "chirp-v3.5", 
+            "v4": "chirp-v4",
+            "v4.5": "chirp-auk",
+            "v4.5+": "chirp-bluejay"
+        }
+        
+        mv = mv_mapping.get(version, "chirp-auk")
+            
+        try:
+            payload = {
+                "prompt": prompt,
+                "tags": tags,
+                "mv": mv,
+                "title": title  
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+            
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            
+            response = requests.post(
+                "https://ai.comfly.chat/suno/generate",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            pbar.update_absolute(20)
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", error_message, 
+                    "", "", "", "", "", "")
+                
+            result = response.json()
+            
+            if "id" not in result:
+                error_message = "No task ID in response"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", "", error_message, 
+                    "", "", "", "", "", "")
+                
+            task_id = result.get("id")
+            
+            if "clips" not in result or len(result["clips"]) < 2:
+                error_message = "Expected at least 2 clips in the response"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", task_id, error_message, 
+                    "", "", "", "", "", "")
+                
+            clip_ids = [clip["id"] for clip in result["clips"]]
+            if len(clip_ids) < 2:
+                error_message = "Expected at least 2 clip IDs"
+                print(error_message)
+                empty_audio = create_audio_object("")
+                return (empty_audio, empty_audio, "", "", task_id, error_message, 
+                    "", "", "", "", "", "")
+                
+            pbar.update_absolute(30)
+            max_attempts = 30
+            attempts = 0
+            final_clips = []
+            final_tags = tags  
+            generated_title = ""  
+            
+            while attempts < max_attempts and len(final_clips) < 2:
+                time.sleep(5)
+                attempts += 1
+                
+                try:
+                    clip_response = requests.get(
+                        f"https://ai.comfly.chat/suno/feed/{','.join(clip_ids)}",
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    
+                    if clip_response.status_code != 200:
+                        continue
+                        
+                    clips_data = clip_response.json()
+                    
+                    progress = min(80, 30 + (attempts * 50 // max_attempts))
+                    pbar.update_absolute(progress)
+                    complete_clips = [
+                        clip for clip in clips_data 
+                        if clip.get("status") == "complete" and (clip.get("audio_url") or clip.get("state") == "succeeded")
+                    ]
+                    
+                    for clip in complete_clips:
+                        if clip.get("id") in clip_ids and clip not in final_clips:
+                            final_clips.append(clip)
+                            if "tags" in clip and clip["tags"]:
+                                final_tags = clip["tags"]
+                            if "title" in clip and clip["title"]:
+                                generated_title = clip["title"]
+                    
+                    if len(final_clips) >= 2:
+                        break
+                        
+                except Exception as e:
+                    print(f"Error checking clip status: {str(e)}")
+            
+            if len(final_clips) < 2:
+                error_message = f"Only received {len(final_clips)} complete clips after {max_attempts} attempts"
+                print(error_message)
+                
+                if not final_clips:
+                    empty_audio = create_audio_object("")
+                    return (empty_audio, empty_audio, "", "", task_id, error_message, 
+                        "", "", "", "", "", "")
+
+            final_title = generated_title if generated_title else title
+                    
+            audio_urls = []
+            clip_id_values = []
+            image_large_urls = []
+            
+            for clip in final_clips[:2]:
+                audio_url = ""
+                if "audio_url" in clip and clip["audio_url"]:
+                    audio_url = clip["audio_url"]
+                elif "cdn1.suno.ai" in str(clip):
+                    match = re.search(r'https://cdn1\.suno\.ai/[^"\']+\.mp3', str(clip))
+                    if match:
+                        audio_url = match.group(0)
+                
+                audio_urls.append(audio_url if audio_url else "")
+
+                clip_id = clip.get("clip_id", clip.get("id", ""))
+                clip_id_values.append(clip_id)
+
+                image_large_url = clip.get("image_large_url", "")
+                image_large_urls.append(image_large_url)
+
+            while len(audio_urls) < 2:
+                audio_urls.append("")
+                
+            while len(clip_id_values) < 2:
+                clip_id_values.append("")
+                
+            while len(image_large_urls) < 2:
+                image_large_urls.append("")
+
+            audio_objects = [create_audio_object(url) for url in audio_urls[:2]]
+            while len(audio_objects) < 2:
+                audio_objects.append(create_audio_object(""))
+            
+            pbar.update_absolute(100)
+            
+            response_info = {
+                "status": "success",
+                "title": final_title,
+                "version": version,
+                "seed": seed if seed > 0 else "auto",
+                "clips_generated": len(final_clips),
+                "tags": final_tags
+            }
+
+            return (
+                audio_objects[0],  
+                audio_objects[1],  
+                audio_urls[0],     
+                audio_urls[1],     
+                task_id,
+                json.dumps(response_info),
+                clip_id_values[0],
+                clip_id_values[1],
+                image_large_urls[0],
+                image_large_urls[1],
+                final_tags,
+                final_title  
+            )
+                
+        except Exception as e:
+            error_message = f"Error generating music: {str(e)}"
+            print(error_message)
+            empty_audio = create_audio_object("")
+            return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "", "", "")
+
+
+
 WEB_DIRECTORY = "./web"    
         
 NODE_CLASS_MAPPINGS = {
@@ -7789,6 +8484,9 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Doubao_Seedream_4": Comfly_Doubao_Seedream_4,
     "Comfly_Doubao_Seededit": Comfly_Doubao_Seededit,
     "Comfly_MiniMax_video": Comfly_MiniMax_video,
+    "Comfly_suno_description": Comfly_suno_description,
+    "Comfly_suno_lyrics": Comfly_suno_lyrics,
+    "Comfly_suno_custom": Comfly_suno_custom,
     "Comfly_nano_banana": Comfly_nano_banana,
     "Comfly_nano_banana_fal": Comfly_nano_banana_fal,
     "Comfly_nano_banana_edit": Comfly_nano_banana_edit
@@ -7825,6 +8523,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Doubao_Seedream_4": "Comfly Doubao Seedream4.0",
     "Comfly_Doubao_Seededit": "Comfly Doubao Seededit3.0",
     "Comfly_MiniMax_video": "Comfly MiniMax Hailuo Video",
+    "Comfly_suno_description": "Comfly Suno Description",
+    "Comfly_suno_lyrics": "Comfly Suno Lyrics",
+    "Comfly_suno_custom": "Comfly Suno Custom",
     "Comfly_nano_banana": "Comfly_nano_banana",
     "Comfly_nano_banana_fal": "Comfly_nano_banana_fal",
     "Comfly_nano_banana_edit": "Comfly_nano_banana_edit"
