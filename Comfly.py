@@ -7866,7 +7866,7 @@ class Comfly_suno_description:
             "required": {
                 "title": ("STRING", {"default": ""}),
                 "description_prompt": ("STRING", {"multiline": True}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+"], {"default": "v4.5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v4.5"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
@@ -7908,7 +7908,8 @@ class Comfly_suno_description:
             "v3.5": "chirp-v3.5", 
             "v4": "chirp-v4",
             "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay"
+            "v4.5+": "chirp-bluejay",
+            "v5": "chirp-crow"
         }
         
         mv = mv_mapping.get(version, "chirp-auk")
@@ -8220,7 +8221,7 @@ class Comfly_suno_custom:
         return {
             "required": {
                 "title": ("STRING", {"default": ""}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+"], {"default": "v4.5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v4.5"}),
                 "prompt": ("STRING", {"multiline": True}), 
                 "tags": ("STRING", {"default": ""}),  
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
@@ -8267,7 +8268,8 @@ class Comfly_suno_custom:
             "v3.5": "chirp-v3.5", 
             "v4": "chirp-v4",
             "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay"
+            "v4.5+": "chirp-bluejay",
+            "v5": "chirp-crow"
         }
         
         mv = mv_mapping.get(version, "chirp-auk")

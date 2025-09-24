@@ -6,6 +6,11 @@
 
 # 更新 Update：
 
+20250924：
+
+`Comfly_suno:节点`: 新增v5模型
+
+
 20250918：
 
 `Comfly_suno:节点`: 新增Comfly_suno_description，Comfly_suno_lyrics，Comfly_suno_custom三个节点
