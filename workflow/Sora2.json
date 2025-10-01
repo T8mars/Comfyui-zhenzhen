@@ -1,0 +1,447 @@
+{
+  "id": "b1bbf138-a503-4d9b-bca8-918bbb1f276e",
+  "revision": 0,
+  "last_node_id": 63,
+  "last_link_id": 77,
+  "nodes": [
+    {
+      "id": 46,
+      "type": "OpenAI_Sora_API",
+      "pos": [
+        3340.71435546875,
+        301.2610778808594
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 67
+        },
+        {
+          "name": "api_key",
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 75
+        },
+        {
+          "name": "user_prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "user_prompt"
+          },
+          "link": 76
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            72
+          ]
+        },
+        {
+          "name": "tokens_usage",
+          "type": "STRING",
+          "links": [
+            73
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "7f7faf4bb01cf2fd76b4e89fca902ff455f6257e",
+        "Node name for S&R": "OpenAI_Sora_API"
+      },
+      "widgets_values": [
+        "https://ai.t8star.cn/v1/",
+        "sora_video2",
+        "",
+        "衣服穿到一个人身上"
+      ]
+    },
+    {
+      "id": 58,
+      "type": "CR Prompt Text",
+      "pos": [
+        2641.2705078125,
+        964.0133056640625
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            76
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "衣服穿到一个人身上"
+      ]
+    },
+    {
+      "id": 50,
+      "type": "LoadImage",
+      "pos": [
+        2755.941162109375,
+        256.0520935058594
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            67
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.62",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "00035_00.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 57,
+      "type": "CR Prompt Text",
+      "pos": [
+        2618.278564453125,
+        690.8465576171875
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            75
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "sk-gpQeZUUqQBGo6OeXrlQiTl3RrmtNWnoTFurizrVYhWAASerG"
+      ]
+    },
+    {
+      "id": 59,
+      "type": "Note",
+      "pos": [
+        2222.5126953125,
+        663.634033203125
+      ],
+      "size": [
+        251.232666015625,
+        123.35426330566406
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "https://ai.t8star.cn/ 获取API地址\n国庆期间，每个视频仅收取0.01元\n\n注册送0.2，每日签到也送"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 60,
+      "type": "OpenAI_Sora_API",
+      "pos": [
+        3308.381103515625,
+        612.1262817382812
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "tokens_usage",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "7f7faf4bb01cf2fd76b4e89fca902ff455f6257e",
+        "Node name for S&R": "OpenAI_Sora_API"
+      },
+      "widgets_values": [
+        "https://ai.t8star.cn/v1",
+        "sora-2",
+        "",
+        "请描述要生成的视频内容"
+      ]
+    },
+    {
+      "id": 55,
+      "type": "easy showAnything",
+      "pos": [
+        3830.979736328125,
+        763.3160400390625
+      ],
+      "size": [
+        402.2673034667969,
+        141.43382263183594
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 73
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1148fbe5fe0276780c56f0adfa22b96d5200d832",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "total_tokens=831, input_tokens=781, output_tokens=50"
+      ]
+    },
+    {
+      "id": 54,
+      "type": "easy showAnything",
+      "pos": [
+        3843.51953125,
+        465.2179870605469
+      ],
+      "size": [
+        430.6808776855469,
+        224.9739532470703
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 72
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1148fbe5fe0276780c56f0adfa22b96d5200d832",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://midjourney-plus.oss-us-west-1.aliyuncs.com/sora/8b4fae95-e226-4fea-86f5-d1613dba9a9a.mp4"
+      ]
+    },
+    {
+      "id": 63,
+      "type": "Note",
+      "pos": [
+        4321.1181640625,
+        506.2657775878906
+      ],
+      "size": [
+        312.6282653808594,
+        144.85118103027344
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "复制地址到浏览器打开就是视频"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      67,
+      50,
+      0,
+      46,
+      0,
+      "IMAGE"
+    ],
+    [
+      72,
+      46,
+      1,
+      54,
+      0,
+      "*"
+    ],
+    [
+      73,
+      46,
+      2,
+      55,
+      0,
+      "*"
+    ],
+    [
+      75,
+      57,
+      0,
+      46,
+      1,
+      "STRING"
+    ],
+    [
+      76,
+      58,
+      0,
+      46,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        1853.4716796875,
+        -203.02989196777344,
+        2851.595947265625,
+        355.8738098144531
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8769226950000326,
+      "offset": [
+        -2310.8427936535604,
+        174.36048006211513
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.27.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

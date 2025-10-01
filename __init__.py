@@ -16,5 +16,3 @@ def start_ai_helper():
     ai_helper_thread.start()
 
 start_ai_helper()
-
-
