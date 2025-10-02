@@ -8477,7 +8477,7 @@ class OpenAISoraAPI:
     - 适配示例返回：每行均为 JSON，字段为 choices[0].delta.content
     - 超时时间：600 秒（10 分钟）
     输入参数：
-      - base_url: 默认 https://ai.t8star.cn/v1/
+      - base_url: 默认 https://ai.t8star.cn/v1
       - model: 默认 sora_video2
       - api_key: 必填
       - system_prompt: 可选，用于设定系统指令
@@ -8494,7 +8494,7 @@ class OpenAISoraAPI:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "base_url": ("STRING", {"default": "https://ai.t8star.cn/v1/", "multiline": False}),
+                "base_url": ("STRING", {"default": "https://ai.t8star.cn/v1", "multiline": False}),
                 "model": ("STRING", {"default": "sora_video2", "multiline": False}),
                 "api_key": ("STRING", {"default": "", "multiline": False}),
                 "user_prompt": ("STRING", {"multiline": True, "default": "请描述要生成的视频内容"}),
