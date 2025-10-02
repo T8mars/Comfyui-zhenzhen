@@ -1,7 +1,7 @@
 # 网站：https://ai.t8star.cn
 # 在线工作流：https://www.runninghub.ai/?inviteCode=rh-v1121
 
-# 👋🏻 Welcome to Comfly
+# 👋🏻 Welcome to Zhenzhen
 
 # 此版本为无悬浮按钮版本，只有节点。
 
