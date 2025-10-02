@@ -10,3 +10,4 @@ matrix-client
 transformers
 huggingface-hub
 psutil
+nest_asyncio
