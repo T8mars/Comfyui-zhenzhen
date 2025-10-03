@@ -17,7 +17,7 @@
 新版竖版模型：sora_video2-portrait
 新版横版模型：sora_video2-landscape
 老板竖版模型：sora_video2
-更新节点以及示例工作流--Sora2.json
+更新节点以及示例工作流--Sora2-hd.json
 
 20251002-2：
 
