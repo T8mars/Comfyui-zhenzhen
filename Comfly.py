@@ -8967,72 +8967,10 @@ class OpenAISoraAPI:
             print(f"[OpenAISoraAPI] 视频下载转换过程出错: {e}")
             return None
 
-class SyncVideoInput:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "video": ("VIDEO",),
-                "fps": ("FLOAT", {"default": 24.0, "min": 0.01, "max": 120.0}),
-            },
-        }
-
-    RETURN_TYPES = ("VIDEO",)
-    RETURN_NAMES = ("video",)
-    FUNCTION = "execute"
-    CATEGORY = "image/video"
-
-    def execute(self, video, fps):
-        print(f"[SyncVideoInput] 收到 video 类型: {type(video)}，值: {video}")
-
-        # 1. 如果是协程，同步执行
-        if asyncio.iscoroutine(video):
-            video = sync_await(video)
-
-        # 2. 如果是 Tensor（原生 VIDEO）
-        if isinstance(video, torch.Tensor):
-            components = VideoComponents(
-                images=video,
-                audio=None,
-                frame_rate=Fraction(fps).limit_denominator(1000)
-            )
-            return (VideoFromComponents(components),)
-
-        # 3. 如果是合法路径或 URL
-        if isinstance(video, str):
-            if video.startswith("http"):
-                # 下载到临时文件
-                ext = video.split("?")[0].split(".")[-1] or "mp4"
-                tmp = tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False)
-                tmp.close()
-                print(f"[SyncVideoInput] 正在下载视频: {video}")
-                with requests.get(video, stream=True) as r:
-                    r.raise_for_status()
-                    with open(tmp.name, "wb") as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                print(f"[SyncVideoInput] 下载完成: {tmp.name}")
-                return (VideoFromFile(tmp.name),)
-
-            elif os.path.isfile(video):
-                print(f"[SyncVideoInput] 本地路径: {video}")
-                return (VideoFromFile(video),)
-
-            else:
-                raise FileNotFoundError(f"路径不存在或无效: {video}")
-
-        # 4. 如果已经是 VideoInput
-        if isinstance(video, VideoInput):
-            return (video,)
-
-        # 5. 其他情况
-        raise TypeError(f"不支持的 video 类型: {type(video)}，值: {video}")
-
 
 WEB_DIRECTORY = "./web"    
         
 NODE_CLASS_MAPPINGS = {
-    "SyncVideoInput":SyncVideoInput,
     "OpenAI_Sora_API": OpenAISoraAPI,
     "Comfly_Mj": Comfly_Mj,
     "Comfly_mjstyle": Comfly_mjstyle,
@@ -9073,7 +9011,6 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "CSyncVideoInput": "SyncVideoInput节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
     "Comfly_Mj": "Comfly_Mj", 
     "Comfly_mjstyle": "Comfly_mjstyle",

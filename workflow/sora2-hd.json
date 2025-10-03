@@ -1,0 +1,413 @@
+{
+  "id": "b1bbf138-a503-4d9b-bca8-918bbb1f276e",
+  "revision": 0,
+  "last_node_id": 67,
+  "last_link_id": 83,
+  "nodes": [
+    {
+      "id": 63,
+      "type": "Note",
+      "pos": [
+        4424.3056640625,
+        720.0801391601562
+      ],
+      "size": [
+        312.6282653808594,
+        144.85118103027344
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "复制地址到浏览器打开就是视频"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 59,
+      "type": "Note",
+      "pos": [
+        2349.256591796875,
+        555.2994995117188
+      ],
+      "size": [
+        251.232666015625,
+        123.35426330566406
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "https://ai.t8star.cn/ 获取API地址\n国庆期间，每个视频仅收取0.01元\n\n注册送0.2，每日签到也送"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 55,
+      "type": "easy showAnything",
+      "pos": [
+        3865.97314453125,
+        754.889404296875
+      ],
+      "size": [
+        402.2673034667969,
+        141.43382263183594
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 83
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1148fbe5fe0276780c56f0adfa22b96d5200d832",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "total_tokens=325, input_tokens=276, output_tokens=49"
+      ]
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        3860.93310546875,
+        159.33958435058594
+      ],
+      "size": [
+        430.6808776855469,
+        224.9739532470703
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 82
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1148fbe5fe0276780c56f0adfa22b96d5200d832",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "<coroutine object download_url_to_video_output at 0x0000022A3F74A9D0>"
+      ]
+    },
+    {
+      "id": 50,
+      "type": "LoadImage",
+      "pos": [
+        2768.402587890625,
+        143.75755310058594
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            78
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.62",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "u=1499891578,649140042&fm=253&app=138&f=JPEG.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 57,
+      "type": "CR Prompt Text",
+      "pos": [
+        2659.239990234375,
+        583.4537963867188
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            80
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "sk-tS0K3Kvdsy6dkFUi3gUWJWVCqNCfIUdpZWHTDRhniqCOT3GT"
+      ]
+    },
+    {
+      "id": 65,
+      "type": "OpenAI_Sora_API",
+      "pos": [
+        3081.5693359375,
+        244.73976135253906
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 78
+        },
+        {
+          "name": "api_key",
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 80
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            82
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            81
+          ]
+        },
+        {
+          "name": "tokens_usage",
+          "type": "STRING",
+          "links": [
+            83
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "7f7faf4bb01cf2fd76b4e89fca902ff455f6257e",
+        "Node name for S&R": "OpenAI_Sora_API"
+      },
+      "widgets_values": [
+        "https://ai.t8star.cn/v1",
+        "sora_video2-landscape-hd",
+        "",
+        "小狗的历险记，横版视频"
+      ]
+    },
+    {
+      "id": 54,
+      "type": "easy showAnything",
+      "pos": [
+        3857.6806640625,
+        454.9187927246094
+      ],
+      "size": [
+        430.6808776855469,
+        224.9739532470703
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 81
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1148fbe5fe0276780c56f0adfa22b96d5200d832",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://midjourney-plus.oss-us-west-1.aliyuncs.com/sora/e82ec09b-e776-4fe1-ba0b-6c03a5173431.mp4"
+      ]
+    },
+    {
+      "id": 67,
+      "type": "Note",
+      "pos": [
+        3173.551513671875,
+        559.2974853515625
+      ],
+      "size": [
+        413.864501953125,
+        199.27297973632812
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "新版节点可以用以下5个模型，支持横版，复制到节点的model上即可，国庆期间PRO模型也是0.01元RMB，国庆礼物，祝大家国庆玩得开心\n\n竖版高清模型：sora_video2-portrait-hd\n横版高清模型：sora_video2-landscape-hd\n新版竖版模型：sora_video2-portrait\n新版横版模型：sora_video2-landscape\n老板竖版模型：sora_video2"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      78,
+      50,
+      0,
+      65,
+      0,
+      "IMAGE"
+    ],
+    [
+      80,
+      57,
+      0,
+      65,
+      1,
+      "STRING"
+    ],
+    [
+      81,
+      65,
+      1,
+      54,
+      0,
+      "*"
+    ],
+    [
+      82,
+      65,
+      0,
+      66,
+      0,
+      "*"
+    ],
+    [
+      83,
+      65,
+      2,
+      55,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        1734.3038330078125,
+        -263.7821350097656,
+        2851.595947265625,
+        355.8738098144531
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.2839025177495544,
+      "offset": [
+        -2118.1559638552276,
+        -174.46304826110023
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.27.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
