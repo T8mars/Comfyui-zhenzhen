@@ -8,6 +8,17 @@
 
 # 更新 Update：
 
+20251002-3：
+
+新版节点可以用以下5个模型，支持横版，复制到节点的model上即可，国庆期间PRO模型也是0.01元RMB，国庆礼物，祝大家国庆玩得开心
+
+竖版高清模型：sora_video2-portrait-hd
+横版高清模型：sora_video2-landscape-hd
+新版竖版模型：sora_video2-portrait
+新版横版模型：sora_video2-landscape
+老板竖版模型：sora_video2
+更新节点以及示例工作流--Sora2.json
+
 20251002-2：
 
 Sora2 Api目前并发较高，如反复出现500代码且报错代码为401，通常是这个APIKEY首先，重新新建一个令牌一般即可解决
