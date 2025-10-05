@@ -15,9 +15,13 @@
 上面2个1080P，下面2个是HD，国庆期间依然粉丝价格0.01人民币一个视频
 
 sora_video2-portrait-15s
+
 sora_video2-landscape-15s
+
 sora_video2-portrait-hd-15s
+
 sora_video2-landscape-hd-15s
+
 
 目前国庆期间依然15S依然是0.01元RMB，给大家玩，祝大家中秋快乐！
 
