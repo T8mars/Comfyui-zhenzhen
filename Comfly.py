@@ -5971,7 +5971,7 @@ class Comfly_sora2:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "response")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Openai
+    CATEGORY = "Comfly-v2/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
