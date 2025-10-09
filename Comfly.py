@@ -2,11 +2,9 @@ import os
 import io
 import math
 import random
-import tempfile
 import torch
 import torchaudio
 import requests
-import nest_asyncio
 import time
 import numpy as np
 from PIL import Image
@@ -23,24 +21,11 @@ import mimetypes
 import cv2
 import shutil
 import subprocess
-import concurrent.futures
 from .utils import pil2tensor, tensor2pil
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
-from typing import Optional, Any
-from comfy_api_nodes.apinode_utils import download_url_to_video_output
-import asyncio
-from comfy_api.input import VideoInput
-from comfy_api.input_impl import VideoFromFile
-from comfy_api.util import VideoComponents
-from comfy_api.input_impl import VideoFromComponents
-from fractions import Fraction
-
-def sync_await(coro):
-    import concurrent.futures
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(asyncio.run, coro)
-        return future.result()
+import concurrent.futures
+import threading
 
 
 def get_config():
@@ -846,14 +831,38 @@ class Comfly_Mju(ComflyBaseNode):
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
-            
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        
         try:
-            results = loop.run_until_complete(self.process_input(taskId, U1, U2, U3, U4))
-        finally:
-            loop.close()
-        return results
+            try:
+                current_loop = asyncio.get_running_loop()
+            
+                def run_async():
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    try:
+                        return new_loop.run_until_complete(self.process_input(taskId, U1, U2, U3, U4))
+                    finally:
+                        new_loop.close()
+
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(run_async)
+                    return future.result()
+                    
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    results = loop.run_until_complete(self.process_input(taskId, U1, U2, U3, U4))
+                finally:
+                    loop.close()
+                return results
+                
+        except Exception as e:
+            print(f"Error in run method: {str(e)}")
+            blank_image = Image.new('RGB', (512, 512), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, "")
+
 
     async def process_input(self, taskId, U1=False, U2=False, U3=False, U4=False):
         try:
@@ -883,37 +892,76 @@ class Comfly_Mju(ComflyBaseNode):
                 print(error_message)
                 raise self.MidjourneyError(error_message)
 
-            properties = {}
-            if "properties" in task_result:
-                if isinstance(task_result["properties"], str):
+            messageId = None
+
+            if "properties" in task_result and task_result["properties"]:
+                properties = task_result["properties"]
+
+                if isinstance(properties, str):
                     try:
-                        properties = json.loads(task_result["properties"])
+                        properties = json.loads(properties)
                     except json.JSONDecodeError as e:
-                        error_message = f"Failed to parse properties JSON: {e}"
-                        print(error_message)
-                        raise self.MidjourneyError(error_message)
-                else:
-                    properties = task_result["properties"]
+                        print(f"Failed to parse properties JSON: {e}")
+                        properties = {}
 
-            message_id = properties.get("messageId")
-            if not message_id:
-                if "buttons" in task_result and task_result["buttons"]:
-                    try:
-                        buttons = json.loads(task_result["buttons"])
-                        if buttons and len(buttons) > 0:
-                            custom_id = buttons[0].get("customId", "")
-                            parts = custom_id.split("::")
-                            if len(parts) >= 5:
-                                message_id = parts[4]
-                    except Exception as e:
-                        print(f"Failed to extract messageId from buttons: {e}")
+                if isinstance(properties, dict):
+                    messageId = properties.get("messageId") or properties.get("message_id")
 
-            if not message_id:
+            if not messageId and "buttons" in task_result and task_result["buttons"]:
+                buttons = task_result["buttons"]
+                
+                try:
+                    if isinstance(buttons, str):
+                        buttons = json.loads(buttons)
+
+                    if isinstance(buttons, list) and buttons:
+                        for button in buttons:
+                            if isinstance(button, dict):
+                                custom_id = button.get("customId", "")
+                                if custom_id:
+                                    parts = custom_id.split("::")
+                                    if len(parts) >= 5:
+                                        messageId = parts[4]
+                                        break
+                                
+                except (json.JSONDecodeError, TypeError, AttributeError) as e:
+                    print(f"Error processing buttons: {str(e)}")
+
+            if not messageId:
+                possible_fields = ['messageId', 'message_id', 'id', 'task_id']
+                for field in possible_fields:
+                    if field in task_result and task_result[field]:
+                        messageId = task_result[field]
+                        print(f"Found messageId in field '{field}': {messageId}")
+                        break
+
+            if not messageId:
+                response_str = str(task_result)
+
+                id_patterns = [
+                    r'"(?:messageId|message_id|id)"\s*:\s*"([a-zA-Z0-9\-_]{16,})"',
+                    r'MJ::JOB::\w+::\d+::([a-zA-Z0-9\-_]{16,})',
+                    r'"([a-zA-Z0-9\-_]{20,})"'
+                ]
+                
+                for pattern in id_patterns:
+                    match = re.search(pattern, response_str)
+                    if match:
+                        messageId = match.group(1)
+                        print(f"Found messageId using pattern: {messageId}")
+                        break
+
+            if not messageId:
+                messageId = taskId
+                print(f"Using taskId as messageId: {messageId}")
+
+            if not messageId:
                 error_message = "Could not find messageId in task result"
                 print(error_message)
+                print(f"Task result structure: {json.dumps(task_result, indent=2)}")
                 raise self.MidjourneyError(error_message)
 
-            custom_id = self.generate_custom_id(action, index, message_id)
+            custom_id = self.generate_custom_id(action, index, messageId)
 
             response = await self.midjourney_submit_action(action, taskId, index, custom_id)
 
@@ -950,7 +998,8 @@ class Comfly_Mju(ComflyBaseNode):
             raise e
         except Exception as e:
             print(f"An error occurred while processing input: {str(e)}")
-            raise e       
+            raise e
+       
 
     def generate_custom_id(self, action, index, message_id):
         if action == "zoom":
@@ -1252,75 +1301,56 @@ class Comfly_Mjv(ComflyBaseNode):
     FUNCTION = "run"
     CATEGORY = "Comfly-v2/Midjourney"
 
-    async def submit_action(self, customId, taskId):
-        headers = self.get_headers()
-        payload = {
-            "customId": customId,
-            "taskId": taskId
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/action", headers=headers, json=payload) as response: 
-                if response.status == 200:
-                    try:
-                        data = await response.json()
-                        return data
-                    except aiohttp.client_exceptions.ContentTypeError:
-                        text_response = await response.text()
-                        print(f"API returned non-JSON response: {text_response}")
-                        try:
-                            import json
-                            data = json.loads(text_response)
-                            return data
-                        except json.JSONDecodeError:
-                            if text_response and len(text_response) < 100:
-                                return {"result": text_response.strip()}
-                            raise Exception(f"Invalid response format: {text_response}")
-                else:
-                    error_message = f"Error submitting Midjourney action: {response.status}"
-                    print(error_message)
-                    try:
-                        error_details = await response.text()
-                        error_message += f" - {error_details}"
-                    except:
-                        pass
-                    raise Exception(error_message)
-    
-    async def submit_modal(self, prompt, taskId, maskBase64=None):
-        headers = self.get_headers()
-        payload = {
-            "prompt": prompt,
-            "taskId": taskId
-        }
-        
-        if maskBase64:
-            payload["maskBase64"] = maskBase64
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/modal", headers=headers, json=payload) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data
-                else:
-                    error_message = f"Error submitting Midjourney modal: {response.status}"
-                    print(error_message)
-                    raise Exception(error_message)
-    
     def run(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False, api_key=""):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
-       
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            image_url = loop.run_until_complete(self.process_input(taskId, upsample_v6_2x_subtle, upsample_v6_2x_creative, costume_zoom, zoom, pan_left, pan_right, pan_up, pan_down))
-        finally:
-            loop.close()
         
-        return image_url
+        try:
+            try:
+                current_loop = asyncio.get_running_loop()
+            
+                def run_async():
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    try:
+                        return new_loop.run_until_complete(self.process_input(taskId, upsample_v6_2x_subtle, upsample_v6_2x_creative, costume_zoom, zoom, pan_left, pan_right, pan_up, pan_down))
+                    finally:
+                        new_loop.close()
+
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(run_async)
+                    result = future.result()
+
+                    if isinstance(result, tuple) and len(result) > 0:
+                        return result
+                    else:
+                        blank_image = Image.new('RGB', (512, 512), color='white')
+                        blank_tensor = pil2tensor(blank_image)
+                        return (blank_tensor,)
+                    
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    result = loop.run_until_complete(self.process_input(taskId, upsample_v6_2x_subtle, upsample_v6_2x_creative, costume_zoom, zoom, pan_left, pan_right, pan_up, pan_down))
+
+                    if isinstance(result, tuple) and len(result) > 0:
+                        return result
+                    else:
+                        blank_image = Image.new('RGB', (512, 512), color='white')
+                        blank_tensor = pil2tensor(blank_image)
+                        return (blank_tensor,)
+                finally:
+                    loop.close()
+                
+        except Exception as e:
+            print(f"Error in run method: {str(e)}")
+            blank_image = Image.new('RGB', (512, 512), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor,)
 
     async def process_input(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False):
         if taskId:
@@ -1350,8 +1380,16 @@ class Comfly_Mjv(ComflyBaseNode):
 
                 if not messageId and "buttons" in task_result and task_result["buttons"]:
                     try:
-                        buttons = json.loads(task_result["buttons"])
-                        if buttons and len(buttons) > 0:
+                        buttons = task_result["buttons"]
+                        if isinstance(buttons, str):
+                            buttons = json.loads(buttons)
+                        elif isinstance(buttons, list):
+                            pass
+                        else:
+                            print(f"Unexpected buttons type: {type(buttons)}")
+                            buttons = []
+                        
+                        if buttons and len(buttons) > 0 and isinstance(buttons[0], dict):
                             first_button_id = buttons[0].get("customId", "")
                             parts = first_button_id.split("::")
                             if len(parts) >= 5:
@@ -1419,15 +1457,21 @@ class Comfly_Mjv(ComflyBaseNode):
                     tensor_image = pil2tensor(image)
                     return (tensor_image,)
                 else:
-                    return (None,)
+                    blank_image = Image.new('RGB', (512, 512), color='white')
+                    blank_tensor = pil2tensor(blank_image)
+                    return (blank_tensor,)
 
             except Exception as e:
                 error_message = f"Error processing action: {str(e)}"
                 print(error_message)
-                return (error_message,)
+                blank_image = Image.new('RGB', (512, 512), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor,)
         else:
             print("No taskId provided.")
-            return ("No taskId provided.",)
+            blank_image = Image.new('RGB', (512, 512), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor,)
 
     async def process_task(self, taskId):
         while True:
@@ -1450,6 +1494,94 @@ class Comfly_Mjv(ComflyBaseNode):
                 error_message = f"Error fetching task result: {str(e)}"
                 print(error_message)
                 raise Exception(error_message)
+
+    async def submit_action(self, customId, taskId):
+        headers = self.get_headers()
+        payload = {
+            "customId": customId,
+            "taskId": taskId
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/action", headers=headers, json=payload) as response: 
+                if response.status == 200:
+                    try:
+                        data = await response.json()
+                        return data
+                    except aiohttp.client_exceptions.ContentTypeError:
+                        text_response = await response.text()
+                        print(f"API returned non-JSON response: {text_response}")
+                        try:
+                            import json
+                            data = json.loads(text_response)
+                            return data
+                        except json.JSONDecodeError:
+                            if text_response and len(text_response) < 100:
+                                return {"result": text_response.strip()}
+                            raise Exception(f"Invalid response format: {text_response}")
+                else:
+                    error_message = f"Error submitting Midjourney action: {response.status}"
+                    print(error_message)
+                    try:
+                        error_details = await response.text()
+                        error_message += f" - {error_details}"
+                    except:
+                        pass
+                    raise Exception(error_message)
+    
+    async def submit_modal(self, prompt, taskId, maskBase64=None):
+        headers = self.get_headers()
+        payload = {
+            "prompt": prompt,
+            "taskId": taskId
+        }
+        
+        if maskBase64:
+            payload["maskBase64"] = maskBase64
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/modal", headers=headers, json=payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data
+                else:
+                    error_message = f"Error submitting Midjourney modal: {response.status}"
+                    print(error_message)
+                    raise Exception(error_message)
+
+    async def midjourney_fetch_task_result(self, taskId):
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + self.api_key
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{self.midjourney_api_url[self.speed]}/mj/task/{taskId}/fetch", headers=headers, timeout=self.timeout) as response:
+                    if response.status == 200:
+                        try:
+                            data = await response.json()
+                            return data
+                        except aiohttp.client_exceptions.ContentTypeError:
+                            text_response = await response.text()
+                            try:
+                                import json
+                                data = json.loads(text_response)
+                                return data
+                            except json.JSONDecodeError:
+                                if text_response and len(text_response) < 100:
+                                    return {"status": "SUCCESS", "progress": "100%", "imageUrl": text_response.strip()}
+                                raise Exception(f"Server returned invalid response: {text_response}")
+                    else:
+                        error_message = f"Error fetching Midjourney task result: {response.status}"
+                        try:
+                            error_details = await response.text()
+                            error_message += f" - {error_details}"
+                        except:
+                            pass
+                        raise Exception(error_message)
+        except asyncio.TimeoutError:
+            error_message = f"Timeout error: Request to fetch task result timed out after {self.timeout} seconds"
+            raise Exception(error_message)
 
 
 class Comfly_Mj_swap_face(ComflyBaseNode):
@@ -5816,6 +5948,205 @@ class ComflyChatGPTApi:
                 return (blank_tensor, error_message, "", self.format_conversation_history())
 
 
+class Comfly_sora2:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": ("STRING", {"default": "sora_video2"}),
+                "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
+                "duration": (["10", "15"], {"default": "10"}),
+                "hd": ("BOOLEAN", {"default": False}),
+                "apikey": ("STRING", {"default": ""})
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",)
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "Comfly-v2/Openai
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 900
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def image_to_base64(self, image_tensor):
+        """Convert tensor to base64 string with data URI prefix"""
+        if image_tensor is None:
+            return None
+            
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+    
+    def process(self, prompt, model, aspect_ratio="16:9", duration="10", hd=False, apikey="", 
+                image1=None, image2=None, image3=None, image4=None):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            return ("", "", json.dumps(error_response))
+        
+        pbar = comfy.utils.ProgressBar(100)
+        pbar.update_absolute(10)
+        
+        try:
+            has_image = any(img is not None for img in [image1, image2, image3, image4])
+            
+            if has_image:
+                images = []
+                for img in [image1, image2, image3, image4]:
+                    if img is not None:
+                        img_base64 = self.image_to_base64(img)
+                        if img_base64:
+                            images.append(img_base64)
+                
+                if not images:
+                    error_message = "Failed to process any of the input images"
+                    print(error_message)
+                    return ("", "", json.dumps({"status": "error", "message": error_message}))
+                
+                payload = {
+                    "prompt": prompt,
+                    "model": "sora_video2",
+                    "images": images,
+                    "aspect_ratio": aspect_ratio,
+                    "duration": duration,
+                    "hd": hd
+                }
+                
+                endpoint = "https://ai.comfly.chat/v2/videos/generations"
+            else:
+                payload = {
+                    "prompt": prompt,
+                    "model": "sora_video2",
+                    "aspect_ratio": aspect_ratio,
+                    "duration": duration,
+                    "hd": hd
+                }
+                
+                endpoint = "https://ai.comfly.chat/v2/videos/generations"
+            
+            pbar.update_absolute(20)
+            
+            response = requests.post(
+                endpoint,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
+                
+            result = response.json()
+            
+            if "task_id" not in result:
+                error_message = "No task ID in API response"
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
+            
+            task_id = result["task_id"]
+            print(f"Task ID: {task_id}")
+            
+            pbar.update_absolute(30)
+
+            max_attempts = 120  
+            attempts = 0
+            video_url = None
+            
+            while attempts < max_attempts:
+                time.sleep(10)
+                attempts += 1
+                
+                try:
+                    status_response = requests.get(
+                        f"https://ai.comfly.chat/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                        
+                    status_data = status_response.json()
+
+                    progress_text = status_data.get("progress", "0%")
+                    try:
+                        if progress_text.endswith('%'):
+                            progress_value = int(progress_text[:-1])
+                            pbar_value = min(90, 30 + int(progress_value * 0.6))
+                            pbar.update_absolute(pbar_value)
+                    except (ValueError, AttributeError):
+                        progress_value = min(80, 30 + (attempts * 50 // max_attempts))
+                        pbar.update_absolute(progress_value)
+                    
+                    status = status_data.get("status", "")
+                    
+                    if status == "SUCCESS":
+                        if "data" in status_data and "output" in status_data["data"]:
+                            video_url = status_data["data"]["output"]
+                            break
+                            
+                    elif status == "FAILURE":
+                        fail_reason = status_data.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(error_message)
+                        return ("", "", json.dumps({"status": "error", "message": error_message, "task_id": task_id}))
+                        
+                except Exception as e:
+                    print(f"Error checking task status: {str(e)}")
+            
+            if not video_url:
+                error_message = f"Failed to get video URL after {max_attempts} attempts"
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message, "task_id": task_id}))
+            
+            video_adapter = ComflyVideoAdapter(video_url)
+            
+            pbar.update_absolute(100)
+            
+            response_data = {
+                "status": "success",
+                "task_id": task_id,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "duration": duration,
+                "hd": hd,
+                "video_url": video_url
+            }
+            
+            return (video_adapter, video_url, json.dumps(response_data))
+            
+        except Exception as e:
+            error_message = f"Error in video generation: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"status": "error", "message": error_message}))
+
+
 
 ############################# Flux ###########################
 
@@ -8468,509 +8799,6 @@ class Comfly_suno_custom:
             empty_audio = create_audio_object("")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "", "", "")
 
-
-class OpenAISoraAPI:
-    """
-    ComfyUI自定义节点：ai.t8star.cn Sora-2 视频生成（OpenAI兼容流式接口）
-    - 参考 openai_chat_api_node.py 的结构与风格
-    - 通过 ai.t8star.cn 的 /chat/completions 接口，以 stream=True 获取流式增量内容
-    - 适配示例返回：每行均为 JSON，字段为 choices[0].delta.content
-    - 超时时间：600 秒（10 分钟）
-    输入参数：
-      - base_url: 默认 https://ai.t8star.cn/v1
-      - model: 默认 sora_video2
-      - api_key: 必填
-      - system_prompt: 可选，用于设定系统指令
-      - user_prompt: 必填，视频生成描述
-    输出：
-      - reasoning_content: 保留为空（""），与参考节点保持一致
-      - answer: 汇总的增量内容（通常包含进度与最终信息）
-      - tokens_usage: 由于返回中未提供 usage，这里一般为空字符串
-    """
-    def __init__(self):
-        pass
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "base_url": ("STRING", {"default": "https://ai.t8star.cn/v1", "multiline": False}),
-                "model": ("STRING", {"default": "sora_video2", "multiline": False}),
-                "api_key": ("STRING", {"default": "", "multiline": False}),
-                "user_prompt": ("STRING", {"multiline": True, "default": "请描述要生成的视频内容"}),
-                #"hd": (["true", "false"], {"default": "false"}),
-                #"duration": (["10", "15"], {"default": "15"}),
-                #"aspect_ratio": (["16:9", "9:16"], {"default": "9:16"}),
-            },
-            "optional": {
-                # 可选图像输入：提供则走“图生视频（image-to-video）”，不提供则为“文生视频（text-to-video）”
-                "image": ("IMAGE",),
-            }
-        }
-
-    RETURN_TYPES = ("VIDEO", "STRING", "STRING")
-    RETURN_NAMES = ("video", "video_url", "tokens_usage")
-    FUNCTION = "generate"
-    CATEGORY = "zhenzhen"
-
-    def generate(self, base_url, model, api_key, user_prompt, image=None):
-        """
-        调用 ai.t8star.cn 的 sora-2 模型进行视频生成（流式）。
-        请求：
-          POST {base_url}/chat/completions
-          headers:
-            - Authorization: Bearer {api_key}
-            - Accept: application/json
-            - Content-Type: application/json
-          json:
-            {
-              "model": model,
-              "messages": [{"role": "system","content": system_prompt}, {"role":"user","content": user_prompt}],
-              "stream": true
-            }
-        解析：
-          - 逐行读取，每行是 JSON，取 choices[0].delta.content 累加
-          - 若流式无内容，降级为非流式请求（stream=false）再解析
-        超时：
-          - timeout=600 秒
-        """
-        if not api_key:
-            return (None, "", "错误：未配置API Key，请在节点参数中设置 api_key")
-        if not base_url:
-            return (None, "", "错误：未配置 base_url，请在节点参数中设置 base_url")
-        if not user_prompt.strip():
-            return (None, "", "错误：user_prompt 为空，请提供视频描述")
-
-        try:
-            headers = self._build_headers(api_key)
-            api_url = f"{base_url.rstrip('/')}/chat/completions"
-
-            # 构建聊天内容：
-            # - 若提供 image：按 OpenAI 多模态格式使用 content 数组，携带文本与图片
-            # - 若不提供 image：保持纯文本 content 字符串，兼容各类兼容接口
-            if image is not None:
-                try:
-                    from io import BytesIO
-                    import base64
-                    from PIL import Image as _PILImage  # 仅用于确保PIL可用
-                    pil_image = self._convert_to_pil(image)
-                    buf = BytesIO()
-                    pil_image.save(buf, format="PNG")
-                    buf.seek(0)
-                    image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                    base64_url = f"data:image/png;base64,{image_base64}"
-                    content = [
-                        {"type": "text", "text": user_prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": base64_url,
-                                "detail": "high"
-                            }
-                        }
-                    ]
-                    print(f"[OpenAISoraAPI] 图生视频模式: 已附带输入图像，尺寸={pil_image.size}, base64长度={len(image_base64)}")
-                except Exception as e:
-                    return (None, f"输入图像处理失败: {e}", "")
-                messages = [{"role": "user", "content": content}]
-            else:
-                print(f"[OpenAISoraAPI] 文生视频模式: 纯文本提示词")
-                messages = [{"role": "user", "content": user_prompt}]
-
-            payload = {
-                "model": model,
-                "messages": messages,
-                "stream": True
-            }
-
-            print(f"[OpenAISoraAPI] 请求: {api_url} (chat/completions, stream=True)")
-            print(f"[OpenAISoraAPI] 模型: {model}")
-            # 打印裁剪后的提示词，便于用户确认任务内容
-            _preview = (user_prompt[:120] + "...") if len(user_prompt) > 120 else user_prompt
-            print(f"[OpenAISoraAPI] 提交Sora任务 | 提示词: {_preview}")
-            # 打印精简后的载荷（避免输出完整base64）
-            try:
-                print(f"[OpenAISoraAPI] 请求载荷(精简): {self._safe_json_dumps(payload)}")
-            except Exception:
-                pass
-            resp = requests.post(api_url, headers=headers, json=payload, timeout=600, stream=True)
-            print(f"[OpenAISoraAPI] 响应状态码: {resp.status_code}")
-
-            if resp.status_code != 200:
-                return (None, f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-
-            reasoning_content, answer, tokens_usage = self._parse_302_stream(resp)
-
-            # 若流式无内容，降级为非流式
-            if not answer:
-                try:
-                    safe_payload = dict(payload)
-                    safe_payload["stream"] = False
-                    print(f"[OpenAISoraAPI] 流式无增量，降级为非流式请求")
-                    resp2 = requests.post(api_url, headers=headers, json=safe_payload, timeout=600)
-                    if resp2.status_code == 200:
-                        rc2, answer2, tu2 = self._parse_non_stream(resp2)
-                        video_url2 = self._extract_video_url(answer2)
-                        video2 = self._download_and_convert_video(video_url2)
-                        return (video2, video_url2 or "", tu2)
-                    else:
-                        return (None, f"非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}", tokens_usage)
-                except Exception as _e:
-                    print(f"[OpenAISoraAPI] 非流式降级异常: {_e}")
-
-            # 正常流式结果：提取视频URL并下载
-            video_url = self._extract_video_url(answer)
-            video_output = self._download_and_convert_video(video_url)
-            return (video_output, video_url or "", tokens_usage)
-        except requests.exceptions.ConnectTimeout as e:
-            return (None, f"网络连接超时: 无法连接到API服务器。请检查网络连接或代理。错误: {e}", "")
-        except requests.exceptions.Timeout as e:
-            return (None, f"请求超时: API响应时间过长。请稍后重试。错误: {e}", "")
-        except requests.exceptions.ConnectionError as e:
-            return (None, f"网络连接错误: 无法建立到API的连接。请检查网络设置。错误: {e}", "")
-        except requests.exceptions.RequestException as e:
-            return (None, f"API请求失败: {e}", "")
-        except Exception as e:
-            return (None, f"处理失败: {e}", "")
-
-    def _build_headers(self, api_key: str):
-        return {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-    def _convert_to_pil(self, image):
-        """
-        将ComfyUI的IMAGE/常见输入转换为PIL Image（RGB）。
-        - 支持 torch.Tensor (N,H,W,3) 或 (H,W,3)，数值范围[0,1]或[0,255]
-        - 支持PIL Image
-        - 支持numpy数组
-        """
-        try:
-            from PIL import Image
-            if hasattr(image, "cpu"):  # torch.Tensor
-                import torch
-                import numpy as np
-                t = image
-                if t.dim() == 4:
-                    t = t[0]
-                # 期望 (H,W,3)
-                if t.shape[-1] == 3:
-                    arr = t.detach().cpu().numpy()
-                elif t.shape[0] == 3 and t.dim() == 3:
-                    # 兼容 (3,H,W) -> (H,W,3)
-                    arr = t.detach().cpu().numpy().transpose(1, 2, 0)
-                else:
-                    raise ValueError(f"不支持的Tensor形状: {tuple(t.shape)}")
-                # 归一化
-                if arr.max() <= 1.0:
-                    arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                else:
-                    arr = arr.clip(0, 255).astype("uint8")
-                img = Image.fromarray(arr)
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            elif hasattr(image, "save"):  # PIL
-                from PIL import Image as _Image
-                img = image
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            else:
-                import numpy as np
-                if isinstance(image, np.ndarray):
-                    arr = image
-                    if arr.ndim == 3 and arr.shape[0] == 3:
-                        arr = arr.transpose(1, 2, 0)
-                    if arr.max() <= 1.0:
-                        arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                    else:
-                        arr = arr.clip(0, 255).astype("uint8")
-                    from PIL import Image
-                    img = Image.fromarray(arr)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
-                    return img
-                raise ValueError(f"不支持的图像类型: {type(image)}")
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 图像转换失败: {e}")
-            raise
-
-    def _safe_json_dumps(self, obj, ensure_ascii=False, indent=2):
-        """
-        序列化JSON时截断超长/疑似base64字段，避免日志刷屏。
-        """
-        import json as _json
-
-        def _truncate_base64(value: str):
-            if not isinstance(value, str):
-                return value
-            if len(value) > 100 and (
-                value.startswith("data:image/") or
-                value[:8] in ("iVBORw0K", "/9j/")  # 常见PNG/JPEG开头
-            ):
-                return value[:50] + f"... (len={len(value)})"
-            return value
-
-        def _walk(v):
-            if isinstance(v, dict):
-                return {k: _walk(_truncate_base64(val)) for k, val in v.items()}
-            if isinstance(v, list):
-                return [_walk(_truncate_base64(x)) for x in v]
-            return _truncate_base64(v)
-
-        return _json.dumps(_walk(obj), ensure_ascii=ensure_ascii, indent=indent)
-
-    def _parse_302_stream(self, resp):
-        """
-        解析 ai.t8star.cn 的流式响应。
-        示例行：
-          {"choices":[{"delta":{"content":"...","role":"assistant"},"index":0}],"id":"...","model":"sora-2","object":"chat.completion.chunk"}
-        策略：
-          - 逐行解析 JSON
-          - 提取 choices[0].delta.content 累加
-          - 无 usage 字段，tokens_usage 保持为空
-        """
-        answer_parts = []
-        tokens_usage = ""
-        # 进度与心跳跟踪
-        last_progress = -1   # 最近一次打印的百分比进度（0-100）
-        chunk_count = 0      # 已接收的增量块数量
-        printed_url = False  # 是否已打印过URL
-        try:
-            for raw in resp.iter_lines(decode_unicode=True):
-                if raw is None:
-                    continue
-                line = raw.strip()
-                if not line:
-                    continue
-
-                # 可能伴随时间戳行，如 "21:56:01"，跳过非 JSON 行
-                if not (line.startswith("{") and line.endswith("}")):
-                    continue
-
-                try:
-                    payload = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-
-                if "choices" in payload and isinstance(payload["choices"], list) and payload["choices"]:
-                    delta = payload["choices"][0].get("delta", {})
-                    if isinstance(delta, dict):
-                        piece = delta.get("content")
-                        if isinstance(piece, str) and piece:
-                            # 进度日志：尽量识别诸如 "进度 36.."、"41.."、"60.." 等
-                            text = piece.strip()
-                            # 优先匹配包含“进度”的片段
-                            prog_candidates = []
-                            if "进度" in text or "progress" in text.lower():
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-                                if not prog_candidates:
-                                    prog_candidates = re.findall(r'进度[^0-9]*?(\d{1,3})', text)
-                            else:
-                                # 一般性匹配 "41.." 这类
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-
-                            # 过滤到 0-100 的最大值作为当前进度
-                            curr_prog = None
-                            for p in prog_candidates:
-                                try:
-                                    v = int(p)
-                                    if 0 <= v <= 100:
-                                        curr_prog = v if (curr_prog is None or v > curr_prog) else curr_prog
-                                except Exception:
-                                    pass
-                            if curr_prog is not None and curr_prog > last_progress:
-                                last_progress = curr_prog
-                                print(f"[OpenAISoraAPI][{time.strftime('%H:%M:%S')}] 任务进度: {last_progress}%")
-
-                            # 首次发现 URL 则提示
-                            if not printed_url and ("http://" in text or "https://" in text):
-                                urls = re.findall(r'https?://\S+', text)
-                                if urls:
-                                    print(f"[OpenAISoraAPI] 可能的视频URL: {urls[0]}")
-                                    printed_url = True
-
-                            # 心跳：每收到一定数量块打印一次累计长度
-                            chunk_count += 1
-                            if chunk_count % 20 == 0:
-                                total_len = sum(len(x) for x in answer_parts) + len(text)
-                                print(f"[OpenAISoraAPI] 流式接收中... 已接收 {chunk_count} 块，累计字符 {total_len}")
-
-                            answer_parts.append(piece)
-
-            # 合并并做简单的编码清理
-            answer = self._normalize_text("".join(answer_parts).strip())
-            return ("", answer, tokens_usage)
-        except Exception as e:
-            return ("", f"流式解析失败: {e}", tokens_usage)
-
-    def _parse_non_stream(self, resp):
-        """
-        非流式响应解析（兼容 OpenAI chat/completions）
-        预期结构：
-          {"choices":[{"message":{"role":"assistant","content":"..."},"finish_reason":"..." }], "usage": {...}}
-        """
-        try:
-            if resp.status_code != 200:
-                return ("", f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-            if not resp.text.strip():
-                return ("", "API返回空响应", "")
-
-            try:
-                data = resp.json()
-            except json.JSONDecodeError as json_error:
-                return ("", f"API响应格式错误: {str(json_error)}", "")
-
-            # 错误字段
-            if "error" in data and data["error"]:
-                err = data["error"]
-                msg = err.get("message", str(err))
-                typ = err.get("type", "unknown_error")
-                return ("", f"API错误 ({typ}): {msg}", "")
-
-            usage = data.get("usage", {})
-            tokens_usage = self._format_tokens_usage(usage)
-
-            if "choices" in data and data["choices"]:
-                message = data["choices"][0].get("message", {})
-                content = message.get("content", "")
-                if not content:
-                    finish_reason = data["choices"][0].get("finish_reason", "")
-                    return ("", f"未返回内容，finish_reason={finish_reason}", tokens_usage)
-                reasoning_content, answer = self._parse_content_tags(content)
-                return ("", answer, tokens_usage)
-
-            return ("", "API未返回choices内容", tokens_usage)
-        except Exception as e:
-            return ("", f"响应解析失败: {e}", "")
-
-    def _parse_content_tags(self, content: str):
-        """
-        复用与参考节点一致的标签解析逻辑：
-        - <think>...</think> 抽取思考
-        - <answer>...</answer> 抽取答案
-        - <reasoning>...</reasoning> 抽取思考
-        """
-        try:
-            think_pattern = r'<think>(.*?)</think>'
-            think_match = re.search(think_pattern, content, re.DOTALL)
-            if think_match:
-                reasoning_content = think_match.group(1).strip()
-                answer = content.replace(think_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            answer_pattern = r'<answer>(.*?)</answer>'
-            answer_match = re.search(answer_pattern, content, re.DOTALL)
-            if answer_match:
-                return ("", answer_match.group(1).strip())
-
-            answer_pattern_open = r'<answer>(.*)'
-            answer_match_open = re.search(answer_pattern_open, content, re.DOTALL)
-            if answer_match_open:
-                return ("", answer_match_open.group(1).strip())
-
-            reasoning_pattern = r'<reasoning>(.*?)</reasoning>'
-            reasoning_match = re.search(reasoning_pattern, content, re.DOTALL)
-            if reasoning_match:
-                reasoning_content = reasoning_match.group(1).strip()
-                answer = content.replace(reasoning_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            return ("", content.strip())
-        except Exception:
-            return ("", content.strip())
-
-    def _format_tokens_usage(self, usage):
-        if not usage:
-            return ""
-        total_tokens = usage.get('total_tokens') or usage.get('total') or usage.get('tokens') or '-'
-        prompt_tokens = (
-            usage.get('prompt_tokens')
-            or usage.get('input_tokens')
-            or (usage.get('input', {}) if isinstance(usage.get('input'), dict) else None)
-            or usage.get('prompt')
-            or '-'
-        )
-        if isinstance(prompt_tokens, dict):
-            prompt_tokens = prompt_tokens.get('tokens') or prompt_tokens.get('count') or '-'
-        completion_tokens = (
-            usage.get('completion_tokens')
-            or usage.get('output_tokens')
-            or (usage.get('output', {}) if isinstance(usage.get('output'), dict) else None)
-            or usage.get('completion')
-            or '-'
-        )
-        if isinstance(completion_tokens, dict):
-            completion_tokens = completion_tokens.get('tokens') or completion_tokens.get('count') or '-'
-        return f"total_tokens={total_tokens}, input_tokens={prompt_tokens}, output_tokens={completion_tokens}"
-
-    def _normalize_text(self, s: str) -> str:
-        if not isinstance(s, str) or not s:
-            return s or ""
-        sample = s[:8]
-        suspicious = ("Ã", "å", "æ", "ç", "ð", "þ")
-        if any(ch in sample for ch in suspicious):
-            try:
-                return s.encode("latin-1", errors="ignore").decode("utf-8", errors="ignore")
-            except Exception:
-                return s
-        return s
-
-    def _extract_video_url(self, text: str) -> Optional[str]:
-        """
-        从返回文本中提取视频URL。
-        优先匹配指向 mp4/webm 等视频资源的URL；若未匹配到，则回退匹配任意 http/https 链接。
-        """
-        if not isinstance(text, str) or not text:
-            return None
-        try:
-            # 优先匹配视频直链
-            m = re.findall(r'(https?://[^\s)>\]]+\.(?:mp4|webm)(?:\?[^\s)>\]]*)?)', text, flags=re.IGNORECASE)
-            if m:
-                return m[0]
-            # 其次匹配 markdown 的 [在线播放](url) 格式
-            m2 = re.findall(r'\((https?://[^\s)]+)\)', text, flags=re.IGNORECASE)
-            if m2:
-                return m2[0]
-            # 再次匹配任意 http/https 链接
-            m3 = re.findall(r'(https?://[^\s)>\]]+)', text, flags=re.IGNORECASE)
-            if m3:
-                return m3[0]
-            return None
-        except Exception:
-            return None
-
-    def _download_and_convert_video(self, video_url: str) -> Optional[Any]:
-        """
-        下载视频URL并转换为VIDEO对象，参考 jimeng_video_node.py 的实现。
-        - 校验URL合法性
-        - 使用 download_url_to_video_output(video_url, timeout=120)
-        - 出错返回 None，保证节点稳定
-        """
-        try:
-            if not video_url or not isinstance(video_url, str):
-                print(f"[OpenAISoraAPI] 无效的视频URL: {video_url}")
-                return None
-            if not video_url.startswith(("http://", "https://")):
-                print(f"[OpenAISoraAPI] 不支持的URL格式: {video_url}")
-                return None
-
-            print(f"[OpenAISoraAPI] 🎬 开始下载视频: {video_url[:80]}...")
-            try:
-                video_output = download_url_to_video_output(video_url, timeout=120)
-                print(f"[OpenAISoraAPI] ✅ 视频下载完成")
-                return video_output
-            except Exception as download_error:
-                print(f"[OpenAISoraAPI] ❌ 视频下载失败: {download_error}")
-                return None
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 视频下载转换过程出错: {e}")
-            return None
-
-
 class OpenAISoraAPIPlus:
     """
     ComfyUI自定义节点：ai.t8star.cn Sora-2 视频生成（OpenAI兼容流式接口）
@@ -9472,7 +9300,6 @@ class OpenAISoraAPIPlus:
             return None
 
 
-
 WEB_DIRECTORY = "./web"    
         
 NODE_CLASS_MAPPINGS = {
@@ -9492,6 +9319,7 @@ NODE_CLASS_MAPPINGS = {
     "ComflyGeminiAPI": ComflyGeminiAPI,
     "ComflySeededit": ComflySeededit,
     "ComflyChatGPTApi": ComflyChatGPTApi,
+    "Comfly_sora2": Comfly_sora2, 
     "ComflyJimengApi": ComflyJimengApi, 
     "Comfly_gpt_image_1_edit": Comfly_gpt_image_1_edit,
     "Comfly_gpt_image_1": Comfly_gpt_image_1,
@@ -9533,6 +9361,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ComflyGeminiAPI": "Comfly Gemini API",
     "ComflySeededit": "Comfly Doubao SeedEdit2.0",
     "ComflyChatGPTApi": "Comfly ChatGPT Api",
+    "Comfly_sora2": "Comfly_sora2", 
     "ComflyJimengApi": "Comfly Jimeng API", 
     "Comfly_gpt_image_1_edit": "Comfly_gpt_image_1_edit",
     "Comfly_gpt_image_1": "Comfly_gpt_image_1", 
