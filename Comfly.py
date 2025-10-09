@@ -26,6 +26,7 @@ from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 import concurrent.futures
 import threading
+from typing import Optional
 
 
 def get_config():
