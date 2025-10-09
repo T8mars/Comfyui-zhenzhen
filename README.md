@@ -8,6 +8,25 @@
 
 # 更新 Update：
 
+20251005:
+
+更新新节点:OpenAi sora api plus：支持4个新模型，支持15秒时长
+
+上面2个1080P，下面2个是HD，国庆期间依然粉丝价格0.01人民币一个视频
+
+sora_video2-portrait-15s
+
+sora_video2-landscape-15s
+
+sora_video2-portrait-hd-15s
+
+sora_video2-landscape-hd-15s
+
+
+目前国庆期间依然15S依然是0.01元RMB，给大家玩，祝大家中秋快乐！
+
+更新新工作流：Sora2-Plus-15s-HD.json，15秒专属工作流，支持HD，支持横版及竖版
+
 20251002-3：
 
 新版节点可以用以下5个模型，支持横版，复制到节点的model上即可，国庆期间PRO模型也是0.01元RMB，国庆礼物，祝大家国庆玩得开心
