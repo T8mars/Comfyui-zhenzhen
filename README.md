@@ -3,6 +3,9 @@
 
 # 👋🏻 Welcome to Zhenzhen
 
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
+My favorite girl
+
 # 更新 Update：
 
 20251010:
