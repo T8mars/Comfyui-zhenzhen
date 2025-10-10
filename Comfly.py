@@ -23,6 +23,7 @@ import mimetypes
 import cv2
 import shutil
 import subprocess
+import threading
 import concurrent.futures
 from .utils import pil2tensor, tensor2pil
 from comfy.utils import common_upscale
