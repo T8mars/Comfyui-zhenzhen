@@ -8,6 +8,10 @@
 
 # 更新 Update：
 
+20251010:
+
+Comfly_sora2:节点,新增sora-2-pro模型，目前基准0.6，目前出视频速度较慢，无水印，支持15秒以及HD，工作流同步更新，workflow目录下sora2-plus-new-15shd.json
+
 20251009:
 
 Comfly_sora2:节点: 新增sora2视频模型节点，新节点支持直接video combine了，不用再复制链接了！目前无水印，生成最多10s普通画质视频，hd和15s暂时无法使用请知晓。
