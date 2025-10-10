@@ -3,9 +3,6 @@
 
 # 👋🏻 Welcome to Zhenzhen
 
-# 此版本为无悬浮按钮版本，只有节点。
-
-
 # 更新 Update：
 
 20251010:
