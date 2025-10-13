@@ -23,7 +23,7 @@ sora_video2-landscape-hd-15s 模型下架
 
 ## 演示视频
 
-https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/ma.mp4
+[观看项目演示视频](https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/ma.mp4)
 
 20251010:
 
