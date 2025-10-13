@@ -21,6 +21,12 @@ sora_video2-landscape-hd-15s 模型下架
 
 这个版本质量非常高，但是跑起来非常慢，15S差不多10分钟，HD还要单独8分钟，也就是跑一次至少20分钟左右，且有失败概率，如果Comfyui超时了，请去网站查看下异步任务，看看原因，正常失败会退积分。
 
+## 演示视频
+
+<p align="center">
+  <video src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/ma.mp4" controls width="600"></video>
+</p>
+
 20251010:
 
 Comfly_sora2:节点,新增sora-2-pro模型，目前基准0.6，目前出视频速度较慢，无水印，支持15秒以及HD，工作流同步更新，workflow目录下sora2-plus-new-15shd.json
