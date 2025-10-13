@@ -1,4 +1,4 @@
-# 网站：https://ai.t8star.cn
+# 网站：[https://ai.t8star.cn](https://ai.t8star.cn/register?aff=dP7j)
 # 在线工作流：https://www.runninghub.ai/?inviteCode=rh-v1121
 
 # 👋🏻 Welcome to Zhenzhen
@@ -7,6 +7,19 @@
 My favorite girl
 
 # 更新 Update：
+
+20251014:
+
+删除2个老的SORA2工作流，老版本HD和15S模型下架
+sora_video2-portrait-15s 模型下架
+sora_video2-landscape-15s 模型下架
+sora_video2-portrait-hd-15s 模型下架
+sora_video2-landscape-hd-15s 模型下架
+
+新的模型请用：sora-2-pro
+工作流：sora2-plus-new-15shd.json
+
+这个版本质量非常高，但是跑起来非常慢，15S差不多10分钟，HD还要单独8分钟，也就是跑一次至少20分钟左右，且有失败概率，如果Comfyui超时了，请去网站查看下异步任务，看看原因，正常失败会退积分。
 
 20251010:
 
