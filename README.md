@@ -12,6 +12,7 @@ My favorite girl
 
 由于sora2 HD 15S非常需要时间（官方也很慢），将重试时间从120S-调整到180S，目前测试下来大部分在150S-160S时候成功，偶尔也有180S没成功情况
 节点超时不代表一定失败，请从贞贞AI工坊-左侧异步任务，点进去可以看看到，点对应任务的蓝色数字链接，从里面下载MP4即可，如果超时会提示超时，超时失败会退费
+Sora普通版0.1积分，SORA HD 15S 1.7积分
 
 20251014:
 
@@ -32,7 +33,7 @@ sora_video2-landscape-hd-15s 模型下架
 
 20251010:
 
-Comfly_sora2:节点,新增sora-2-pro模型，目前基准0.6，目前出视频速度较慢，无水印，支持15秒以及HD，工作流同步更新，workflow目录下sora2-plus-new-15shd.json
+Comfly_sora2:节点,新增sora-2-pro模型，目前基准1.7，目前出视频速度较慢，无水印，支持15秒以及HD，工作流同步更新，workflow目录下sora2-plus-new-15shd.json
 
 20251009:
 
