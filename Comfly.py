@@ -6099,7 +6099,7 @@ class Comfly_sora2:
             
             pbar.update_absolute(30)
 
-            max_attempts = 120  
+            max_attempts = 179
             attempts = 0
             video_url = None
             
