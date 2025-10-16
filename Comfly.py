@@ -5964,9 +5964,9 @@ class Comfly_sora2:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": ("STRING", {"default": "sora_video2"}),
+                "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
-                "duration": (["10", "15"], {"default": "10"}),
+                "duration": (["10", "15", "25"], {"default": "15"}),
                 "hd": ("BOOLEAN", {"default": False}),
                 "apikey": ("STRING", {"default": ""})
             },
@@ -5974,7 +5974,8 @@ class Comfly_sora2:
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
-                "image4": ("IMAGE",)
+                "image4": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
             }
         }
     
@@ -6005,7 +6006,7 @@ class Comfly_sora2:
         return f"data:image/png;base64,{base64_str}"
     
     def process(self, prompt, model, aspect_ratio="16:9", duration="10", hd=False, apikey="", 
-                image1=None, image2=None, image3=None, image4=None):
+                image1=None, image2=None, image3=None, image4=None, seed=0):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -6015,6 +6016,16 @@ class Comfly_sora2:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             return ("", "", json.dumps(error_response))
+
+        if model == "sora-2":
+            if duration == "25":  
+                error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
+            if hd:
+                error_message = "The sora-2 model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
         
         pbar = comfy.utils.ProgressBar(100)
         pbar.update_absolute(10)
@@ -6037,23 +6048,29 @@ class Comfly_sora2:
                 
                 payload = {
                     "prompt": prompt,
-                    "model": "sora_video2",
+                    "model": model,
                     "images": images,
                     "aspect_ratio": aspect_ratio,
                     "duration": duration,
                     "hd": hd
                 }
                 
+                if seed > 0:
+                    payload["seed"] = seed
+                
                 endpoint = "https://ai.comfly.chat/v2/videos/generations"
             else:
                 payload = {
                     "prompt": prompt,
-                    "model": "sora_video2",
+                    "model": model,
                     "aspect_ratio": aspect_ratio,
                     "duration": duration,
                     "hd": hd
                 }
                 
+                if seed > 0:
+                    payload["seed"] = seed
+                    
                 endpoint = "https://ai.comfly.chat/v2/videos/generations"
             
             pbar.update_absolute(20)
@@ -6082,7 +6099,7 @@ class Comfly_sora2:
             
             pbar.update_absolute(30)
 
-            max_attempts = 179  
+            max_attempts = 120  
             attempts = 0
             video_url = None
             
@@ -6141,6 +6158,7 @@ class Comfly_sora2:
                 "status": "success",
                 "task_id": task_id,
                 "prompt": prompt,
+                "model": model,
                 "aspect_ratio": aspect_ratio,
                 "duration": duration,
                 "hd": hd,
