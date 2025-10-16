@@ -8,6 +8,9 @@ My favorite girl
 
 # 更新 Update：
 
+20251016-2:
+
+修改Sora2的最大重试次数
 
 20251016:
 
