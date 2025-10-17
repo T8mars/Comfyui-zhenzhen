@@ -6017,6 +6017,11 @@ class Comfly_sora2:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             return ("", "", json.dumps(error_response))
 
+        if duration == "25" and hd == True:
+            error_message = "25s and hd parameters cannot be used together. Please choose only one of them."
+            print(error_message)
+            return ("", "", json.dumps({"status": "error", "message": error_message}))
+            
         if model == "sora-2":
             if duration == "25":  
                 error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
@@ -6026,7 +6031,7 @@ class Comfly_sora2:
                 error_message = "The sora-2 model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
                 print(error_message)
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
-        
+      
         pbar = comfy.utils.ProgressBar(100)
         pbar.update_absolute(10)
         
@@ -6099,7 +6104,7 @@ class Comfly_sora2:
             
             pbar.update_absolute(30)
 
-            max_attempts = 179
+            max_attempts = 300  
             attempts = 0
             video_url = None
             
