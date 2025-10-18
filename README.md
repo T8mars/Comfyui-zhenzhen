@@ -8,6 +8,27 @@ My favorite girl
 
 # 更新 Update：
 
+20251018:
+
+目前模型分为sora-2和sora-2-pro版
+
+sora-2 偶发性出水印，价格基准0.1RMB，不支持HD，可选10S和15S，支持横版竖版，画面会有闪烁
+sora-2 Pro，无水印，基准价格1.7RMB，10S和15S支持HD，25S不支持HD，支持横版竖版，无闪烁画面，HD非常清晰，非HD一般清晰
+
+务必注意25S不要和HD同时开！
+
+25S 大概需要30分钟
+15S HD大概需要20分钟
+10S 非HD大概5分钟左右
+15S 非HD大概10分钟左右
+
+由于并发压力不同，以上时间仅供参考
+
+更新了6个最终版工作流，可以直接使用
+
+B站教程：https://www.bilibili.com/video/BV1m3WszsEn7/
+Youtube教程：https://www.youtube.com/watch?v=bc8b5ZxPvJE
+
 20251017-2:
 
 修复了sora-2-pro模型，其中10S和15S支持HD同时开启，25S不支持HD，务必注意！基准都是1.7RMB，无论是不是HD或者是不是25S，25S目前测试下来需要1400秒左右，非常久，务必注意
