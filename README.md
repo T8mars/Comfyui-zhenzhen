@@ -15,6 +15,7 @@ Nano-banana 由于长期风控原因，将于 10.20 日 中午12点涨价至 0.0
 gemini-2.5-flash-image和gemini-2.5-flash-image-preview模型有概率不出图，只支持chat格式
 
 nano-banana节点已更新，只有edit节点才支持尺寸选择。
+
 Veo3.1节点更新，支持新模型veo3.1，价格不变
 
 工作流一会更新
