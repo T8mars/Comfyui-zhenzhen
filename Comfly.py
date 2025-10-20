@@ -7548,7 +7548,8 @@ class Comfly_nano_banana_edit:
                 
                 data = {
                     "prompt": final_prompt,
-                    "model": model
+                    "model": model,
+                    "aspect_ratio": aspect_ratio 
                 }
                 
                 if response_format:
