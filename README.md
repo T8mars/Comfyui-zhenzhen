@@ -8,6 +8,32 @@ My favorite girl
 
 # 更新 Update：
 
+20251020-2:
+
+修复上个版本NananaBanana图像编辑比例不生效问题
+新增12个包括nanobanana以及veo3,veo3.1的工作流
+
+veo3特价模型基准1.5RMB/8S，模型名字：
+veo3 文生视频
+veo3-fast 文生视频
+veo3-fast-frames 图生视频
+
+Veo3 Pro模型3RMB/8S，模型名字：
+veo3-pro 文生视频
+veo3-pro-frames 图生视频
+高质量模式，价格也高一点
+
+Veo3.1 特价模型基准1.5RMB/8S，模型名字：
+veo3.1 文生视频，图生视频
+veo3.1-components 文生视频，图生视频，多参1-2张
+注意veo3.1-components，支持多图参考，Veo3.1支持首尾帧
+
+Veo3.1 Pro模型基准3RMB/8S，模型名字：
+veo3.1-pro  文生视频，图生视频，首尾帧
+高质量模式，价格也高一点
+
+注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=dP7j 为准
+
 20251020:
 
 Nano-banana 由于长期风控原因，将于 10.20 日 中午12点涨价至 0.08/次；
