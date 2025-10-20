@@ -6775,19 +6775,22 @@ class Comfly_Flux_Kontext_bfl:
 
 ############################# Googel ###########################
 
+
 class Comfly_Googel_Veo3:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames"], {"default": "veo3"}),
+                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1", "veo3.1-pro", "veo3.1-components"], {"default": "veo3"}),
                 "enhance_prompt": ("BOOLEAN", {"default": False}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
-                "image": ("IMAGE",),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "enable_upsample": ("BOOLEAN", {"default": False}),
             }
@@ -6818,7 +6821,8 @@ class Comfly_Googel_Veo3:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def generate_video(self, prompt, model="veo3", enhance_prompt=False, aspect_ratio="16:9", apikey="", image=None, seed=0, enable_upsample=False):
+    def generate_video(self, prompt, model="veo3", enhance_prompt=False, aspect_ratio="16:9", apikey="", 
+                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -6832,8 +6836,8 @@ class Comfly_Googel_Veo3:
         try:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
- 
-            is_image_to_video = image is not None
+
+            has_images = any(img is not None for img in [image1, image2, image3])
  
             payload = {
                 "prompt": prompt,
@@ -6844,16 +6848,25 @@ class Comfly_Googel_Veo3:
             if seed > 0:
                 payload["seed"] = seed
 
-            if model in ["veo3", "veo3-fast", "veo3-pro"] and aspect_ratio:
+            if model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro"] and aspect_ratio:
                 payload["aspect_ratio"] = aspect_ratio
 
-            if model in ["veo3", "veo3-fast", "veo3-pro"] and enable_upsample:
+            if model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro"] and enable_upsample:
                 payload["enable_upsample"] = enable_upsample
- 
-            if is_image_to_video:
-                image_base64 = self.image_to_base64(image)
-                if image_base64:
-                    payload["images"] = [f"data:image/png;base64,{image_base64}"]
+
+            if has_images:
+                images_base64 = []
+                for img in [image1, image2, image3]:
+                    if img is not None:
+                        batch_size = img.shape[0]
+                        for i in range(batch_size):
+                            single_image = img[i:i+1]
+                            image_base64 = self.image_to_base64(single_image)
+                            if image_base64:
+                                images_base64.append(f"data:image/png;base64,{image_base64}")
+                
+                if images_base64:
+                    payload["images"] = images_base64
 
             response = requests.post(
                 "https://ai.comfly.chat/google/v1/models/veo/videos",
@@ -6947,7 +6960,8 @@ class Comfly_Googel_Veo3:
                     "enhance_prompt": enhance_prompt,
                     "aspect_ratio": aspect_ratio if model in ["veo3", "veo3-fast", "veo3-pro"] else "default",
                     "enable_upsample": enable_upsample if model in ["veo3", "veo3-fast", "veo3-pro"] else False,
-                    "video_url": video_url
+                    "video_url": video_url,
+                    "images_count": len([img for img in [image1, image2, image3] if img is not None])
                 }
                 
                 video_adapter = ComflyVideoAdapter(video_url)
@@ -6965,7 +6979,7 @@ class Comfly_nano_banana:
         return {
             "required": {
                 "text": ("STRING", {"multiline": True}),
-                "model": (["nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana"}),
+                "model": (["gemini-2.5-flash-image", "nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana"}),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -7439,7 +7453,7 @@ class Comfly_nano_banana_edit:
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
                 "model": (["nano-banana", "nano-banana-hd"], {"default": "nano-banana"}),
-                "aspect_ratio": (["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16"], {"default": "1:1"}),
+                "aspect_ratio": (["16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "1:1"}),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -7476,21 +7490,6 @@ class Comfly_nano_banana_edit:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def ratio_to_size(self, ratio):
-        """Convert aspect ratio to a size that maintains that ratio"""
-        base_pixels = 1048576 
-
-        width_ratio, height_ratio = map(int, ratio.split(':'))
-
-        scale = math.sqrt(base_pixels / (width_ratio * height_ratio))
-        width = int(width_ratio * scale)
-        height = int(height_ratio * scale)
-
-        width = (width // 8) * 8
-        height = (height // 8) * 8
-        
-        return f"{width}x{height}"
-    
     def generate_image(self, prompt, mode="text2img", model="nano-banana", aspect_ratio="1:1", 
                       image1=None, image2=None, image3=None, image4=None,
                       apikey="", response_format="url", seed=0):  
@@ -7511,21 +7510,17 @@ class Comfly_nano_banana_edit:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
 
-            size = None
-            if mode == "text2img":
-                size = self.ratio_to_size(aspect_ratio)
+            final_prompt = prompt
             
             if mode == "text2img":
                 headers = self.get_headers()
                 headers["Content-Type"] = "application/json"
                 
                 payload = {
-                    "prompt": prompt,
-                    "model": model
+                    "prompt": final_prompt,
+                    "model": model,
+                    "aspect_ratio": aspect_ratio  
                 }
-                
-                if size:
-                    payload["size"] = size
                     
                 if response_format:
                     payload["response_format"] = response_format
@@ -7552,7 +7547,7 @@ class Comfly_nano_banana_edit:
                         files.append(('image', ('image.png', buffered, 'image/png')))
                 
                 data = {
-                    "prompt": prompt,
+                    "prompt": final_prompt,
                     "model": model
                 }
                 
@@ -7590,9 +7585,7 @@ class Comfly_nano_banana_edit:
             
             generated_tensors = []
             response_info = f"Generated {len(result['data'])} images using {model}\n"
-
-            if mode == "text2img" and size:
-                response_info += f"Aspect ratio: {aspect_ratio} (size: {size})\n"
+            response_info += f"Aspect ratio: {aspect_ratio}\n"
 
             if seed > 0:
                 response_info += f"Seed: {seed}\n"
@@ -7640,6 +7633,7 @@ class Comfly_nano_banana_edit:
 
 
  ############################# Qwen ###########################
+
 
 class Comfly_qwen_image:
     
