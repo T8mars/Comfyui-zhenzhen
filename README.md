@@ -8,6 +8,10 @@ My favorite girl
 
 # 更新 Update：
 
+20251024-2:
+
+RunningHub上所有API相关工作流均已更新，如果发现有漏网之鱼请B站或者youtube留言发链接，我会及时处理
+
 20251024:
 
 更新sora2-chat节点，速度更快，目前只支持横版，竖版15S非HD视频！不支持HD和25S，更稳定
