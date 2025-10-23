@@ -59,7 +59,7 @@ class Comfly_api_set:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "api_base": (["comfly", "ip", "hk", "us"], {"default": "comfly"}),
+                "api_base": (["zhenzhen", "ip", "hk", "us"], {"default": "zhenzhen"}),
                 "apikey": ("STRING", {"default": ""}),
             },
             "optional": {
