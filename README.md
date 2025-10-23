@@ -10,7 +10,7 @@ My favorite girl
 
 20251023
 
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/2.png" width="100%" alt="new node">
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/3.png" width="100%" alt="new node">
 
 新增节点api setting
 由于昨天网站被攻击，昨天半夜已经修复，防止再出现类似问题，增加多个可选接口，目前有1个主站，一个美国站，一个香港站，还有个自定义IP接口，RH的工作流需要晚上更新，本地直接改下节点即可
