@@ -8,6 +8,13 @@ My favorite girl
 
 # 更新 Update：
 
+20251023
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/2.png" width="30%" alt="My favorite girl">
+
+新增节点api setting
+由于昨天网站被攻击，昨天半夜已经修复，防止再出现类似问题，增加多个可选接口，目前有1个主站，一个美国站，一个香港站，还有个自定义IP接口，RH的工作流需要晚上更新，本地直接改下节点即可
+
 20251020-2:
 
 修复上个版本NananaBanana图像编辑比例不生效问题
