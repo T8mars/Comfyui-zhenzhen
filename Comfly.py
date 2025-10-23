@@ -53,6 +53,54 @@ def save_config(config):
         json.dump(config, f, indent=4)
 
 
+
+class Comfly_api_set:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "api_base": (["comfly", "ip", "hk", "us"], {"default": "comfly"}),
+                "apikey": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "custom_ip": ("STRING", {"default": "", "placeholder": "Enter IP when using 'ip' option (e.g. http://104.194.8.112:9088)"}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("apikey",)
+    FUNCTION = "set_api_base"
+    CATEGORY = "Comfly"
+
+    def set_api_base(self, api_base, apikey="", custom_ip=""):
+        global baseurl
+        
+        base_url_mapping = {
+            "zhenzhen": "https://ai.t8star.cn",
+            "ip": custom_ip,
+            "hk": "https://hk-api.gptbest.vip",
+            "us": "https://api.gptbest.vip"
+        }
+        
+        if api_base == "ip" and not custom_ip.strip():
+            raise ValueError("When selecting 'ip' option, you must provide a custom IP address in the 'custom_ip' field")
+        
+        if api_base in base_url_mapping:
+            baseurl = base_url_mapping[api_base]
+            
+        if apikey.strip():
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        message = f"API Base URL set to: {baseurl}"
+        if apikey.strip():
+            message += "\nAPI key has been updated"
+            
+        print(message)
+        return (apikey,)
+
+
 class ComflyVideoAdapter:
     def __init__(self, video_path_or_url):
         if video_path_or_url.startswith('http'):
@@ -182,9 +230,9 @@ def create_audio_object(audio_url):
 class ComflyBaseNode:
     def __init__(self):
         self.midjourney_api_url = {
-            "turbo mode": "https://ai.comfly.chat/mj-turbo",
-            "fast mode": "https://ai.comfly.chat/mj-fast",
-            "relax mode": "https://ai.comfly.chat/mj-relax"
+            "turbo mode": f"{baseurl}/mj-turbo",
+            "fast mode": f"{baseurl}/mj-fast",
+            "relax mode": f"{baseurl}/mj-relax"
         }
         self.api_key = get_config().get('api_key', '') 
         self.speed = "fast mode"
@@ -1640,7 +1688,7 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
         """Fetch task result by task_id"""
         try:
             response = requests.get(
-                f"https://ai.comfly.chat/mj/task/{task_id}/fetch",
+                f"{baseurl}/mj/task/{task_id}/fetch",
                 headers=self.get_headers(),
                 timeout=self.timeout
             )
@@ -1684,7 +1732,7 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
 
             print("Sending request to face swap API...")
             response = requests.post(
-                "https://ai.comfly.chat/mj/insight-face/swap",
+                f"{baseurl}/mj/insight-face/swap",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -2017,7 +2065,7 @@ class Comfly_mj_video(ComflyBaseNode):
             print("Submitting video generation request...")
             try:
                 response = requests.post(
-                    "https://ai.comfly.chat/mj/submit/video", 
+                    f"{baseurl}/mj/submit/video", 
                     headers=self.get_headers(),
                     json=payload,
                     timeout=(30, 90)  
@@ -2061,7 +2109,7 @@ class Comfly_mj_video(ComflyBaseNode):
             while retry_count < max_retries:
                 try:
                     status_response = requests.get(
-                        f"https://ai.comfly.chat/mj/task/{task_id}/fetch",
+                        f"{baseurl}/mj/task/{task_id}/fetch",
                         headers=self.get_headers(),
                         timeout=(10, 30)  
                     )
@@ -2211,7 +2259,7 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             print("Submitting video extension request...")
 
             response = requests.post(
-                "https://ai.comfly.chat/mj/submit/video",
+                f"{baseurl}/mj/submit/video",
                 headers=self.get_headers(),
                 json=payload
             )
@@ -2240,7 +2288,7 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             while True:
                 try:
                     status_response = requests.get(
-                        f"https://ai.comfly.chat/mj/task/{new_task_id}/fetch",
+                        f"{baseurl}/mj/task/{new_task_id}/fetch",
                         headers=self.get_headers()
                     )
                     
@@ -2496,7 +2544,7 @@ class Comfly_kling_text2video:
         try:
             pbar = comfy.utils.ProgressBar(100)  
             response = requests.post(
-                "https://ai.comfly.chat/kling/v1/videos/text2video",
+                f"{baseurl}/kling/v1/videos/text2video",
                 headers=self.get_headers(),
                 json=payload
             )
@@ -2513,7 +2561,7 @@ class Comfly_kling_text2video:
             while True:
                 time.sleep(2)
                 status_response = requests.get(
-                    f"https://ai.comfly.chat/kling/v1/videos/text2video/{task_id}",
+                    f"{baseurl}/kling/v1/videos/text2video/{task_id}",
                     headers=self.get_headers()
                 )
                 status_response.raise_for_status()
@@ -2710,7 +2758,7 @@ class Comfly_kling_image2video:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(5)  
             response = requests.post(
-                "https://ai.comfly.chat/kling/v1/videos/image2video",
+                f"{baseurl}/kling/v1/videos/image2video",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -2735,7 +2783,7 @@ class Comfly_kling_image2video:
             while True:
                 time.sleep(2)
                 status_response = requests.get(
-                    f"https://ai.comfly.chat/kling/v1/videos/image2video/{task_id}",
+                    f"{baseurl}/kling/v1/videos/image2video/{task_id}",
                     headers=self.get_headers(),
                     timeout=self.timeout
                 )
@@ -2915,7 +2963,7 @@ class Comfly_kling_multi_image2video:
             try:
                 status_response = self.make_request_with_retry(
                     'get',
-                    f"https://ai.comfly.chat/kling/v1/videos/multi-image2video/{task_id}",
+                    f"{baseurl}/kling/v1/videos/multi-image2video/{task_id}",
                     headers=headers
                 )
                 
@@ -3007,7 +3055,7 @@ class Comfly_kling_multi_image2video:
             print("Submitting multi-image video generation request...")
             response = self.make_request_with_retry(
                 'post',
-                "https://ai.comfly.chat/kling/v1/videos/multi-image2video",
+                f"{baseurl}/kling/v1/videos/multi-image2video",
                 headers=headers,
                 json=payload,
                 max_retries=max_retries,
@@ -3120,7 +3168,7 @@ class Comfly_video_extend:
         }
         try:
             response = requests.post(
-                "https://ai.comfly.chat/kling/v1/videos/video-extend",
+                f"{baseurl}/kling/v1/videos/video-extend",
                 headers=headers,
                 json=payload,
                 timeout=self.timeout
@@ -3138,7 +3186,7 @@ class Comfly_video_extend:
             while True:
                 time.sleep(2)
                 status_response = requests.get(
-                    f"https://ai.comfly.chat/kling/v1/videos/video-extend/{task_id}",
+                    f"{baseurl}/kling/v1/videos/video-extend/{task_id}",
                     headers=headers,
                     timeout=self.timeout
                 )
@@ -3327,7 +3375,7 @@ class Comfly_lip_sync:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(5)  
             response = requests.post(
-                "https://ai.comfly.chat/kling/v1/videos/lip-sync",
+                f"{baseurl}/kling/v1/videos/lip-sync",
                 headers=headers,
                 json=payload,
                 timeout=self.timeout
@@ -3345,7 +3393,7 @@ class Comfly_lip_sync:
             while True:
                 time.sleep(2)
                 status_response = requests.get(
-                    f"https://ai.comfly.chat/kling/v1/videos/lip-sync/{task_id}",
+                    f"{baseurl}/kling/v1/videos/lip-sync/{task_id}",
                     headers=headers,
                     timeout=self.timeout
                 )
@@ -3565,7 +3613,7 @@ class ComflyGeminiAPI:
 
             try:
                 response = requests.post(
-                    "https://ai.comfly.chat/v1/chat/completions",
+                    f"{baseurl}/v1/chat/completions",
                     headers=self.get_headers(),
                     json=payload,
                     timeout=self.timeout
@@ -3768,7 +3816,7 @@ class Comfly_Doubao_Seedream:
                 payload["seed"] = seed
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations",
+                f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -4025,7 +4073,7 @@ class Comfly_Doubao_Seedream_4:
                 payload["image"] = image_urls
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations",
+                f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -4197,7 +4245,7 @@ class Comfly_Doubao_Seededit:
                 payload["seed"] = seed
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations",
+                f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -4343,7 +4391,7 @@ class ComflyJimengApi:
             files = {'file': ('image.png', file_content, 'image/png')}
 
             response = requests.post(
-                "https://ai.comfly.chat/v1/files",
+                f"{baseurl}/v1/files",
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 files=files,
                 timeout=self.timeout
@@ -4443,7 +4491,7 @@ class ComflyJimengApi:
                     "stream": True
                 }
 
-                api_url = "https://ai.comfly.chat/v1/chat/completions"
+                api_url = f"{baseurl}/v1/chat/completions"
                 headers = self.get_headers()
 
                 pbar.update_absolute(30)
@@ -4514,7 +4562,7 @@ class ComflyJimengApi:
                         return (blank_tensor, response_info, "")
             
             else:
-                api_url = "https://ai.comfly.chat/volcv/v1?Action=CVProcess&Version=2022-08-31"
+                api_url = f"{baseurl}/volcv/v1?Action=CVProcess&Version=2022-08-31"
                 
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 response_info = f"**Jimeng Image Generation Request**\n\n"
@@ -4671,7 +4719,7 @@ class ComflyJimengVideoApi:
             files = {'file': ('image.png', file_content, 'image/png')}
 
             response = requests.post(
-                "https://ai.comfly.chat/v1/files",
+                f"{baseurl}/v1/files",
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 files=files,
                 timeout=self.timeout
@@ -4728,7 +4776,7 @@ class ComflyJimengVideoApi:
 
             pbar.update_absolute(30)
             response = requests.post(
-                "https://ai.comfly.chat/jimeng/submit/videos",
+                f"{baseurl}/jimeng/submit/videos",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -4773,7 +4821,7 @@ class ComflyJimengVideoApi:
                 
                 try:
                     status_response = requests.get(
-                        f"https://ai.comfly.chat/jimeng/fetch/{task_id}",
+                        f"{baseurl}/jimeng/fetch/{task_id}",
                         headers=self.get_headers(),
                         timeout=30
                     )
@@ -4962,7 +5010,7 @@ class ComflySeededit:
             }
             
             # Call the API
-            api_url = "https://ai.comfly.chat/volcv/v1?Action=CVProcess&Version=2022-08-31"
+            api_url = f"{baseurl}/volcv/v1?Action=CVProcess&Version=2022-08-31"
             
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             response_info = f"**SeedEdit Request**\n\n"
@@ -5307,7 +5355,7 @@ class Comfly_gpt_image_1_edit:
                         image_files.append(('mask', files['mask']))
 
                     response = self.make_request_with_retry(
-                        "https://ai.comfly.chat/v1/images/edits",
+                        f"{baseurl}/v1/images/edits",
                         data=data,
                         files=image_files,
                         max_retries=max_retries,
@@ -5321,7 +5369,7 @@ class Comfly_gpt_image_1_edit:
                         request_files.append(('mask', files['mask']))
 
                     response = self.make_request_with_retry(
-                        "https://ai.comfly.chat/v1/images/edits",
+                        f"{baseurl}/v1/images/edits",
                         data=data,
                         files=request_files,
                         max_retries=max_retries,
@@ -5505,7 +5553,7 @@ class Comfly_gpt_image_1:
                 payload["size"] = size
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations",
+                f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -5638,7 +5686,7 @@ class ComflyChatGPTApi:
         self.api_key = get_config().get('api_key', '')
         self.timeout = 800
         self.image_download_timeout = 600
-        self.api_endpoint = "https://ai.comfly.chat/v1/chat/completions"
+        self.api_endpoint = f"{baseurl}/v1/chat/completions"
         self.conversation_history = []
  
     def get_headers(self):
@@ -6063,7 +6111,7 @@ class Comfly_sora2:
                 if seed > 0:
                     payload["seed"] = seed
                 
-                endpoint = "https://ai.comfly.chat/v2/videos/generations"
+                endpoint = f"{baseurl}/v2/videos/generations"
             else:
                 payload = {
                     "prompt": prompt,
@@ -6076,7 +6124,7 @@ class Comfly_sora2:
                 if seed > 0:
                     payload["seed"] = seed
                     
-                endpoint = "https://ai.comfly.chat/v2/videos/generations"
+                endpoint = f"{baseurl}/v2/videos/generations"
             
             pbar.update_absolute(20)
             
@@ -6114,7 +6162,7 @@ class Comfly_sora2:
                 
                 try:
                     status_response = requests.get(
-                        f"https://ai.comfly.chat/v2/videos/generations/{task_id}",
+                        f"{baseurl}/v2/videos/generations/{task_id}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -6231,7 +6279,7 @@ class Comfly_Flux_Kontext:
             files = {'file': ('image.png', file_content, 'image/png')}
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/files",
+                f"{baseurl}/v1/files",
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 files=files,
                 timeout=self.timeout
@@ -6321,7 +6369,7 @@ class Comfly_Flux_Kontext:
                 payload["seed"] = seed
 
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations",
+                f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -6484,7 +6532,7 @@ class Comfly_Flux_Kontext_Edit:
 
                 pbar.update_absolute(30)
                 response = requests.post(
-                    "https://ai.comfly.chat/v1/images/edits",
+                    f"{baseurl}/v1/images/edits",
                     headers=self.get_headers(),
                     data=data,
                     files=files,
@@ -6507,7 +6555,7 @@ class Comfly_Flux_Kontext_Edit:
                 headers["Content-Type"] = "application/json"
                 
                 response = requests.post(
-                    "https://ai.comfly.chat/v1/images/generations",
+                    f"{baseurl}/v1/images/generations",
                     headers=headers,
                     json=payload,
                     timeout=self.timeout
@@ -6653,7 +6701,7 @@ class Comfly_Flux_Kontext_bfl:
         pbar = comfy.utils.ProgressBar(100)
         pbar.update_absolute(10)
 
-        api_endpoint = f"https://ai.comfly.chat/bfl/v1/{model}"
+        api_endpoint = f"{baseurl}/bfl/v1/{model}"
         
         try:
             payload = {
@@ -6710,7 +6758,7 @@ class Comfly_Flux_Kontext_bfl:
                 
                 try:
                     result_response = requests.get(
-                        f"https://ai.comfly.chat/bfl/v1/get_result?id={task_id}",
+                        f"{baseurl}/bfl/v1/get_result?id={task_id}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -6774,7 +6822,6 @@ class Comfly_Flux_Kontext_bfl:
 
 
 ############################# Googel ###########################
-
 
 class Comfly_Googel_Veo3:
     @classmethod
@@ -6869,7 +6916,7 @@ class Comfly_Googel_Veo3:
                     payload["images"] = images_base64
 
             response = requests.post(
-                "https://ai.comfly.chat/google/v1/models/veo/videos",
+                f"{baseurl}/google/v1/models/veo/videos",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -6905,7 +6952,7 @@ class Comfly_Googel_Veo3:
                 
                 try:
                     status_response = requests.get(
-                        f"https://ai.comfly.chat/google/v1/tasks/{task_id}",
+                        f"{baseurl}/google/v1/tasks/{task_id}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -7027,7 +7074,7 @@ class Comfly_nano_banana:
         
         try:
             response = session.post(
-                "https://ai.comfly.chat/v1/chat/completions",
+                f"{baseurl}/v1/chat/completions",
                 headers=self.get_headers(),
                 json=payload, 
                 stream=True,
@@ -7242,7 +7289,7 @@ class Comfly_nano_banana_fal:
             
             headers = {"Authorization": f"Bearer {self.api_key}"}
             response = requests.post(
-                "https://ai.comfly.chat/v1/files",
+                f"{baseurl}/v1/files",
                 headers=headers,
                 files=files,
                 timeout=self.timeout
@@ -7314,7 +7361,7 @@ class Comfly_nano_banana_fal:
             pbar.update_absolute(20)
             
             if model.endswith("/edit"):
-                api_endpoint = f"https://ai.comfly.chat/fal-ai/{model}"
+                api_endpoint = f"{baseurl}/fal-ai/{model}"
 
                 payload = {
                     "prompt": prompt,
@@ -7336,7 +7383,7 @@ class Comfly_nano_banana_fal:
                     timeout=self.timeout
                 )
             else:
-                api_endpoint = f"https://ai.comfly.chat/fal-ai/{model}"
+                api_endpoint = f"{baseurl}/fal-ai/{model}"
                 
                 payload = {
                     "prompt": prompt,
@@ -7373,7 +7420,7 @@ class Comfly_nano_banana_fal:
                 response_url = response_url.replace("https://queue.fal.run", "https://ai.comfly.chat")
 
             if not response_url:
-                response_url = f"https://ai.comfly.chat/fal-ai/{model}/requests/{request_id}"
+                response_url = f"{baseurl}/fal-ai/{model}/requests/{request_id}"
             
             pbar.update_absolute(50)
 
@@ -7529,7 +7576,7 @@ class Comfly_nano_banana_edit:
                     payload["seed"] = seed
                 
                 response = requests.post(
-                    "https://ai.comfly.chat/v1/images/generations",
+                    f"{baseurl}/v1/images/generations",
                     headers=headers,
                     json=payload,
                     timeout=self.timeout
@@ -7559,7 +7606,7 @@ class Comfly_nano_banana_edit:
                     data["seed"] = str(seed)
                 
                 response = requests.post(
-                    "https://ai.comfly.chat/v1/images/edits",
+                    f"{baseurl}/v1/images/edits",
                     headers=headers,
                     data=data,
                     files=files,
@@ -7634,7 +7681,6 @@ class Comfly_nano_banana_edit:
 
 
  ############################# Qwen ###########################
-
 
 class Comfly_qwen_image:
     
@@ -7735,7 +7781,7 @@ class Comfly_qwen_image:
             pbar.update_absolute(30)
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/generations", 
+                f"{baseurl}/v1/images/generations", 
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -7925,7 +7971,7 @@ class Comfly_qwen_image_edit:
             headers = {"Authorization": f"Bearer {self.api_key}"}
             
             response = requests.post(
-                "https://ai.comfly.chat/v1/images/edits", 
+                f"{baseurl}/v1/images/edits", 
                 headers=headers,
                 files=files,
                 data=data,
@@ -8027,8 +8073,8 @@ class Comfly_MiniMax_video:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 600
-        self.api_endpoint = "https://ai.comfly.chat/minimax/v1/video_generation"
-        self.query_endpoint = "https://ai.comfly.chat/minimax/v1/query/video_generation"
+        self.api_endpoint = f"{baseurl}/minimax/v1/video_generation"
+        self.query_endpoint = f"{baseurl}/minimax/v1/query/video_generation"
 
     def get_headers(self):
         return {
@@ -8173,7 +8219,7 @@ class Comfly_MiniMax_video:
                     if status == "Success":
                         file_id = status_result.get("file_id")
                         if file_id:
-                            video_retrieval_url = f"https://ai.comfly.chat/minimax/v1/files/retrieve?file_id={file_id}"
+                            video_retrieval_url = f"{baseurl}/minimax/v1/files/retrieve?file_id={file_id}"
                             file_response = requests.get(
                                 video_retrieval_url,
                                 headers=self.get_headers(),
@@ -8186,10 +8232,10 @@ class Comfly_MiniMax_video:
                                     video_url = file_data["file"]["download_url"]
                                     break
                                 else:
-                                    video_url = f"https://ai.comfly.chat/minimax/v1/file?file_id={file_id}"
+                                    video_url = f"{baseurl}/minimax/v1/file?file_id={file_id}"
                                     break
                             else:
-                                video_url = f"https://ai.comfly.chat/minimax/v1/file?file_id={file_id}"
+                                video_url = f"{baseurl}/minimax/v1/file?file_id={file_id}"
                                 break
                     elif status == "Failed":
                         error_message = f"Video generation failed: {status_result.get('base_resp', {}).get('status_msg', 'Unknown error')}"
@@ -8205,7 +8251,7 @@ class Comfly_MiniMax_video:
                 return (None, task_id, json.dumps({"status": "error", "message": error_message}))
                 
             if not video_url:
-                video_url = f"https://ai.comfly.chat/minimax/v1/file?file_id={file_id}"
+                video_url = f"{baseurl}/minimax/v1/file?file_id={file_id}"
             
             pbar.update_absolute(90)
             print(f"Video generation completed. URL: {video_url}")
@@ -8305,7 +8351,7 @@ class Comfly_suno_description:
             pbar.update_absolute(10)
             
             response = requests.post(
-                "https://ai.comfly.chat/suno/generate/description-mode",
+                f"{baseurl}/suno/generate/description-mode",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -8356,7 +8402,7 @@ class Comfly_suno_description:
                 
                 try:
                     clip_response = requests.get(
-                        f"https://ai.comfly.chat/suno/feed/{','.join(clip_ids)}",
+                        f"{baseurl}/suno/feed/{','.join(clip_ids)}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -8518,7 +8564,7 @@ class Comfly_suno_lyrics:
                 payload["seed"] = seed
 
             response = requests.post(
-                "https://ai.comfly.chat/suno/generate/lyrics/",
+                f"{baseurl}/suno/generate/lyrics/",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -8550,7 +8596,7 @@ class Comfly_suno_lyrics:
                 
                 try:
                     lyrics_response = requests.get(
-                        f"https://ai.comfly.chat/suno/lyrics/{task_id}",
+                        f"{baseurl}/suno/lyrics/{task_id}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -8665,7 +8711,7 @@ class Comfly_suno_custom:
             pbar.update_absolute(10)
             
             response = requests.post(
-                "https://ai.comfly.chat/suno/generate",
+                f"{baseurl}/suno/generate",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -8719,7 +8765,7 @@ class Comfly_suno_custom:
                 
                 try:
                     clip_response = requests.get(
-                        f"https://ai.comfly.chat/suno/feed/{','.join(clip_ids)}",
+                        f"{baseurl}/suno/feed/{','.join(clip_ids)}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
@@ -8827,1013 +8873,12 @@ class Comfly_suno_custom:
             empty_audio = create_audio_object("")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "", "", "")
 
-class OpenAISoraAPIPlus:
-    """
-    ComfyUI自定义节点：ai.t8star.cn Sora-2 视频生成（OpenAI兼容流式接口）
-    - 参考 openai_chat_api_node.py 的结构与风格
-    - 通过 ai.t8star.cn 的 /chat/completions 接口，以 stream=True 获取流式增量内容
-    - 适配示例返回：每行均为 JSON，字段为 choices[0].delta.content
-    - 超时时间：600 秒（10 分钟）
-    输入参数：
-      - base_url: 默认 https://ai.t8star.cn/v1
-      - model: 默认 sora_video2
-      - api_key: 必填
-      - system_prompt: 可选，用于设定系统指令
-      - user_prompt: 必填，视频生成描述
-    输出：
-      - reasoning_content: 保留为空（""），与参考节点保持一致
-      - answer: 汇总的增量内容（通常包含进度与最终信息）
-      - tokens_usage: 由于返回中未提供 usage，这里一般为空字符串
-    """
-    def __init__(self):
-        pass
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "base_url": ("STRING", {"default": "https://ai.t8star.cn/v1", "multiline": False}),
-                "model": ("STRING", {"default": "sora_video2", "multiline": False}),
-                "api_key": ("STRING", {"default": "", "multiline": False}),
-                "user_prompt": ("STRING", {"multiline": True, "default": "请描述要生成的视频内容"}),
-            },
-            "optional": {
-                # 可选图像输入：提供则走“图生视频（image-to-video）”，不提供则为“文生视频（text-to-video）”
-                "aspect_ratio": ("STRING", {"default": "16:9", "multiline": False, "options": ["16:9", "9:16"]}),
-                "hd": ("BOOLEAN", {"default": True}),
-                "duration": ("INT", {"default": 15, "options": [10, 15]}),
-            }
-        }
-
-    RETURN_TYPES = ("VIDEO", "STRING", "STRING")
-    RETURN_NAMES = ("video", "video_url", "tokens_usage")
-    FUNCTION = "generate"
-    CATEGORY = "zhenzhen"
-
-    def generate(self, base_url, model, api_key, user_prompt,image=None,hd=True,duration=15,aspect_ratio="16:9"):
-        """
-        调用 ai.t8star.cn 的 sora-2 模型进行视频生成（流式）。
-        请求：
-          POST {base_url}/chat/completions
-          headers:
-            - Authorization: Bearer {api_key}
-            - Accept: application/json
-            - Content-Type: application/json
-          json:
-            {
-              "model": model,
-              "messages": [{"role": "system","content": system_prompt}, {"role":"user","content": user_prompt}],
-              "stream": true
-            }
-        解析：
-          - 逐行读取，每行是 JSON，取 choices[0].delta.content 累加
-          - 若流式无内容，降级为非流式请求（stream=false）再解析
-        超时：
-          - timeout=600 秒
-        """
-        if not api_key:
-            return (None, "", "错误：未配置API Key，请在节点参数中设置 api_key")
-        if not base_url:
-            return (None, "", "错误：未配置 base_url，请在节点参数中设置 base_url")
-        if not user_prompt.strip():
-            return (None, "", "错误：user_prompt 为空，请提供视频描述")
-
-        try:
-            headers = self._build_headers(api_key)
-            api_url = f"{base_url.rstrip('/')}/chat/completions"
-
-            # 构建聊天内容：
-            # - 若提供 image：按 OpenAI 多模态格式使用 content 数组，携带文本与图片
-            # - 若不提供 image：保持纯文本 content 字符串，兼容各类兼容接口
-            if image is not None:
-                try:
-                    from io import BytesIO
-                    import base64
-                    from PIL import Image as _PILImage  # 仅用于确保PIL可用
-                    pil_image = self._convert_to_pil(image)
-                    buf = BytesIO()
-                    pil_image.save(buf, format="PNG")
-                    buf.seek(0)
-                    image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                    base64_url = f"data:image/png;base64,{image_base64}"
-                    content = [
-                        {"type": "text", "text": user_prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": base64_url,
-                                "detail": "high"
-                            }
-                        }
-                    ]
-                    print(f"[OpenAISoraAPI] 图生视频模式: 已附带输入图像，尺寸={pil_image.size}, base64长度={len(image_base64)}")
-                except Exception as e:
-                    return (None, f"输入图像处理失败: {e}", "")
-                messages = [{"role": "user", "content": content}]
-            else:
-                print(f"[OpenAISoraAPI] 文生视频模式: 纯文本提示词")
-                messages = [{"role": "user", "content": user_prompt}]
-
-            payload = {
-                "model": model,
-                "messages": messages,
-                "stream": True
-            }
-
-            print(f"[OpenAISoraAPI] 请求: {api_url} (chat/completions, stream=True)")
-            print(f"[OpenAISoraAPI] 模型: {model}")
-            # 打印裁剪后的提示词，便于用户确认任务内容
-            _preview = (user_prompt[:120] + "...") if len(user_prompt) > 120 else user_prompt
-            print(f"[OpenAISoraAPI] 提交Sora任务 | 提示词: {_preview}")
-            # 打印精简后的载荷（避免输出完整base64）
-            try:
-                print(f"[OpenAISoraAPI] 请求载荷(精简): {self._safe_json_dumps(payload)}")
-            except Exception:
-                pass
-            resp = requests.post(api_url, headers=headers, json=payload, timeout=600, stream=True)
-            print(f"[OpenAISoraAPI] 响应状态码: {resp.status_code}")
-
-            if resp.status_code != 200:
-                return (None, f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-
-            reasoning_content, answer, tokens_usage = self._parse_302_stream(resp)
-
-            # 若流式无内容，降级为非流式
-            if not answer:
-                try:
-                    safe_payload = dict(payload)
-                    safe_payload["stream"] = False
-                    print(f"[OpenAISoraAPI] 流式无增量，降级为非流式请求")
-                    resp2 = requests.post(api_url, headers=headers, json=safe_payload, timeout=600)
-                    if resp2.status_code == 200:
-                        rc2, answer2, tu2 = self._parse_non_stream(resp2)
-                        video_url2 = self._extract_video_url(answer2)
-                        video2 = self._download_and_convert_video(video_url2)
-                        return (video2, video_url2 or "", tu2)
-                    else:
-                        return (None, f"非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}", tokens_usage)
-                except Exception as _e:
-                    print(f"[OpenAISoraAPI] 非流式降级异常: {_e}")
-
-            # 正常流式结果：提取视频URL并下载
-            video_url = self._extract_video_url(answer)
-            video_output = self._download_and_convert_video(video_url)
-            return (video_output, video_url or "", tokens_usage)
-        except requests.exceptions.ConnectTimeout as e:
-            return (None, f"网络连接超时: 无法连接到API服务器。请检查网络连接或代理。错误: {e}", "")
-        except requests.exceptions.Timeout as e:
-            return (None, f"请求超时: API响应时间过长。请稍后重试。错误: {e}", "")
-        except requests.exceptions.ConnectionError as e:
-            return (None, f"网络连接错误: 无法建立到API的连接。请检查网络设置。错误: {e}", "")
-        except requests.exceptions.RequestException as e:
-            return (None, f"API请求失败: {e}", "")
-        except Exception as e:
-            return (None, f"处理失败: {e}", "")
-
-    def _build_headers(self, api_key: str):
-        return {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-    def _convert_to_pil(self, image):
-        """
-        将ComfyUI的IMAGE/常见输入转换为PIL Image（RGB）。
-        - 支持 torch.Tensor (N,H,W,3) 或 (H,W,3)，数值范围[0,1]或[0,255]
-        - 支持PIL Image
-        - 支持numpy数组
-        """
-        try:
-            from PIL import Image
-            if hasattr(image, "cpu"):  # torch.Tensor
-                import torch
-                import numpy as np
-                t = image
-                if t.dim() == 4:
-                    t = t[0]
-                # 期望 (H,W,3)
-                if t.shape[-1] == 3:
-                    arr = t.detach().cpu().numpy()
-                elif t.shape[0] == 3 and t.dim() == 3:
-                    # 兼容 (3,H,W) -> (H,W,3)
-                    arr = t.detach().cpu().numpy().transpose(1, 2, 0)
-                else:
-                    raise ValueError(f"不支持的Tensor形状: {tuple(t.shape)}")
-                # 归一化
-                if arr.max() <= 1.0:
-                    arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                else:
-                    arr = arr.clip(0, 255).astype("uint8")
-                img = Image.fromarray(arr)
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            elif hasattr(image, "save"):  # PIL
-                from PIL import Image as _Image
-                img = image
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            else:
-                import numpy as np
-                if isinstance(image, np.ndarray):
-                    arr = image
-                    if arr.ndim == 3 and arr.shape[0] == 3:
-                        arr = arr.transpose(1, 2, 0)
-                    if arr.max() <= 1.0:
-                        arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                    else:
-                        arr = arr.clip(0, 255).astype("uint8")
-                    from PIL import Image
-                    img = Image.fromarray(arr)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
-                    return img
-                raise ValueError(f"不支持的图像类型: {type(image)}")
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 图像转换失败: {e}")
-            raise
-
-    def _safe_json_dumps(self, obj, ensure_ascii=False, indent=2):
-        """
-        序列化JSON时截断超长/疑似base64字段，避免日志刷屏。
-        """
-        import json as _json
-
-        def _truncate_base64(value: str):
-            if not isinstance(value, str):
-                return value
-            if len(value) > 100 and (
-                value.startswith("data:image/") or
-                value[:8] in ("iVBORw0K", "/9j/")  # 常见PNG/JPEG开头
-            ):
-                return value[:50] + f"... (len={len(value)})"
-            return value
-
-        def _walk(v):
-            if isinstance(v, dict):
-                return {k: _walk(_truncate_base64(val)) for k, val in v.items()}
-            if isinstance(v, list):
-                return [_walk(_truncate_base64(x)) for x in v]
-            return _truncate_base64(v)
-
-        return _json.dumps(_walk(obj), ensure_ascii=ensure_ascii, indent=indent)
-
-    def _parse_302_stream(self, resp):
-        """
-        解析 ai.t8star.cn 的流式响应。
-        示例行：
-          {"choices":[{"delta":{"content":"...","role":"assistant"},"index":0}],"id":"...","model":"sora-2","object":"chat.completion.chunk"}
-        策略：
-          - 逐行解析 JSON
-          - 提取 choices[0].delta.content 累加
-          - 无 usage 字段，tokens_usage 保持为空
-        """
-        answer_parts = []
-        tokens_usage = ""
-        # 进度与心跳跟踪
-        last_progress = -1   # 最近一次打印的百分比进度（0-100）
-        chunk_count = 0      # 已接收的增量块数量
-        printed_url = False  # 是否已打印过URL
-        try:
-            for raw in resp.iter_lines(decode_unicode=True):
-                if raw is None:
-                    continue
-                line = raw.strip()
-                if not line:
-                    continue
-
-                # 可能伴随时间戳行，如 "21:56:01"，跳过非 JSON 行
-                if not (line.startswith("{") and line.endswith("}")):
-                    continue
-
-                try:
-                    payload = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-
-                if "choices" in payload and isinstance(payload["choices"], list) and payload["choices"]:
-                    delta = payload["choices"][0].get("delta", {})
-                    if isinstance(delta, dict):
-                        piece = delta.get("content")
-                        if isinstance(piece, str) and piece:
-                            # 进度日志：尽量识别诸如 "进度 36.."、"41.."、"60.." 等
-                            text = piece.strip()
-                            # 优先匹配包含“进度”的片段
-                            prog_candidates = []
-                            if "进度" in text or "progress" in text.lower():
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-                                if not prog_candidates:
-                                    prog_candidates = re.findall(r'进度[^0-9]*?(\d{1,3})', text)
-                            else:
-                                # 一般性匹配 "41.." 这类
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-
-                            # 过滤到 0-100 的最大值作为当前进度
-                            curr_prog = None
-                            for p in prog_candidates:
-                                try:
-                                    v = int(p)
-                                    if 0 <= v <= 100:
-                                        curr_prog = v if (curr_prog is None or v > curr_prog) else curr_prog
-                                except Exception:
-                                    pass
-                            if curr_prog is not None and curr_prog > last_progress:
-                                last_progress = curr_prog
-                                print(f"[OpenAISoraAPI][{time.strftime('%H:%M:%S')}] 任务进度: {last_progress}%")
-
-                            # 首次发现 URL 则提示
-                            if not printed_url and ("http://" in text or "https://" in text):
-                                urls = re.findall(r'https?://\S+', text)
-                                if urls:
-                                    print(f"[OpenAISoraAPI] 可能的视频URL: {urls[0]}")
-                                    printed_url = True
-
-                            # 心跳：每收到一定数量块打印一次累计长度
-                            chunk_count += 1
-                            if chunk_count % 20 == 0:
-                                total_len = sum(len(x) for x in answer_parts) + len(text)
-                                print(f"[OpenAISoraAPI] 流式接收中... 已接收 {chunk_count} 块，累计字符 {total_len}")
-
-                            answer_parts.append(piece)
-
-            # 合并并做简单的编码清理
-            answer = self._normalize_text("".join(answer_parts).strip())
-            return ("", answer, tokens_usage)
-        except Exception as e:
-            return ("", f"流式解析失败: {e}", tokens_usage)
-
-    def _parse_non_stream(self, resp):
-        """
-        非流式响应解析（兼容 OpenAI chat/completions）
-        预期结构：
-          {"choices":[{"message":{"role":"assistant","content":"..."},"finish_reason":"..." }], "usage": {...}}
-        """
-        try:
-            if resp.status_code != 200:
-                return ("", f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-            if not resp.text.strip():
-                return ("", "API返回空响应", "")
-
-            try:
-                data = resp.json()
-            except json.JSONDecodeError as json_error:
-                return ("", f"API响应格式错误: {str(json_error)}", "")
-
-            # 错误字段
-            if "error" in data and data["error"]:
-                err = data["error"]
-                msg = err.get("message", str(err))
-                typ = err.get("type", "unknown_error")
-                return ("", f"API错误 ({typ}): {msg}", "")
-
-            usage = data.get("usage", {})
-            tokens_usage = self._format_tokens_usage(usage)
-
-            if "choices" in data and data["choices"]:
-                message = data["choices"][0].get("message", {})
-                content = message.get("content", "")
-                if not content:
-                    finish_reason = data["choices"][0].get("finish_reason", "")
-                    return ("", f"未返回内容，finish_reason={finish_reason}", tokens_usage)
-                reasoning_content, answer = self._parse_content_tags(content)
-                return ("", answer, tokens_usage)
-
-            return ("", "API未返回choices内容", tokens_usage)
-        except Exception as e:
-            return ("", f"响应解析失败: {e}", "")
-
-    def _parse_content_tags(self, content: str):
-        """
-        复用与参考节点一致的标签解析逻辑：
-        - <think>...</think> 抽取思考
-        - <answer>...</answer> 抽取答案
-        - <reasoning>...</reasoning> 抽取思考
-        """
-        try:
-            think_pattern = r'<think>(.*?)</think>'
-            think_match = re.search(think_pattern, content, re.DOTALL)
-            if think_match:
-                reasoning_content = think_match.group(1).strip()
-                answer = content.replace(think_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            answer_pattern = r'<answer>(.*?)</answer>'
-            answer_match = re.search(answer_pattern, content, re.DOTALL)
-            if answer_match:
-                return ("", answer_match.group(1).strip())
-
-            answer_pattern_open = r'<answer>(.*)'
-            answer_match_open = re.search(answer_pattern_open, content, re.DOTALL)
-            if answer_match_open:
-                return ("", answer_match_open.group(1).strip())
-
-            reasoning_pattern = r'<reasoning>(.*?)</reasoning>'
-            reasoning_match = re.search(reasoning_pattern, content, re.DOTALL)
-            if reasoning_match:
-                reasoning_content = reasoning_match.group(1).strip()
-                answer = content.replace(reasoning_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            return ("", content.strip())
-        except Exception:
-            return ("", content.strip())
-
-    def _format_tokens_usage(self, usage):
-        if not usage:
-            return ""
-        total_tokens = usage.get('total_tokens') or usage.get('total') or usage.get('tokens') or '-'
-        prompt_tokens = (
-            usage.get('prompt_tokens')
-            or usage.get('input_tokens')
-            or (usage.get('input', {}) if isinstance(usage.get('input'), dict) else None)
-            or usage.get('prompt')
-            or '-'
-        )
-        if isinstance(prompt_tokens, dict):
-            prompt_tokens = prompt_tokens.get('tokens') or prompt_tokens.get('count') or '-'
-        completion_tokens = (
-            usage.get('completion_tokens')
-            or usage.get('output_tokens')
-            or (usage.get('output', {}) if isinstance(usage.get('output'), dict) else None)
-            or usage.get('completion')
-            or '-'
-        )
-        if isinstance(completion_tokens, dict):
-            completion_tokens = completion_tokens.get('tokens') or completion_tokens.get('count') or '-'
-        return f"total_tokens={total_tokens}, input_tokens={prompt_tokens}, output_tokens={completion_tokens}"
-
-    def _normalize_text(self, s: str) -> str:
-        if not isinstance(s, str) or not s:
-            return s or ""
-        sample = s[:8]
-        suspicious = ("Ã", "å", "æ", "ç", "ð", "þ")
-        if any(ch in sample for ch in suspicious):
-            try:
-                return s.encode("latin-1", errors="ignore").decode("utf-8", errors="ignore")
-            except Exception:
-                return s
-        return s
-
-    def _extract_video_url(self, text: str) -> Optional[str]:
-        """
-        从返回文本中提取视频URL。
-        优先匹配指向 mp4/webm 等视频资源的URL；若未匹配到，则回退匹配任意 http/https 链接。
-        """
-        if not isinstance(text, str) or not text:
-            return None
-        try:
-            # 优先匹配视频直链
-            m = re.findall(r'(https?://[^\s)>\]]+\.(?:mp4|webm)(?:\?[^\s)>\]]*)?)', text, flags=re.IGNORECASE)
-            if m:
-                return m[0]
-            # 其次匹配 markdown 的 [在线播放](url) 格式
-            m2 = re.findall(r'\((https?://[^\s)]+)\)', text, flags=re.IGNORECASE)
-            if m2:
-                return m2[0]
-            # 再次匹配任意 http/https 链接
-            m3 = re.findall(r'(https?://[^\s)>\]]+)', text, flags=re.IGNORECASE)
-            if m3:
-                return m3[0]
-            return None
-        except Exception:
-            return None
-
-    def _download_and_convert_video(self, video_url: str) -> Optional[Any]:
-        """
-        下载视频URL并转换为VIDEO对象，参考 jimeng_video_node.py 的实现。
-        - 校验URL合法性
-        - 使用 download_url_to_video_output(video_url, timeout=120)
-        - 出错返回 None，保证节点稳定
-        """
-        try:
-            if not video_url or not isinstance(video_url, str):
-                print(f"[OpenAISoraAPI] 无效的视频URL: {video_url}")
-                return None
-            if not video_url.startswith(("http://", "https://")):
-                print(f"[OpenAISoraAPI] 不支持的URL格式: {video_url}")
-                return None
-
-            print(f"[OpenAISoraAPI] 🎬 开始下载视频: {video_url[:80]}...")
-            try:
-                video_output = download_url_to_video_output(video_url, timeout=120)
-                print(f"[OpenAISoraAPI] ✅ 视频下载完成")
-                return video_output
-            except Exception as download_error:
-                print(f"[OpenAISoraAPI] ❌ 视频下载失败: {download_error}")
-                return None
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 视频下载转换过程出错: {e}")
-            return None
-
-
-class OpenAISoraAPI:
-    """
-    ComfyUI自定义节点：ai.t8star.cn Sora-2 视频生成（OpenAI兼容流式接口）
-    - 参考 openai_chat_api_node.py 的结构与风格
-    - 通过 ai.t8star.cn 的 /chat/completions 接口，以 stream=True 获取流式增量内容
-    - 适配示例返回：每行均为 JSON，字段为 choices[0].delta.content
-    - 超时时间：600 秒（10 分钟）
-    输入参数：
-      - base_url: 默认 https://ai.t8star.cn/v1
-      - model: 默认 sora_video2
-      - api_key: 必填
-      - system_prompt: 可选，用于设定系统指令
-      - user_prompt: 必填，视频生成描述
-    输出：
-      - reasoning_content: 保留为空（""），与参考节点保持一致
-      - answer: 汇总的增量内容（通常包含进度与最终信息）
-      - tokens_usage: 由于返回中未提供 usage，这里一般为空字符串
-    """
-    def __init__(self):
-        pass
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "base_url": ("STRING", {"default": "https://ai.t8star.cn/v1", "multiline": False}),
-                "model": ("STRING", {"default": "sora_video2", "multiline": False}),
-                "api_key": ("STRING", {"default": "", "multiline": False}),
-                "user_prompt": ("STRING", {"multiline": True, "default": "请描述要生成的视频内容"}),
-                #"hd": (["true", "false"], {"default": "false"}),
-                #"duration": (["10", "15"], {"default": "15"}),
-                #"aspect_ratio": (["16:9", "9:16"], {"default": "9:16"}),
-            },
-            "optional": {
-                # 可选图像输入：提供则走“图生视频（image-to-video）”，不提供则为“文生视频（text-to-video）”
-                "image": ("IMAGE",),
-            }
-        }
-
-    RETURN_TYPES = ("VIDEO", "STRING", "STRING")
-    RETURN_NAMES = ("video", "video_url", "tokens_usage")
-    FUNCTION = "generate"
-    CATEGORY = "zhenzhen"
-
-    def generate(self, base_url, model, api_key, user_prompt, image=None):
-        """
-        调用 ai.t8star.cn 的 sora-2 模型进行视频生成（流式）。
-        请求：
-          POST {base_url}/chat/completions
-          headers:
-            - Authorization: Bearer {api_key}
-            - Accept: application/json
-            - Content-Type: application/json
-          json:
-            {
-              "model": model,
-              "messages": [{"role": "system","content": system_prompt}, {"role":"user","content": user_prompt}],
-              "stream": true
-            }
-        解析：
-          - 逐行读取，每行是 JSON，取 choices[0].delta.content 累加
-          - 若流式无内容，降级为非流式请求（stream=false）再解析
-        超时：
-          - timeout=600 秒
-        """
-        if not api_key:
-            return (None, "", "错误：未配置API Key，请在节点参数中设置 api_key")
-        if not base_url:
-            return (None, "", "错误：未配置 base_url，请在节点参数中设置 base_url")
-        if not user_prompt.strip():
-            return (None, "", "错误：user_prompt 为空，请提供视频描述")
-
-        try:
-            headers = self._build_headers(api_key)
-            api_url = f"{base_url.rstrip('/')}/chat/completions"
-
-            # 构建聊天内容：
-            # - 若提供 image：按 OpenAI 多模态格式使用 content 数组，携带文本与图片
-            # - 若不提供 image：保持纯文本 content 字符串，兼容各类兼容接口
-            if image is not None:
-                try:
-                    from io import BytesIO
-                    import base64
-                    from PIL import Image as _PILImage  # 仅用于确保PIL可用
-                    pil_image = self._convert_to_pil(image)
-                    buf = BytesIO()
-                    pil_image.save(buf, format="PNG")
-                    buf.seek(0)
-                    image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                    base64_url = f"data:image/png;base64,{image_base64}"
-                    content = [
-                        {"type": "text", "text": user_prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": base64_url,
-                                "detail": "high"
-                            }
-                        }
-                    ]
-                    print(f"[OpenAISoraAPI] 图生视频模式: 已附带输入图像，尺寸={pil_image.size}, base64长度={len(image_base64)}")
-                except Exception as e:
-                    return (None, f"输入图像处理失败: {e}", "")
-                messages = [{"role": "user", "content": content}]
-            else:
-                print(f"[OpenAISoraAPI] 文生视频模式: 纯文本提示词")
-                messages = [{"role": "user", "content": user_prompt}]
-
-            payload = {
-                "model": model,
-                "messages": messages,
-                "stream": True
-            }
-
-            print(f"[OpenAISoraAPI] 请求: {api_url} (chat/completions, stream=True)")
-            print(f"[OpenAISoraAPI] 模型: {model}")
-            # 打印裁剪后的提示词，便于用户确认任务内容
-            _preview = (user_prompt[:120] + "...") if len(user_prompt) > 120 else user_prompt
-            print(f"[OpenAISoraAPI] 提交Sora任务 | 提示词: {_preview}")
-            # 打印精简后的载荷（避免输出完整base64）
-            try:
-                print(f"[OpenAISoraAPI] 请求载荷(精简): {self._safe_json_dumps(payload)}")
-            except Exception:
-                pass
-            resp = requests.post(api_url, headers=headers, json=payload, timeout=600, stream=True)
-            print(f"[OpenAISoraAPI] 响应状态码: {resp.status_code}")
-
-            if resp.status_code != 200:
-                return (None, f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-
-            reasoning_content, answer, tokens_usage = self._parse_302_stream(resp)
-
-            # 若流式无内容，降级为非流式
-            if not answer:
-                try:
-                    safe_payload = dict(payload)
-                    safe_payload["stream"] = False
-                    print(f"[OpenAISoraAPI] 流式无增量，降级为非流式请求")
-                    resp2 = requests.post(api_url, headers=headers, json=safe_payload, timeout=600)
-                    if resp2.status_code == 200:
-                        rc2, answer2, tu2 = self._parse_non_stream(resp2)
-                        video_url2 = self._extract_video_url(answer2)
-                        video2 = self._download_and_convert_video(video_url2)
-                        return (video2, video_url2 or "", tu2)
-                    else:
-                        return (None, f"非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}", tokens_usage)
-                except Exception as _e:
-                    print(f"[OpenAISoraAPI] 非流式降级异常: {_e}")
-
-            # 正常流式结果：提取视频URL并下载
-            video_url = self._extract_video_url(answer)
-            video_output = self._download_and_convert_video(video_url)
-            return (video_output, video_url or "", tokens_usage)
-        except requests.exceptions.ConnectTimeout as e:
-            return (None, f"网络连接超时: 无法连接到API服务器。请检查网络连接或代理。错误: {e}", "")
-        except requests.exceptions.Timeout as e:
-            return (None, f"请求超时: API响应时间过长。请稍后重试。错误: {e}", "")
-        except requests.exceptions.ConnectionError as e:
-            return (None, f"网络连接错误: 无法建立到API的连接。请检查网络设置。错误: {e}", "")
-        except requests.exceptions.RequestException as e:
-            return (None, f"API请求失败: {e}", "")
-        except Exception as e:
-            return (None, f"处理失败: {e}", "")
-
-    def _build_headers(self, api_key: str):
-        return {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-    def _convert_to_pil(self, image):
-        """
-        将ComfyUI的IMAGE/常见输入转换为PIL Image（RGB）。
-        - 支持 torch.Tensor (N,H,W,3) 或 (H,W,3)，数值范围[0,1]或[0,255]
-        - 支持PIL Image
-        - 支持numpy数组
-        """
-        try:
-            from PIL import Image
-            if hasattr(image, "cpu"):  # torch.Tensor
-                import torch
-                import numpy as np
-                t = image
-                if t.dim() == 4:
-                    t = t[0]
-                # 期望 (H,W,3)
-                if t.shape[-1] == 3:
-                    arr = t.detach().cpu().numpy()
-                elif t.shape[0] == 3 and t.dim() == 3:
-                    # 兼容 (3,H,W) -> (H,W,3)
-                    arr = t.detach().cpu().numpy().transpose(1, 2, 0)
-                else:
-                    raise ValueError(f"不支持的Tensor形状: {tuple(t.shape)}")
-                # 归一化
-                if arr.max() <= 1.0:
-                    arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                else:
-                    arr = arr.clip(0, 255).astype("uint8")
-                img = Image.fromarray(arr)
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            elif hasattr(image, "save"):  # PIL
-                from PIL import Image as _Image
-                img = image
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                return img
-            else:
-                import numpy as np
-                if isinstance(image, np.ndarray):
-                    arr = image
-                    if arr.ndim == 3 and arr.shape[0] == 3:
-                        arr = arr.transpose(1, 2, 0)
-                    if arr.max() <= 1.0:
-                        arr = (arr * 255.0).clip(0, 255).astype("uint8")
-                    else:
-                        arr = arr.clip(0, 255).astype("uint8")
-                    from PIL import Image
-                    img = Image.fromarray(arr)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
-                    return img
-                raise ValueError(f"不支持的图像类型: {type(image)}")
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 图像转换失败: {e}")
-            raise
-
-    def _safe_json_dumps(self, obj, ensure_ascii=False, indent=2):
-        """
-        序列化JSON时截断超长/疑似base64字段，避免日志刷屏。
-        """
-        import json as _json
-
-        def _truncate_base64(value: str):
-            if not isinstance(value, str):
-                return value
-            if len(value) > 100 and (
-                value.startswith("data:image/") or
-                value[:8] in ("iVBORw0K", "/9j/")  # 常见PNG/JPEG开头
-            ):
-                return value[:50] + f"... (len={len(value)})"
-            return value
-
-        def _walk(v):
-            if isinstance(v, dict):
-                return {k: _walk(_truncate_base64(val)) for k, val in v.items()}
-            if isinstance(v, list):
-                return [_walk(_truncate_base64(x)) for x in v]
-            return _truncate_base64(v)
-
-        return _json.dumps(_walk(obj), ensure_ascii=ensure_ascii, indent=indent)
-
-    def _parse_302_stream(self, resp):
-        """
-        解析 ai.t8star.cn 的流式响应。
-        示例行：
-          {"choices":[{"delta":{"content":"...","role":"assistant"},"index":0}],"id":"...","model":"sora-2","object":"chat.completion.chunk"}
-        策略：
-          - 逐行解析 JSON
-          - 提取 choices[0].delta.content 累加
-          - 无 usage 字段，tokens_usage 保持为空
-        """
-        answer_parts = []
-        tokens_usage = ""
-        # 进度与心跳跟踪
-        last_progress = -1   # 最近一次打印的百分比进度（0-100）
-        chunk_count = 0      # 已接收的增量块数量
-        printed_url = False  # 是否已打印过URL
-        try:
-            for raw in resp.iter_lines(decode_unicode=True):
-                if raw is None:
-                    continue
-                line = raw.strip()
-                if not line:
-                    continue
-
-                # 可能伴随时间戳行，如 "21:56:01"，跳过非 JSON 行
-                if not (line.startswith("{") and line.endswith("}")):
-                    continue
-
-                try:
-                    payload = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-
-                if "choices" in payload and isinstance(payload["choices"], list) and payload["choices"]:
-                    delta = payload["choices"][0].get("delta", {})
-                    if isinstance(delta, dict):
-                        piece = delta.get("content")
-                        if isinstance(piece, str) and piece:
-                            # 进度日志：尽量识别诸如 "进度 36.."、"41.."、"60.." 等
-                            text = piece.strip()
-                            # 优先匹配包含“进度”的片段
-                            prog_candidates = []
-                            if "进度" in text or "progress" in text.lower():
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-                                if not prog_candidates:
-                                    prog_candidates = re.findall(r'进度[^0-9]*?(\d{1,3})', text)
-                            else:
-                                # 一般性匹配 "41.." 这类
-                                prog_candidates = re.findall(r'(\d{1,3})(?=%|\.{2,})', text)
-
-                            # 过滤到 0-100 的最大值作为当前进度
-                            curr_prog = None
-                            for p in prog_candidates:
-                                try:
-                                    v = int(p)
-                                    if 0 <= v <= 100:
-                                        curr_prog = v if (curr_prog is None or v > curr_prog) else curr_prog
-                                except Exception:
-                                    pass
-                            if curr_prog is not None and curr_prog > last_progress:
-                                last_progress = curr_prog
-                                print(f"[OpenAISoraAPI][{time.strftime('%H:%M:%S')}] 任务进度: {last_progress}%")
-
-                            # 首次发现 URL 则提示
-                            if not printed_url and ("http://" in text or "https://" in text):
-                                urls = re.findall(r'https?://\S+', text)
-                                if urls:
-                                    print(f"[OpenAISoraAPI] 可能的视频URL: {urls[0]}")
-                                    printed_url = True
-
-                            # 心跳：每收到一定数量块打印一次累计长度
-                            chunk_count += 1
-                            if chunk_count % 20 == 0:
-                                total_len = sum(len(x) for x in answer_parts) + len(text)
-                                print(f"[OpenAISoraAPI] 流式接收中... 已接收 {chunk_count} 块，累计字符 {total_len}")
-
-                            answer_parts.append(piece)
-
-            # 合并并做简单的编码清理
-            answer = self._normalize_text("".join(answer_parts).strip())
-            return ("", answer, tokens_usage)
-        except Exception as e:
-            return ("", f"流式解析失败: {e}", tokens_usage)
-
-    def _parse_non_stream(self, resp):
-        """
-        非流式响应解析（兼容 OpenAI chat/completions）
-        预期结构：
-          {"choices":[{"message":{"role":"assistant","content":"..."},"finish_reason":"..." }], "usage": {...}}
-        """
-        try:
-            if resp.status_code != 200:
-                return ("", f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
-            if not resp.text.strip():
-                return ("", "API返回空响应", "")
-
-            try:
-                data = resp.json()
-            except json.JSONDecodeError as json_error:
-                return ("", f"API响应格式错误: {str(json_error)}", "")
-
-            # 错误字段
-            if "error" in data and data["error"]:
-                err = data["error"]
-                msg = err.get("message", str(err))
-                typ = err.get("type", "unknown_error")
-                return ("", f"API错误 ({typ}): {msg}", "")
-
-            usage = data.get("usage", {})
-            tokens_usage = self._format_tokens_usage(usage)
-
-            if "choices" in data and data["choices"]:
-                message = data["choices"][0].get("message", {})
-                content = message.get("content", "")
-                if not content:
-                    finish_reason = data["choices"][0].get("finish_reason", "")
-                    return ("", f"未返回内容，finish_reason={finish_reason}", tokens_usage)
-                reasoning_content, answer = self._parse_content_tags(content)
-                return ("", answer, tokens_usage)
-
-            return ("", "API未返回choices内容", tokens_usage)
-        except Exception as e:
-            return ("", f"响应解析失败: {e}", "")
-
-    def _parse_content_tags(self, content: str):
-        """
-        复用与参考节点一致的标签解析逻辑：
-        - <think>...</think> 抽取思考
-        - <answer>...</answer> 抽取答案
-        - <reasoning>...</reasoning> 抽取思考
-        """
-        try:
-            think_pattern = r'<think>(.*?)</think>'
-            think_match = re.search(think_pattern, content, re.DOTALL)
-            if think_match:
-                reasoning_content = think_match.group(1).strip()
-                answer = content.replace(think_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            answer_pattern = r'<answer>(.*?)</answer>'
-            answer_match = re.search(answer_pattern, content, re.DOTALL)
-            if answer_match:
-                return ("", answer_match.group(1).strip())
-
-            answer_pattern_open = r'<answer>(.*)'
-            answer_match_open = re.search(answer_pattern_open, content, re.DOTALL)
-            if answer_match_open:
-                return ("", answer_match_open.group(1).strip())
-
-            reasoning_pattern = r'<reasoning>(.*?)</reasoning>'
-            reasoning_match = re.search(reasoning_pattern, content, re.DOTALL)
-            if reasoning_match:
-                reasoning_content = reasoning_match.group(1).strip()
-                answer = content.replace(reasoning_match.group(0), "").strip()
-                return (reasoning_content, answer)
-
-            return ("", content.strip())
-        except Exception:
-            return ("", content.strip())
-
-    def _format_tokens_usage(self, usage):
-        if not usage:
-            return ""
-        total_tokens = usage.get('total_tokens') or usage.get('total') or usage.get('tokens') or '-'
-        prompt_tokens = (
-            usage.get('prompt_tokens')
-            or usage.get('input_tokens')
-            or (usage.get('input', {}) if isinstance(usage.get('input'), dict) else None)
-            or usage.get('prompt')
-            or '-'
-        )
-        if isinstance(prompt_tokens, dict):
-            prompt_tokens = prompt_tokens.get('tokens') or prompt_tokens.get('count') or '-'
-        completion_tokens = (
-            usage.get('completion_tokens')
-            or usage.get('output_tokens')
-            or (usage.get('output', {}) if isinstance(usage.get('output'), dict) else None)
-            or usage.get('completion')
-            or '-'
-        )
-        if isinstance(completion_tokens, dict):
-            completion_tokens = completion_tokens.get('tokens') or completion_tokens.get('count') or '-'
-        return f"total_tokens={total_tokens}, input_tokens={prompt_tokens}, output_tokens={completion_tokens}"
-
-    def _normalize_text(self, s: str) -> str:
-        if not isinstance(s, str) or not s:
-            return s or ""
-        sample = s[:8]
-        suspicious = ("Ã", "å", "æ", "ç", "ð", "þ")
-        if any(ch in sample for ch in suspicious):
-            try:
-                return s.encode("latin-1", errors="ignore").decode("utf-8", errors="ignore")
-            except Exception:
-                return s
-        return s
-
-    def _extract_video_url(self, text: str) -> Optional[str]:
-        """
-        从返回文本中提取视频URL。
-        优先匹配指向 mp4/webm 等视频资源的URL；若未匹配到，则回退匹配任意 http/https 链接。
-        """
-        if not isinstance(text, str) or not text:
-            return None
-        try:
-            # 优先匹配视频直链
-            m = re.findall(r'(https?://[^\s)>\]]+\.(?:mp4|webm)(?:\?[^\s)>\]]*)?)', text, flags=re.IGNORECASE)
-            if m:
-                return m[0]
-            # 其次匹配 markdown 的 [在线播放](url) 格式
-            m2 = re.findall(r'\((https?://[^\s)]+)\)', text, flags=re.IGNORECASE)
-            if m2:
-                return m2[0]
-            # 再次匹配任意 http/https 链接
-            m3 = re.findall(r'(https?://[^\s)>\]]+)', text, flags=re.IGNORECASE)
-            if m3:
-                return m3[0]
-            return None
-        except Exception:
-            return None
-
-    def _download_and_convert_video(self, video_url: str) -> Optional[Any]:
-        """
-        下载视频URL并转换为VIDEO对象，参考 jimeng_video_node.py 的实现。
-        - 校验URL合法性
-        - 使用 download_url_to_video_output(video_url, timeout=120)
-        - 出错返回 None，保证节点稳定
-        """
-        try:
-            if not video_url or not isinstance(video_url, str):
-                print(f"[OpenAISoraAPI] 无效的视频URL: {video_url}")
-                return None
-            if not video_url.startswith(("http://", "https://")):
-                print(f"[OpenAISoraAPI] 不支持的URL格式: {video_url}")
-                return None
-
-            print(f"[OpenAISoraAPI] 🎬 开始下载视频: {video_url[:80]}...")
-            try:
-                video_output = download_url_to_video_output(video_url, timeout=120)
-                print(f"[OpenAISoraAPI] ✅ 视频下载完成")
-                return video_output
-            except Exception as download_error:
-                print(f"[OpenAISoraAPI] ❌ 视频下载失败: {download_error}")
-                return None
-        except Exception as e:
-            print(f"[OpenAISoraAPI] 视频下载转换过程出错: {e}")
-            return None
-
 
 
 WEB_DIRECTORY = "./web"    
         
 NODE_CLASS_MAPPINGS = {
+    "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
     "OpenAI_Sora_API": OpenAISoraAPI,
     "Comfly_Mj": Comfly_Mj,
@@ -9876,6 +8921,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "Comfly_api_set": "Comfly API Settings",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
     "Comfly_Mj": "Comfly_Mj", 
