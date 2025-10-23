@@ -1,0 +1,340 @@
+{
+  "id": "1f2a7a1a-126d-4f7b-95c9-df695f19723e",
+  "revision": 0,
+  "last_node_id": 30,
+  "last_link_id": 33,
+  "nodes": [
+    {
+      "id": 26,
+      "type": "LoadImage",
+      "pos": [
+        148.95240783691406,
+        175.29641723632812
+      ],
+      "size": [
+        325.5415344238281,
+        335.0829772949219
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            28
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_temp_cqaav_00001_.png",
+        "image"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "LoadImage",
+      "pos": [
+        150.36965942382812,
+        -215.4776611328125
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_temp_cqaav_00005_.png",
+        "image"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "ShowText|pysssss",
+      "pos": [
+        532.9033813476562,
+        -211.59860229492188
+      ],
+      "size": [
+        399.0537414550781,
+        96.1793441772461
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "f2838ed5e59de4d73cde5c98354b87a8d3200190",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 24,
+      "type": "Comfly_kling_image2video",
+      "pos": [
+        517.8356323242188,
+        -52.11933135986328
+      ],
+      "size": [
+        418.4242858886719,
+        564.8904418945312
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 27
+        },
+        {
+          "name": "image_tail",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 28
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            32
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            25
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "slot_index": 3,
+          "links": []
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_kling_image2video"
+      },
+      "widgets_values": [
+        "",
+        "kling-v1",
+        0.5,
+        "1:1",
+        "std",
+        "5",
+        1,
+        "",
+        0,
+        "randomize",
+        "none",
+        0,
+        0
+      ]
+    },
+    {
+      "id": 29,
+      "type": "SaveVideo",
+      "pos": [
+        1105.6685457265157,
+        -6.438716079891151
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 32
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 30,
+      "type": "Comfly_api_set",
+      "pos": [
+        93.82448289267982,
+        592.4084623441676
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            33
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      25,
+      24,
+      1,
+      10,
+      0,
+      "STRING"
+    ],
+    [
+      27,
+      25,
+      0,
+      24,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      26,
+      0,
+      24,
+      1,
+      "IMAGE"
+    ],
+    [
+      32,
+      24,
+      0,
+      29,
+      0,
+      "VIDEO"
+    ],
+    [
+      33,
+      30,
+      0,
+      24,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.3310000000000004,
+      "offset": [
+        73.47353384535194,
+        100.82293257191132
+      ]
+    },
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

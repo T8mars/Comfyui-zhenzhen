@@ -1,0 +1,723 @@
+{
+  "id": "2528f5b4-3050-46e7-8add-4b1495e4285a",
+  "revision": 0,
+  "last_node_id": 24,
+  "last_link_id": 21,
+  "nodes": [
+    {
+      "id": 22,
+      "type": "Note",
+      "pos": [
+        212.52813720703125,
+        136.29051208496094
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "简单描写要生成的歌曲"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 23,
+      "type": "Note",
+      "pos": [
+        233.23062133789062,
+        -98.37892150878906
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "歌曲名字"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        404.7899475097656,
+        678.594482421875
+      ],
+      "size": [
+        675.9651489257812,
+        284.64923095703125
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.0.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "\nAPI申请地址：https://ai.t8star.cn/\n注册送0.2美元\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\n如需本地使用，请安装节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [
+        219.92483520507812,
+        397.4062805175781
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "APIKEY"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 18,
+      "type": "CR Prompt Text",
+      "pos": [
+        560.7794189453125,
+        -176.22178649902344
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            18
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "命中注定"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "CR Prompt Text",
+      "pos": [
+        559.2335815429688,
+        122.51653289794922
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            19
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "写一首伤感的情歌"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "Comfly_suno_description",
+      "pos": [
+        1109.5635986328125,
+        -96.24041748046875
+      ],
+      "size": [
+        400,
+        432
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "title",
+          "name": "title",
+          "type": "STRING",
+          "widget": {
+            "name": "title"
+          },
+          "link": 18
+        },
+        {
+          "label": "description_prompt",
+          "name": "description_prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "description_prompt"
+          },
+          "link": 19
+        },
+        {
+          "label": "version",
+          "name": "version",
+          "type": "COMBO",
+          "widget": {
+            "name": "version"
+          }
+        },
+        {
+          "label": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          }
+        },
+        {
+          "label": "make_instrumental",
+          "name": "make_instrumental",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "make_instrumental"
+          }
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "label": "audio1",
+          "name": "audio1",
+          "type": "AUDIO",
+          "links": [
+            15
+          ]
+        },
+        {
+          "label": "audio2",
+          "name": "audio2",
+          "type": "AUDIO",
+          "links": [
+            16
+          ]
+        },
+        {
+          "label": "audio_url1",
+          "name": "audio_url1",
+          "type": "STRING"
+        },
+        {
+          "label": "audio_url2",
+          "name": "audio_url2",
+          "type": "STRING"
+        },
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            20
+          ]
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING"
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING"
+        },
+        {
+          "label": "clip_id1",
+          "name": "clip_id1",
+          "type": "STRING"
+        },
+        {
+          "label": "clip_id2",
+          "name": "clip_id2",
+          "type": "STRING"
+        },
+        {
+          "label": "tags",
+          "name": "tags",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        },
+        {
+          "label": "title",
+          "name": "title",
+          "type": "STRING",
+          "links": [
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_suno_description",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "命中注定",
+        "写一首伤感的粤语情歌",
+        "v5",
+        1165506579,
+        "randomize",
+        false,
+        ""
+      ]
+    },
+    {
+      "id": 19,
+      "type": "easy showAnything",
+      "pos": [
+        2031.231689453125,
+        96.19112396240234
+      ],
+      "size": [
+        471.29736328125,
+        252.39659118652344
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "[Verse]\n夜风吹过冷清的街\n树影摇曳像在哽咽\n月光洒在窗前的椅子\n空的像你的承诺一直\n\n[Chorus]\n你说爱是秋叶飘零\n飘到哪算是注定\n可我心是沉默的山岭\n等风等雨等不到你回应\n\n[Verse 2]\n时间像烛火慢慢熄灭\n烧痛回忆却无声无怨\n指尖还留着你的余温\n但你的影子渐渐模糊不见\n\n[Chorus]\n你说爱是秋叶飘零\n飘到哪算是注定\n可我心是沉默的山岭\n等风等雨等不到你回应\n\n[Bridge]\n如果梦能倒带一次\n我会拥抱不放开彼此\n哪怕未来依旧充满静寂\n至少当下能触碰你\n\n[Chorus]\n你说爱是秋叶飘零\n飘到哪算是注定\n可我心是沉默的山岭\n等风等雨等不到你回应"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "easy showAnything",
+      "pos": [
+        1702.9837646484375,
+        321.5945129394531
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "melancholic, piano-driven ballad with haunting strings and soft male vocals"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "easy showAnything",
+      "pos": [
+        1712.975341796875,
+        534.172119140625
+      ],
+      "size": [
+        301.2272033691406,
+        214.44508361816406
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "秋夜泪影"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "SaveAudio",
+      "pos": [
+        1701.9539794921875,
+        130.740234375
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 16
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "label": "audioUI",
+          "name": "audioUI",
+          "type": "AUDIO_UI",
+          "widget": {
+            "name": "audioUI"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveAudio",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "SaveAudio",
+      "pos": [
+        1689.576171875,
+        -141.6171417236328
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 15
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "label": "audioUI",
+          "name": "audioUI",
+          "type": "AUDIO_UI",
+          "widget": {
+            "name": "audioUI"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveAudio",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Comfly_api_set",
+      "pos": [
+        581.274360623243,
+        430.2459473236742
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      13,
+      11,
+      9,
+      12,
+      0,
+      "*"
+    ],
+    [
+      14,
+      11,
+      10,
+      13,
+      0,
+      "*"
+    ],
+    [
+      15,
+      11,
+      0,
+      14,
+      0,
+      "AUDIO"
+    ],
+    [
+      16,
+      11,
+      1,
+      15,
+      0,
+      "AUDIO"
+    ],
+    [
+      18,
+      18,
+      0,
+      11,
+      0,
+      "STRING"
+    ],
+    [
+      19,
+      17,
+      0,
+      11,
+      1,
+      "STRING"
+    ],
+    [
+      20,
+      11,
+      4,
+      19,
+      0,
+      "*"
+    ],
+    [
+      21,
+      24,
+      0,
+      11,
+      5,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        26.568632125854492,
+        -680.1112670898438,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.87976167623705,
+      "offset": [
+        -525.6776232968867,
+        -20.07514918858781
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

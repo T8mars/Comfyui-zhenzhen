@@ -1,0 +1,760 @@
+{
+  "id": "29ef93d4-b560-42b6-a8cf-39338bfbb1d6",
+  "revision": 0,
+  "last_node_id": 17,
+  "last_link_id": 17,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        1127.356201171875,
+        1347.5177001953125
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "APIKEY"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "Note",
+      "pos": [
+        1119.95947265625,
+        1086.40185546875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "简单描写要生成的歌曲"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 12,
+      "type": "Note",
+      "pos": [
+        1140.6619873046875,
+        851.7324829101562
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "歌曲名字"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "easy showAnything",
+      "pos": [
+        2534.186767578125,
+        1505.882080078125
+      ],
+      "size": [
+        301.2272033691406,
+        214.44508361816406
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "命中注定"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "easy showAnything",
+      "pos": [
+        2517.69677734375,
+        1284.283447265625
+      ],
+      "size": [
+        380.9090881347656,
+        112.3636703491211
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "r&b,rap,female vocal,"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "Note",
+      "pos": [
+        233.6842041015625,
+        1428.5572509765625
+      ],
+      "size": [
+        675.9651489257812,
+        284.64923095703125
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.0.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "\nAPI申请地址：https://ai.t8star.cn/\n注册送0.2美元\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\n如需本地使用，请安装节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 16,
+      "type": "Note",
+      "pos": [
+        1085.0833740234375,
+        1652.5174560546875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "歌曲风格等"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 15,
+      "type": "CR Prompt Text",
+      "pos": [
+        1329.57861328125,
+        1656.0283203125
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            14
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "r&b,rap,female vocal,"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "CR Prompt Text",
+      "pos": [
+        1405.1864013671875,
+        762.002197265625
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "命中注定"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Comfly_suno_custom",
+      "pos": [
+        1885.5452880859375,
+        942.4056396484375
+      ],
+      "size": [
+        400,
+        452
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "title",
+          "name": "title",
+          "type": "STRING",
+          "widget": {
+            "name": "title"
+          },
+          "link": 15
+        },
+        {
+          "label": "version",
+          "name": "version",
+          "type": "COMBO",
+          "widget": {
+            "name": "version"
+          }
+        },
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 16
+        },
+        {
+          "label": "tags",
+          "name": "tags",
+          "type": "STRING",
+          "widget": {
+            "name": "tags"
+          },
+          "link": 14
+        },
+        {
+          "label": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          }
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "label": "audio1",
+          "name": "audio1",
+          "type": "AUDIO",
+          "links": [
+            9
+          ]
+        },
+        {
+          "label": "audio2",
+          "name": "audio2",
+          "type": "AUDIO",
+          "links": [
+            10
+          ]
+        },
+        {
+          "label": "audio_url1",
+          "name": "audio_url1",
+          "type": "STRING"
+        },
+        {
+          "label": "audio_url2",
+          "name": "audio_url2",
+          "type": "STRING"
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING"
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING"
+        },
+        {
+          "label": "clip_id1",
+          "name": "clip_id1",
+          "type": "STRING"
+        },
+        {
+          "label": "clip_id2",
+          "name": "clip_id2",
+          "type": "STRING"
+        },
+        {
+          "label": "image_large_url1",
+          "name": "image_large_url1",
+          "type": "STRING"
+        },
+        {
+          "label": "image_large_url2",
+          "name": "image_large_url2",
+          "type": "STRING"
+        },
+        {
+          "label": "tags",
+          "name": "tags",
+          "type": "STRING",
+          "links": [
+            11
+          ]
+        },
+        {
+          "label": "title",
+          "name": "title",
+          "type": "STRING",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_suno_custom",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "",
+        "v5",
+        "",
+        "",
+        50292462,
+        "randomize",
+        ""
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveAudio",
+      "pos": [
+        2614.165283203125,
+        1075.97802734375
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 10
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "label": "audioUI",
+          "name": "audioUI",
+          "type": "AUDIO_UI",
+          "widget": {
+            "name": "audioUI"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveAudio",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "SaveAudio",
+      "pos": [
+        2624.592041015625,
+        856.3980712890625
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 9
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "label": "audioUI",
+          "name": "audioUI",
+          "type": "AUDIO_UI",
+          "widget": {
+            "name": "audioUI"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveAudio",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CR Prompt Text",
+      "pos": [
+        1380.12109375,
+        1035.5611572265625
+      ],
+      "size": [
+        459.11663818359375,
+        227.41641235351562
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            16
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "[Verse]\n灯光太亮 看不清你的脸\n心跳太慢 像时间在流淌\n你的影子 在房间角落晃\n想伸手抓住 却碰不到过往\n\n[Chorus]\n你走了 留下空荡的房间\n一句话 反复回荡在耳边\n爱是否 只是一个谎言\n再说一遍 再说一遍\n\n[Verse 2]\n冷风吹过 窗帘轻轻摆动\n耳边回响 是你熟悉的梦\n我试着追 却一步步落空\n脚步太重 回忆却太轻松\n\n[Bridge]\n如果时间能倒流\n我会不放开你的手\n如果星星能诉说\n它会说我从未放手\n\n[Chorus]\n你走了 留下空荡的房间\n一句话 反复回荡在耳边\n爱是否 只是一个谎言\n再说一遍 再说一遍\n\n[Outro]\n灯光暗了 看清你的从前\n心跳停了 在梦里再遇见\n再说一遍 再说一遍\n再说一遍 让我听见"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "Comfly_api_set",
+      "pos": [
+        1482.5815753054158,
+        1354.3721651592423
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      9,
+      14,
+      0,
+      8,
+      0,
+      "AUDIO"
+    ],
+    [
+      10,
+      14,
+      1,
+      7,
+      0,
+      "AUDIO"
+    ],
+    [
+      11,
+      14,
+      10,
+      4,
+      0,
+      "*"
+    ],
+    [
+      12,
+      14,
+      11,
+      2,
+      0,
+      "*"
+    ],
+    [
+      14,
+      15,
+      0,
+      14,
+      3,
+      "STRING"
+    ],
+    [
+      15,
+      1,
+      0,
+      14,
+      0,
+      "STRING"
+    ],
+    [
+      16,
+      5,
+      0,
+      14,
+      2,
+      "STRING"
+    ],
+    [
+      17,
+      17,
+      0,
+      14,
+      5,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        934,
+        270,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.1671841070450037,
+      "offset": [
+        -937.6743923294767,
+        -881.7989872692712
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

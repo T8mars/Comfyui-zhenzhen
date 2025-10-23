@@ -1,0 +1,987 @@
+{
+  "id": "bb825d4e-1fd2-4709-a752-726db27efec6",
+  "revision": 0,
+  "last_node_id": 21,
+  "last_link_id": 19,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "easy showAnything",
+      "pos": [
+        1412.8790283203125,
+        780.9115600585938
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "输入任何",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "1747196828408093"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [
+        2933.63427734375,
+        687.5848999023438
+      ],
+      "size": [
+        315,
+        270
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 8,
+      "type": "easy imageSplitGrid",
+      "pos": [
+        2499.46923828125,
+        668.0528564453125
+      ],
+      "size": [
+        315,
+        82
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        },
+        {
+          "name": "row",
+          "type": "INT",
+          "widget": {
+            "name": "row"
+          }
+        },
+        {
+          "name": "column",
+          "type": "INT",
+          "widget": {
+            "name": "column"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy imageSplitGrid",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        2,
+        2
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 11,
+      "type": "Note Plus (mtb)",
+      "pos": [
+        -890.0971069335938,
+        481.36529541015625
+      ],
+      "size": [
+        656,
+        128
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "css": "/** here you can write css**/\nh1 {\n    color: whitesmoke;\n}",
+        "theme": "one_dark",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "<div class=\"startPage\">\n  <div class=\"hoverContainer\">\n    <a href=\"https://aix.studio\">\n      <span class=\"size-smallButton style-input\">🗃️ AIX官网</span>\n    </a>\n    <a href=\"https://t.zsxq.com/7F90A\">\n      <span class=\"size-smallButton style-input\">🪲 知识星球</span>\n    </a>\n    <a href=\"https://space.bilibili.com/385085361\">\n      <span class=\"size-smallButton style-input\">☕ B站首页</span>\n    </a>\n  </div>\n</div>"
+      ],
+      "color": "#3a3a3a",
+      "bgcolor": "#262626",
+      "shape": 1
+    },
+    {
+      "id": 2,
+      "type": "easy showAnything",
+      "pos": [
+        1413.7691650390625,
+        455.8651123046875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "输入任何",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "an anime girl,–ow 800 --v 7 --ar 1:1 --oref https://mj.fonedis.cc/attachments/20250514/6175fddd6fa44e598a0bce289900f4dc.png"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 4,
+      "type": "SaveImage",
+      "pos": [
+        1750.6871337890625,
+        392.12847900390625
+      ],
+      "size": [
+        546.4049682617188,
+        691.0940551757812
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 12,
+      "type": "Note",
+      "pos": [
+        1380.7879638671875,
+        234.90628051757812
+      ],
+      "size": [
+        426.3122253417969,
+        126.59513854980469
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "教程：\nhttps://www.bilibili.com/video/BV1Xw79zaECG/\nhttps://www.youtube.com/watch?v=9id42q0Wp8Y&t=50s\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [
+        -1214.833740234375,
+        -263.0628662109375
+      ],
+      "size": [
+        936.0238037109375,
+        650.4548950195312
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了\n之前服务器被攻击，目前已修复，RELAX也恢复了之前服务器被攻击，目前已修复，RELAX也恢复了"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 14,
+      "type": "Note",
+      "pos": [
+        416.3734436035156,
+        313.8393859863281
+      ],
+      "size": [
+        365.1081848144531,
+        141.07041931152344
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "relax便宜大概8分多4张图 需要300多秒\nfast mode 4张图大概4毛多，1分钟内\n–ow 800 这个参数可以不加，这个是参考相似度0-1000\n\nAPI注册地址（送0.2美元）：https://ai.t8star.cn/token\n令牌新建一个Default分组！\n后台查询是否失败及扣费记录：https://ai.t8star.cn/midjourney\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 9,
+      "type": "Comfly_Mj",
+      "pos": [
+        875.8579711914062,
+        271.85906982421875
+      ],
+      "size": [
+        400,
+        662
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "no",
+          "name": "no",
+          "shape": 7,
+          "type": "STRING"
+        },
+        {
+          "label": "c",
+          "name": "c",
+          "shape": 7,
+          "type": "INT"
+        },
+        {
+          "label": "s",
+          "name": "s",
+          "shape": 7,
+          "type": "INT"
+        },
+        {
+          "label": "iw",
+          "name": "iw",
+          "shape": 7,
+          "type": "FLOAT"
+        },
+        {
+          "label": "r",
+          "name": "r",
+          "shape": 7,
+          "type": "INT"
+        },
+        {
+          "label": "sw",
+          "name": "sw",
+          "shape": 7,
+          "type": "INT"
+        },
+        {
+          "label": "cw",
+          "name": "cw",
+          "shape": 7,
+          "type": "INT"
+        },
+        {
+          "label": "sv",
+          "name": "sv",
+          "shape": 7,
+          "type": "COMBO"
+        },
+        {
+          "label": "oref",
+          "name": "oref",
+          "shape": 7,
+          "type": "STRING",
+          "link": 9
+        },
+        {
+          "label": "cref",
+          "name": "cref",
+          "shape": 7,
+          "type": "STRING"
+        },
+        {
+          "label": "sref",
+          "name": "sref",
+          "shape": 7,
+          "type": "STRING"
+        },
+        {
+          "label": "positive",
+          "name": "positive",
+          "shape": 7,
+          "type": "STRING"
+        },
+        {
+          "label": "text",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          }
+        },
+        {
+          "label": "speed",
+          "name": "speed",
+          "type": "COMBO",
+          "widget": {
+            "name": "speed"
+          }
+        },
+        {
+          "label": "text_en",
+          "name": "text_en",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "text_en"
+          },
+          "link": 17
+        },
+        {
+          "label": "api_key",
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 19
+        },
+        {
+          "label": "ar",
+          "name": "ar",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "ar"
+          }
+        },
+        {
+          "label": "model_version",
+          "name": "model_version",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "model_version"
+          }
+        },
+        {
+          "label": "video",
+          "name": "video",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "video"
+          }
+        },
+        {
+          "label": "tile",
+          "name": "tile",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "tile"
+          }
+        },
+        {
+          "label": "seed",
+          "name": "seed",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            4,
+            8
+          ]
+        },
+        {
+          "label": "text",
+          "name": "text",
+          "type": "STRING",
+          "links": [
+            2
+          ]
+        },
+        {
+          "label": "taskId",
+          "name": "taskId",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_Mj",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "",
+        "relax mode",
+        "an anime girl,–ow 800",
+        "",
+        "1:1",
+        "v 7",
+        false,
+        false,
+        1641116713,
+        "randomize"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 13,
+      "type": "Note",
+      "pos": [
+        -54.80629348754883,
+        1029.743408203125
+      ],
+      "size": [
+        788.2308959960938,
+        621.6865234375
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "参数\t作用\t范围\t用法范例\n\n基础参数：基本属性，适合新手使用\n\n–ar\t调整图像长宽比\t任意比例\t/imagine a dog –ar 16:9\n–v / –version\t选择 MJ 模型版本\t1 到 7\t/imagine a dragon –v 7\n–q\t提升品质与生成速度\t0.25 到 2\t/imagine a forest –q 2\n–stop\t控制图像生成完成度：快速预览或生成模煳效果\t10 到 100\t/imagine a forest –stop 50\n–repeat / –r\t重複生成指定次数：生成多组图像以选择最佳\t1 到 100\t/imagine a dog –repeat 5\n–fast\t强制使用快速模式：可快速测试构图\t无需数值\t/imagine a landscape –fast\n–relax\t使用慢速生成：GPU 时间不足时免费生成\t无需数值\t/imagine a forest –relax\n\n风格与创意参数\n\n–stylize / –s\t调整风格化程度：控制艺术性与写实平衡\t0 到 1000\t/imagine a cat –stylize 500\n–p\t在网页版中，进入「Personalization」页面，选择至少 200 张图像后，Midjourney 会生成一个个人化编码\t/imagine a cat –p ekrofdu\n–exp\t启用实验性功能，增强细节\t0 到 100\t/imagine a city –exp 50\n–weird\t控制图像生成的「怪诞程度」\t0 到 3000\t/imagine a city –weird 100\n–chaos / –c\t控制生成随机性\t0 到 100\t/imagine a cat –chaos 50\n–niji\t启用动漫风格模型\t无需数值或 1-6\t/imagine an anime girl –niji 6\n–style\t选择风格变体：细化插画风格，可搭配 Niji\t例如 6a、6b\t/imagine an anime –style 6b\n(a：柔和动漫风；b：鲜明动漫风)\n–test\t启用测试模式 (实验性算法)：测试新算法效果\t无需数值\t/imagine a portrait –test\n–testp\t启用摄影风格测试模式：生成写实摄影风格图像\t无需数值\t/imagine a portrait –testp\n\n参考图像参数\n\n–sref\t指定风格参考图像\t图像 URL 或编码\t/imagine a dog –sref 3666203151\n–sw\t控制风格参考（–sref）影响程度\t0 到 1000\t/imagine a dog –sref 3666203151 –sw 500\n–cref\t指定角色参考图像\t图像 URL\t/imagine a wizard –cref elf.png\n–cw\t控制角色参考（–cref）影响程度\t0 到 100\t/imagine a wizard –cref elf.png –cw 75\n–oref\t指定全能参考图像：将特定元素融入新场景（角色、物体等）\t图像 URL\t/imagine a knight –oref sword.png\n–ow\t控制（–oref） 影响程度\t0 到 1000\t/imagine a knight –oref sword.png –ow 400\n–iw\t控制图像提示影响程度：调整图像与文字提示平衡\t0 到 2\t/imagine a city –iw 1.5\n\n其他进阶参数：适合专业用户或特定需求\n\n–no\t移除特定元素\t任意描述\t/imagine a landscape –no people\n–tile\t生成可平铺图像：设计纹理或壁纸\t无需数值\t/imagine a pattern –tile\n–seed\t指定种子值：重现特定图像风格\t0 到 4294967295\t/imagine a cat –seed 12345\n–video\t生成动画，展示生成过程\t无需数值\t/imagine a sunset –video\n–same\t保持一致性（实验性）\t无需数值\t/imagine a cat –same\n–hd\t提升解析度（V7 中不建议）\t无需数值\t/imagine a city –hd\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 1,
+      "type": "Comfly_upload",
+      "pos": [
+        436.1263427734375,
+        559.9556884765625
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "label": "api_key",
+          "name": "api_key",
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "url",
+          "name": "url",
+          "type": "STRING",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_upload",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 10,
+      "type": "LoadImage",
+      "pos": [
+        -100.30824279785156,
+        307.965576171875
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          }
+        },
+        {
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "label": "遮罩",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "4493ba858c07b6ec91fd5b96f9027e3f223eb961260a8ed1ef49db9c70bab122.png",
+        "image"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 20,
+      "type": "easy showAnything",
+      "pos": [
+        878.5398559570312,
+        1048.6492919921875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "输入任何",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "an anime girl,–ow 800"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 17,
+      "type": "CR Prompt Text",
+      "pos": [
+        -54.02667884908735,
+        738.467250329885
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "提示词文本",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            17,
+            18
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#335",
+          "groupcolor": "#88A",
+          "color": "#223"
+        }
+      },
+      "widgets_values": [
+        "an anime girl,–ow 800"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 21,
+      "type": "Comfly_api_set",
+      "pos": [
+        498.3636168925791,
+        790.4200023612648
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      10,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      9,
+      1,
+      2,
+      0,
+      "*"
+    ],
+    [
+      3,
+      9,
+      2,
+      3,
+      0,
+      "*"
+    ],
+    [
+      4,
+      9,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      8,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      9,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      9,
+      1,
+      0,
+      9,
+      8,
+      "STRING"
+    ],
+    [
+      17,
+      17,
+      0,
+      9,
+      14,
+      "STRING"
+    ],
+    [
+      18,
+      17,
+      0,
+      20,
+      0,
+      "*"
+    ],
+    [
+      19,
+      21,
+      0,
+      9,
+      15,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -79.96398162841797,
+        -317.9178161621094,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.4122927695244558,
+      "offset": [
+        21.992979574385018,
+        -541.4773753663459
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

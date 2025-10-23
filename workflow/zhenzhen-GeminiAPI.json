@@ -1,0 +1,333 @@
+{
+  "id": "ebed8081-b61f-4799-b015-f2238977c307",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        -694.7574462890625,
+        -3232.098388671875
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "1.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -299.1976013183594,
+        -3423.918212890625
+      ],
+      "size": [
+        315,
+        100
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "2c09d59ab5ac27ac59022832bfde4eeeb9c55825",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "https://oss.ffire.cc/cdn/2025-03-25/gSQ8bUrVtykXaKsTzsUxve.png"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": [
+        111.88241577148438,
+        -3226.768310546875
+      ],
+      "size": [
+        228,
+        304
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 4,
+      "type": "ShowText|pysssss",
+      "pos": [
+        379.5123596191406,
+        -3225.048583984375
+      ],
+      "size": [
+        386.5,
+        297.20001220703125
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "2c09d59ab5ac27ac59022832bfde4eeeb9c55825",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "**User prompt**: 把背景换成海洋背景\n\n**Response** (2025-03-25 13:22:18):\n![Image_0](https://oss.ffire.cc/cdn/2025-03-25/gSQ8bUrVtykXaKsTzsUxve.png)"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "ComflyGeminiAPI",
+      "pos": [
+        -336.70770263671875,
+        -3221.64990234375
+      ],
+      "size": [
+        400,
+        344
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "object_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "subject_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "scene_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "generated_images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "slot_index": 2,
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "2929caa9b2742aae0b66cb7b3dd69355a8af46b4\n",
+        "Node name for S&R": "ComflyGeminiAPI"
+      },
+      "widgets_values": [
+        "把背景换成海洋背景",
+        "gemini-2.0-flash-exp-image",
+        "object_image size",
+        1,
+        1,
+        0.95,
+        467600140,
+        "randomize",
+        120,
+        ""
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Comfly_api_set",
+      "pos": [
+        -691.5115964069894,
+        -2841.9296483503526
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "STRING"
+    ],
+    [
+      4,
+      1,
+      2,
+      5,
+      0,
+      "STRING"
+    ],
+    [
+      5,
+      6,
+      0,
+      1,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.2100000000000002,
+      "offset": [
+        863.6018209961874,
+        3512.6567901799144
+      ]
+    },
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

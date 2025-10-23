@@ -1,0 +1,538 @@
+{
+  "id": "3287800d-753a-48f7-8c87-12aad04048aa",
+  "revision": 0,
+  "last_node_id": 13,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 9,
+      "type": "ShowText|pysssss",
+      "pos": [
+        730.3987426757812,
+        -3540.884765625
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "2c09d59ab5ac27ac59022832bfde4eeeb9c55825",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 10,
+      "type": "ShowText|pysssss",
+      "pos": [
+        354.4396057128906,
+        -3541.42724609375
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "2c09d59ab5ac27ac59022832bfde4eeeb9c55825",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 6,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -35.430030822753906,
+        -3534.5078125
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "2c09d59ab5ac27ac59022832bfde4eeeb9c55825",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 7,
+      "type": "Comfly_lip_sync",
+      "pos": [
+        535.78125,
+        -3409.396484375
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "link": 4
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "link": 5
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "slot_index": 2,
+          "links": [
+            8
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "2929caa9b2742aae0b66cb7b3dd69355a8af46b4\n",
+        "Node name for S&R": "Comfly_lip_sync"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "text2video",
+        "今天天气真好啊",
+        "zh",
+        "阳光少年",
+        "Sunny",
+        1,
+        1045320018,
+        "randomize",
+        "",
+        "file",
+        ""
+      ]
+    },
+    {
+      "id": 11,
+      "type": "SaveVideo",
+      "pos": [
+        1094.1693072284315,
+        -3345.1768189763784
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Comfly_kling_image2video",
+      "pos": [
+        42.41004943847656,
+        -3406.02099609375
+      ],
+      "size": [
+        400,
+        486
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "image_tail",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "slot_index": 2,
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "video_id",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "2929caa9b2742aae0b66cb7b3dd69355a8af46b4\n",
+        "Node name for S&R": "Comfly_kling_image2video"
+      },
+      "widgets_values": [
+        "小男孩面对镜头笑起来",
+        "kling-v1-6",
+        0.5,
+        "1:1",
+        "std",
+        "5",
+        1,
+        "",
+        1537541256,
+        "randomize",
+        "none",
+        0,
+        0
+      ]
+    },
+    {
+      "id": 12,
+      "type": "SaveVideo",
+      "pos": [
+        518.4166960334742,
+        -2912.09194598499
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 10
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "LoadImage",
+      "pos": [
+        -533.3826932040128,
+        -3411.237670898438
+      ],
+      "size": [
+        329.2816162109375,
+        432.9647521972656
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "leo19000_A_real_Chinese_little_boy_with_rich_facial_expressio_90864af4-95be-4b50-bbf3-13d9bbe5556c_2.png",
+        "image"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "Comfly_api_set",
+      "pos": [
+        -325.96464054766903,
+        -2897.671699624904
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            11,
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      4,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      3,
+      1,
+      6,
+      0,
+      "STRING"
+    ],
+    [
+      4,
+      3,
+      3,
+      7,
+      0,
+      "STRING"
+    ],
+    [
+      5,
+      3,
+      2,
+      7,
+      1,
+      "STRING"
+    ],
+    [
+      7,
+      7,
+      1,
+      9,
+      0,
+      "STRING"
+    ],
+    [
+      8,
+      7,
+      2,
+      10,
+      0,
+      "STRING"
+    ],
+    [
+      9,
+      7,
+      0,
+      11,
+      0,
+      "VIDEO"
+    ],
+    [
+      10,
+      3,
+      0,
+      12,
+      0,
+      "VIDEO"
+    ],
+    [
+      11,
+      13,
+      0,
+      3,
+      2,
+      "STRING"
+    ],
+    [
+      12,
+      13,
+      0,
+      7,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.1,
+      "offset": [
+        378.90025123215054,
+        3640.5221038440973
+      ]
+    },
+    "frontendVersion": "1.28.7",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

@@ -1,0 +1,1238 @@
+{
+  "id": "3c8bae95-dcfe-4ec1-8b0f-138d05bf1549",
+  "revision": 0,
+  "last_node_id": 35,
+  "last_link_id": 28,
+  "nodes": [
+    {
+      "id": 11,
+      "type": "LoadImage",
+      "pos": [
+        -1409.4169921875,
+        1225.0853271484375
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "bd7129b7707661dc1f37ec6a00af5605cca6d18ea51d0d37e26e3ff0d3bdb515.png",
+        "image"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [
+        -978.7732543945312,
+        1285.441162109375
+      ],
+      "size": [
+        315,
+        270
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 6,
+      "type": "easy showAnything",
+      "pos": [
+        1425.889404296875,
+        676.5692749023438
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "1753378681036930"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 7,
+      "type": "easy showAnything",
+      "pos": [
+        1424.14111328125,
+        825.5093994140625
+      ],
+      "size": [
+        482.2601013183594,
+        198.99844360351562
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"message\": \"Generated 4 videos successfully\", \"task_id\": \"1753378681036930\", \"video_urls\": [\"https://storage.fonedis.cc/video/caebe0f6-e7a1-4b8b-9ab2-1b74901809ee/0_0.mp4\", \"https://storage.fonedis.cc/video/caebe0f6-e7a1-4b8b-9ab2-1b74901809ee/0_1.mp4\", \"https://storage.fonedis.cc/video/caebe0f6-e7a1-4b8b-9ab2-1b74901809ee/0_2.mp4\", \"https://storage.fonedis.cc/video/caebe0f6-e7a1-4b8b-9ab2-1b74901809ee/0_3.mp4\"]}"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 16,
+      "type": "SaveVideo",
+      "pos": [
+        1426.8880615234375,
+        265.0970764160156
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 11
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Note",
+      "pos": [
+        668.9672241210938,
+        1146.48291015625
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "运动模式low/high，低动态，高动态"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [
+        1677.3048095703125,
+        640.5785522460938
+      ],
+      "size": [
+        465.52880859375,
+        134.1642608642578
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "一次生成4个， 选一个喜欢的即可"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 19,
+      "type": "SaveVideo",
+      "pos": [
+        2390.558837890625,
+        286.3514709472656
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 15
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 27,
+      "type": "SaveVideo",
+      "pos": [
+        2673.20751953125,
+        1105.1083984375
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 22
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 28,
+      "type": "SaveVideo",
+      "pos": [
+        2664.384765625,
+        1491.376953125
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 23
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 30,
+      "type": "easy showAnything",
+      "pos": [
+        1795.4896240234375,
+        1174.6839599609375
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "1753378889409496"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 31,
+      "type": "easy showAnything",
+      "pos": [
+        1791.9217529296875,
+        1337.709228515625
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"message\": \"Extended 4 videos successfully\", \"task_id\": \"1753378889409496\", \"video_urls\": [\"https://storage.fonedis.cc/video/64555aee-ef45-4844-b7a5-9bcd5bc39ac8/0_0.mp4\", \"https://storage.fonedis.cc/video/64555aee-ef45-4844-b7a5-9bcd5bc39ac8/0_1.mp4\", \"https://storage.fonedis.cc/video/64555aee-ef45-4844-b7a5-9bcd5bc39ac8/0_2.mp4\", \"https://storage.fonedis.cc/video/64555aee-ef45-4844-b7a5-9bcd5bc39ac8/0_3.mp4\"]}"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 20,
+      "type": "SaveVideo",
+      "pos": [
+        2196.2744140625,
+        656.4864501953125
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 16
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "CR Prompt Text",
+      "pos": [
+        -161.66409301757812,
+        714.7169189453125
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            18
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "The woman ran in the jungle to the viewer with a frightened expression, followed by the dinosaurs chasing after her and want to eat her"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "SaveVideo",
+      "pos": [
+        1887.0015869140625,
+        109.47477722167969
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 14
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 26,
+      "type": "SaveVideo",
+      "pos": [
+        2209.77783203125,
+        1572.603515625
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 21
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "SaveVideo",
+      "pos": [
+        2188.83349609375,
+        1096.20849609375
+      ],
+      "size": [
+        315,
+        336
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 20
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveVideo",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Comfly_mj_video_extend",
+      "pos": [
+        1269.019287109375,
+        1140.323486328125
+      ],
+      "size": [
+        315,
+        206
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video1",
+          "name": "video1",
+          "type": "VIDEO",
+          "links": [
+            20
+          ]
+        },
+        {
+          "label": "video2",
+          "name": "video2",
+          "type": "VIDEO",
+          "links": [
+            21
+          ]
+        },
+        {
+          "label": "video3",
+          "name": "video3",
+          "type": "VIDEO",
+          "links": [
+            22
+          ]
+        },
+        {
+          "label": "video4",
+          "name": "video4",
+          "type": "VIDEO",
+          "links": [
+            23
+          ]
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_mj_video_extend",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        0,
+        ""
+      ]
+    },
+    {
+      "id": 32,
+      "type": "Note",
+      "pos": [
+        1271.0582275390625,
+        1421.4249267578125
+      ],
+      "size": [
+        465.52880859375,
+        134.1642608642578
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "这是延长节点，可以加5秒视频生成到9-10秒，"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 17,
+      "type": "Comfly_mj_video",
+      "pos": [
+        783.705078125,
+        720.9348754882812
+      ],
+      "size": [
+        400,
+        308
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 10
+        },
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 18
+        },
+        {
+          "label": "motion",
+          "name": "motion",
+          "type": "COMBO",
+          "widget": {
+            "name": "motion"
+          },
+          "link": 17
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video1",
+          "name": "video1",
+          "type": "VIDEO",
+          "links": [
+            11
+          ]
+        },
+        {
+          "label": "video2",
+          "name": "video2",
+          "type": "VIDEO",
+          "links": [
+            14
+          ]
+        },
+        {
+          "label": "video3",
+          "name": "video3",
+          "type": "VIDEO",
+          "links": [
+            15
+          ]
+        },
+        {
+          "label": "video4",
+          "name": "video4",
+          "type": "VIDEO",
+          "links": [
+            16
+          ]
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            12,
+            19
+          ]
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_mj_video",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "A woman is speaking in front of the camera, smiling and taking a selfie with her phone in one hand. The phone cannot be seen in the camera, only her hand can be seen, and the other hand makes natural movements as she speak,Staring at the lens,\na scene with a person dressed in traditional attire, likely inspired by East Asian culture\nThe individual is wearing ornate jewelry and a detailed headpiece, suggesting a historical or fantasy setting\nIn the background, there is a scenic landscape with lush greenery, flowers, and a pathway leading to a body of water surrounded by mountains\nSeveral people are walking along the path, some holding lanterns, which adds to the serene and mystical atmosphere of the scene\nThe overall ambiance is tranquil and picturesque, evoking a sense of adventure or exploration.",
+        "high",
+        "",
+        "",
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 34,
+      "type": "Note",
+      "pos": [
+        -429.0464172363281,
+        1058.9210205078125
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "填写贞贞AI工坊的API KEY"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 14,
+      "type": "LoadImage",
+      "pos": [
+        324.5545349121094,
+        717.5068969726562
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            10
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "3350d939e89ac32953321b1578750bf72a930488fa9fe6b565ac2bfa3e37d1c4.png",
+        "image"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        633.539794921875,
+        399.0921325683594
+      ],
+      "size": [
+        559.0477905273438,
+        228.00534057617188
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "\nAPI申请地址：https://ai.t8star.cn/\n注册送0.2美元\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\n如需本地使用，请安装节点：https://github.com/ainewsto/Comfyui_Comfly_v2\n\n图生视频1.4元/4次基准价格，延长部分也是1.4元/4次基准价格"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 21,
+      "type": "PrimitiveNode",
+      "pos": [
+        364.4438728515665,
+        1125.1199852098453
+      ],
+      "size": [
+        210,
+        106
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "COMBO",
+          "name": "COMBO",
+          "type": "COMBO",
+          "widget": {
+            "name": "motion"
+          },
+          "links": [
+            17
+          ]
+        }
+      ],
+      "title": "motion",
+      "properties": {
+        "Run widget replace on values": false
+      },
+      "widgets_values": [
+        "high",
+        "fixed",
+        ""
+      ]
+    },
+    {
+      "id": 35,
+      "type": "Comfly_api_set",
+      "pos": [
+        -93.34360485442815,
+        1124.615278564855
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "adf9e0f39de29353810237fad96984456739fff3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      6,
+      11,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      10,
+      14,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      11,
+      17,
+      0,
+      16,
+      0,
+      "VIDEO"
+    ],
+    [
+      12,
+      17,
+      4,
+      6,
+      0,
+      "*"
+    ],
+    [
+      13,
+      17,
+      5,
+      7,
+      0,
+      "*"
+    ],
+    [
+      14,
+      17,
+      1,
+      18,
+      0,
+      "VIDEO"
+    ],
+    [
+      15,
+      17,
+      2,
+      19,
+      0,
+      "VIDEO"
+    ],
+    [
+      16,
+      17,
+      3,
+      20,
+      0,
+      "VIDEO"
+    ],
+    [
+      17,
+      21,
+      0,
+      17,
+      2,
+      "COMBO"
+    ],
+    [
+      18,
+      23,
+      0,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      19,
+      17,
+      4,
+      24,
+      0,
+      "STRING"
+    ],
+    [
+      20,
+      24,
+      0,
+      25,
+      0,
+      "VIDEO"
+    ],
+    [
+      21,
+      24,
+      1,
+      26,
+      0,
+      "VIDEO"
+    ],
+    [
+      22,
+      24,
+      2,
+      27,
+      0,
+      "VIDEO"
+    ],
+    [
+      23,
+      24,
+      3,
+      28,
+      0,
+      "VIDEO"
+    ],
+    [
+      24,
+      24,
+      4,
+      30,
+      0,
+      "*"
+    ],
+    [
+      25,
+      24,
+      5,
+      31,
+      0,
+      "*"
+    ],
+    [
+      28,
+      35,
+      0,
+      17,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        288.2966003417969,
+        -381.2975769042969,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "这个分组不用管",
+      "bounding": [
+        -1419.4169921875,
+        1151.4853515625,
+        765.6436157226562,
+        397.6000061035156
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7972024500000097,
+      "offset": [
+        161.66779637715894,
+        -83.90256961937109
+      ]
+    },
+    "links_added_by_ue": [],
+    "VHS_KeepIntermediate": true,
+    "VHS_MetadataImage": true,
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "VHS_latentpreviewrate": 0,
+    "VHS_latentpreview": true,
+    "frontendVersion": "1.28.7"
+  },
+  "version": 0.4
+}

@@ -1,8 +1,8 @@
 {
   "id": "3c8bae95-dcfe-4ec1-8b0f-138d05bf1549",
   "revision": 0,
-  "last_node_id": 22,
-  "last_link_id": 16,
+  "last_node_id": 23,
+  "last_link_id": 17,
   "nodes": [
     {
       "id": 6,
@@ -16,7 +16,7 @@
         88
       ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -126,7 +126,7 @@
         514.7555936761019
       ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -185,7 +185,7 @@
         88
       ],
       "flags": {},
-      "order": 11,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -246,18 +246,64 @@
       "bgcolor": "#653"
     },
     {
+      "id": 19,
+      "type": "Note",
+      "pos": [
+        -253.24998453348655,
+        988.1225318012818
+      ],
+      "size": [
+        294.8108430937071,
+        133.8671240234412
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分\n每日工作台签到领积分"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [
+        684.6631317942888,
+        197.96378653827483
+      ],
+      "size": [
+        548.9761394001816,
+        298.62362647675195
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "veo3特价模型基准1.5RMB/8S，模型名字：\nveo3 文生视频\nveo3-fast 文生视频\nveo3-fast-frames 图生视频\n\nVeo3 Pro模型3RMB/8S，模型名字：\nveo3-pro 文生视频\nveo3-pro-frames 图生视频\n高质量模式，价格也高一点\n\nVeo3.1 特价模型基准1.5RMB/8S，模型名字：\nveo3.1 文生视频，图生视频\nveo3.1-components 文生视频，图生视频，多参1-2张\n注意veo3.1-components，支持多图参考，Veo3.1支持首尾帧\n\nVeo3.1 Pro模型基准3RMB/8S，模型名字：\nveo3.1-pro  文生视频，图生视频，首尾帧\n高质量模式，价格也高一点\n\n注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=dP7j 为准"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
       "id": 10,
       "type": "Note",
       "pos": [
-        -199.6143004358628,
-        218.62241882824998
+        -134.70799106160533,
+        20.44191896052828
       ],
       "size": [
         559.0477905273438,
         228.00534057617188
       ],
       "flags": {},
-      "order": 3,
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -271,27 +317,43 @@
       "bgcolor": "#653"
     },
     {
-      "id": 19,
-      "type": "Note",
+      "id": 22,
+      "type": "LoadImage",
       "pos": [
-        -253.24998453348655,
-        988.1225318012818
+        -285.9577127071029,
+        331.2034135916688
       ],
       "size": [
-        294.8108430937071,
-        133.8671240234412
+        270,
+        314
       ],
       "flags": {},
-      "order": 4,
+      "order": 6,
       "mode": 0,
       "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分\n每日工作台签到领积分"
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            16
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
       ],
-      "color": "#432",
-      "bgcolor": "#653"
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "1515151.png",
+        "image"
+      ]
     },
     {
       "id": 16,
@@ -305,7 +367,7 @@
         200
       ],
       "flags": {},
-      "order": 5,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -337,31 +399,8 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "#Scarlet Watcher - Flower of Destruction # # Structure (variable editing time; total 25 seconds; content 23.00 seconds+2.00 seconds black screen; mode: standard; rhythm coefficient: 2.0) - [# 1 0.05 seconds] Action: {Static - kneeling knight leaning against the glowing sword blade, in the midst of red flowers}; Camera: {Locked in the center} - [Static]/* Qi */| Subject: {Female Knight; Iron Mask under Hood; Dim Gold Armor; Stained Cloak; Red Transparent Sword Blade; Kneeling Position} | Scene: {Abandoned Underground Temple Cave; Red Flower Floor; Dust Drifting} | Light: {Cold Light from the Ceiling; Sword Blade Like a Red Light Source; Misty Mist} | Tone: {Cold Desaturated World and Intense Crimson Contrast; High Contrast; Delicate Granularity} | Camera: {Medium Scene; Center Symmetrical Composition; 35mm Film Texture;}; Fixed} | Sound effects: {Cave air sound; distant dripping sound; no BGM} - [# 2 1.00s] Action: {Insert sword blade deeper; buzzing suddenly; petals tremble}; Flight position: {Push low from the petal height} - [Dynamic]/* Qigong */| Main body: {Tight hands with iron gloves; the iron mask droops} | Scene: {Flower field center} | Light: {Red core blooms; soft halo} | Flight position: {Wide angle → middle view; 24mm; hand shaking} | Sound effect: {Blade buzzing increases; Petal rustling; no BGM} - [# 3 1.60s] Action: {Close up - Blade brightness increases; micro spark crawls}; Camera: {Slowly Tilting Along the Edge} - [Static]/* Air */| Subject: {Blade Surface; Sparkling Rune} | Scene: {Near Ground Flower Bed} | Light Effect: {Red Light; Mirror Fading} | Color Mixing: {Red Faint; Slight Dark Angle} | Camera: {Close Up; Refractive Adjustment; Shallow Depth of Field} | Sound Effect: {Inhalation Whisper; Cave Reverb; No BGM} - [# 4 1.90s] Action: {Desaturated Shock Wave rushes towards her from the periphery; Initial Gale}; Camera: {Ascending and spiraling downward} - [Dynamic]/* Qigong */| Subject: {Knight centered, cloak pulled by wind} | Scene: {Vast cave; flowers turning gray} | Light: {Light pillar flickering in dust} | Camera: {Top widescreen; 24mm lens; spiral rocker arm} | Sound effects: {Pressure roar; Wind picking; No BGM}"
+        "Women dancing on the pedestrian bridge"
       ]
-    },
-    {
-      "id": 21,
-      "type": "Note",
-      "pos": [
-        684.6631317942888,
-        197.96378653827483
-      ],
-      "size": [
-        548.9761394001816,
-        298.62362647675195
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "veo3特价模型基准1.5RMB/8S，模型名字：\nveo3 文生视频\nveo3-fast 文生视频\nveo3-fast-frames 图生视频\n\nVeo3 Pro模型3RMB/8S，模型名字：\nveo3-pro 文生视频\nveo3-pro-frames 图生视频\n高质量模式，价格也高一点\n\nVeo3.1 特价模型基准1.5RMB/8S，模型名字：\nveo3.1 文生视频，图生视频\nveo3.1-components 文生视频，图生视频，多参1-2张\n注意veo3.1-components，支持多图参考，Veo3.1支持首尾帧\n\nVeo3.1 Pro模型基准3RMB/8S，模型名字：\nveo3.1-pro  文生视频，图生视频，首尾帧\n高质量模式，价格也高一点\n\n注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=dP7j 为准"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
     },
     {
       "id": 17,
@@ -375,14 +414,14 @@
         316
       ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 16
         },
         {
           "name": "image2",
@@ -438,7 +477,7 @@
           "widget": {
             "name": "apikey"
           },
-          "link": 16
+          "link": 17
         },
         {
           "label": "seed",
@@ -499,7 +538,7 @@
       },
       "widgets_values": [
         "",
-        "veo3-pro",
+        "veo3.1",
         false,
         "16:9",
         "",
@@ -509,18 +548,18 @@
       ]
     },
     {
-      "id": 22,
+      "id": 23,
       "type": "Comfly_api_set",
       "pos": [
-        86.85965304396649,
-        944.9128270281817
+        80.23880334541481,
+        983.2729468619958
       ],
       "size": [
         270,
         106
       ],
       "flags": {},
-      "order": 7,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -528,7 +567,7 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            16
+            17
           ]
         }
       ],
@@ -590,6 +629,14 @@
       22,
       0,
       17,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      23,
+      0,
+      17,
       7,
       "STRING"
     ]
@@ -614,8 +661,8 @@
     "ds": {
       "scale": 1.2839025177495054,
       "offset": [
-        206.86832283818063,
-        -401.93122600827695
+        295.703780369429,
+        -448.9454950713105
       ]
     },
     "frontendVersion": "1.28.7",

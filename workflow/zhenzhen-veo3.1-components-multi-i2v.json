@@ -1,8 +1,8 @@
 {
   "id": "3c8bae95-dcfe-4ec1-8b0f-138d05bf1549",
   "revision": 0,
-  "last_node_id": 22,
-  "last_link_id": 16,
+  "last_node_id": 24,
+  "last_link_id": 18,
   "nodes": [
     {
       "id": 6,
@@ -16,7 +16,7 @@
         88
       ],
       "flags": {},
-      "order": 10,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -47,7 +47,7 @@
         }
       },
       "widgets_values": [
-        "https://filesystem.site/cdn/20251020/e27a57aed18884abaa0be0eab33fdb.mp4"
+        "https://filesystem.site/cdn/20251020/5d78fb474b52a9d82ea736b918c525.mp4"
       ],
       "color": "#332922",
       "bgcolor": "#593930"
@@ -115,6 +115,204 @@
       "bgcolor": "#653"
     },
     {
+      "id": 7,
+      "type": "easy showAnything",
+      "pos": [
+        1476.931289081197,
+        883.4923261887063
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "输入任何",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "{\"code\": \"success\", \"task_id\": \"veo3.1:1760952224-q6jMMQ4zb2\", \"prompt\": \"Women dancing on the pedestrian bridge\", \"model\": \"veo3.1\", \"enhance_prompt\": false, \"aspect_ratio\": \"default\", \"enable_upsample\": false, \"video_url\": \"https://filesystem.site/cdn/20251020/5d78fb474b52a9d82ea736b918c525.mp4\", \"images_count\": 1}"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        -213.07498522251734,
+        717.5739802048156
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "prompt"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 19,
+      "type": "Note",
+      "pos": [
+        -253.24998453348655,
+        988.1225318012818
+      ],
+      "size": [
+        294.8108430937071,
+        133.8671240234412
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分\n每日工作台签到领积分"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        -134.70799106160533,
+        20.44191896052828
+      ],
+      "size": [
+        559.0477905273438,
+        228.00534057617188
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2美元\n\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\nComfyui调用API节点(支持本地部署)：https://github.com/T8mars/Comfyui-zhenzhen\n\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 22,
+      "type": "LoadImage",
+      "pos": [
+        -625.6875364279798,
+        300.44892825659105
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            16
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "1515151.png",
+        "image"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "LoadImage",
+      "pos": [
+        -616.507284110545,
+        671.4330803554493
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00013_loyue_1760859660.png",
+        "image"
+      ]
+    },
+    {
       "id": 14,
       "type": "SaveVideo",
       "pos": [
@@ -126,7 +324,7 @@
         514.7555936761019
       ],
       "flags": {},
-      "order": 9,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -174,173 +372,6 @@
       ]
     },
     {
-      "id": 7,
-      "type": "easy showAnything",
-      "pos": [
-        1476.931289081197,
-        883.4923261887063
-      ],
-      "size": [
-        210,
-        88
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "输入任何",
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 14
-        }
-      ],
-      "outputs": [
-        {
-          "label": "output",
-          "name": "output",
-          "type": "*"
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
-        "Node name for S&R": "easy showAnything",
-        "widget_ue_connectable": {},
-        "ttNbgOverride": {
-          "bgcolor": "#593930",
-          "groupcolor": "#b06634",
-          "color": "#332922"
-        }
-      },
-      "widgets_values": [
-        "{\"code\": \"success\", \"task_id\": \"veo3.1:1760950938-1jkBvNcOC9\", \"prompt\": \"#Scarlet Watcher - Flower of Destruction # # Structure (variable editing time; total 25 seconds; content 23.00 seconds+2.00 seconds black screen; mode: standard; rhythm coefficient: 2.0) - [# 1 0.05 seconds] Action: {Static - kneeling knight leaning against the glowing sword blade, in the midst of red flowers}; Camera: {Locked in the center} - [Static]/* Qi */| Subject: {Female Knight; Iron Mask under Hood; Dim Gold Armor; Stained Cloak; Red Transparent Sword Blade; Kneeling Position} | Scene: {Abandoned Underground Temple Cave; Red Flower Floor; Dust Drifting} | Light: {Cold Light from the Ceiling; Sword Blade Like a Red Light Source; Misty Mist} | Tone: {Cold Desaturated World and Intense Crimson Contrast; High Contrast; Delicate Granularity} | Camera: {Medium Scene; Center Symmetrical Composition; 35mm Film Texture;}; Fixed} | Sound effects: {Cave air sound; distant dripping sound; no BGM} - [# 2 1.00s] Action: {Insert sword blade deeper; buzzing suddenly; petals tremble}; Flight position: {Push low from the petal height} - [Dynamic]/* Qigong */| Main body: {Tight hands with iron gloves; the iron mask droops} | Scene: {Flower field center} | Light: {Red core blooms; soft halo} | Flight position: {Wide angle \\u2192 middle view; 24mm; hand shaking} | Sound effect: {Blade buzzing increases; Petal rustling; no BGM} - [# 3 1.60s] Action: {Close up - Blade brightness increases; micro spark crawls}; Camera: {Slowly Tilting Along the Edge} - [Static]/* Air */| Subject: {Blade Surface; Sparkling Rune} | Scene: {Near Ground Flower Bed} | Light Effect: {Red Light; Mirror Fading} | Color Mixing: {Red Faint; Slight Dark Angle} | Camera: {Close Up; Refractive Adjustment; Shallow Depth of Field} | Sound Effect: {Inhalation Whisper; Cave Reverb; No BGM} - [# 4 1.90s] Action: {Desaturated Shock Wave rushes towards her from the periphery; Initial Gale}; Camera: {Ascending and spiraling downward} - [Dynamic]/* Qigong */| Subject: {Knight centered, cloak pulled by wind} | Scene: {Vast cave; flowers turning gray} | Light: {Light pillar flickering in dust} | Camera: {Top widescreen; 24mm lens; spiral rocker arm} | Sound effects: {Pressure roar; Wind picking; No BGM}\", \"model\": \"veo3.1\", \"enhance_prompt\": false, \"aspect_ratio\": \"default\", \"enable_upsample\": false, \"video_url\": \"https://filesystem.site/cdn/20251020/e27a57aed18884abaa0be0eab33fdb.mp4\", \"images_count\": 0}"
-      ],
-      "color": "#332922",
-      "bgcolor": "#593930"
-    },
-    {
-      "id": 20,
-      "type": "Note",
-      "pos": [
-        -213.07498522251734,
-        717.5739802048156
-      ],
-      "size": [
-        210,
-        88
-      ],
-      "flags": {
-        "pinned": true
-      },
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "prompt"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 10,
-      "type": "Note",
-      "pos": [
-        -199.6143004358628,
-        218.62241882824998
-      ],
-      "size": [
-        559.0477905273438,
-        228.00534057617188
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2美元\n\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\nComfyui调用API节点(支持本地部署)：https://github.com/T8mars/Comfyui-zhenzhen\n\n"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 19,
-      "type": "Note",
-      "pos": [
-        -253.24998453348655,
-        988.1225318012818
-      ],
-      "size": [
-        294.8108430937071,
-        133.8671240234412
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分\n每日工作台签到领积分"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 16,
-      "type": "CR Prompt Text",
-      "pos": [
-        33.87678493479203,
-        637.634098314742
-      ],
-      "size": [
-        400,
-        200
-      ],
-      "flags": {},
-      "order": 5,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "提示词文本",
-          "name": "prompt",
-          "type": "STRING",
-          "links": [
-            10
-          ]
-        },
-        {
-          "name": "show_help",
-          "type": "STRING"
-        }
-      ],
-      "properties": {
-        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
-        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
-        "Node name for S&R": "CR Prompt Text",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "#Scarlet Watcher - Flower of Destruction # # Structure (variable editing time; total 25 seconds; content 23.00 seconds+2.00 seconds black screen; mode: standard; rhythm coefficient: 2.0) - [# 1 0.05 seconds] Action: {Static - kneeling knight leaning against the glowing sword blade, in the midst of red flowers}; Camera: {Locked in the center} - [Static]/* Qi */| Subject: {Female Knight; Iron Mask under Hood; Dim Gold Armor; Stained Cloak; Red Transparent Sword Blade; Kneeling Position} | Scene: {Abandoned Underground Temple Cave; Red Flower Floor; Dust Drifting} | Light: {Cold Light from the Ceiling; Sword Blade Like a Red Light Source; Misty Mist} | Tone: {Cold Desaturated World and Intense Crimson Contrast; High Contrast; Delicate Granularity} | Camera: {Medium Scene; Center Symmetrical Composition; 35mm Film Texture;}; Fixed} | Sound effects: {Cave air sound; distant dripping sound; no BGM} - [# 2 1.00s] Action: {Insert sword blade deeper; buzzing suddenly; petals tremble}; Flight position: {Push low from the petal height} - [Dynamic]/* Qigong */| Main body: {Tight hands with iron gloves; the iron mask droops} | Scene: {Flower field center} | Light: {Red core blooms; soft halo} | Flight position: {Wide angle → middle view; 24mm; hand shaking} | Sound effect: {Blade buzzing increases; Petal rustling; no BGM} - [# 3 1.60s] Action: {Close up - Blade brightness increases; micro spark crawls}; Camera: {Slowly Tilting Along the Edge} - [Static]/* Air */| Subject: {Blade Surface; Sparkling Rune} | Scene: {Near Ground Flower Bed} | Light Effect: {Red Light; Mirror Fading} | Color Mixing: {Red Faint; Slight Dark Angle} | Camera: {Close Up; Refractive Adjustment; Shallow Depth of Field} | Sound Effect: {Inhalation Whisper; Cave Reverb; No BGM} - [# 4 1.90s] Action: {Desaturated Shock Wave rushes towards her from the periphery; Initial Gale}; Camera: {Ascending and spiraling downward} - [Dynamic]/* Qigong */| Subject: {Knight centered, cloak pulled by wind} | Scene: {Vast cave; flowers turning gray} | Light: {Light pillar flickering in dust} | Camera: {Top widescreen; 24mm lens; spiral rocker arm} | Sound effects: {Pressure roar; Wind picking; No BGM}"
-      ]
-    },
-    {
       "id": 21,
       "type": "Note",
       "pos": [
@@ -352,7 +383,7 @@
         298.62362647675195
       ],
       "flags": {},
-      "order": 6,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -375,20 +406,20 @@
         316
       ],
       "flags": {},
-      "order": 8,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 16
         },
         {
           "name": "image2",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 17
         },
         {
           "name": "image3",
@@ -438,7 +469,7 @@
           "widget": {
             "name": "apikey"
           },
-          "link": 16
+          "link": 18
         },
         {
           "label": "seed",
@@ -499,28 +530,75 @@
       },
       "widgets_values": [
         "",
-        "veo3-pro",
+        "veo3.1-components",
         false,
         "16:9",
         "",
-        1477800498,
+        996970627,
         "randomize",
         false
       ]
     },
     {
-      "id": 22,
+      "id": 16,
+      "type": "CR Prompt Text",
+      "pos": [
+        33.87678493479203,
+        637.634098314742
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "提示词文本",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "The character in Image1 is shopping with an imag2 bag"
+      ]
+    },
+    {
+      "id": 24,
       "type": "Comfly_api_set",
       "pos": [
-        86.85965304396649,
-        944.9128270281817
+        108.26041423165647,
+        1003.8704412687742
       ],
       "size": [
         270,
         106
       ],
       "flags": {},
-      "order": 7,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -528,7 +606,7 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            16
+            18
           ]
         }
       ],
@@ -590,6 +668,22 @@
       22,
       0,
       17,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      23,
+      0,
+      17,
+      1,
+      "IMAGE"
+    ],
+    [
+      18,
+      24,
+      0,
+      17,
       7,
       "STRING"
     ]
@@ -612,10 +706,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.2839025177495054,
+      "scale": 1.2839025177495067,
       "offset": [
-        206.86832283818063,
-        -401.93122600827695
+        245.55520504180396,
+        -501.3583729573184
       ]
     },
     "frontendVersion": "1.28.7",
