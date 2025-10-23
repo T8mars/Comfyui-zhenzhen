@@ -8,7 +8,23 @@ My favorite girl
 
 # 更新 Update：
 
-20251023
+20251024:
+
+更新sora2-chat节点，速度更快，目前只支持横版，竖版15S非HD视频！不支持HD和25S，更稳定
+
+所有工作流全部做了更新，请下载新工作流，搭建方式有所区别
+
+新增sora2-chat对应工作流
+
+另外Sora2-chat节点，生成后可以下载GIF以及视频，在Comfyui节点会生成如下链接，请从控制台中查找
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/4.png" width="100%" alt="new node">
+
+然后链接复制到浏览器打开，如下也可以下载和分享
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/5.png" width="30%" alt="new node">
+
+20251023:
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/3.png" width="100%" alt="new node">
 
