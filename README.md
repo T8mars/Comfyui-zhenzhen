@@ -22,7 +22,7 @@ My favorite girl
 
 然后链接复制到浏览器打开，如下也可以下载和分享
 
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/5.png" width="30%" alt="new node">
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/5.png" width="60%" alt="new node">
 
 20251023:
 
