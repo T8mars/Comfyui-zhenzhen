@@ -8,7 +8,7 @@ My favorite girl
 
 # 更新 Update：
 
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="100%" alt="new node">
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
