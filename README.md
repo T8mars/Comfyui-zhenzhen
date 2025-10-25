@@ -6,6 +6,14 @@
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
 My favorite girl
 
+
+# 新版节点搭建，报错自查，API调用教程：
+
+B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
+
+Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
+
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
