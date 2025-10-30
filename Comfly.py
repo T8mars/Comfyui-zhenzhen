@@ -29,7 +29,7 @@ from .utils import pil2tensor, tensor2pil
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
-from comfy_api_nodes.apinode_utils import download_url_to_video_output
+#from comfy_api_nodes.apinode_utils import download_url_to_video_output
 import asyncio
 from comfy_api.input import VideoInput
 from comfy_api.input_impl import VideoFromFile
