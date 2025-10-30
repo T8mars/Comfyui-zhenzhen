@@ -20,6 +20,10 @@ Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251030:
+
+修正最新comfyui内核节点加载报错的问题
+
 20251024-2:
 
 RunningHub上所有API相关工作流均已更新，如果发现有漏网之鱼请B站或者youtube留言发链接，我会及时处理
