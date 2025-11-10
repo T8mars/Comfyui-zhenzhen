@@ -27,9 +27,11 @@ Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 插件更新suno_cover，suno_upload_extend，suno_upload:节点`:
 
 suno_upload：上传自己的音频文件，获取clip_ip,用于suno_cover和suno_upload_extend节点。上传音频时长必须在6s-60s内。
-suno_cover：音乐翻版\修改风格，输入clip_ip(可以是自己上传的，或者在平台生成的音乐的。
-自己上传的有可能因为跨账号问题不生效。)
+
+suno_cover：音乐翻版\修改风格，输入clip_ip(可以是自己上传的，或者在平台生成的音乐的。PS：自己上传的有可能因为跨账号问题不生效。)
+
 suno_upload_extend：音频续写，输入clip_ip(可以是自己上传的，或者在平台生成的音乐的)
+
 示例工作流后续更新
 
 20251106:
