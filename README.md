@@ -20,6 +20,18 @@ Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251110:
+
+新增sora2-pro优质分组，网站显示有问题，不是次数，是按秒收费，务必注意！还是比较贵的，只有4秒8秒12秒，原本的也能用，但是奥特曼改了每个账号的次数，所以每天次数有限
+
+插件更新suno_cover，suno_upload_extend，suno_upload:节点`:
+
+suno_upload：上传自己的音频文件，获取clip_ip,用于suno_cover和suno_upload_extend节点。上传音频时长必须在6s-60s内。
+suno_cover：音乐翻版\修改风格，输入clip_ip(可以是自己上传的，或者在平台生成的音乐的。
+自己上传的有可能因为跨账号问题不生效。)
+suno_upload_extend：音频续写，输入clip_ip(可以是自己上传的，或者在平台生成的音乐的)
+示例工作流后续更新
+
 20251106:
 
 增加新节点sora2_openai
