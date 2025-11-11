@@ -20,6 +20,12 @@ Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251111-2
+
+新增Comfly Sora2 Character节点，使用方式是把生成后的username用于放在提示词中 @username 直接调用。可同时使用多个角色客串调用。需要先在sora2中认证创建角色，或者用别人已认证创建过的角色，支持真人！
+
+统一所有的节点分组
+
 20251111:
 
 sora2新增创建角色 API，创建角色，后续可在prompt 里 @ 调用，可以同时调用多个角色，调用方式：https://gpt-best.apifox.cn/api-374618722
