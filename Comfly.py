@@ -70,7 +70,7 @@ class Comfly_api_set:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("apikey",)
     FUNCTION = "set_api_base"
-    CATEGORY = "Comfly"
+    CATEGORY = "zhenzhen"
 
     def set_api_base(self, api_base, apikey="", custom_ip=""):
         global baseurl
@@ -447,7 +447,7 @@ class Comfly_upload(ComflyBaseNode):
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("url",)
     FUNCTION = "upload_image"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     async def upload_image_to_midjourney(self, image):
 
@@ -625,7 +625,7 @@ class Comfly_Mj(ComflyBaseNode):
 
     FUNCTION = "process_input"
 
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def __init__(self):
         super().__init__()
@@ -881,7 +881,7 @@ class Comfly_Mju(ComflyBaseNode):
     RETURN_TYPES = ("IMAGE", "STRING")  
     RETURN_NAMES = ("image", "taskId")  
     FUNCTION = "run"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def run(self, taskId, U1=False, U2=False, U3=False, U4=False, api_key=""):
         if api_key.strip():
@@ -1357,7 +1357,7 @@ class Comfly_Mjv(ComflyBaseNode):
     RETURN_TYPES = ("IMAGE",) 
     RETURN_NAMES = ("image",) 
     FUNCTION = "run"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def run(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False, api_key=""):
         if api_key.strip():
@@ -1659,7 +1659,7 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "image_url")
     FUNCTION = "swap_face"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def __init__(self):
         super().__init__()
@@ -1870,7 +1870,7 @@ class Comfly_mjstyle:
 
     OUTPUT_NODE = True
 
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def replace_repeat(self, prompt):
         prompt = prompt.replace("，", ",")
@@ -1936,7 +1936,7 @@ class Comfly_mj_video(ComflyBaseNode):
     RETURN_TYPES = (IO.VIDEO, IO.VIDEO, IO.VIDEO, IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video1", "video2", "video3", "video4", "task_id", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def __init__(self):
         super().__init__()
@@ -2220,7 +2220,7 @@ class Comfly_mj_video_extend(ComflyBaseNode):
     RETURN_TYPES = (IO.VIDEO, IO.VIDEO, IO.VIDEO, IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video1", "video2", "video3", "video4", "task_id", "response")
     FUNCTION = "extend_video"
-    CATEGORY = "Comfly-v2/Midjourney"
+    CATEGORY = "zhenzhen/Midjourney"
 
     def __init__(self):
         super().__init__()
@@ -2433,7 +2433,7 @@ class Comfly_kling_text2video:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "task_id", "video_id", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Comfly_kling"
+    CATEGORY = "zhenzhen/Comfly_kling"
 
     def __init__(self):
         super().__init__()
@@ -2630,7 +2630,7 @@ class Comfly_kling_image2video:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "task_id", "video_id", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Comfly_kling"
+    CATEGORY = "zhenzhen/Comfly_kling"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -2871,7 +2871,7 @@ class Comfly_kling_multi_image2video:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "task_id", "video_id", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Comfly_kling"
+    CATEGORY = "zhenzhen/Comfly_kling"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -3141,7 +3141,7 @@ class Comfly_video_extend:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "video_id", "response")
     FUNCTION = "extend_video"
-    CATEGORY = "Comfly-v2/Comfly_kling"
+    CATEGORY = "zhenzhen/Comfly_kling"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -3325,7 +3325,7 @@ class Comfly_lip_sync:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "task_id", "response")
     FUNCTION = "process_lip_sync"
-    CATEGORY = "Comfly-v2/Comfly_kling"
+    CATEGORY = "zhenzhen/Comfly_kling"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -3474,7 +3474,7 @@ class ComflyGeminiAPI:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("generated_images", "response", "image_url")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Google"
+    CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -3745,7 +3745,7 @@ class Comfly_Doubao_Seedream:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "response")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -3939,7 +3939,7 @@ class Comfly_Doubao_Seedream_4:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image", "response", "image_url")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -4196,7 +4196,7 @@ class Comfly_Doubao_Seededit:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "response")
     FUNCTION = "edit_image"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -4350,7 +4350,7 @@ class ComflyJimengApi:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("generated_image", "response", "image_url")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
     
     def __init__(self):
         super().__init__()
@@ -4695,7 +4695,7 @@ class ComflyJimengVideoApi:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "task_id", "response", "video_url")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -4931,7 +4931,7 @@ class ComflySeededit:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("edited_image", "response", "image_url")
     FUNCTION = "edit_image"
-    CATEGORY = "Comfly-v2/Doubao"
+    CATEGORY = "zhenzhen/Doubao"
     
     def __init__(self):
         super().__init__()
@@ -5156,7 +5156,7 @@ class Comfly_gpt_image_1_edit:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("edited_image", "response", "chats")
     FUNCTION = "edit_image"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -5508,7 +5508,7 @@ class Comfly_gpt_image_1:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("generated_image", "response")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -5680,7 +5680,7 @@ class ComflyChatGPTApi:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("images", "response", "image_urls", "chats")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
     
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -6026,7 +6026,7 @@ class Comfly_sora2_openai:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "response", "video_url", "seed")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -6228,7 +6228,7 @@ class Comfly_sora2:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "response")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -6450,7 +6450,7 @@ class Comfly_sora2_chat:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "gif_url", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Openai"
+    CATEGORY = "zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -6662,6 +6662,138 @@ class Comfly_sora2_chat:
             return ("", "", "", json.dumps({"status": "error", "message": error_message}))
 
 
+class Comfly_sora2_character:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "video_url": ("STRING", {"multiline": False}),
+                "timestamps": ("STRING", {"default": "1,3", "multiline": False}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("character_id", "username", "permalink", "profile_picture_url", "response")
+    FUNCTION = "create_character"
+    CATEGORY = "zhenzhen/Openai"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def create_character(self, video_url, timestamps="1,3", seed=0, api_key=""):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            return ("", "", "", "", json.dumps(error_response))
+            
+        try:
+            if not timestamps or "," not in timestamps:
+                error_message = "Timestamps must be in format 'start,end' (e.g. '1,3')"
+                print(error_message)
+                return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+            
+            try:
+                start_time, end_time = map(float, timestamps.split(","))
+                duration = end_time - start_time
+
+                if duration < 1:
+                    error_message = "Duration must be at least 1 second (minimum difference between start and end)"
+                    print(error_message)
+                    return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+                    
+                if duration > 3:
+                    error_message = "Duration must be at most 3 seconds (maximum difference between start and end)"
+                    print(error_message)
+                    return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+                    
+            except ValueError:
+                error_message = "Invalid timestamps format. Use numbers separated by comma (e.g. '1.5,3.2')"
+                print(error_message)
+                return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            
+            payload = {
+                "url": video_url,
+                "timestamps": timestamps
+            }
+            
+            if seed > 0:
+                payload["seed"] = seed
+                
+            pbar.update_absolute(30)
+            
+            response = requests.post(
+                f"{baseurl}/sora/v1/characters",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            pbar.update_absolute(60)
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+                
+            result = response.json()
+            
+            pbar.update_absolute(90)
+
+            character_id = result.get("id", "")
+            username = result.get("username", "")
+            permalink = result.get("permalink", "")
+            profile_picture_url = result.get("profile_picture_url", "")
+            
+            if not character_id:
+                error_message = "No character ID returned from API"
+                print(error_message)
+                return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+            
+            pbar.update_absolute(100)
+            
+            response_data = {
+                "status": "success",
+                "character_id": character_id,
+                "username": username,
+                "permalink": permalink,
+                "profile_picture_url": profile_picture_url,
+                "video_url": video_url,
+                "timestamps": timestamps,
+                "duration": f"{duration:.1f}s",
+                "seed": seed if seed > 0 else "auto"
+            }
+            
+            print(f"Character created successfully. ID: {character_id}, Username: {username}")
+            
+            return (character_id, username, permalink, profile_picture_url, json.dumps(response_data))
+            
+        except Exception as e:
+            error_message = f"Error creating character: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+
+
 
 
 ############################# Flux ###########################
@@ -6691,7 +6823,7 @@ class Comfly_Flux_Kontext:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "image_url")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Flux"
+    CATEGORY = "zhenzhen/Flux"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -6906,7 +7038,7 @@ class Comfly_Flux_Kontext_Edit:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "image_url")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Flux"
+    CATEGORY = "zhenzhen/Flux"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -7091,7 +7223,7 @@ class Comfly_Flux_Kontext_bfl:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image", "image_url", "response")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Flux"
+    CATEGORY = "zhenzhen/Flux"
     OUTPUT_NODE = True
 
     def __init__(self):
@@ -7281,7 +7413,7 @@ class Comfly_Googel_Veo3:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/Google"
+    CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -7479,7 +7611,7 @@ class Comfly_nano_banana:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image", "response", "image_url")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Google"
+    CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -7686,7 +7818,7 @@ class Comfly_nano_banana_fal:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "response")
     FUNCTION = "process"
-    CATEGORY = "Comfly-v2/Google"
+    CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -7951,7 +8083,7 @@ class Comfly_nano_banana_edit:
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("image", "response")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Google"
+    CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -8147,7 +8279,7 @@ class Comfly_qwen_image:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image", "response", "image_url")
     FUNCTION = "generate_image"
-    CATEGORY = "Comfly-v2/Qwen"
+    CATEGORY = "zhenzhen/Qwen"
        
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -8325,7 +8457,7 @@ class Comfly_qwen_image_edit:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image", "response", "image_url")
     FUNCTION = "edit_image"
-    CATEGORY = "Comfly-v2/Qwen"
+    CATEGORY = "zhenzhen/Qwen"
        
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -8503,7 +8635,7 @@ class Comfly_MiniMax_video:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "task_id", "response")
     FUNCTION = "generate_video"
-    CATEGORY = "Comfly-v2/MiniMax"
+    CATEGORY = "zhenzhen/MiniMax"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -8735,7 +8867,7 @@ class Comfly_suno_description:
     RETURN_TYPES = ("AUDIO", "AUDIO", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "prompt", "task_id", "response", "clip_id1", "clip_id2", "tags", "title")
     FUNCTION = "generate_music"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -8966,7 +9098,7 @@ class Comfly_suno_lyrics:
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("lyrics", "response", "title", "tags")
     FUNCTION = "generate_lyrics"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -9091,7 +9223,7 @@ class Comfly_suno_custom:
     RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "task_id", "response",
                    "clip_id1", "clip_id2", "image_large_url1", "image_large_url2", "tags", "title")
     FUNCTION = "generate_music"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -9318,7 +9450,7 @@ class Comfly_suno_upload:
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("clip_id", "title", "tags", "lyrics", "response")
     FUNCTION = "upload_audio"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -9534,7 +9666,7 @@ class Comfly_suno_upload_extend:
     RETURN_TYPES = ("AUDIO", "AUDIO", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "task_id", "response", "clip_id1", "clip_id2", "duration")
     FUNCTION = "extend_audio"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -9763,7 +9895,7 @@ class Comfly_suno_cover:
     RETURN_TYPES = ("AUDIO", "AUDIO", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "STRING")
     RETURN_NAMES = ("audio1", "audio2", "audio_url1", "audio_url2", "task_id", "response", "clip_id1", "clip_id2", "image_url1", "image_url2")
     FUNCTION = "generate_cover"
-    CATEGORY = "Comfly-v2/Suno"
+    CATEGORY = "zhenzhen/Suno"
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
@@ -11030,7 +11162,8 @@ NODE_CLASS_MAPPINGS = {
     "ComflyChatGPTApi": ComflyChatGPTApi,
     "Comfly_sora2_openai": Comfly_sora2_openai, 
     "Comfly_sora2": Comfly_sora2, 
-    "Comfly_sora2_chat": Comfly_sora2_chat,  
+    "Comfly_sora2_chat": Comfly_sora2_chat, 
+    "Comfly_sora2_character": Comfly_sora2_character, 
     "ComflyJimengApi": ComflyJimengApi, 
     "Comfly_gpt_image_1_edit": Comfly_gpt_image_1_edit,
     "Comfly_gpt_image_1": Comfly_gpt_image_1,
@@ -11079,6 +11212,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_sora2_openai": "Comfly_sora2_openai", 
     "Comfly_sora2": "Comfly_sora2", 
     "Comfly_sora2_chat": "Comfly_sora2_chat", 
+    "Comfly_sora2_character": "Comfly Sora2 Character",  
     "ComflyJimengApi": "Comfly Jimeng API", 
     "Comfly_gpt_image_1_edit": "Comfly_gpt_image_1_edit",
     "Comfly_gpt_image_1": "Comfly_gpt_image_1", 
