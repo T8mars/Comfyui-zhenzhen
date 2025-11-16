@@ -13,12 +13,35 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
-
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
+
+20251117
+
+增加2个新工作流，分别是Sora2角色创建节点，以及多角色@调用加图片参考混合工作流
+
+zhenzhen-sora2-character-create.json --角色创建，创建将花费0.01积分，只需创建一次，可以无线调用
+
+zhenzhen-sora2-multi-character.json --多角色@调用加图片参考混合
+
+创建我们可以通过图床的URL获取，但是很多图床不支持VIDEO，另外有些哪怕可以上传SORA2也不支持，所以推荐用下面方式：
+
+首先先用Sora2跑一次视频，跑出来的角色的response的MP4地址复制到新节点的URL
+
+常规操作：
+
+URL部分需要用图床，但是不是每个图床都支持，最好的办法， 先用我们的API生成一个SORA2视频，他会有个MP4地址
+
+生成的usename保存下来，后续就可以直接@使用了，支持多角色
+
+比如：https://midjourney-plus.oss-us-west-1.aliyuncs.com/sora/39cf59c1-354f-4ba3-88d6-5abebc14c0b8.mp4
+
+让后复制下即可，就能获得新的USERNAME
+
+timestamps代表获取URL视频的其中几秒中的角色，1,3意思就是1-3秒，以此类推
 
 20251112
 
