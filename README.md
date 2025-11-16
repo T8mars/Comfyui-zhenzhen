@@ -21,9 +21,9 @@ Youtube：https://www.youtube.com/watch?v=LvvD5HkKqHM&t=13s&pp=0gcJCQMKAYcqIYzv
 
 # Sora2整合包以及多参角色客串和ID创建教程
 
-https://www.bilibili.com/video/BV16MChB8ERT/
+B站：https://www.bilibili.com/video/BV16MChB8ERT/
 
-https://www.youtube.com/watch?v=GsQnGBqRPnA
+Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 整合包V2：https://pan.quark.cn/s/86d82abd2f17
 
