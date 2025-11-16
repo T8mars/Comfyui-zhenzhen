@@ -13,6 +13,12 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
+# 通过Sora2全自动生成漫剧
+
+B站：https://www.bilibili.com/video/BV1pRCABsE9y/
+
+Youtube：https://www.youtube.com/watch?v=LvvD5HkKqHM&t=13s&pp=0gcJCQMKAYcqIYzv
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
@@ -42,6 +48,8 @@ URL部分需要用图床，但是不是每个图床都支持，最好的办法�
 让后复制下即可，就能获得新的USERNAME
 
 timestamps代表获取URL视频的其中几秒中的角色，1,3意思就是1-3秒，以此类推
+
+参考工作流是2角色@加一个参考背景，最多支持4角色加一个背景
 
 20251112
 
