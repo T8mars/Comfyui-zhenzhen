@@ -1,0 +1,439 @@
+{
+  "id": "0c258e12-f212-48d3-b71e-820714cad75f",
+  "revision": 0,
+  "last_node_id": 105,
+  "last_link_id": 174,
+  "nodes": [
+    {
+      "id": 99,
+      "type": "SaveImage",
+      "pos": [
+        1233.7849046450676,
+        -255.76241178626242
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 169
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 98,
+      "type": "LoadImage",
+      "pos": [
+        138.71124756738504,
+        -372.10498399107684
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            168,
+            170
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "C745D49A10F40534C127A84A67AA0ADB.png",
+        "image"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "ImageConcanate",
+      "pos": [
+        1189.490264503942,
+        78.80348715202604
+      ],
+      "size": [
+        270,
+        102
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 170
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "link": 171
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            172
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "6ee278aa7d802c03ad713a7c5fbc02861b6773a8",
+        "Node name for S&R": "ImageConcanate"
+      },
+      "widgets_values": [
+        "right",
+        true
+      ]
+    },
+    {
+      "id": 101,
+      "type": "SaveImage",
+      "pos": [
+        1628.666909307442,
+        -65.3897030946166
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 172
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 97,
+      "type": "Comfly_nano_banana",
+      "pos": [
+        635.0076450624348,
+        -246.5360668455052
+      ],
+      "size": [
+        400,
+        316
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 168
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 174
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 173
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            169,
+            171
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "2607ea71e5269ced450802a7872f773a3e7cc87e",
+        "Node name for S&R": "Comfly_nano_banana"
+      },
+      "widgets_values": [
+        "",
+        "gemini-3-pro-image-preview",
+        1,
+        0.95,
+        "",
+        2144490416,
+        "randomize",
+        32768
+      ]
+    },
+    {
+      "id": 104,
+      "type": "Comfly_api_set",
+      "pos": [
+        170.81914059508088,
+        82.6500586891184
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            173
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "2607ea71e5269ced450802a7872f773a3e7cc87e",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-tS0K3Kvdsy6dkFUi3gUWJWVCqNCfIUdpZWHTDRhniqCOT3GT",
+        ""
+      ]
+    },
+    {
+      "id": 105,
+      "type": "CR Prompt Text",
+      "pos": [
+        97.56125703419026,
+        300.0137150319393
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            174
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "女人在咖啡店喝咖啡"
+      ]
+    },
+    {
+      "id": 103,
+      "type": "Note",
+      "pos": [
+        -208.5760873225421,
+        -146.55417725573264
+      ],
+      "size": [
+        284.6024702250078,
+        117.55081590894957
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "API注册：https://ai.t8star.cn/register?aff=dP7j\n目前0.2积分一个图"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      168,
+      98,
+      0,
+      97,
+      0,
+      "IMAGE"
+    ],
+    [
+      169,
+      97,
+      0,
+      99,
+      0,
+      "IMAGE"
+    ],
+    [
+      170,
+      98,
+      0,
+      100,
+      0,
+      "IMAGE"
+    ],
+    [
+      171,
+      97,
+      0,
+      100,
+      1,
+      "IMAGE"
+    ],
+    [
+      172,
+      100,
+      0,
+      101,
+      0,
+      "IMAGE"
+    ],
+    [
+      173,
+      104,
+      0,
+      97,
+      5,
+      "STRING"
+    ],
+    [
+      174,
+      105,
+      0,
+      97,
+      4,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -876.3999633789062,
+        -798.2618408203125,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.4122927695244718,
+      "offset": [
+        411.59438376709323,
+        449.171034475553
+      ]
+    },
+    "frontendVersion": "1.28.7",
+    "node_versions": {
+      "comfy-core": "0.3.24",
+      "comfyui-inpainteasy": "1.0.2"
+    },
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
