@@ -7593,7 +7593,17 @@ class Comfly_nano_banana:
         return {
             "required": {
                 "text": ("STRING", {"multiline": True}),
-                "model": (["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana"}),
+                "model": (
+                    [
+                        "gemini-3-pro-image-preview",
+                        "gemini-2.5-flash-image",
+                        "nano-banana",
+                        "nano-banana-hd",
+                        "nano-banana-2",          # ← 新增模型
+                        "gemini-2.5-flash-image-preview"
+                    ],
+                    {"default": "nano-banana"},
+                ),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -7604,8 +7614,9 @@ class Comfly_nano_banana:
                 "top_p": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "apikey": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768})
-            }
+                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768}),
+                "image_size": ("STRING", {"default": "2K"}),  # ← 新增传参
+            },
         }
 
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
@@ -7614,7 +7625,7 @@ class Comfly_nano_banana:
     CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
-        self.api_key = get_config().get('api_key', '')
+        self.api_key = get_config().get("api_key", "")
         self.timeout = 300
 
     def get_headers(self):
@@ -7675,7 +7686,7 @@ class Comfly_nano_banana:
 
     def process(self, text, model="gemini-2.5-flash-image-preview", 
                 image1=None, image2=None, image3=None, image4=None,
-                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768):
+                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768,image_size=""):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -7730,7 +7741,8 @@ class Comfly_nano_banana:
                 "temperature": temperature,
                 "top_p": top_p,
                 "max_tokens": max_tokens,
-                "stream": True 
+                "stream": True, 
+                "image_size": image_size  # ← 新增字段
             }
 
             if seed > 0:
