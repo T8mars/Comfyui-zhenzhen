@@ -13,6 +13,12 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
+# NanoBanana 2使用教程
+
+B站：https://www.bilibili.com/video/BV13MyPBzEjJ/
+
+Youtube：https://www.youtube.com/watch?v=J6Zg7SrU_BE
+
 # 通过Sora2全自动生成漫剧
 
 B站：https://www.bilibili.com/video/BV1pRCABsE9y/
