@@ -33,6 +33,19 @@ Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251121
+
+新增Nano-Banana-2模型
+
+目前支持2个模型Gemini-3-Pro-Image-Preview 和 Nano-Banana-2
+
+区别：
+
+Gemini-3-Pro-Image-Preview，适配官方格式级openai chat格式
+nano-banan-2：支持chat，支持Openai兼容格式，传送支持2K,4K，API调用参数：mage_size="4K",支持绘图接口同步模式以及异步模式
+
+节点也更新了，但是似乎4K没生效，白天看下在修复
+
 20251120
 
 支持nanobanana 2，直接用原本的nanobnana工作流即可，更换下模型！
