@@ -33,6 +33,15 @@ Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251120
+
+支持nanobanana 2，直接用原本的nanobnana工作流即可，更换下模型！
+模型名字gemini-3-pro-image-preview
+增加工作流：zhenzhen-nano-banana-V2(Gemini-3-pro-image-preview).json
+目前是0.2积分/图
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.png" width="100%" alt="new node">
+
 20251117
 
 增加2个新工作流，分别是Sora2角色创建节点，以及多角色@调用加图片参考混合工作流
@@ -58,11 +67,6 @@ URL部分需要用图床，但是不是每个图床都支持，最好的办法�
 timestamps代表获取URL视频的其中几秒中的角色，1,3意思就是1-3秒，以此类推
 
 参考工作流是2角色@加一个参考背景，可支持多角色客串艾特以及多图参考，当然太多肯定也会影响一致性，请适量！
-
-20251120
-
-支持nanobanana 2，直接用原本的nanobnana工作流即可，更换下模型！
-模型名字gemini-3-pro-image-preview
 
 20251112
 
