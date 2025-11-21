@@ -45,6 +45,12 @@ Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 支持Nano Banana 2多图编辑以及2K，4K高清版
 
+增加工作流：Nano-Banana-2-Edit-T2I-4K.json
+
+增加工作流：Nano-Banana-2-Edit-Multi-I2I-4K.json
+
+可选分辨率以及1K,2K,4K，暂时都是0.2积分
+
 20251121
 
 新增Nano-Banana-2模型
