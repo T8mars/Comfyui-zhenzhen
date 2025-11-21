@@ -7593,17 +7593,7 @@ class Comfly_nano_banana:
         return {
             "required": {
                 "text": ("STRING", {"multiline": True}),
-                "model": (
-                    [
-                        "gemini-3-pro-image-preview",
-                        "gemini-2.5-flash-image",
-                        "nano-banana",
-                        "nano-banana-hd",
-                        "nano-banana-2",          # ← 新增模型
-                        "gemini-2.5-flash-image-preview"
-                    ],
-                    {"default": "nano-banana"},
-                ),
+                "model": (["nano-banana-2","gemini-3-pro-image-preview", "gemini-2.5-flash-image", "nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana"}),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -7614,9 +7604,8 @@ class Comfly_nano_banana:
                 "top_p": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "apikey": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768}),
-                "image_size": ("STRING", {"default": "2K"}),  # ← 新增传参
-            },
+                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768})
+            }
         }
 
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
@@ -7625,7 +7614,7 @@ class Comfly_nano_banana:
     CATEGORY = "zhenzhen/Google"
 
     def __init__(self):
-        self.api_key = get_config().get("api_key", "")
+        self.api_key = get_config().get('api_key', '')
         self.timeout = 300
 
     def get_headers(self):
@@ -7686,7 +7675,7 @@ class Comfly_nano_banana:
 
     def process(self, text, model="gemini-2.5-flash-image-preview", 
                 image1=None, image2=None, image3=None, image4=None,
-                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768,image_size=""):
+                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -7741,8 +7730,7 @@ class Comfly_nano_banana:
                 "temperature": temperature,
                 "top_p": top_p,
                 "max_tokens": max_tokens,
-                "stream": True, 
-                "image_size": image_size  # ← 新增字段
+                "stream": True 
             }
 
             if seed > 0:
@@ -8261,110 +8249,150 @@ class Comfly_nano_banana_edit:
 
  ############################# Qwen ###########################
 
-class Comfly_qwen_image:
-    
-    """
-    A node that generates images using Qwen AI service
-    """
-
+class Comfly_nano_banana2_edit:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "size": (["512x512", "1024x1024", "768x1024", "576x1024", "1024x768", "1024x576", "Custom"], {"default": "1024x768"}),
-                "Custom_size": ("STRING", {"default": "Enter custom size (e.g. 1280x720)", "multiline": False}),
-                "model": (["qwen-image"], {"default": "qwen-image"}),
-                "num_images": ([1, 2, 3, 4], {"default": 1}),
+                "mode": (["text2img", "img2img"], {"default": "text2img"}),
+                "model": (["nano-banana-2"], {"default": "nano-banana-2"}),
+                "aspect_ratio": (["16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "1:1"}),
+                "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
             "optional": {
-                "api_key": ("STRING", {"default": ""}),
-                "num_inference_steps": ("INT", {"default": 30, "min": 2, "max": 50, "step": 1}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                "guidance_scale": ("FLOAT", {"default": 2.5, "min": 0, "max": 20, "step": 0.5}),
-                "enable_safety_checker": ("BOOLEAN", {"default": True}),
-                "negative_prompt": ("STRING", {"default": "", "multiline": True}),
-                "output_format": (["jpeg", "png"], {"default": "png"}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image10": ("IMAGE",),
+                "image11": ("IMAGE",),
+                "image12": ("IMAGE",),
+                "image13": ("IMAGE",),
+                "image14": ("IMAGE",),
+                "apikey": ("STRING", {"default": ""}),
+                "response_format": (["url", "b64_json"], {"default": "url"}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
             }
         }
     
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
-    RETURN_NAMES = ("image", "response", "image_url")
+    RETURN_TYPES = ("IMAGE", "STRING")
+    RETURN_NAMES = ("image", "response")
     FUNCTION = "generate_image"
-    CATEGORY = "zhenzhen/Qwen"
-       
+    CATEGORY = "zhenzhen/Google"
+
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
-        self.timeout = 300
+        self.timeout = 600
 
     def get_headers(self):
         return {
-            "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
- 
-    def generate_image(self, prompt, size, Custom_size, model, num_images=1,
-                       api_key="", num_inference_steps=30, seed=0, guidance_scale=2.5, 
-                       enable_safety_checker=True, negative_prompt="", output_format="png"):
-        if api_key.strip():
-            self.api_key = api_key
+    
+    def image_to_base64(self, image_tensor):
+        """Convert tensor to base64 string"""
+        if image_tensor is None:
+            return None
+            
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    
+    def generate_image(self, prompt, mode="text2img", model="nano-banana-2", aspect_ratio="1:1", 
+                      image_size="2K", image1=None, image2=None, image3=None, image4=None,
+                      image5=None, image6=None, image7=None, image8=None, image9=None, 
+                      image10=None, image11=None, image12=None, image13=None, image14=None,
+                      apikey="", response_format="url", seed=0):
+        if apikey.strip():
+            self.api_key = apikey
             config = get_config()
-            config['api_key'] = api_key
+            config['api_key'] = apikey
             save_config(config)
             
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, error_message)
+            
         try:
-            if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
-                print(error_message)
-                blank_image = Image.new('RGB', (1024, 1024), color='white')
-                blank_tensor = pil2tensor(blank_image)
-                return (blank_tensor, error_message, "")
-                
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
-            
-            actual_size = Custom_size if size == "Custom" else size
 
-            if size == "Custom" and (Custom_size == "Enter custom size (e.g. 1280x720)" or "x" not in Custom_size):
-                error_message = "Please enter a valid custom size in the format 'widthxheight' (e.g. 1280x720)"
-                print(error_message)
-                blank_image = Image.new('RGB', (1024, 1024), color='white')
-                blank_tensor = pil2tensor(blank_image)
-                return (blank_tensor, error_message, "")
-
-            payload = {
-                "prompt": prompt,
-                "size": actual_size,  
-                "model": model,
-                "n": num_images,  
-            }
-
-            if num_inference_steps != 30:
-                payload["num_inference_steps"] = num_inference_steps
-                
-            if seed != 0:
-                payload["seed"] = seed
-                
-            if guidance_scale != 2.5:
-                payload["guidance_scale"] = guidance_scale
-                
-            if not enable_safety_checker:
-                payload["enable_safety_checker"] = enable_safety_checker
-                
-            if negative_prompt.strip():
-                payload["negative_prompt"] = negative_prompt
-                
-            if output_format != "png":
-                payload["output_format"] = output_format
+            final_prompt = prompt
             
-            pbar.update_absolute(30)
-            
-            response = requests.post(
-                f"{baseurl}/v1/images/generations", 
-                headers=self.get_headers(),
-                json=payload,
-                timeout=self.timeout
-            )
+            if mode == "text2img":
+                headers = self.get_headers()
+                headers["Content-Type"] = "application/json"
+                
+                payload = {
+                    "prompt": final_prompt,
+                    "model": model,
+                    "aspect_ratio": aspect_ratio,
+                    "image_size": image_size
+                }
+                    
+                if response_format:
+                    payload["response_format"] = response_format
+
+                if seed > 0:
+                    payload["seed"] = seed
+                
+                print(f"Payload: {json.dumps(payload, indent=2)}")
+                
+                response = requests.post(
+                    f"{baseurl}/v1/images/generations",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout
+                )
+            else:
+                headers = self.get_headers()
+
+                all_images = [image1, image2, image3, image4, image5, image6, image7, 
+                             image8, image9, image10, image11, image12, image13, image14]
+                
+                files = []
+                image_count = 0
+                for img in all_images:
+                    if img is not None:
+                        pil_img = tensor2pil(img)[0]
+                        buffered = BytesIO()
+                        pil_img.save(buffered, format="PNG")
+                        buffered.seek(0)
+                        files.append(('image', (f'image_{image_count}.png', buffered, 'image/png')))
+                        image_count += 1
+                
+                print(f"Processing {image_count} input images")
+                
+                data = {
+                    "prompt": final_prompt,
+                    "model": model,
+                    "aspect_ratio": aspect_ratio,
+                    "image_size": image_size
+                }
+                
+                if response_format:
+                    data["response_format"] = response_format
+
+                if seed > 0:
+                    data["seed"] = str(seed)
+               
+                response = requests.post(
+                    f"{baseurl}/v1/images/edits",
+                    headers=headers,
+                    data=data,
+                    files=files,
+                    timeout=self.timeout
+                )
             
             pbar.update_absolute(50)
             
@@ -8373,68 +8401,71 @@ class Comfly_qwen_image:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
-                return (blank_tensor, error_message, "")
+                return (blank_tensor, error_message)
                 
             result = response.json()
+            
+            if "data" not in result or not result["data"]:
+                error_message = "No image data in response"
+                print(error_message)
+                blank_image = Image.new('RGB', (1024, 1024), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, error_message)
+            
+            generated_tensors = []
+            response_info = f"Generated {len(result['data'])} images using {model}\n"
+            response_info += f"Image size: {image_size}\n"
+            response_info += f"Aspect ratio: {aspect_ratio}\n"
+            
+            if mode == "img2img":
+                response_info += f"Input images: {image_count}\n"
 
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            response_info = f"**Qwen Image Generation ({timestamp})**\n\n"
-            response_info += f"Prompt: {prompt}\n"
-            response_info += f"Model: {model}\n"
-            response_info += f"Size: {actual_size}\n"
-            response_info += f"Number of Images: {num_images}\n"
-            response_info += f"Seed: {seed}\n\n"
+            if seed > 0:
+                response_info += f"Seed: {seed}\n"
             
-            generated_images = []
-            image_urls = []
-            
-            if "data" in result and result["data"]:
-                for i, item in enumerate(result["data"]):
-                    pbar.update_absolute(50 + (i+1) * 40 // len(result["data"]))
-                    
-                    if "b64_json" in item:
-                        image_data = base64.b64decode(item["b64_json"])
-                        generated_image = Image.open(BytesIO(image_data))
+            for i, item in enumerate(result["data"]):
+                pbar.update_absolute(50 + (i+1) * 40 // len(result["data"]))
+                
+                if "b64_json" in item:
+                    image_data = base64.b64decode(item["b64_json"])
+                    generated_image = Image.open(BytesIO(image_data))
+                    generated_tensor = pil2tensor(generated_image)
+                    generated_tensors.append(generated_tensor)
+                    response_info += f"Image {i+1}: Base64 data\n"
+                elif "url" in item:
+                    image_url = item["url"]
+                    response_info += f"Image {i+1}: {image_url}\n"
+                    try:
+                        img_response = requests.get(image_url, timeout=self.timeout)
+                        img_response.raise_for_status()
+                        generated_image = Image.open(BytesIO(img_response.content))
                         generated_tensor = pil2tensor(generated_image)
-                        generated_images.append(generated_tensor)
-                    elif "url" in item:
-                        image_url = item["url"]
-                        image_urls.append(image_url)
-                        try:
-                            img_response = requests.get(image_url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            generated_image = Image.open(BytesIO(img_response.content))
-                            generated_tensor = pil2tensor(generated_image)
-                            generated_images.append(generated_tensor)
-                        except Exception as e:
-                            print(f"Error downloading image from URL: {str(e)}")
+                        generated_tensors.append(generated_tensor)
+                    except Exception as e:
+                        print(f"Error downloading image from URL: {str(e)}")
+            
+            pbar.update_absolute(100)
+            
+            if generated_tensors:
+                combined_tensor = torch.cat(generated_tensors, dim=0)
+                return (combined_tensor, response_info)
             else:
-                error_message = "No generated images in response"
+                error_message = "Failed to process any images"
                 print(error_message)
-                response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
-                return (blank_tensor, response_info, "")
-                
-            if generated_images:
-                combined_tensor = torch.cat(generated_images, dim=0)
-                
-                pbar.update_absolute(100)
-                return (combined_tensor, response_info, image_urls[0] if image_urls else "")
-            else:
-                error_message = "No images were successfully processed"
-                print(error_message)
-                response_info += f"Error: {error_message}\n"
-                blank_image = Image.new('RGB', (1024, 1024), color='white')
-                blank_tensor = pil2tensor(blank_image)
-                return (blank_tensor, response_info, "")
-                
+                return (blank_tensor, error_message)
+            
         except Exception as e:
             error_message = f"Error in image generation: {str(e)}"
             print(error_message)
+            import traceback
+            traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
-            return (blank_tensor, error_message, "")
+            return (blank_tensor, error_message)
+
+ ############################# Qwen ###########################
 
 
 class Comfly_qwen_image_edit:
@@ -11200,7 +11231,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_suno_cover": Comfly_suno_cover,
     "Comfly_nano_banana": Comfly_nano_banana,
     "Comfly_nano_banana_fal": Comfly_nano_banana_fal,
-    "Comfly_nano_banana_edit": Comfly_nano_banana_edit
+    "Comfly_nano_banana_edit": Comfly_nano_banana_edit,
+    "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -11249,5 +11281,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_suno_cover": "Comfly Suno Cover",
     "Comfly_nano_banana": "Comfly_nano_banana",
     "Comfly_nano_banana_fal": "Comfly_nano_banana_fal",
-    "Comfly_nano_banana_edit": "Comfly_nano_banana_edit"
+    "Comfly_nano_banana_edit": "Comfly_nano_banana_edit",
+    "Comfly_nano_banana2_edit": "Comfly_nano_banana2_edit"
 }
