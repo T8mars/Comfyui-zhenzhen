@@ -39,6 +39,12 @@ Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251121-2
+
+新增节点：nano_banana2_edit
+
+支持Nano Banana 2多图编辑以及2K，4K高清版
+
 20251121
 
 新增Nano-Banana-2模型
