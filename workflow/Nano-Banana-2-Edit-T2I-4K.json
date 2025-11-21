@@ -1,0 +1,394 @@
+{
+  "id": "0c258e12-f212-48d3-b71e-820714cad75f",
+  "revision": 0,
+  "last_node_id": 108,
+  "last_link_id": 183,
+  "nodes": [
+    {
+      "id": 99,
+      "type": "SaveImage",
+      "pos": [
+        1213.064204801145,
+        -384.52676081635406
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 179
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "Comfly_api_set",
+      "pos": [
+        166.78264062548553,
+        498.89429208519084
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            182
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "2607ea71e5269ced450802a7872f773a3e7cc87e",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-VyPHLDgymgCPRJ7uFUZTvpw6vfCW5yA2bBvMqMzFeNUcUe22",
+        ""
+      ]
+    },
+    {
+      "id": 105,
+      "type": "CR Prompt Text",
+      "pos": [
+        122.32261344792582,
+        217.90265406683204
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            178
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "女人在咖啡店喝咖啡,4K"
+      ]
+    },
+    {
+      "id": 103,
+      "type": "Note",
+      "pos": [
+        -231.6944681484045,
+        463.98272369544196
+      ],
+      "size": [
+        284.6024702250078,
+        117.55081590894957
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "API注册：https://ai.t8star.cn/register?aff=dP7j\n目前0.2积分一个图,暂时1K,2K,4K价格一样"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 106,
+      "type": "easy showAnything",
+      "pos": [
+        1225.0984805930582,
+        432.99038340894595
+      ],
+      "size": [
+        436.0616500514569,
+        284.4429985203067
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 181
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "125b3a4905ac9367f7aae5c2df67e2282f0a3d37",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Generated 1 images using nano-banana-2\nImage size: 4K\nAspect ratio: 16:9\nSeed: 1555476324\nImage 1: https://webstatic.aiproxy.vip/output/20251121/e5ba43c6-ab63-4b34-89eb-604428b345ba.jpg\n"
+      ]
+    },
+    {
+      "id": 108,
+      "type": "Comfly_nano_banana2_edit",
+      "pos": [
+        679.03063855927,
+        144.9364677806031
+      ],
+      "size": [
+        400,
+        540
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 178
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 182
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            179
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            181
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "ad351e4cc2776aef203741297075074a2803e02a",
+        "Node name for S&R": "Comfly_nano_banana2_edit"
+      },
+      "widgets_values": [
+        "",
+        "text2img",
+        "nano-banana-2",
+        "16:9",
+        "4K",
+        "",
+        "url",
+        1061988868,
+        "randomize"
+      ]
+    }
+  ],
+  "links": [
+    [
+      178,
+      105,
+      0,
+      108,
+      14,
+      "STRING"
+    ],
+    [
+      179,
+      108,
+      0,
+      99,
+      0,
+      "IMAGE"
+    ],
+    [
+      181,
+      108,
+      1,
+      106,
+      0,
+      "*"
+    ],
+    [
+      182,
+      104,
+      0,
+      108,
+      15,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -876.3999633789062,
+        -798.2618408203125,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9229599817706443,
+      "offset": [
+        480.8294528492682,
+        316.0191454577643
+      ]
+    },
+    "frontendVersion": "1.28.7",
+    "node_versions": {
+      "comfy-core": "0.3.24",
+      "comfyui-inpainteasy": "1.0.2"
+    },
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
