@@ -37,6 +37,7 @@ from comfy_api.util import VideoComponents
 from comfy_api.input_impl import VideoFromComponents
 from fractions import Fraction
 
+api_base="https://ai.t8star.cn"
 
 def get_config():
     try:
@@ -51,7 +52,6 @@ def save_config(config):
     config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Comflyapi.json')
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=4)
-
 
 
 class Comfly_api_set:
@@ -11412,51 +11412,51 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Comfly_api_set": "Comfly API Settings",
+    "Comfly_api_set": "Zhenzhen API Settings",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
-    "Comfly_Mj": "Comfly_Mj", 
-    "Comfly_mjstyle": "Comfly_mjstyle",
-    "Comfly_upload": "Comfly_upload",
-    "Comfly_Mju": "Comfly_Mju",
-    "Comfly_Mjv": "Comfly_Mjv",  
-    "Comfly_Mj_swap_face": "Comfly MJ Face Swap",
-    "Comfly_kling_text2video": "Comfly_kling_text2video",
-    "Comfly_kling_image2video": "Comfly_kling_image2video",
-    "Comfly_kling_multi_image2video": "Comfly_kling_multi_image2video",
-    "Comfly_video_extend": "Comfly_video_extend",
-    "Comfly_lip_sync": "Comfly_lip_sync",
-    "ComflyGeminiAPI": "Comfly Gemini API",
-    "ComflySeededit": "Comfly Doubao SeedEdit2.0",
-    "ComflyChatGPTApi": "Comfly ChatGPT Api",
-    "Comfly_sora2_openai": "Comfly_sora2_openai", 
-    "Comfly_sora2": "Comfly_sora2", 
-    "Comfly_sora2_chat": "Comfly_sora2_chat", 
-    "Comfly_sora2_character": "Comfly Sora2 Character",  
-    "ComflyJimengApi": "Comfly Jimeng API", 
-    "Comfly_gpt_image_1_edit": "Comfly_gpt_image_1_edit",
-    "Comfly_gpt_image_1": "Comfly_gpt_image_1", 
-    "ComflyJimengVideoApi": "Comfly Jimeng Video API",
-    "Comfly_Flux_Kontext": "Comfly_Flux_Kontext",
-    "Comfly_Flux_Kontext_Edit": "Comfly_Flux_Kontext_Edit",
-    "Comfly_Flux_Kontext_bfl": "Comfly_Flux_Kontext_bfl",
-    "Comfly_Googel_Veo3": "Comfly Google Veo3",
-    "Comfly_mj_video": "Comfly MJ Video",
-    "Comfly_mj_video_extend": "Comfly MJ Video Extend",
-    "Comfly_qwen_image": "Comfly_qwen_image",
-    "Comfly_qwen_image_edit": "Comfly_qwen_image_edit",
-    "Comfly_Doubao_Seedream": "Comfly Doubao Seedream3.0",
-    "Comfly_Doubao_Seedream_4": "Comfly Doubao Seedream4.0",
-    "Comfly_Doubao_Seededit": "Comfly Doubao Seededit3.0",
-    "Comfly_MiniMax_video": "Comfly MiniMax Hailuo Video",
-    "Comfly_suno_description": "Comfly Suno Description",
-    "Comfly_suno_lyrics": "Comfly Suno Lyrics",
-    "Comfly_suno_custom": "Comfly Suno Custom",
-    "Comfly_suno_upload": "Comfly Suno Upload",
-    "Comfly_suno_upload_extend": "Comfly Suno Upload Extend", 
-    "Comfly_suno_cover": "Comfly Suno Cover",
-    "Comfly_nano_banana": "Comfly_nano_banana",
-    "Comfly_nano_banana_fal": "Comfly_nano_banana_fal",
-    "Comfly_nano_banana_edit": "Comfly_nano_banana_edit",
-    "Comfly_nano_banana2_edit": "Comfly_nano_banana2_edit"
+    "Comfly_Mj": "Zhenzhen_Mj", 
+    "Comfly_mjstyle": "Zhenzhen_mjstyle",
+    "Comfly_upload": "Zhenzhen_upload",
+    "Comfly_Mju": "Zhenzhen_Mju",
+    "Comfly_Mjv": "Zhenzhen_Mjv",  
+    "Comfly_Mj_swap_face": "Zhenzhen MJ Face Swap",
+    "Comfly_kling_text2video": "Zhenzhen_kling_text2video",
+    "Comfly_kling_image2video": "Zhenzhen_kling_image2video",
+    "Comfly_kling_multi_image2video": "Zhenzhen_kling_multi_image2video",
+    "Comfly_video_extend": "Zhenzhen_video_extend",
+    "Comfly_lip_sync": "Zhenzhen_lip_sync",
+    "ComflyGeminiAPI": "Zhenzhen Gemini API",
+    "ComflySeededit": "Zhenzhen Doubao SeedEdit2.0",
+    "ComflyChatGPTApi": "Zhenzhen ChatGPT Api",
+    "Comfly_sora2_openai": "Zhenzhen_sora2_openai", 
+    "Comfly_sora2": "Zhenzhen_sora2", 
+    "Comfly_sora2_chat": "Zhenzhen_sora2_chat", 
+    "Comfly_sora2_character": "Zhenzhen Sora2 Character",  
+    "ComflyJimengApi": "Zhenzhen Jimeng API", 
+    "Comfly_gpt_image_1_edit": "Zhenzhen_gpt_image_1_edit",
+    "Comfly_gpt_image_1": "Zhenzhen_gpt_image_1", 
+    "ComflyJimengVideoApi": "Zhenzhen Jimeng Video API",
+    "Comfly_Flux_Kontext": "Zhenzhen_Flux_Kontext",
+    "Comfly_Flux_Kontext_Edit": "Zhenzhen_Flux_Kontext_Edit",
+    "Comfly_Flux_Kontext_bfl": "Zhenzhen_Flux_Kontext_bfl",
+    "Comfly_Googel_Veo3": "Zhenzhen Google Veo3",
+    "Comfly_mj_video": "Zhenzhen MJ Video",
+    "Comfly_mj_video_extend": "Zhenzhen MJ Video Extend",
+    "Comfly_qwen_image": "Zhenzhen_qwen_image",
+    "Comfly_qwen_image_edit": "Zhenzhen_qwen_image_edit",
+    "Comfly_Doubao_Seedream": "Zhenzhen Doubao Seedream3.0",
+    "Comfly_Doubao_Seedream_4": "Zhenzhen Doubao Seedream4.0",
+    "Comfly_Doubao_Seededit": "Zhenzhen Doubao Seededit3.0",
+    "Comfly_MiniMax_video": "Zhenzhen MiniMax Hailuo Video",
+    "Comfly_suno_description": "Zhenzhen Suno Description",
+    "Comfly_suno_lyrics": "Zhenzhen Suno Lyrics",
+    "Comfly_suno_custom": "Zhenzhen Suno Custom",
+    "Comfly_suno_upload": "Zhenzhen Suno Upload",
+    "Comfly_suno_upload_extend": "Zhenzhen Suno Upload Extend", 
+    "Comfly_suno_cover": "Zhenzhen Suno Cover",
+    "Comfly_nano_banana": "Zhenzhen_nano_banana",
+    "Comfly_nano_banana_fal": "Zhenzhen_nano_banana_fal",
+    "Comfly_nano_banana_edit": "Zhenzhen_nano_banana_edit",
+    "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit"
 }
