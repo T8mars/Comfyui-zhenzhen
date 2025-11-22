@@ -37,7 +37,7 @@ from comfy_api.util import VideoComponents
 from comfy_api.input_impl import VideoFromComponents
 from fractions import Fraction
 
-api_base="https://ai.t8star.cn"
+baseurl = "https://ai.t8star.cn"
 
 def get_config():
     try:
