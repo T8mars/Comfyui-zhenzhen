@@ -39,6 +39,12 @@ Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251122
+
+Nano Banana 2模型4K价格下调到基准0.15元(rmb)
+Veo3.1及component模型价格从2.025下调到0.3元(rmb)
+Veo3.1 Pro模型价格从3元下调到1元(rmb)
+
 20251121-2
 
 新增节点：nano_banana2_edit
