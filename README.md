@@ -19,6 +19,12 @@ B站：https://www.bilibili.com/video/BV13MyPBzEjJ/
 
 Youtube：https://www.youtube.com/watch?v=J6Zg7SrU_BE
 
+# NanoBanana 2 4K使用教程(调价0.15)及VEO3.1调价到0.3
+
+Bilibili教程：https://www.bilibili.com/video/BV1g1ULBmEhA/
+
+Youtube教程：https://www.youtube.com/watch?v=MASUQv_SKGs
+
 # 通过Sora2全自动生成漫剧
 
 B站：https://www.bilibili.com/video/BV1pRCABsE9y/
@@ -32,6 +38,14 @@ B站：https://www.bilibili.com/video/BV16MChB8ERT/
 Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
 
 整合包V2：https://pan.quark.cn/s/86d82abd2f17
+
+# Sora2无限并发整合包V3以及故事板支持，角色客串分镜大师脚本
+
+B站：https://www.bilibili.com/video/BV1nzUWB9EKx/
+
+Youtube：https://www.youtube.com/watch?v=IZKLX1fyZIk
+
+整合包V3：https://pan.quark.cn/s/635ee1b917b6
 
 # 更新 Update：
 
