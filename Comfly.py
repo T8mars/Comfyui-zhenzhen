@@ -6,7 +6,7 @@ import tempfile
 import torch
 import torchaudio
 import requests
-import nest_asyncio
+#import nest_asyncio
 import time
 import numpy as np
 from PIL import Image
