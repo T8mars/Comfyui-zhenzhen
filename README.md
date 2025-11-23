@@ -57,7 +57,7 @@ Youtube：https://www.youtube.com/watch?v=hRpdlEWCOws
 
 B站：https://www.bilibili.com/video/BV1H3UuB2EJ3/
 
-Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho&t=3s
+Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
 
 # 更新 Update：
 
