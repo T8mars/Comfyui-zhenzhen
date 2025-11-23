@@ -47,11 +47,23 @@ Youtube：https://www.youtube.com/watch?v=IZKLX1fyZIk
 
 整合包V3：https://pan.quark.cn/s/635ee1b917b6
 
+# Nano Banana2 + Sora2 +Gemeni 3 Pro一致性自动分镜剧本+漫画+音频+视频
+
+B站：https://www.bilibili.com/video/BV1zhUKBKEAp/
+
+Youtube：https://www.youtube.com/watch?v=hRpdlEWCOws
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
+
+20251124
+
+注意，目前令牌分组default负载过大，4K容易出白图，推荐2K
+如需4K，在贞贞AI工坊网站左侧令牌-找到自己的令牌编辑，删除Default分组，添加优质分组，成功率大大提高
+报错429和报错500都是谷歌负载上限，并不扣费，如果遇到的是提示无法处理图片并扣费，这时候请去网站的日志里，找到对应任务点进去，实际已经生成完毕，目前在排查这个问题
 
 20251122
 
