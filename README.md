@@ -53,6 +53,12 @@ B站：https://www.bilibili.com/video/BV1zhUKBKEAp/
 
 Youtube：https://www.youtube.com/watch?v=hRpdlEWCOws
 
+# Nano Banana Pro白图及各种报错解决方法，api令牌渠道分组使用方式
+
+B站：https://www.bilibili.com/video/BV1H3UuB2EJ3/
+
+Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho&t=3s
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
