@@ -65,6 +65,11 @@ Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251124-2
+
+Nano Banana 2模型后端进行了调整，基本修复了出白图的问题，调整了格式，可以尝试使用Default或者和优质分组一起用
+Nano Banana 2 Edit节点新增AUTO模式，自动跟随图片尺寸比例，已默认
+
 20251124
 
 注意，目前令牌分组default负载过大，4K容易出白图，推荐2K
