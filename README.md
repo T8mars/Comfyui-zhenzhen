@@ -68,6 +68,7 @@ Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
 20251124-2
 
 Nano Banana 2模型后端进行了调整，基本修复了出白图的问题，调整了格式，可以尝试使用Default或者和优质分组一起用
+
 Nano Banana 2 Edit节点新增AUTO模式，自动跟随图片尺寸比例，已默认
 
 20251124
