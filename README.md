@@ -65,6 +65,13 @@ Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
+20251127
+
+新增Flux2相关节点，Flux_2_Flex，Flux_2_Pro
+新增Vidu相关节点，vidu_img2video，vidu_text2video，vidu_ref2video，vidu_start-end2video
+
+工作流晚上更新
+
 20251124-2
 
 Nano Banana 2模型后端进行了调整，基本修复了出白图的问题，调整了格式，可以尝试使用Default或者和优质分组一起用
