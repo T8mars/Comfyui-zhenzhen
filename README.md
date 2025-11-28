@@ -65,7 +65,7 @@ Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
-20251128
+### 20251128
 
 上线 Claude 最新模型 claude-opus-4-5-20251101，目前最强的推理模型之一，上架MinMax系列音频模型，上架Flux2 Pro和Flux2 Flex模型，上架Vidu多参，文生，图生，首尾帧模型
 
