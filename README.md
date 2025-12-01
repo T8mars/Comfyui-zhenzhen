@@ -4,7 +4,7 @@
 # 👋🏻 Welcome to Zhenzhen
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
-My favorite girl
+My favorite girl Go YounJung
 
 
 # 新版节点搭建，报错自查，API调用教程：
@@ -71,11 +71,11 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！
 
-由于NanoBanana Pro 4K的图像文件过大，在跨境下载时候容易导致失败，新增OSS设置
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/oss.png" width="70%" alt="new node">
+
+由于NanoBanana Pro 4K的图像文件过大，在跨境下载时候容易导致失败，新增OSS设置(对象存储服务)
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
-
-
 
 ### 20251130
 
