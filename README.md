@@ -10,7 +10,7 @@ My favorite girl Go YounJung
 
 网站使用教程：https://ai.t8star.cn/about
 
-API调用及开发教程https://ai.t8star.cn/api-set
+API调用及开发教程：https://ai.t8star.cn/api-set
 
 # 新版节点搭建，报错自查，API调用教程：
 
