@@ -86,6 +86,8 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 nano_banana2-edit节点新增模型nano-banana-2-2k，nano-banana-2-4k，如果用API调用时候，image_size参数不生效，主要用于由于谷歌问题导致的2K,4K出图变1K问题的备用方案，作为备用模型
 
+上架可灵视频O1模型，Z-image-tubro以及阿里的各种视频模型
+
 ### 20251130
 
 以下2个新模型扣费方式不太一样，使用前请注意下，因为都是官方渠道
