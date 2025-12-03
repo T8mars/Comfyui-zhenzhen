@@ -82,6 +82,10 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251203
+
+nano_banana2-edit节点新增模型nano-banana-2-2k，nano-banana-2-4k，如果用API调用时候，image_size参数不生效，主要用于由于谷歌问题导致的2K,4K出图变1K问题的备用方案，作为备用模型
+
 ### 20251130
 
 以下2个新模型扣费方式不太一样，使用前请注意下，因为都是官方渠道
