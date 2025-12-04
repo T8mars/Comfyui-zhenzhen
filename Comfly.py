@@ -4180,7 +4180,7 @@ class Comfly_Doubao_Seedream_4_5:
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
                 "model": ("STRING", {"default": "doubao-seedream-4-5-251128"}),
-                "response_format": (["url", "b64_json"], {"default": "url"}),
+                "response_format": (["url", "b64_json"], {"default": "b64_json"}),
                 "resolution": (["2K", "4K"], {"default": "2K"}),
             },
             "optional": {
