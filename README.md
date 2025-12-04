@@ -82,6 +82,11 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251205
+
+新增Zhenzhen Doubao Seedream4.5节点，可使用豆包4.5，出图速度比大香蕉2快多了，人物一致性好过大香蕉，基准0.15，支持2K和4K
+新增zhenzhen-doubao-seedream4_5_image_edit.json工作流
+
 ### 20251203
 
 nano_banana2-edit节点新增模型nano-banana-2-2k，nano-banana-2-4k，如果用API调用时候，image_size参数不生效，主要用于由于谷歌问题导致的2K,4K出图变1K问题的备用方案，作为备用模型
