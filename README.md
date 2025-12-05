@@ -82,6 +82,12 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251205-2
+
+修复veo3.1 component模型问题
+新增节点：Zhenzhen_Z_Image_Turbo
+工作流晚上回去发
+
 ### 20251205
 
 新增Zhenzhen Doubao Seedream4.5节点，可使用豆包4.5，出图速度比大香蕉2快多了，人物一致性好过大香蕉，基准0.15，支持2K和4K
