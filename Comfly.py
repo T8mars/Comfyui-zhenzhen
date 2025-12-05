@@ -13393,5 +13393,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana_fal": "Zhenzhen_nano_banana_fal",
     "Comfly_nano_banana_edit": "Zhenzhen_nano_banana_edit",
     "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit",
-    "Comfly_Z_image_turbo": "Zhenzhen_Image_Turbo"
+    "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo"
 }
