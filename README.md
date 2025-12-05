@@ -85,7 +85,8 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 ### 20251206-2
 
 新增工作流zhenzhen-Nano-Banana-2-Edit-S2A.json，同步转异步，支持异步任务，可在网站后台异步任务查询(nano banana pro)
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/s2a.jpg" width="100%" alt="new node">
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/s2a.png" width="100%" alt="new node">
 
 ### 20251206
 
