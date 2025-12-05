@@ -82,6 +82,10 @@ Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251206
+
+新增nano_banana2_edit_S2A节点，支持同步转异步模式，任务可在异步任务中查询了！同时可以通过任务ID回溯下载失败的图片URL地址！另外做了一些异常处理
+
 ### 20251205-2
 
 修复veo3.1 component模型问题
