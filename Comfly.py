@@ -9528,6 +9528,192 @@ class Comfly_qwen_image_edit:
             return (image, error_message, "")
 
 
+class Comfly_Z_image_turbo:
+    """
+    Comfly Z Image Turbo node
+    Generates images using Z Image Turbo API
+    """
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["z-image-turbo"], {"default": "z-image-turbo"}),
+                "size": (["512x512", "768x768", "1024x1024", "1280x720", "720x1280", "1536x1024", "1024x1536", "Custom"], {"default": "1024x1024"}),
+                "output_format": (["jpeg", "png", "webp"], {"default": "jpeg"}),
+            },
+            "optional": {
+                "custom_size": ("STRING", {"default": "1024x1024", "placeholder": "Enter custom size (e.g. 1280x720)"}),
+                "apikey": ("STRING", {"default": ""}),
+                "guidance_scale": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 20.0, "step": 0.04}),
+                "num_inference_steps": ("INT", {"default": 8, "min": 1, "max": 50, "step": 1}),
+                "output_quality": ("INT", {"default": 80, "min": 0, "max": 100, "step": 1}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Qwen"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def generate_image(self, prompt, model="z-image-turbo", size="1024x1024", output_format="jpg",
+                      custom_size="1024x1024", apikey="", guidance_scale=0.0, num_inference_steps=8,
+                      output_quality=80, seed=0):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+            
+        if not self.api_key:
+            error_message = "API key not found in Comflyapi.json"
+            print(error_message)
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, "", error_message)
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            actual_size = custom_size if size == "Custom" else size
+
+            if size == "Custom":
+                if "x" not in custom_size:
+                    error_message = "Custom size must be in format 'widthxheight' (e.g. 1280x720)"
+                    print(error_message)
+                    blank_image = Image.new('RGB', (1024, 1024), color='white')
+                    blank_tensor = pil2tensor(blank_image)
+                    return (blank_tensor, "", error_message)
+                
+                try:
+                    width, height = map(int, custom_size.split('x'))
+                    if width < 64 or width > 2048 or height < 64 or height > 2048:
+                        error_message = "Width and height must be between 64 and 2048"
+                        print(error_message)
+                        blank_image = Image.new('RGB', (1024, 1024), color='white')
+                        blank_tensor = pil2tensor(blank_image)
+                        return (blank_tensor, "", error_message)
+                except ValueError:
+                    error_message = "Invalid custom size format. Use 'widthxheight' (e.g. 1280x720)"
+                    print(error_message)
+                    blank_image = Image.new('RGB', (1024, 1024), color='white')
+                    blank_tensor = pil2tensor(blank_image)
+                    return (blank_tensor, "", error_message)
+
+            try:
+                width, height = map(int, actual_size.split('x'))
+            except:
+                width, height = 1024, 1024
+
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "size": actual_size,
+                "output_format": output_format,
+                "guidance_scale": guidance_scale,
+                "num_inference_steps": num_inference_steps,
+                "output_quality": output_quality
+            }
+            
+            if seed > 0:
+                payload["seed"] = seed
+            
+            pbar.update_absolute(30)
+
+            response = requests.post(
+                f"{baseurl}/v1/images/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            pbar.update_absolute(50)
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                blank_image = Image.new('RGB', (width, height), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, "", error_message)
+                
+            result = response.json()
+
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            response_info = f"**Z Image Turbo Generation ({timestamp})**\n\n"
+            response_info += f"Prompt: {prompt}\n"
+            response_info += f"Model: {model}\n"
+            response_info += f"Size: {actual_size}\n"
+            response_info += f"Output Format: {output_format}\n"
+            response_info += f"Guidance Scale: {guidance_scale}\n"
+            response_info += f"Steps: {num_inference_steps}\n"
+            response_info += f"Output Quality: {output_quality}\n"
+            response_info += f"Seed: {seed if seed > 0 else 'auto'}\n\n"
+            
+            image_url = ""
+            generated_image = None
+            
+            if "data" in result and result["data"]:
+                item = result["data"][0]
+                pbar.update_absolute(70)
+                
+                if "b64_json" in item:
+                    image_data = base64.b64decode(item["b64_json"])
+                    generated_image = Image.open(BytesIO(image_data))
+                elif "url" in item:
+                    image_url = item["url"]
+                    response_info += f"Image URL: {image_url}\n"
+                    try:
+                        img_response = requests.get(image_url, timeout=self.timeout)
+                        img_response.raise_for_status()
+                        generated_image = Image.open(BytesIO(img_response.content))
+                    except Exception as e:
+                        print(f"Error downloading image from URL: {str(e)}")
+                        response_info += f"Error: {str(e)}\n"
+            else:
+                error_message = "No image data in response"
+                print(error_message)
+                response_info += f"Error: {error_message}\n"
+                blank_image = Image.new('RGB', (width, height), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, "", response_info)
+            
+            pbar.update_absolute(90)
+            
+            if generated_image:
+                generated_tensor = pil2tensor(generated_image)
+                pbar.update_absolute(100)
+                return (generated_tensor, image_url, response_info)
+            else:
+                error_message = "Failed to process image"
+                print(error_message)
+                response_info += f"Error: {error_message}\n"
+                blank_image = Image.new('RGB', (width, height), color='white')
+                blank_tensor = pil2tensor(blank_image)
+                return (blank_tensor, "", response_info)
+                
+        except Exception as e:
+            error_message = f"Error in image generation: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, "", error_message)
+
+
+
 ############################# MiniMax ###########################
 
 class Comfly_MiniMax_video:
@@ -13148,7 +13334,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana": Comfly_nano_banana,
     "Comfly_nano_banana_fal": Comfly_nano_banana_fal,
     "Comfly_nano_banana_edit": Comfly_nano_banana_edit,
-    "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit
+    "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit,
+    "Comfly_Z_image_turbo": Comfly_Z_image_turbo
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -13205,5 +13392,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana": "Zhenzhen_nano_banana",
     "Comfly_nano_banana_fal": "Zhenzhen_nano_banana_fal",
     "Comfly_nano_banana_edit": "Zhenzhen_nano_banana_edit",
-    "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit"
+    "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit",
+    "Comfly_Z_image_turbo": "Zhenzhen_Image_Turbo"
 }
