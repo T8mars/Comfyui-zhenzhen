@@ -70,6 +70,12 @@ Bilibili教程：https://www.bilibili.com/video/BV1wUSmBfEhv/
 
 Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
 
+# NanoBanana Pro S2A异步任务节点使用教程（推荐）
+
+Bilibili教程：https://www.bilibili.com/video/BV1zs2WBjEsh/
+
+Youtube教程：https://www.youtube.com/watch?v=KB5NDfQ65Ug
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
