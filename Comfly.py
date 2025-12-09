@@ -14104,6 +14104,668 @@ class Comfly_nano_banana2_edit_S2A:
             return (blank_tensor, "", "", json.dumps({"status": "query_error", "task_id": task_id, "message": error_message}))
 
 
+class ComflyGrok3VideoApi:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["grok-video-3"], {"default": "grok-video-3"}),
+                "ratio": (["2:3", "3:2", "1:1"], {"default": "1:1"}),
+                "resolution": (["720P", "1080P"], {"default": "720P"}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "task_id", "response", "video_url")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Grok"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def upload_image(self, image_tensor):
+        """Upload image to the file endpoint and return the URL"""
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+
+            files = {'file': ('image.png', file_content, 'image/png')}
+
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if 'url' in result:
+                return result['url']
+            else:
+                print(f"Unexpected response from file upload API: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            return None
+    
+    def generate_video(self, prompt, model, ratio, resolution, api_key="", image=None, seed=0):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            return ("", "", json.dumps(error_response), "")
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "ratio": ratio,
+                "resolution": resolution
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            # Handle image input
+            image_url = None
+            if image is not None:
+                pbar.update_absolute(20)
+                image_url = self.upload_image(image)
+                if image_url:
+                    payload["images"] = [image_url]
+                else:
+                    error_message = "Failed to upload image. Please check your image and try again."
+                    print(error_message)
+                    return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+            pbar.update_absolute(30)
+            
+            # Submit video generation request
+            response = requests.post(
+                f"{baseurl}/v2/videos/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+                
+            result = response.json()
+            
+            # Extract task_id from response
+            task_id = result.get("task_id")
+            if not task_id:
+                error_message = "No task ID returned from API"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            pbar.update_absolute(40)
+            
+            # Poll for video generation completion
+            video_url = None
+            attempts = 0
+            max_attempts = 36  # Wait up to 3 minutes (36 * 5 seconds)
+            start_time = time.time()
+            max_wait_time = 300  # 5 minutes
+        
+            while attempts < max_attempts:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+
+                if elapsed_time > max_wait_time:
+                    error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
+                    print(error_message)
+                    return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                
+                time.sleep(5)  
+                attempts += 1
+                
+                try:
+                    # Query task status
+                    status_response = requests.get(
+                        f"{baseurl}/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                        
+                    status_result = status_response.json()
+                    
+                    # Check task status
+                    status = status_result.get("status", "UNKNOWN")
+                    
+                    # Update progress bar based on status
+                    if status == "IN_PROGRESS":
+                        progress = status_result.get("progress", "0%")
+                        try:
+                            if progress.endswith('%'):
+                                progress_num = int(progress.rstrip('%'))
+                                pbar_value = min(90, 40 + progress_num * 50 / 100)
+                                pbar.update_absolute(pbar_value)
+                        except (ValueError, AttributeError):
+                            progress_value = min(80, 40 + (attempts * 40 // max_attempts))
+                            pbar.update_absolute(progress_value)
+                    
+                    # Handle different statuses
+                    if status == "SUCCESS":
+                        # Extract video URL from successful response
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            break
+                        else:
+                            continue
+                    
+                    elif status == "FAILURE":
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(error_message)
+                        return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                    
+                    elif status in ["NOT_START", "IN_PROGRESS"]:
+                        continue
+                    else:
+                        continue
+                    
+                except requests.exceptions.Timeout:
+                    continue
+                except Exception as e:
+                    continue
+            
+            if not video_url:
+                error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
+                print(error_message)
+                return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+
+            if video_url:
+                pbar.update_absolute(95)
+                print(f"Video generation completed, URL: {video_url}")            
+                
+                # Return video adapter
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, task_id, json.dumps({"code": "success", "url": video_url}), video_url)
+            
+        except Exception as e:
+            error_message = f"Error generating video: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+class ComflyGrok3VideoApi:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["grok-video-3"], {"default": "grok-video-3"}),
+                "ratio": (["2:3", "3:2", "1:1"], {"default": "1:1"}),
+                "resolution": (["720P", "1080P"], {"default": "720P"}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "task_id", "response", "video_url")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Grok"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def upload_image(self, image_tensor):
+        """Upload image to the file endpoint and return the URL"""
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+
+            files = {'file': ('image.png', file_content, 'image/png')}
+
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if 'url' in result:
+                return result['url']
+            else:
+                print(f"Unexpected response from file upload API: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            return None
+    
+    def generate_video(self, prompt, model, ratio, resolution, api_key="", image=None, seed=0):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            return ("", "", json.dumps(error_response), "")
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "ratio": ratio,
+                "resolution": resolution
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            # Handle image input
+            image_url = None
+            if image is not None:
+                pbar.update_absolute(20)
+                image_url = self.upload_image(image)
+                if image_url:
+                    payload["images"] = [image_url]
+                else:
+                    error_message = "Failed to upload image. Please check your image and try again."
+                    print(error_message)
+                    return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+            pbar.update_absolute(30)
+            
+            # Submit video generation request
+            response = requests.post(
+                f"{baseurl}/v2/videos/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+                
+            result = response.json()
+            
+            # Extract task_id from response
+            task_id = result.get("task_id")
+            if not task_id:
+                error_message = "No task ID returned from API"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            pbar.update_absolute(40)
+            
+            # Poll for video generation completion
+            video_url = None
+            attempts = 0
+            max_attempts = 36  # Wait up to 3 minutes (36 * 5 seconds)
+            start_time = time.time()
+            max_wait_time = 300  # 5 minutes
+        
+            while attempts < max_attempts:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+
+                if elapsed_time > max_wait_time:
+                    error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
+                    print(error_message)
+                    return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                
+                time.sleep(5)  
+                attempts += 1
+                
+                try:
+                    # Query task status
+                    status_response = requests.get(
+                        f"{baseurl}/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                        
+                    status_result = status_response.json()
+                    
+                    # Check task status
+                    status = status_result.get("status", "UNKNOWN")
+                    
+                    # Update progress bar based on status
+                    if status == "IN_PROGRESS":
+                        progress = status_result.get("progress", "0%")
+                        try:
+                            if progress.endswith('%'):
+                                progress_num = int(progress.rstrip('%'))
+                                pbar_value = min(90, 40 + progress_num * 50 / 100)
+                                pbar.update_absolute(pbar_value)
+                        except (ValueError, AttributeError):
+                            progress_value = min(80, 40 + (attempts * 40 // max_attempts))
+                            pbar.update_absolute(progress_value)
+                    
+                    # Handle different statuses
+                    if status == "SUCCESS":
+                        # Extract video URL from successful response
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            break
+                        else:
+                            continue
+                    
+                    elif status == "FAILURE":
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(error_message)
+                        return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                    
+                    elif status in ["NOT_START", "IN_PROGRESS"]:
+                        continue
+                    else:
+                        continue
+                    
+                except requests.exceptions.Timeout:
+                    continue
+                except Exception as e:
+                    continue
+            
+            if not video_url:
+                error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
+                print(error_message)
+                return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+
+            if video_url:
+                pbar.update_absolute(95)
+                print(f"Video generation completed, URL: {video_url}")            
+                
+                # Return video adapter
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, task_id, json.dumps({"code": "success", "url": video_url}), video_url)
+            
+        except Exception as e:
+            error_message = f"Error generating video: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+
+
+
+class ComflyGrok3VideoApi:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["grok-video-3"], {"default": "grok-video-3"}),
+                "ratio": (["2:3", "3:2", "1:1"], {"default": "1:1"}),
+                "resolution": (["720P", "1080P"], {"default": "720P"}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "task_id", "response", "video_url")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Grok"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def upload_image(self, image_tensor):
+        """Upload image to the file endpoint and return the URL"""
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+
+            files = {'file': ('image.png', file_content, 'image/png')}
+
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if 'url' in result:
+                return result['url']
+            else:
+                print(f"Unexpected response from file upload API: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            return None
+    
+    def generate_video(self, prompt, model, ratio, resolution, api_key="", image=None, seed=0):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            return ("", "", json.dumps(error_response), "")
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "ratio": ratio,
+                "resolution": resolution
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            # Handle image input
+            image_url = None
+            if image is not None:
+                pbar.update_absolute(20)
+                image_url = self.upload_image(image)
+                if image_url:
+                    payload["images"] = [image_url]
+                else:
+                    error_message = "Failed to upload image. Please check your image and try again."
+                    print(error_message)
+                    return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+            pbar.update_absolute(30)
+            
+            # Submit video generation request
+            response = requests.post(
+                f"{baseurl}/v2/videos/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+                
+            result = response.json()
+            
+            # Extract task_id from response
+            task_id = result.get("task_id")
+            if not task_id:
+                error_message = "No task ID returned from API"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            pbar.update_absolute(40)
+            
+            # Poll for video generation completion
+            video_url = None
+            attempts = 0
+            max_attempts = 36  # Wait up to 3 minutes (36 * 5 seconds)
+            start_time = time.time()
+            max_wait_time = 300  # 5 minutes
+        
+            while attempts < max_attempts:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+
+                if elapsed_time > max_wait_time:
+                    error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
+                    print(error_message)
+                    return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                
+                time.sleep(5)  
+                attempts += 1
+                
+                try:
+                    # Query task status
+                    status_response = requests.get(
+                        f"{baseurl}/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                        
+                    status_result = status_response.json()
+                    
+                    # Check task status
+                    status = status_result.get("status", "UNKNOWN")
+                    
+                    # Update progress bar based on status
+                    if status == "IN_PROGRESS":
+                        progress = status_result.get("progress", "0%")
+                        try:
+                            if progress.endswith('%'):
+                                progress_num = int(progress.rstrip('%'))
+                                pbar_value = min(90, 40 + progress_num * 50 / 100)
+                                pbar.update_absolute(pbar_value)
+                        except (ValueError, AttributeError):
+                            progress_value = min(80, 40 + (attempts * 40 // max_attempts))
+                            pbar.update_absolute(progress_value)
+                    
+                    # Handle different statuses
+                    if status == "SUCCESS":
+                        # Extract video URL from successful response
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            break
+                        else:
+                            continue
+                    
+                    elif status == "FAILURE":
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(error_message)
+                        return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                    
+                    elif status in ["NOT_START", "IN_PROGRESS"]:
+                        continue
+                    else:
+                        continue
+                    
+                except requests.exceptions.Timeout:
+                    continue
+                except Exception as e:
+                    continue
+            
+            if not video_url:
+                error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
+                print(error_message)
+                return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+
+            if video_url:
+                pbar.update_absolute(95)
+                print(f"Video generation completed, URL: {video_url}")            
+                
+                # Return video adapter
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, task_id, json.dumps({"code": "success", "url": video_url}), video_url)
+            
+        except Exception as e:
+            error_message = f"Error generating video: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+
+
 
 
 WEB_DIRECTORY = "./web"    
@@ -14164,7 +14826,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana_edit": Comfly_nano_banana_edit,
     "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit,
     "Comfly_nano_banana2_edit_S2A": Comfly_nano_banana2_edit_S2A,
-    "Comfly_Z_image_turbo": Comfly_Z_image_turbo
+    "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
+    "ComflyGrok3VideoApi": ComflyGrok3VideoApi
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -14223,5 +14886,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana_edit": "Zhenzhen_nano_banana_edit",
     "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit",
     "Comfly_nano_banana2_edit_S2A": "Zhenzhen_nano_banana2_edit_S2A",
+    "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
     "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo"
 }

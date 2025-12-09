@@ -1,0 +1,466 @@
+{
+  "id": "242a6140-7341-49ca-876b-c01366b39b84",
+  "revision": 0,
+  "last_node_id": 101,
+  "last_link_id": 104,
+  "nodes": [
+    {
+      "id": 92,
+      "type": "Comfly_api_set",
+      "pos": [
+        -2213.067350548152,
+        391.2283152033372
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 89
+        }
+      ],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            100
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "a374cba455529175dfbe7205090b4bba15814bfe",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 87,
+      "type": "LoadImage",
+      "pos": [
+        -1858.2017467574362,
+        69.90667863264133
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            101
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "23ad81957915c488c5d29a952d13b024501d2a35fb12e11921c234ab759ca968.png",
+        "image"
+      ]
+    },
+    {
+      "id": 101,
+      "type": "easy showAnything",
+      "pos": [
+        -671.608905631869,
+        574.4680737304017
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://soruxgpt-saas-yimeng.soruxgpt.com/file_download/6d4aec71-5d25-4ffb-b9ad-b4f7a4da235f.mp4"
+      ]
+    },
+    {
+      "id": 97,
+      "type": "ComflyGrok3VideoApi",
+      "pos": [
+        -1562.51612941374,
+        396.236130568541
+      ],
+      "size": [
+        400,
+        292
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 101
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 100
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            98
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            102
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            103
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "T8mars/Comfyui-zhenzhen",
+        "ver": "18b3754d36e5b8db060efebd1b7dd4abb9cd5f91",
+        "Node name for S&R": "ComflyGrok3VideoApi"
+      },
+      "widgets_values": [
+        "女人说：T8，你在干嘛呀",
+        "grok-video-3",
+        "1:1",
+        "720P",
+        "",
+        1549414767,
+        "randomize"
+      ]
+    },
+    {
+      "id": 98,
+      "type": "SaveVideo",
+      "pos": [
+        -982.7639612772829,
+        64.17167761277291
+      ],
+      "size": [
+        536.4256424486844,
+        404.377441251022
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 98
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 99,
+      "type": "easy showAnything",
+      "pos": [
+        -915.4072077421799,
+        559.2591073920682
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 102
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "grok:c99dfc9b-edcf-4eba-aca9-b240702938c6"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "easy showAnything",
+      "pos": [
+        -916.1876012735983,
+        754.5176572842018
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 103
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"code\": \"success\", \"url\": \"https://soruxgpt-saas-yimeng.soruxgpt.com/file_download/6d4aec71-5d25-4ffb-b9ad-b4f7a4da235f.mp4\"}"
+      ]
+    },
+    {
+      "id": 93,
+      "type": "Note",
+      "pos": [
+        -2714.332535362082,
+        123.93728773256461
+      ],
+      "size": [
+        242.84572326965463,
+        123.50205732086079
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "api获取地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分，每天工作台签到送积分\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 90,
+      "type": "CR Prompt Text",
+      "pos": [
+        -2413.9510524338184,
+        64.11613043773859
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            89
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      89,
+      90,
+      0,
+      92,
+      0,
+      "STRING"
+    ],
+    [
+      98,
+      97,
+      0,
+      98,
+      0,
+      "VIDEO"
+    ],
+    [
+      100,
+      92,
+      0,
+      97,
+      1,
+      "STRING"
+    ],
+    [
+      101,
+      87,
+      0,
+      97,
+      0,
+      "IMAGE"
+    ],
+    [
+      102,
+      97,
+      1,
+      99,
+      0,
+      "*"
+    ],
+    [
+      103,
+      97,
+      2,
+      100,
+      0,
+      "*"
+    ],
+    [
+      104,
+      97,
+      3,
+      101,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube:T8star-Aix",
+      "bounding": [
+        -3060.765399083281,
+        -396.2282034264812,
+        2859.113137206591,
+        350.23877952853917
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.899573401737282,
+      "offset": [
+        3494.2831200567,
+        715.2309739911071
+      ]
+    },
+    "frontendVersion": "1.30.6",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
