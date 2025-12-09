@@ -88,6 +88,11 @@ Youtube教程：https://www.youtube.com/watch?v=KB5NDfQ65Ug
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251209
+
+新增Grok3-video节点，支持最新GORK文生视频和图生视频，支持音画同步，支持中文配音，已过滤nsfw内容，合规使用！新增对应的2个工作流
+今天下午谷歌砍了并发，导致目前一直分组上限，目前在逐步处理，推荐先用优质分组
+
 ### 20251206-2
 
 新增工作流zhenzhen-Nano-Banana-2-Edit-S2A.json，同步转异步，支持异步任务，可在网站后台异步任务查询(nano banana pro)
