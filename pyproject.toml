@@ -1,6 +1,6 @@
 [project]
 name = "zhenzhen"
-description = "I love GoYounJung!各种平价API，主要给粉丝朋友使用！B站：https://space.bilibili.com/385085361，网站：https://ai.t8star.cn/register?aff=dP7j"
+description = "I love GoYounJung!Most Cheap API to my fans friedns!Bilibili:https://space.bilibili.com/385085361,website:https://ai.t8star.cn/register?aff=dP7j"
 version = "1.0.1"
 license = {file = "LICENSE"} 
 # classifiers = [
