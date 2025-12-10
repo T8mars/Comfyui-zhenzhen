@@ -76,6 +76,13 @@ Bilibili教程：https://www.bilibili.com/video/BV1zs2WBjEsh/
 
 Youtube教程：https://www.youtube.com/watch?v=KB5NDfQ65Ug
 
+# Grok Video 3使用教程（文生视频/图生视频）
+
+Bilibili教程：https://www.bilibili.com/video/BV1SmmnBoEDz/
+
+Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
+
+
 # 更新 Update：
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">
