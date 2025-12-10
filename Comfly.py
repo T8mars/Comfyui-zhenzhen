@@ -14233,9 +14233,9 @@ class ComflyGrok3VideoApi:
             # Poll for video generation completion
             video_url = None
             attempts = 0
-            max_attempts = 36  # Wait up to 3 minutes (36 * 5 seconds)
+            max_attempts = 200  # Wait up to 3 minutes (36 * 5 seconds)
             start_time = time.time()
-            max_wait_time = 300  # 5 minutes
+            max_wait_time = 600  # 5 minutes
         
             while attempts < max_attempts:
                 current_time = time.time()
