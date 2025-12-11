@@ -30,11 +30,16 @@ Bilibili教程：https://www.bilibili.com/video/BV1g1ULBmEhA/
 
 Youtube教程：https://www.youtube.com/watch?v=MASUQv_SKGs
 
-# 通过Sora2全自动生成漫剧
+# 通过Sora2全自动生成漫剧(老版UI)
 
 B站：https://www.bilibili.com/video/BV1pRCABsE9y/
 
-Youtube：https://www.youtube.com/watch?v=LvvD5HkKqHM&t=13s&pp=0gcJCQMKAYcqIYzv
+Youtube：https://www.youtube.com/watch?v=LvvD5HkKqHM
+
+# 通过Sora2全自动生成真人短剧+动画漫剧(新版UI)
+
+B站：https://www.bilibili.com/video/BV1pRCABsE9y/
+Youtube：待更新
 
 # Sora2整合包以及多参角色客串和ID创建教程
 
