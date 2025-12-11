@@ -95,6 +95,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251211
+
+Nano-banana-2(Pro) 由于官方并发大幅缩减，目前正在大量增加并发，成本上涨，故NanoBanana Pro价格从0.15上调至0.2基准，gemini 3 pro image preview暂时不变，价格已经生效，望周知
+
 ### 20251209
 
 新增Grok3-video节点，支持最新GORK文生视频和图生视频，支持音画同步，支持中文配音，已过滤nsfw内容，合规使用！新增对应的2个工作流
