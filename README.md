@@ -106,6 +106,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 20251211
 
+Sora2 Pro 15S HD版和25S已经恢复使用，节点不变，基准2.5元
+
+### 20251211
+
 Nano-banana-2(Pro) 由于官方并发大幅缩减，目前正在大量增加并发，成本上涨，故NanoBanana Pro价格从0.15上调至0.2基准，gemini 3 pro image preview暂时不变，价格已经生效，望周知
 
 ### 20251209
