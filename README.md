@@ -104,7 +104,7 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
-### 20251211
+### 20251211-2
 
 Sora2 Pro 15S HD版和25S已经恢复使用，节点不变，基准2.5元
 
