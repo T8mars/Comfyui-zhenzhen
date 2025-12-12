@@ -1,7 +1,7 @@
 [project]
 name = "zhenzhen"
 description = "I love GoYounJung!Most Cheap API to my fans friedns!Bilibili:https://space.bilibili.com/385085361,website:https://ai.t8star.cn/register?aff=dP7j"
-version = "1.0.1"
+version = "1.0.2"
 license = {file = "LICENSE"} 
 # classifiers = [
 #     # For OS-independent nodes (works on all operating systems)
@@ -20,7 +20,7 @@ license = {file = "LICENSE"}
 #     "Environment :: GPU :: Apple Metal",    # Apple Metal support
 # ]
 
-dependencies = ["aiohttp", "aiohttp-cors", "GitPython", "numpy", "Pillow", "requests", "torch", "GitPython", "matrix-client", "transformers", "huggingface-hub", "psutil", "nest_asyncio"]
+dependencies = ["aiohttp", "aiohttp-cors", "GitPython", "numpy", "Pillow", "requests", "torch", "GitPython", "matrix-client", "transformers", "huggingface-hub", "psutil", "nest_asyncio", "openai"]
 
 [project.urls]
 Repository = "https://github.com/T8mars/Comfyui-zhenzhen"

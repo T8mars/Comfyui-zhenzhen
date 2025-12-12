@@ -11,3 +11,4 @@ transformers
 huggingface-hub
 psutil
 nest_asyncio
+openai

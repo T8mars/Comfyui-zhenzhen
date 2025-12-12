@@ -37,6 +37,12 @@ from comfy_api.util import VideoComponents
 from comfy_api.input_impl import VideoFromComponents
 from fractions import Fraction
 
+# For LLM API functionality
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
 baseurl = "https://ai.t8star.cn"
 
 def get_config():
@@ -14770,6 +14776,178 @@ class ComflyGrok3VideoApi:
 
 WEB_DIRECTORY = "./web"    
         
+def encode_image_b64(ref_image):
+    """
+    Encode ComfyUI IMAGE tensor to base64 JPEG without resizing.
+
+    Notes:
+    - Keep original resolution (no resize).
+    - Avoid temporary files (in-memory encoding).
+    """
+    i = 255.0 * ref_image.cpu().numpy()[0]
+    img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+
+    buf = io.BytesIO()
+    # Use JPEG to match the existing OpenAI-compatible payload mime label.
+    img.save(buf, format="JPEG", quality=95, optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
+def _get_video_file_path(video):
+    """
+    Try to extract a filesystem path from a ComfyUI VIDEO object.
+    Returns None if it cannot be resolved.
+    """
+    # VideoFromFile type (private attribute)
+    if hasattr(video, "_VideoFromFile__file"):
+        path = getattr(video, "_VideoFromFile__file", None)
+        if isinstance(path, str) and os.path.exists(path):
+            return path
+
+    # Stream-like sources
+    if hasattr(video, "get_stream_source"):
+        try:
+            stream_source = video.get_stream_source()
+            if isinstance(stream_source, str) and os.path.exists(stream_source):
+                return stream_source
+        except Exception:
+            pass
+
+    # Common attributes
+    for attr in ("path", "file"):
+        if hasattr(video, attr):
+            path = getattr(video, attr, None)
+            if isinstance(path, str) and os.path.exists(path):
+                return path
+
+    return None
+
+
+def encode_video_b64(video):
+    """
+    Encode ComfyUI VIDEO object to base64 MP4 bytes.
+
+    Notes:
+    - No ffmpeg processing, no compression, no resizing.
+    - If a file path is available, read it directly.
+    - Otherwise, try saving via save_to() to a temp mp4 and read back.
+    """
+    video_path = _get_video_file_path(video)
+    if video_path:
+        with open(video_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+
+    if hasattr(video, "save_to"):
+        temp_path = f"temp_video_{time.time()}.mp4"
+        try:
+            video.save_to(temp_path)
+            with open(temp_path, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
+        finally:
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except Exception:
+                pass
+
+    raise ValueError(f"Unable to read video data from object type: {type(video)}")
+
+
+class Comfly_LLm_API:
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "api_baseurl": ("STRING", {"multiline": True, "default": "https://ai.t8star.cn/v1"}),
+                "api_key": ("STRING", {"default": ""}),
+                "model": ("STRING", {"default": "gemini-3-pro-preview"}),
+                "role": ("STRING", {"multiline": True, "default": "You are a helpful assistant"}),
+                "prompt": ("STRING", {"multiline": True, "default": "describe the image"}),
+                "temperature": ("FLOAT", {"default": 0.6}),
+                "seed": ("INT", {"default": 100}),
+            },
+            "optional": {
+                "ref_image": ("IMAGE",),
+                "video": ("VIDEO",),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("describe",)
+    FUNCTION = "rh_run_llmapi"
+    CATEGORY = "zhenzhen/LLM"
+
+    def rh_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None):
+        if OpenAI is None:
+            return ("Error: OpenAI package not installed. Please install it with 'pip install openai'",)
+
+        client = OpenAI(api_key=api_key, base_url=api_baseurl)
+
+        # Priority: video > image > text (align with reference node behavior)
+        if video is not None:
+            try:
+                base64_video = encode_video_b64(video)
+                messages = [
+                    {'role': 'system', 'content': f'{role}'},
+                    {'role': 'user',
+                     'content': [
+                            {
+                                "type": "text",
+                                "text": f"{prompt}"
+                            },
+                            {
+                                "type": "video_url",
+                                "video_url": {
+                                    "url": f"data:video/mp4;base64,{base64_video}"
+                                }
+                            },
+                        ]},
+                ]
+            except Exception as e:
+                return (f"Error encoding video: {str(e)}",)
+        elif ref_image is None:
+            messages = [
+                {'role': 'system', 'content': f'{role}'},
+                {'role': 'user', 'content': f'{prompt}'},
+            ]
+        else:
+            try:
+                base64_image = encode_image_b64(ref_image)
+                messages = [
+                    {'role': 'system', 'content': f'{role}'},
+                    {'role': 'user', 
+                     'content': [
+                            {
+                                "type": "text",
+                                "text": f"{prompt}"
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            },
+                        ]},
+                ]
+            except Exception as e:
+                return (f"Error encoding image: {str(e)}",)
+        
+        try:
+            completion = client.chat.completions.create(model=model, messages=messages, temperature=temperature)
+            if completion is not None and hasattr(completion, 'choices'):
+                prompt_result = completion.choices[0].message.content
+            else:
+                prompt_result = 'Error: No response from API'
+        except Exception as e:
+            prompt_result = f'Error calling API: {str(e)}'
+            
+        return (prompt_result,)
+
+
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
@@ -14827,7 +15005,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit,
     "Comfly_nano_banana2_edit_S2A": Comfly_nano_banana2_edit_S2A,
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
-    "ComflyGrok3VideoApi": ComflyGrok3VideoApi
+    "ComflyGrok3VideoApi": ComflyGrok3VideoApi,
+    "Comfly_LLm_API": Comfly_LLm_API
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -14887,5 +15066,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana2_edit": "Zhenzhen_nano_banana2_edit",
     "Comfly_nano_banana2_edit_S2A": "Zhenzhen_nano_banana2_edit_S2A",
     "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
-    "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo"
+    "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo",
+    "Comfly_LLm_API": "Zhenzhen LLM API"
 }
