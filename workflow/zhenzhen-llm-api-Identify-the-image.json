@@ -1,0 +1,211 @@
+{
+  "id": "9ae6082b-c7f4-433c-9971-7a8f65a3ea65",
+  "revision": 0,
+  "last_node_id": 74,
+  "last_link_id": 84,
+  "nodes": [
+    {
+      "id": 68,
+      "type": "LoadImage",
+      "pos": [
+        814.6930322044947,
+        2177.066425863221
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            84
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.4.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "groceries.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 69,
+      "type": "easy showAnything",
+      "pos": [
+        1806.410668843015,
+        2182.246528696076
+      ],
+      "size": [
+        291.22255081423464,
+        183.77739809412287
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 78
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "这是一张展示了一辆银灰色SUV汽车后备箱内部的特写照片，后备箱门处于完全打开的状态。\n\n以下是详细的图片内容描述：\n\n**1. 主体：装满物品的后备箱**\n*   **购物袋：** 画面中最引人注目的是整齐排列在后备箱右侧的四个棕色牛皮纸购物袋。这些袋子看起来装得很满，里面似乎装着刚刚购买的日用品和食物。\n    *   最右边的袋子里可以看到一根长棍面包（法棍）伸出来，还有一些绿色的包装（可能是蔬菜或零食）。\n    *   紧挨着的袋子里露出了一些绿色的蔬菜叶子。\n    *   左边的两个袋子虽然没露出明显的物品，但也被撑得鼓鼓囊囊。\n*   **后备箱内部：**\n    *   后备箱底部铺着黑色的橡胶防滑垫，上面隐约可以看到“X-TRAIL”的字样，这表明这辆车是日产奇骏（Nissan X-Trail）。\n    *   后备箱左侧是空的，露出了米色的内饰板。\n    *   有一个可伸缩的后备箱遮物帘（米色）处于收起状态，横亘在后排座椅后方。\n*   **后排座椅：** 透过遮物帘上方，可以看到车辆的第二排座椅。座椅是米色的皮革材质，上面有三个头枕，看起来宽敞舒适。\n\n**2. 车辆外观细节**\n*   **尾灯：** 画面左右两侧可以看到车辆垂直设计的红色尾灯组，这是该车型的一个显著特征。左侧尾灯还可以看到部分透明的倒车灯/转向灯区域。\n*   **保险杠：** 车辆底部的后保险杠是银灰色的，上面带有倒车雷达的圆形传感器。最底部有一个银色的下护板，带有几个凸起的装饰设计，增加了车辆的越野感。右下方可以看到排气管的一角。\n*   **车身颜色：** 车辆整体呈现出一种金属质感的银灰色或香槟金色。\n\n**3. 背景与环境**\n*   **外部环境：** 透过车窗和打开的后备箱门，可以看到车辆停在一个半开放的户外区域，很可能是一个有顶棚的停车场或车库入口。\n*   **光线：** 光线明亮且自然，看起来是白天。光线从后方和上方照射进来，照亮了后备箱内部和购物袋。\n*   **远处景色：** 透过前挡风玻璃和侧窗，可以看到模糊的绿色树木，暗示周围环境可能有绿化带。背景中还能看到一些灰色的金属立柱结构。\n\n**总结：**\n这张照片传达了一种“满载而归”的生活气息，可能描绘了一个家庭刚刚结束超市购物，准备开车回家的场景。画面清晰，重点突出了车辆的载物能力和日常使用的实用性。"
+      ]
+    },
+    {
+      "id": 67,
+      "type": "Comfly_LLm_API",
+      "pos": [
+        1287.1984579577795,
+        2176.372932784637
+      ],
+      "size": [
+        400,
+        336
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 84
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "describe",
+          "type": "STRING",
+          "links": [
+            78
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "e3d0b73ec9792b4e250c07b12c0451e9d233157e",
+        "Node name for S&R": "Comfly_LLm_API"
+      },
+      "widgets_values": [
+        "https://ai.t8star.cn/v1",
+        "",
+        "gemini-3-pro-preview",
+        "You are a helpful assistant",
+        "详细的描述图片内容",
+        0.6,
+        991,
+        "randomize"
+      ]
+    },
+    {
+      "id": 70,
+      "type": "Note",
+      "pos": [
+        787.1695551096211,
+        2560.372438771623
+      ],
+      "size": [
+        298.9925492814855,
+        111.00628026082313
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分，每天左边工作台可以签到领积分，平价API\n\n登录网站-右上角模型价格-搜索你要的模型名字，进行反推或者扩写，反推的节点一定要带识别标签的哦"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      78,
+      67,
+      0,
+      69,
+      0,
+      "*"
+    ],
+    [
+      84,
+      68,
+      0,
+      67,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 6,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        220.1370504809976,
+        1664.8095258052301,
+        2969.2521276513385,
+        338.2774185112669
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0152145762931348,
+      "offset": [
+        -440.9832739215731,
+        -1846.6021584571445
+      ]
+    },
+    "frontendVersion": "1.33.13",
+    "workflowRendererVersion": "LG",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
