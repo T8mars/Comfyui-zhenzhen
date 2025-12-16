@@ -1,0 +1,526 @@
+{
+  "id": "9ae6082b-c7f4-433c-9971-7a8f65a3ea65",
+  "revision": 0,
+  "last_node_id": 97,
+  "last_link_id": 102,
+  "nodes": [
+    {
+      "id": 84,
+      "type": "easy showAnything",
+      "pos": [
+        3123.944704478194,
+        2710.5519565802692
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 95
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "19c5bf7f-2f1d-42d9-a5d7-3368ae692392"
+      ]
+    },
+    {
+      "id": 83,
+      "type": "easy showAnything",
+      "pos": [
+        3023.8635165051974,
+        2458.884227369038
+      ],
+      "size": [
+        347.58547658208636,
+        160.66231201779237
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 94
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://dashscope-result-sh.oss-accelerate.aliyuncs.com/1d/a5/20251217/d445d377/19c5bf7f-2f1d-42d9-a5d7-3368ae692392.mp4?Expires=1765990691&OSSAccessKeyId=LTAI5tKPD3TMqf2Lna1fASuh&Signature=roWP23Yu%2FBhcYSWEBiQObpLnogM%3D"
+      ]
+    },
+    {
+      "id": 82,
+      "type": "SaveVideo",
+      "pos": [
+        2526.8016120164343,
+        2718.359075627546
+      ],
+      "size": [
+        436.0683812656689,
+        631.1957472925844
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 93
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.4.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 81,
+      "type": "LoadImage",
+      "pos": [
+        1821.4285400842132,
+        2320.474433087704
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            98
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.4.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "38BB88F56E653FE33B4210DABE766DFF.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 93,
+      "type": "easy showAnything",
+      "pos": [
+        4783.508487319439,
+        2728.226874683529
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 99
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "19c5bf7f-2f1d-42d9-a5d7-3368ae692392"
+      ]
+    },
+    {
+      "id": 94,
+      "type": "easy showAnything",
+      "pos": [
+        4683.427299346443,
+        2476.5591454722976
+      ],
+      "size": [
+        347.58547658208636,
+        160.66231201779237
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 100
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://dashscope-result-sh.oss-accelerate.aliyuncs.com/1d/a5/20251217/d445d377/19c5bf7f-2f1d-42d9-a5d7-3368ae692392.mp4?Expires=1765990691&OSSAccessKeyId=LTAI5tKPD3TMqf2Lna1fASuh&Signature=roWP23Yu%2FBhcYSWEBiQObpLnogM%3D"
+      ]
+    },
+    {
+      "id": 95,
+      "type": "SaveVideo",
+      "pos": [
+        4186.365394857678,
+        2736.033993730806
+      ],
+      "size": [
+        436.0683812656689,
+        631.1957472925844
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 101
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.4.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 86,
+      "type": "Comfly_wan2_6_API",
+      "pos": [
+        2347.3839081000083,
+        2308.581833973078
+      ],
+      "size": [
+        400,
+        296
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 98
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            93
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            94
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            95
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "561dc74e9efc674f92605ce9c60810faaff8d3be",
+        "Node name for S&R": "Comfly_wan2_6_API"
+      },
+      "widgets_values": [
+        "美丽的女人的故事",
+        "",
+        "720P",
+        15,
+        "",
+        true,
+        "multi",
+        true
+      ]
+    },
+    {
+      "id": 96,
+      "type": "Comfly_wan2_6_API",
+      "pos": [
+        4006.947690941249,
+        2326.2567520763378
+      ],
+      "size": [
+        400,
+        296
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            101
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            100
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            99
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "561dc74e9efc674f92605ce9c60810faaff8d3be",
+        "Node name for S&R": "Comfly_wan2_6_API"
+      },
+      "widgets_values": [
+        "美丽的女人的故事",
+        "",
+        "720P",
+        15,
+        "",
+        true,
+        "multi",
+        true
+      ]
+    },
+    {
+      "id": 92,
+      "type": "Note",
+      "pos": [
+        1388.921623309907,
+        2391.1889371291186
+      ],
+      "size": [
+        334.45799712409803,
+        175.9588722866538
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "注意这是官方API版，阿里云百炼的版本，贞贞的还没上，我测试用的\n\n贞贞的AI工坊\nhttps://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分，每天工作台签到领积分"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      93,
+      86,
+      0,
+      82,
+      0,
+      "VIDEO"
+    ],
+    [
+      94,
+      86,
+      1,
+      83,
+      0,
+      "*"
+    ],
+    [
+      95,
+      86,
+      2,
+      84,
+      0,
+      "*"
+    ],
+    [
+      98,
+      81,
+      0,
+      86,
+      0,
+      "IMAGE"
+    ],
+    [
+      99,
+      96,
+      2,
+      93,
+      0,
+      "*"
+    ],
+    [
+      100,
+      96,
+      1,
+      94,
+      0,
+      "*"
+    ],
+    [
+      101,
+      96,
+      0,
+      95,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 6,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        1741.44670626261,
+        1801.8435253336504,
+        2969.2521276513385,
+        338.2774185112669
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "I2V",
+      "bounding": [
+        1811.4285400842132,
+        2234.981833973078,
+        1570.0204530030705,
+        1124.5729889470522
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "T2V",
+      "bounding": [
+        3470.992322925454,
+        2252.656752076338,
+        1570.0204530030705,
+        1124.5729889470522
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9229223420846784,
+      "offset": [
+        -1595.9371679470103,
+        -2033.7442677802485
+      ]
+    },
+    "frontendVersion": "1.33.13",
+    "workflowRendererVersion": "LG",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

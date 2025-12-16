@@ -25,6 +25,7 @@ import shutil
 import subprocess
 import threading
 import concurrent.futures
+import copy
 from .utils import pil2tensor, tensor2pil
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
@@ -6944,24 +6945,22 @@ class Comfly_sora2_chat:
             return ("", "", "", json.dumps({"status": "error", "message": error_message}))
 
 
-
 class Comfly_sora2_character:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
+                "video_url": ("STRING", {"multiline": False}),
                 "timestamps": ("STRING", {"default": "1,3", "multiline": False}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
             },
             "optional": {
-                "url": ("STRING", {"default": "", "multiline": False}),
-                "from_task": ("STRING", {"default": "", "multiline": False}),
                 "api_key": ("STRING", {"default": ""}),
             }
         }
     
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
-    RETURN_NAMES = ("id", "username", "permalink", "profile_picture_url", "response")
+    RETURN_NAMES = ("character_id", "username", "permalink", "profile_picture_url", "response")
     FUNCTION = "create_character"
     CATEGORY = "zhenzhen/Openai"
 
@@ -6975,7 +6974,7 @@ class Comfly_sora2_character:
             "Authorization": f"Bearer {self.api_key}"
         }
     
-    def create_character(self, timestamps="1,3", seed=0, url="", from_task="", api_key=""):
+    def create_character(self, video_url, timestamps="1,3", seed=0, api_key=""):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -6985,18 +6984,10 @@ class Comfly_sora2_character:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             return ("", "", "", "", json.dumps(error_response))
-
-        if url.strip() and from_task.strip():
-            error_response = {"status": "error", "message": "Parameters 'url' and 'from_task' are mutually exclusive. Please provide only one."}
-            return ("", "", "", "", json.dumps(error_response))
-
-        if not url.strip() and not from_task.strip():
-            error_response = {"status": "error", "message": "Either 'url' or 'from_task' parameter is required. Please provide one."}
-            return ("", "", "", "", json.dumps(error_response))
             
         try:
             if not timestamps or "," not in timestamps:
-                error_message = "Invalid timestamps format. Expected format: 'start,end' (e.g. '1,3')"
+                error_message = "Timestamps must be in format 'start,end' (e.g. '1,3')"
                 print(error_message)
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
@@ -7021,22 +7012,17 @@ class Comfly_sora2_character:
 
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
-
+            
             payload = {
+                "url": video_url,
                 "timestamps": timestamps
             }
-
-            if url.strip():
-                payload["url"] = url.strip()
-                print(f"Creating character from video URL: {url}")
-            elif from_task.strip():
-                payload["from_task"] = from_task.strip()
-                print(f"Creating character from task ID: {from_task}")
+            
+            if seed > 0:
+                payload["seed"] = seed
                 
             pbar.update_absolute(30)
             
-            print(f"Sending character creation request with payload: {json.dumps(payload)}")
-
             response = requests.post(
                 f"{baseurl}/sora/v1/characters",
                 headers=self.get_headers(),
@@ -7066,29 +7052,20 @@ class Comfly_sora2_character:
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(100)
-
+            
             response_data = {
                 "status": "success",
-                "id": character_id,
+                "character_id": character_id,
                 "username": username,
                 "permalink": permalink,
                 "profile_picture_url": profile_picture_url,
+                "video_url": video_url,
                 "timestamps": timestamps,
-                "duration": f"{duration:.1f}s"
+                "duration": f"{duration:.1f}s",
+                "seed": seed if seed > 0 else "auto"
             }
-
-            if url.strip():
-                response_data["source"] = "url"
-                response_data["url"] = url
-            else:
-                response_data["source"] = "from_task"
-                response_data["from_task"] = from_task
             
-            print(f"Character created successfully!")
-            print(f"Character ID: {character_id}")
-            print(f"Character username: {username}")
-            print(f"Usage: Use @{username} in your prompt to reference this character")
-            print(f"Example: @{username} dancing on stage")
+            print(f"Character created successfully. ID: {character_id}, Username: {username}")
             
             return (character_id, username, permalink, profile_picture_url, json.dumps(response_data))
             
@@ -7098,6 +7075,8 @@ class Comfly_sora2_character:
             import traceback
             traceback.print_exc()
             return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
+
+
 
 
 ############################# Flux ###########################
@@ -14824,19 +14803,73 @@ WEB_DIRECTORY = "./web"
         
 def encode_image_b64(ref_image):
     """
-    Encode ComfyUI IMAGE tensor to base64 JPEG without resizing.
-
-    Notes:
-    - Keep original resolution (no resize).
-    - Avoid temporary files (in-memory encoding).
+    Encode ComfyUI IMAGE tensor to base64 JPEG with compression optimization.
+    Apply wan.py strategy to reduce base64 size.
     """
-    i = 255.0 * ref_image.cpu().numpy()[0]
-    img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-
-    buf = io.BytesIO()
-    # Use JPEG to match the existing OpenAI-compatible payload mime label.
-    img.save(buf, format="JPEG", quality=95, optimize=True)
-    return base64.b64encode(buf.getvalue()).decode("utf-8")
+    try:
+        # Convert tensor to PIL Image
+        i = 255.0 * ref_image.cpu().numpy()[0]
+        img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+        
+        original_size = img.size
+        print(f"[LLM API] Original image size: {original_size[0]}x{original_size[1]}")
+        
+        # Apply size limit (same as wan.py)
+        max_dimension = 1536
+        if max(original_size) > max_dimension:
+            ratio = max_dimension / max(original_size)
+            new_size = (int(original_size[0] * ratio), int(original_size[1] * ratio))
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+            print(f"[LLM API] Resized image to: {new_size[0]}x{new_size[1]}")
+        
+        # Try multiple compression levels
+        formats_to_try = [
+            ('JPEG', {'quality': 75, 'optimize': True}),
+            ('JPEG', {'quality': 60, 'optimize': True}),
+            ('JPEG', {'quality': 50, 'optimize': True}),
+        ]
+        
+        best_result = None
+        smallest_size = float('inf')
+        
+        for format_name, save_kwargs in formats_to_try:
+            try:
+                buf = io.BytesIO()
+                img.save(buf, format=format_name, **save_kwargs)
+                img_bytes = buf.getvalue()
+                
+                if len(img_bytes) < smallest_size:
+                    smallest_size = len(img_bytes)
+                    best_result = base64.b64encode(img_bytes).decode('utf-8')
+                    
+                    base64_size_mb = len(best_result) / (1024 * 1024)
+                    print(f"[LLM API] Quality {save_kwargs['quality']}: {base64_size_mb:.2f}MB base64")
+                    
+                    # If small enough, use it
+                    if base64_size_mb < 2.0:
+                        break
+            except Exception as e:
+                print(f"[LLM API] Failed encoding with quality {save_kwargs['quality']}: {e}")
+                continue
+        
+        if best_result:
+            final_size_mb = len(best_result) / (1024 * 1024)
+            print(f"[LLM API] Final image base64 size: {final_size_mb:.2f}MB")
+            return best_result
+        else:
+            # Fallback to simple encoding
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=75, optimize=True)
+            return base64.b64encode(buf.getvalue()).decode("utf-8")
+            
+    except Exception as e:
+        print(f"[LLM API] Error encoding image: {str(e)}")
+        # Fallback to original simple method
+        i = 255.0 * ref_image.cpu().numpy()[0]
+        img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=75, optimize=True)
+        return base64.b64encode(buf.getvalue()).decode("utf-8")
 
 
 def _get_video_file_path(video):
@@ -14871,32 +14904,125 @@ def _get_video_file_path(video):
 
 def encode_video_b64(video):
     """
-    Encode ComfyUI VIDEO object to base64 MP4 bytes.
-
-    Notes:
-    - No ffmpeg processing, no compression, no resizing.
-    - If a file path is available, read it directly.
-    - Otherwise, try saving via save_to() to a temp mp4 and read back.
+    Encode ComfyUI VIDEO object to base64 MP4 bytes with compression.
+    Apply ffmpeg compression to reduce base64 size.
     """
     video_path = _get_video_file_path(video)
-    if video_path:
-        with open(video_path, "rb") as f:
-            return base64.b64encode(f.read()).decode("utf-8")
-
-    if hasattr(video, "save_to"):
-        temp_path = f"temp_video_{time.time()}.mp4"
-        try:
-            video.save_to(temp_path)
-            with open(temp_path, "rb") as f:
-                return base64.b64encode(f.read()).decode("utf-8")
-        finally:
+    temp_original = None
+    
+    # If no path, save to temp file first
+    if not video_path:
+        if hasattr(video, "save_to"):
+            temp_original = f"temp_video_original_{time.time()}.mp4"
             try:
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
-            except Exception:
-                pass
-
-    raise ValueError(f"Unable to read video data from object type: {type(video)}")
+                video.save_to(temp_original)
+                video_path = temp_original
+            except Exception as e:
+                print(f"[LLM API] Error saving video: {str(e)}")
+                raise ValueError(f"Unable to save video: {str(e)}")
+        else:
+            raise ValueError(f"Unable to read video data from object type: {type(video)}")
+    
+    # Get original video info
+    try:
+        probe_cmd = [
+            'ffprobe', '-v', 'error',
+            '-select_streams', 'v:0',
+            '-show_entries', 'stream=width,height,duration',
+            '-of', 'json',
+            video_path
+        ]
+        probe_result = subprocess.run(probe_cmd, capture_output=True, text=True)
+        if probe_result.returncode == 0:
+            import json
+            probe_data = json.loads(probe_result.stdout)
+            if 'streams' in probe_data and len(probe_data['streams']) > 0:
+                stream = probe_data['streams'][0]
+                width = stream.get('width', 0)
+                height = stream.get('height', 0)
+                duration = float(stream.get('duration', 0))
+                print(f"[LLM API] Original video: {width}x{height}, {duration:.1f}s")
+    except Exception as e:
+        print(f"[LLM API] Could not probe video: {e}")
+    
+    # Get original file size
+    try:
+        original_size_mb = os.path.getsize(video_path) / (1024 * 1024)
+        print(f"[LLM API] Original video file size: {original_size_mb:.2f}MB")
+    except:
+        original_size_mb = 0
+    
+    # Compress video using ffmpeg
+    compressed_path = f"temp_video_compressed_{time.time()}.mp4"
+    
+    try:
+        # Compression strategy:
+        # 1. Extract only first 5 seconds (sufficient for analysis)
+        # 2. Limit resolution to 720p max (1280x720)
+        # 3. Lower bitrate to 400k
+        # 4. Reduce frame rate to 10fps
+        # 5. Use fast encoding preset
+        compress_cmd = [
+            'ffmpeg', '-i', video_path,
+            '-t', '5',  # Only first 5 seconds
+            '-vf', 'scale=\'min(1280,iw)\':-2',  # Max width 1280, keep aspect ratio
+            '-c:v', 'libx264',
+            '-preset', 'fast',
+            '-crf', '30',  # Higher CRF = more compression
+            '-b:v', '400k',  # Limit video bitrate
+            '-maxrate', '400k',
+            '-bufsize', '800k',
+            '-r', '10',  # 10 fps (reduced for smaller size)
+            '-an',  # Remove audio to save size
+            '-y',  # Overwrite output
+            compressed_path
+        ]
+        
+        print(f"[LLM API] Compressing video (first 5s only) with ffmpeg...")
+        result = subprocess.run(compress_cmd, capture_output=True, text=True, timeout=60)
+        
+        if result.returncode != 0:
+            print(f"[LLM API] FFmpeg compression failed: {result.stderr}")
+            # Fallback: use original video
+            final_path = video_path
+        else:
+            compressed_size_mb = os.path.getsize(compressed_path) / (1024 * 1024)
+            print(f"[LLM API] Compressed video size: {compressed_size_mb:.2f}MB (reduced {((original_size_mb - compressed_size_mb) / original_size_mb * 100):.1f}%)")
+            final_path = compressed_path
+            
+    except FileNotFoundError:
+        print(f"[LLM API] Warning: ffmpeg not found, using original video without compression")
+        final_path = video_path
+    except subprocess.TimeoutExpired:
+        print(f"[LLM API] Warning: ffmpeg timeout, using original video")
+        final_path = video_path
+    except Exception as e:
+        print(f"[LLM API] Warning: compression failed ({str(e)}), using original video")
+        final_path = video_path
+    
+    # Read and encode to base64
+    try:
+        with open(final_path, "rb") as f:
+            video_bytes = f.read()
+            base64_data = base64.b64encode(video_bytes).decode("utf-8")
+            
+        base64_size_mb = len(base64_data) / (1024 * 1024)
+        print(f"[LLM API] Final video base64 size: {base64_size_mb:.2f}MB")
+        
+        if base64_size_mb > 10.0:
+            print(f"[LLM API] Warning: Base64 size is very large ({base64_size_mb:.2f}MB), may cause API issues")
+        
+        return base64_data
+        
+    finally:
+        # Cleanup temp files
+        try:
+            if temp_original and os.path.exists(temp_original):
+                os.remove(temp_original)
+            if os.path.exists(compressed_path):
+                os.remove(compressed_path)
+        except Exception:
+            pass
 
 
 class Comfly_LLm_API:
@@ -14924,10 +15050,10 @@ class Comfly_LLm_API:
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("describe",)
-    FUNCTION = "rh_run_llmapi"
+    FUNCTION = "Zhenzhen_run_llmapi"
     CATEGORY = "zhenzhen/LLM"
 
-    def rh_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None):
+    def Zhenzhen_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None):
         if OpenAI is None:
             return ("Error: OpenAI package not installed. Please install it with 'pip install openai'",)
 
@@ -14936,7 +15062,14 @@ class Comfly_LLm_API:
         # Priority: video > image > text (align with reference node behavior)
         if video is not None:
             try:
+                print(f"[LLM API] Processing video input...")
                 base64_video = encode_video_b64(video)
+                
+                # Log base64 info (truncated)
+                base64_preview = base64_video[:100] + f"...[total {len(base64_video)} chars]"
+                print(f"[LLM API] Video base64 preview: {base64_preview}")
+                print(f"[LLM API] Sending video to model: {model}")
+                
                 messages = [
                     {'role': 'system', 'content': f'{role}'},
                     {'role': 'user',
@@ -14953,8 +15086,22 @@ class Comfly_LLm_API:
                             },
                         ]},
                 ]
+                
+                # Log message structure (without full base64)
+                debug_messages = copy.deepcopy(messages)
+                for msg in debug_messages:
+                    if 'content' in msg and isinstance(msg['content'], list):
+                        for item in msg['content']:
+                            if item.get('type') == 'video_url':
+                                item['video_url']['url'] = f"data:video/mp4;base64,[{len(base64_video)} chars]"
+                print(f"[LLM API] Request messages structure: {json.dumps(debug_messages, indent=2, ensure_ascii=False)}")
+                
             except Exception as e:
-                return (f"Error encoding video: {str(e)}",)
+                error_msg = f"Error encoding video: {str(e)}"
+                print(f"[LLM API] {error_msg}")
+                import traceback
+                traceback.print_exc()
+                return (error_msg,)
         elif ref_image is None:
             messages = [
                 {'role': 'system', 'content': f'{role}'},
@@ -14962,7 +15109,10 @@ class Comfly_LLm_API:
             ]
         else:
             try:
+                print(f"[LLM API] Processing image input...")
                 base64_image = encode_image_b64(ref_image)
+                print(f"[LLM API] Image base64 size: {len(base64_image) / (1024*1024):.2f}MB")
+                
                 messages = [
                     {'role': 'system', 'content': f'{role}'},
                     {'role': 'user', 
@@ -14980,37 +15130,51 @@ class Comfly_LLm_API:
                         ]},
                 ]
             except Exception as e:
-                return (f"Error encoding image: {str(e)}",)
+                error_msg = f"Error encoding image: {str(e)}"
+                print(f"[LLM API] {error_msg}")
+                return (error_msg,)
         
         try:
+            print(f"[LLM API] Calling API: {api_baseurl}")
+            print(f"[LLM API] Model: {model}")
             completion = client.chat.completions.create(model=model, messages=messages, temperature=temperature)
+            
             if completion is not None and hasattr(completion, 'choices'):
                 prompt_result = completion.choices[0].message.content
+                print(f"[LLM API] Response received: {len(prompt_result)} chars")
             else:
                 prompt_result = 'Error: No response from API'
+                print(f"[LLM API] {prompt_result}")
         except Exception as e:
             prompt_result = f'Error calling API: {str(e)}'
+            print(f"[LLM API] API call failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
             
         return (prompt_result,)
 
 
 
 class Comfly_wan2_6_API:
+    def __init__(self):
+        self.timeout = 300
+        self.api_key = ''
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True, "default": "一幅都市奇幻艺术的场景。一个充满动感的涂鸦艺术角色。一个由喷漆所画成的少年,正从一面混凝土墙上活过来。他一边用极快的语速演唱一首英文rap,一边摆着一个经典的、充满活力的说唱歌手姿势。场景设定在夜晚一个充满都市感的铁路桥下。灯光来自一盏孤零零的街灯,营造出电影般的氛围,充满高能量和惊人的细节。视频的音频部分完全由他的rap构成,没有其他对话或杂音。"}),
                 "api_key": ("STRING", {"default": ""}),
-                "resolution": (["720P", "1080P"], {"default": "720P"}),
-                "duration": ([5, 10, 15], {"default": 10}),  # wan2.6 only supports 5, 10, 15
+                "resolution": (["1080P", "720P"], {"default": "1080P"}),
+                "duration": ([5, 10, 15], {"default": 5}),
             },
             "optional": {
                 "image": ("IMAGE",),
-                "image_url": ("STRING", {"default": ""}),  # Allow direct HTTP URL input for testing
                 "audio_url": ("STRING", {"default": ""}),
                 "prompt_extend": ("BOOLEAN", {"default": True}),
                 "shot_type": (["single", "multi"], {"default": "multi"}),
+                "audio_enabled": ("BOOLEAN", {"default": True}),
             }
         }
 
@@ -15019,113 +15183,105 @@ class Comfly_wan2_6_API:
     FUNCTION = "generate_video"
     CATEGORY = "zhenzhen/wanx"
 
-    def __init__(self):
-        self.timeout = 300
-
-    def upload_image_to_oss(self, image_tensor, api_key):
-        """Upload image to Aliyun OSS and get temporary URL"""
-        if image_tensor is None:
-            return None
-            
+    def convert_image_to_base64(self, image_tensor):
+        """Convert image tensor to base64 data URL - exactly as wan.py"""
         try:
-            # Convert tensor to PIL image
-            pil_image = tensor2pil(image_tensor)[0]
-            width, height = pil_image.size
-            print(f"Original image size: {width}x{height}, mode: {pil_image.mode}")
+            # Convert tensor to PIL Image
+            if isinstance(image_tensor, torch.Tensor):
+                # Handle batch dimension
+                if len(image_tensor.shape) == 4:
+                    image_tensor = image_tensor[0]
+                
+                # Convert from [C, H, W] to [H, W, C] if needed
+                if image_tensor.shape[0] == 3:
+                    image_tensor = image_tensor.permute(1, 2, 0)
+                
+                # Convert to numpy and ensure correct range
+                image_np = image_tensor.cpu().numpy()
+                if image_np.max() <= 1.0:
+                    image_np = (image_np * 255).astype('uint8')
+                
+                image = Image.fromarray(image_np)
+            else:
+                image = image_tensor
+
+            # Get original image info
+            original_size = image.size
+            print(f"[Zhenzhen_WanVideo INFO] Original image size: {original_size[0]}x{original_size[1]}")
             
-            # Convert to RGB if needed
-            if pil_image.mode != 'RGB':
-                if pil_image.mode == 'RGBA':
-                    rgb_image = Image.new('RGB', pil_image.size, (255, 255, 255))
-                    rgb_image.paste(pil_image, mask=pil_image.split()[3])
-                    pil_image = rgb_image
-                else:
-                    pil_image = pil_image.convert('RGB')
-                print(f"Converted to RGB mode")
+            # Optimize image size to reduce Base64 length
+            max_dimension = 1536
             
-            # Save to temporary file
-            import tempfile
-            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
-                pil_image.save(tmp_file, format="JPEG", quality=95)
-                tmp_path = tmp_file.name
+            if max(original_size) > max_dimension:
+                # Calculate new size while maintaining aspect ratio
+                ratio = max_dimension / max(original_size)
+                new_size = (int(original_size[0] * ratio), int(original_size[1] * ratio))
+                image = image.resize(new_size, Image.Resampling.LANCZOS)
+                print(f"[Zhenzhen_WanVideo INFO] Resized image to: {new_size[0]}x{new_size[1]}")
+
+            # Try JPEG format with quality optimization
+            formats_to_try = [
+                ('JPEG', 'image/jpeg', {'quality': 75, 'optimize': True}),
+                ('JPEG', 'image/jpeg', {'quality': 60, 'optimize': True}),
+                ('PNG', 'image/png', {'optimize': True})
+            ]
             
-            try:
-                # Step 1: Get upload policy
-                print("Getting upload policy...")
-                policy_url = "https://dashscope.aliyuncs.com/api/v1/uploads"
-                policy_headers = {
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                }
-                policy_params = {
-                    "action": "getPolicy",
-                    "model": "wan2.6-i2v"
-                }
-                
-                policy_response = requests.get(policy_url, headers=policy_headers, params=policy_params)
-                if policy_response.status_code != 200:
-                    print(f"Failed to get upload policy: {policy_response.text}")
-                    return None
-                
-                policy_data = policy_response.json()['data']
-                
-                # Step 2: Upload file to OSS
-                print("Uploading image to OSS...")
-                file_name = f"comfyui_image_{int(time.time())}.jpg"
-                key = f"{policy_data['upload_dir']}/{file_name}"
-                
-                # Debug: print policy data
-                print(f"Upload dir: {policy_data['upload_dir']}")
-                print(f"Key: {key}")
-                
-                with open(tmp_path, 'rb') as file:
-                    files = {
-                        'OSSAccessKeyId': (None, policy_data['oss_access_key_id']),
-                        'Signature': (None, policy_data['signature']),
-                        'policy': (None, policy_data['policy']),
-                        'x-oss-object-acl': (None, policy_data['x_oss_object_acl']),
-                        'x-oss-forbid-overwrite': (None, policy_data['x_oss_forbid_overwrite']),
-                        'key': (None, key),
-                        'success_action_status': (None, '200'),
-                        'file': (file_name, file)
-                    }
+            best_result = None
+            smallest_size = float('inf')
+            
+            for format_name, mime_type, save_kwargs in formats_to_try:
+                try:
+                    img_byte_arr = BytesIO()
                     
-                    upload_response = requests.post(policy_data['upload_host'], files=files)
-                    if upload_response.status_code != 200:
-                        print(f"Failed to upload file: {upload_response.text}")
-                        return None
-                
-                # Construct OSS URL: policy response should contain bucket info
-                # The upload_dir already contains the full path after bucket
-                # Format should be: oss://bucket/path (bucket is in upload_dir prefix)
-                if 'upload_dir' in policy_data:
-                    # upload_dir format might be: bucket/path or just path
-                    # Ensure we have the complete oss:// URL
-                    oss_url = f"oss://{key}"
-                else:
-                    print("Warning: upload_dir not found in policy_data")
-                    oss_url = f"oss://{key}"
+                    # Handle JPEG format (doesn't support transparency)
+                    if format_name == 'JPEG' and image.mode in ('RGBA', 'LA'):
+                        # Convert RGBA to RGB with white background
+                        jpeg_image = Image.new('RGB', image.size, 'white')
+                        if image.mode == 'RGBA':
+                            jpeg_image.paste(image, mask=image.split()[-1])
+                        else:
+                            jpeg_image.paste(image)
+                        jpeg_image.save(img_byte_arr, format=format_name, **save_kwargs)
+                    else:
+                        image.save(img_byte_arr, format=format_name, **save_kwargs)
                     
-                print(f"Image uploaded successfully: {oss_url}")
-                print(f"Valid for 48 hours")
-                
-                # Return OSS URL directly (format: oss://bucket/path/file.jpg)
-                # DO NOT convert to HTTP URL - use oss:// format as per documentation
-                return oss_url
-                
-            finally:
-                # Clean up temporary file
-                import os
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)
+                    img_byte_arr.seek(0)
+                    image_bytes = img_byte_arr.read()
                     
+                    # Check if this format gives smaller result
+                    if len(image_bytes) < smallest_size:
+                        smallest_size = len(image_bytes)
+                        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+                        best_result = f"data:{mime_type};base64,{image_base64}"
+                        
+                        # Calculate base64 size in MB
+                        base64_size_mb = len(image_base64) / (1024 * 1024)
+                        print(f"[Zhenzhen_WanVideo INFO] {format_name} format: {base64_size_mb:.2f}MB base64")
+                        
+                        # If JPEG is small enough, use it
+                        if format_name == 'JPEG' and base64_size_mb < 2.0:
+                            break
+                            
+                except Exception as format_error:
+                    print(f"[Zhenzhen_WanVideo WARNING] Failed to save as {format_name}: {format_error}")
+                    continue
+            
+            if best_result:
+                final_size_mb = len(best_result.split(',')[1]) / (1024 * 1024)
+                print(f"[Zhenzhen_WanVideo INFO] Final base64 size: {final_size_mb:.2f}MB")
+                
+                if final_size_mb > 3.0:
+                    print(f"[Zhenzhen_WanVideo WARNING] Base64 data is large ({final_size_mb:.2f}MB), may cause API issues")
+                
+                return best_result
+            else:
+                raise Exception("Failed to encode image in any supported format")
+                
         except Exception as e:
-            print(f"Error uploading image to OSS: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            print(f"[Zhenzhen_WanVideo ERROR] Image base64 conversion error: {str(e)}")
             return None
 
-    def generate_video(self, prompt, api_key, resolution, duration, image=None, image_url="", audio_url="", prompt_extend=True, shot_type="multi"):
+    def generate_video(self, prompt, api_key, resolution, duration, image=None, audio_url="", prompt_extend=True, shot_type="multi", audio_enabled=True):
         if not api_key.strip():
             config = get_config()
             api_key = config.get('api_key', '')
@@ -15138,145 +15294,172 @@ class Comfly_wan2_6_API:
         self.api_key = api_key
         
         try:
-            # Determine image URL: priority is image_url > image (upload to OSS)
-            img_url = None
-            if image_url and image_url.strip():
-                # Use provided HTTP URL directly
-                img_url = image_url.strip()
-                print(f"Using provided image URL: {img_url}")
-            elif image is not None:
-                # Upload image to OSS
-                img_url = self.upload_image_to_oss(image, api_key)
-                if not img_url:
-                    error_msg = "Failed to upload image to OSS"
-                    print(error_msg)
-                    return (EmptyVideoAdapter(), error_msg, "")
+            # Validate prompt
+            if not prompt or prompt.strip() == "":
+                raise ValueError("Prompt cannot be empty")
             
-            # Prepare payload - strictly follow curl example structure
-            payload = {
+            if len(prompt) > 1500:
+                raise ValueError(f"Prompt too long ({len(prompt)} chars). Max 1500 characters")
+            
+            # Convert image to base64 (exactly as wan.py)
+            image_url = None
+            if image is not None:
+                image_url = self.convert_image_to_base64(image)
+                if not image_url:
+                    raise ValueError("Failed to convert image to base64")
+                print(f"[Zhenzhen_Wan26_I2V INFO] Image converted to base64 successfully")
+            
+            # Prepare request body (exactly matching wan.py structure)
+            request_body = {
                 "model": "wan2.6-i2v",
                 "input": {
                     "prompt": prompt
                 },
                 "parameters": {
-                    "resolution": resolution,
                     "prompt_extend": prompt_extend,
+                    "resolution": resolution,
                     "duration": duration
                 }
             }
             
-            # Add shot_type only for wan2.6
+            # Add image URL (inside input object)
+            if image_url:
+                request_body["input"]["img_url"] = image_url
+            
+            # Add shot_type
             if shot_type:
-                payload["parameters"]["shot_type"] = shot_type
+                request_body["parameters"]["shot_type"] = shot_type
             
-            # Add image URL if available
-            if img_url:
-                payload["input"]["img_url"] = img_url
-            
-            # Audio handling: audio_url takes priority
+            # Add audio
             if audio_url and audio_url.strip():
-                payload["input"]["audio_url"] = audio_url
-                payload["parameters"]["audio"] = True
+                request_body["input"]["audio_url"] = audio_url
+                request_body["parameters"]["audio"] = True
             else:
-                payload["parameters"]["audio"] = False
+                request_body["parameters"]["audio"] = audio_enabled
             
-            # Submit video generation task
+            # Submit task (exactly as wan.py)
             url = "https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis"
+            
             headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-                "X-DashScope-Async": "enable",
-                "X-DashScope-OssResourceResolve": "enable"  # Required for OSS URL
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json',
+                'X-DashScope-Async': 'enable'
             }
             
-            # Debug: Print request info (without full base64)
-            debug_payload = dict(payload)
-            if 'input' in debug_payload and 'img_url' in debug_payload['input']:
-                img_url = debug_payload['input']['img_url']
-                if img_url and len(img_url) > 100:
-                    debug_payload['input']['img_url'] = f"{img_url[:50]}... (truncated, total length: {len(img_url)})"
-            print(f"Request payload: {debug_payload}")
+            # Log with truncated base64
+            log_body = copy.deepcopy(request_body)
+            if "input" in log_body and "img_url" in log_body["input"]:
+                img_url = log_body["input"]["img_url"]
+                if img_url and img_url.startswith("data:image/"):
+                    base64_part = img_url.split(",", 1)
+                    if len(base64_part) > 1:
+                        truncated = base64_part[0] + "," + base64_part[1][:50] + f"...[{len(base64_part[1])} chars]"
+                        log_body["input"]["img_url"] = truncated
             
-            print("Submitting video generation request...")
-            response = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+            print(f"[Zhenzhen_WanVideo INFO] Request body: {json.dumps(log_body, indent=2, ensure_ascii=False)}")
+            print(f"[Zhenzhen_WanVideo INFO] Sending request to: {url}")
             
-            # Check for errors and print detailed error message
-            if response.status_code != 200:
-                error_detail = response.text
-                try:
-                    error_json = response.json()
-                    error_msg = f"API request failed (status {response.status_code}): {error_json}"
-                except:
-                    error_msg = f"API request failed (status {response.status_code}): {error_detail}"
-                print(error_msg)
-                return (EmptyVideoAdapter(), error_msg, "")
+            response = requests.post(url, headers=headers, json=request_body, timeout=60)
             
-            response.raise_for_status()
-            result = response.json()
-            
-            if 'output' not in result or 'task_id' not in result['output']:
-                error_msg = f"Failed to get task ID from response: {result}"
-                print(error_msg)
-                return (EmptyVideoAdapter(), error_msg, "")
-                
-            task_id = result['output']['task_id']
-            print(f"Task submitted successfully. Task ID: {task_id}")
-            
-            # Poll for task completion
-            video_url = self.poll_task_status(task_id)
-            
-            if video_url:
-                # Create video adapter
-                video_adapter = ComflyVideoAdapter(video_url)
-                return (video_adapter, video_url, task_id)
+            if response.status_code == 200:
+                result = response.json()
+                task_id = result.get('output', {}).get('task_id')
+                if task_id:
+                    print(f"[Zhenzhen_WanVideo INFO] Task created. Task ID: {task_id}")
+                    
+                    # Poll for result
+                    video_url = self.poll_task_status(task_id)
+                    
+                    if video_url:
+                        print(f"[Zhenzhen_WanVideo INFO] Downloading video from: {video_url}")
+                        video_adapter = ComflyVideoAdapter(video_url)
+                        return (video_adapter, video_url, task_id)
+                    else:
+                        error_msg = "Failed to generate video"
+                        print(error_msg)
+                        return (EmptyVideoAdapter(), error_msg, task_id)
+                else:
+                    print(f"[Zhenzhen_WanVideo ERROR] No task ID: {result}")
+                    return (EmptyVideoAdapter(), "No task ID in response", "")
             else:
-                error_msg = "Failed to generate video"
-                print(error_msg)
-                return (EmptyVideoAdapter(), error_msg, task_id)
+                # Error handling
+                status_code = response.status_code
+                error_message = "Unknown error"
+                
+                try:
+                    if response.text:
+                        response_json = response.json()
+                        if isinstance(response_json, dict):
+                            if 'message' in response_json:
+                                error_message = str(response_json['message'])
+                            elif 'error' in response_json:
+                                error_obj = response_json['error']
+                                if isinstance(error_obj, dict) and 'message' in error_obj:
+                                    error_message = str(error_obj['message'])
+                                else:
+                                    error_message = str(error_obj)
+                            
+                            if len(error_message) > 200:
+                                error_message = error_message[:200] + "..."
+                except:
+                    error_message = response.text[:200] if response.text else "No details"
+                
+                print(f"[Zhenzhen_WanVideo ERROR] API error ({status_code}): {error_message}")
+                return (EmptyVideoAdapter(), f"API error: {status_code} - {error_message}", "")
                 
         except Exception as e:
-            error_msg = f"Error in video generation: {str(e)}"
-            print(error_msg)
-            return (EmptyVideoAdapter(), error_msg, "")
+            print(f"[Zhenzhen_WanVideo ERROR] Video generation error: {str(e)}")
+            return (EmptyVideoAdapter(), str(e), "")
 
     def poll_task_status(self, task_id):
-        """Poll task status until completion or failure"""
-        url = f"https://dashscope.aliyuncs.com/api/v1/tasks/{task_id}"
-        headers = {"Authorization": f"Bearer {self.api_key}"}
+        """Poll task status (exactly as wan.py)"""
+        query_url = f"https://dashscope.aliyuncs.com/api/v1/tasks/{task_id}"
+        headers = {'Authorization': f'Bearer {self.api_key}'}
         
-        max_attempts = 60  # Maximum polling attempts
-        attempt = 0
+        max_poll_time = 300
+        poll_interval = 10
+        start_time = time.time()
         
-        while attempt < max_attempts:
+        while time.time() - start_time < max_poll_time:
             try:
-                response = requests.get(url, headers=headers, timeout=self.timeout)
-                response.raise_for_status()
-                result = response.json()
+                print(f"[Zhenzhen_WanVideo INFO] Querying task: {query_url}")
+                response = requests.get(query_url, headers=headers, timeout=30)
                 
-                if 'output' in result and 'task_status' in result['output']:
-                    status = result['output']['task_status']
-                    print(f"Task status: {status}")
+                if response.status_code == 200:
+                    result = response.json()
+                    task_status = result.get('output', {}).get('task_status')
                     
-                    if status == 'SUCCEEDED':
-                        if 'video_url' in result['output']:
-                            return result['output']['video_url']
+                    if task_status == 'SUCCEEDED':
+                        video_url = result.get('output', {}).get('video_url')
+                        if video_url:
+                            print(f"[Zhenzhen_WanVideo INFO] Video ready: {video_url}")
+                            return video_url
                         else:
-                            print(f"No video URL in successful response: {result}")
+                            print(f"[Zhenzhen_WanVideo ERROR] No video URL: {result}")
                             return None
-                    elif status == 'FAILED':
-                        error_msg = result['output'].get('message', 'Task failed')
-                        print(f"Task failed: {error_msg}")
+                    elif task_status == 'FAILED':
+                        error_msg = result.get('output', {}).get('message', 'Unknown error')
+                        print(f"[Zhenzhen_WanVideo ERROR] Task failed: {error_msg}")
                         return None
+                    elif task_status in ['PENDING', 'RUNNING']:
+                        elapsed = time.time() - start_time
+                        remaining = max_poll_time - elapsed
+                        print(f"[Zhenzhen_WanVideo INFO] Status: {task_status} ({elapsed:.1f}s elapsed, {remaining:.1f}s remaining)")
+                        time.sleep(poll_interval)
+                        continue
+                    else:
+                        print(f"[Zhenzhen_WanVideo WARNING] Unknown status: {task_status}")
+                        time.sleep(poll_interval)
+                        continue
                 else:
-                    print(f"Unexpected response structure: {result}")
+                    print(f"[Zhenzhen_WanVideo ERROR] Query failed: {response.status_code}")
+                    return None
                     
             except Exception as e:
-                print(f"Error polling task status: {str(e)}")
-                
-            attempt += 1
-            time.sleep(5)  # Wait 5 seconds before next poll
-            
-        print("Task polling timeout")
+                print(f"[Zhenzhen_WanVideo ERROR] Query error: {str(e)}")
+                return None
+        
+        print("[Zhenzhen_WanVideo ERROR] Polling timeout")
         return None
 
 

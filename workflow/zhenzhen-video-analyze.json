@@ -1,0 +1,283 @@
+{
+  "id": "9ae6082b-c7f4-433c-9971-7a8f65a3ea65",
+  "revision": 0,
+  "last_node_id": 99,
+  "last_link_id": 102,
+  "nodes": [
+    {
+      "id": 91,
+      "type": "easy showAnything",
+      "pos": [
+        2315.4996828778303,
+        2331.411941380403
+      ],
+      "size": [
+        461.18394594162237,
+        237.33202814579226
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 97
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "e900c2ca9c0d90b0896881910ca7f3f02d88ebd8",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "这段视频展现了一个充满梦幻与未来感的动画场景，主角是一只粉红色的拟人化卡通兔子（类似宝可梦中的“伊布”），它正驾驶着一辆极具科技感的飞行摩托，在空中高速穿梭。\n\n**画面细节描述：**\n\n- **主角形象**：这只粉色兔子拥有大大的黑色眼睛、尖尖的耳朵和一条长长的尾巴，整体造型可爱又灵动。它身穿一套贴身的粉色机械装甲，手握飞行摩托的把手，表情专注而兴奋，仿佛正在享受一场刺激的空中竞速。\n  \n- **载具设计**：它所骑乘的飞行摩托呈流线型，主体为银色金属质感，点缀着紫色和蓝色的霓虹光效，车头有圆形发光装置，尾部喷射出柔和的白色气流，暗示其强大的推进力。整个摩托悬浮在一团蓬松柔软的粉色云朵之上，云朵像棉花糖一样轻盈飘逸，与角色和载具形成视觉上的和谐统一。\n\n- **背景环境**：镜头以动态跟拍的方式跟随主角飞行，背景是模糊化的未来都市景观——高耸入云的建筑群层层叠叠，色彩斑斓，带有强烈的赛博朋克风格，闪烁着霓虹灯带和全息投影效果。天空湛蓝，阳光明媚，营造出一种既科幻又童话般的氛围。\n\n- **运动感与节奏**：由于采用了运动模糊特效，背景快速向后掠过，强化了速度感和沉浸感。粉色云朵随着飞行微微晃动，增强了画面的动感与真实感。\n\n**整体风格**：\n视频融合了可爱萌系角色、高科技元素与梦幻色彩，呈现出一种“甜酷”（Sweet-Cyber）美学，适合用于游戏宣传片、动画开场或虚拟偶像表演等场景。整个画面洋溢着活力、自由与想象力，令人感受到一种逃离现实、遨游未来的畅快体验。\n\n---\n\n✅ 总结：这是一个充满童趣与未来幻想的动画片段，主角粉色兔子驾驶飞行摩托穿越霓虹都市，视觉冲击力强，风格鲜明，极具吸引力。"
+      ]
+    },
+    {
+      "id": 88,
+      "type": "LoadVideo",
+      "pos": [
+        1362.4543299741297,
+        2298.656611711123
+      ],
+      "size": [
+        270,
+        254
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            96
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.4.0",
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        "1-1.mp4",
+        "image"
+      ]
+    },
+    {
+      "id": 87,
+      "type": "Comfly_LLm_API",
+      "pos": [
+        1740.0840997213784,
+        2301.2531292372455
+      ],
+      "size": [
+        400,
+        336
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 96
+        },
+        {
+          "name": "api_key",
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 102
+        }
+      ],
+      "outputs": [
+        {
+          "name": "describe",
+          "type": "STRING",
+          "links": [
+            97
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "561dc74e9efc674f92605ce9c60810faaff8d3be",
+        "Node name for S&R": "Comfly_LLm_API"
+      },
+      "widgets_values": [
+        "https://ai.t8star.cn/v1",
+        "sk-scmCw4c2sC3s313144444444444444444",
+        "qwen3-vl-plus",
+        "你是个视频分析助手",
+        "详细描述这个视频内容",
+        0.6,
+        1400,
+        "randomize"
+      ]
+    },
+    {
+      "id": 99,
+      "type": "CR Prompt Text",
+      "pos": [
+        1314.7068171227572,
+        2666.545853087976
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            102
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 97,
+      "type": "Note",
+      "pos": [
+        959.5762106438285,
+        2283.894753043838
+      ],
+      "size": [
+        329.0504583359782,
+        132.65996263446823
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "贞贞的AI工坊\nhttps://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分，每天工作台签到领积分"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 98,
+      "type": "Note",
+      "pos": [
+        962.4300506363845,
+        2636.350657697276
+      ],
+      "size": [
+        329.0504583359782,
+        132.65996263446823
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "apikey\n模型不要随便换，不是每个模型都支持视频分析"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      96,
+      88,
+      0,
+      87,
+      1,
+      "VIDEO"
+    ],
+    [
+      97,
+      87,
+      0,
+      91,
+      0,
+      "*"
+    ],
+    [
+      102,
+      99,
+      0,
+      87,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 6,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        220.1370504809976,
+        1664.8095258052301,
+        2969.2521276513385,
+        338.2774185112669
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0152145762931448,
+      "offset": [
+        -687.1384726764848,
+        -1892.2653930962338
+      ]
+    },
+    "frontendVersion": "1.33.13",
+    "workflowRendererVersion": "LG",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
