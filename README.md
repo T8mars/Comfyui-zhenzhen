@@ -106,6 +106,15 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251217
+
+新增节点wan2_6_API，支持官方百炼的APIKEY，暂时贞贞网站还没上，我测试用的，支持文生和图生视频，工作流已更新到workflow目录下
+llm_api节点重写视频识别部分，目前已正常支持视频反推，工作流已更新到workflow目录下
+
+### 20251216-2
+
+修复代码冗余导致的节点加载异常
+
 ### 20251216
 
 sora2_character新增from_task参数输入框：可以直接把sora2生成的真人视频的task id直接输入进去创建角色。
