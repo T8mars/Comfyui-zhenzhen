@@ -106,6 +106,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251216
+
+sora2_character新增from_task参数输入框：可以直接把sora2生成的真人视频的task id直接输入进去创建角色。
+
 ### 20251213-2
 
 今天openai服务器问题导致sora2一直失败（应该是GPT5.2太火爆），导致的负载不够，并非我们问题，SORA2只能多抽卡或者等官方恢复后使用，并非我们问题
