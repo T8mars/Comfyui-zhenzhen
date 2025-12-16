@@ -154,6 +154,30 @@ class ComflyVideoAdapter:
                 return False
 
 
+class EmptyVideoAdapter:
+    """Empty video adapter for error cases"""
+    def __init__(self):
+        self.is_empty = True
+        
+    def get_dimensions(self):
+        return 1, 1  # Minimal dimensions
+    
+    def save_to(self, output_path, format="auto", codec="auto", metadata=None):
+        # Create a minimal black video file
+        try:
+            import numpy as np
+            # Create a 1x1 black frame
+            frame = np.zeros((1, 1, 3), dtype=np.uint8)
+            # Write a minimal video using opencv
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(output_path, fourcc, 1.0, (1, 1))
+            out.write(frame)
+            out.release()
+            return True
+        except:
+            return False
+
+
 def create_audio_object(audio_url):
     """Create an audio object compatible with ComfyUI's audio nodes"""
     if not audio_url:
@@ -14970,6 +14994,292 @@ class Comfly_LLm_API:
         return (prompt_result,)
 
 
+
+class Comfly_wan2_6_API:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": "一幅都市奇幻艺术的场景。一个充满动感的涂鸦艺术角色。一个由喷漆所画成的少年,正从一面混凝土墙上活过来。他一边用极快的语速演唱一首英文rap,一边摆着一个经典的、充满活力的说唱歌手姿势。场景设定在夜晚一个充满都市感的铁路桥下。灯光来自一盏孤零零的街灯,营造出电影般的氛围,充满高能量和惊人的细节。视频的音频部分完全由他的rap构成,没有其他对话或杂音。"}),
+                "api_key": ("STRING", {"default": ""}),
+                "resolution": (["720P", "1080P"], {"default": "720P"}),
+                "duration": ([5, 10, 15], {"default": 10}),  # wan2.6 only supports 5, 10, 15
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "image_url": ("STRING", {"default": ""}),  # Allow direct HTTP URL input for testing
+                "audio_url": ("STRING", {"default": ""}),
+                "prompt_extend": ("BOOLEAN", {"default": True}),
+                "shot_type": (["single", "multi"], {"default": "multi"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/wanx"
+
+    def __init__(self):
+        self.timeout = 300
+
+    def upload_image_to_oss(self, image_tensor, api_key):
+        """Upload image to Aliyun OSS and get temporary URL"""
+        if image_tensor is None:
+            return None
+            
+        try:
+            # Convert tensor to PIL image
+            pil_image = tensor2pil(image_tensor)[0]
+            width, height = pil_image.size
+            print(f"Original image size: {width}x{height}, mode: {pil_image.mode}")
+            
+            # Convert to RGB if needed
+            if pil_image.mode != 'RGB':
+                if pil_image.mode == 'RGBA':
+                    rgb_image = Image.new('RGB', pil_image.size, (255, 255, 255))
+                    rgb_image.paste(pil_image, mask=pil_image.split()[3])
+                    pil_image = rgb_image
+                else:
+                    pil_image = pil_image.convert('RGB')
+                print(f"Converted to RGB mode")
+            
+            # Save to temporary file
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
+                pil_image.save(tmp_file, format="JPEG", quality=95)
+                tmp_path = tmp_file.name
+            
+            try:
+                # Step 1: Get upload policy
+                print("Getting upload policy...")
+                policy_url = "https://dashscope.aliyuncs.com/api/v1/uploads"
+                policy_headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                }
+                policy_params = {
+                    "action": "getPolicy",
+                    "model": "wan2.6-i2v"
+                }
+                
+                policy_response = requests.get(policy_url, headers=policy_headers, params=policy_params)
+                if policy_response.status_code != 200:
+                    print(f"Failed to get upload policy: {policy_response.text}")
+                    return None
+                
+                policy_data = policy_response.json()['data']
+                
+                # Step 2: Upload file to OSS
+                print("Uploading image to OSS...")
+                file_name = f"comfyui_image_{int(time.time())}.jpg"
+                key = f"{policy_data['upload_dir']}/{file_name}"
+                
+                # Debug: print policy data
+                print(f"Upload dir: {policy_data['upload_dir']}")
+                print(f"Key: {key}")
+                
+                with open(tmp_path, 'rb') as file:
+                    files = {
+                        'OSSAccessKeyId': (None, policy_data['oss_access_key_id']),
+                        'Signature': (None, policy_data['signature']),
+                        'policy': (None, policy_data['policy']),
+                        'x-oss-object-acl': (None, policy_data['x_oss_object_acl']),
+                        'x-oss-forbid-overwrite': (None, policy_data['x_oss_forbid_overwrite']),
+                        'key': (None, key),
+                        'success_action_status': (None, '200'),
+                        'file': (file_name, file)
+                    }
+                    
+                    upload_response = requests.post(policy_data['upload_host'], files=files)
+                    if upload_response.status_code != 200:
+                        print(f"Failed to upload file: {upload_response.text}")
+                        return None
+                
+                # Construct OSS URL: policy response should contain bucket info
+                # The upload_dir already contains the full path after bucket
+                # Format should be: oss://bucket/path (bucket is in upload_dir prefix)
+                if 'upload_dir' in policy_data:
+                    # upload_dir format might be: bucket/path or just path
+                    # Ensure we have the complete oss:// URL
+                    oss_url = f"oss://{key}"
+                else:
+                    print("Warning: upload_dir not found in policy_data")
+                    oss_url = f"oss://{key}"
+                    
+                print(f"Image uploaded successfully: {oss_url}")
+                print(f"Valid for 48 hours")
+                
+                # Return OSS URL directly (format: oss://bucket/path/file.jpg)
+                # DO NOT convert to HTTP URL - use oss:// format as per documentation
+                return oss_url
+                
+            finally:
+                # Clean up temporary file
+                import os
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                    
+        except Exception as e:
+            print(f"Error uploading image to OSS: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def generate_video(self, prompt, api_key, resolution, duration, image=None, image_url="", audio_url="", prompt_extend=True, shot_type="multi"):
+        if not api_key.strip():
+            config = get_config()
+            api_key = config.get('api_key', '')
+            
+        if not api_key:
+            error_msg = "API key not found. Please provide an API key."
+            print(error_msg)
+            return (EmptyVideoAdapter(), error_msg, "")
+            
+        self.api_key = api_key
+        
+        try:
+            # Determine image URL: priority is image_url > image (upload to OSS)
+            img_url = None
+            if image_url and image_url.strip():
+                # Use provided HTTP URL directly
+                img_url = image_url.strip()
+                print(f"Using provided image URL: {img_url}")
+            elif image is not None:
+                # Upload image to OSS
+                img_url = self.upload_image_to_oss(image, api_key)
+                if not img_url:
+                    error_msg = "Failed to upload image to OSS"
+                    print(error_msg)
+                    return (EmptyVideoAdapter(), error_msg, "")
+            
+            # Prepare payload - strictly follow curl example structure
+            payload = {
+                "model": "wan2.6-i2v",
+                "input": {
+                    "prompt": prompt
+                },
+                "parameters": {
+                    "resolution": resolution,
+                    "prompt_extend": prompt_extend,
+                    "duration": duration
+                }
+            }
+            
+            # Add shot_type only for wan2.6
+            if shot_type:
+                payload["parameters"]["shot_type"] = shot_type
+            
+            # Add image URL if available
+            if img_url:
+                payload["input"]["img_url"] = img_url
+            
+            # Audio handling: audio_url takes priority
+            if audio_url and audio_url.strip():
+                payload["input"]["audio_url"] = audio_url
+                payload["parameters"]["audio"] = True
+            else:
+                payload["parameters"]["audio"] = False
+            
+            # Submit video generation task
+            url = "https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "X-DashScope-Async": "enable",
+                "X-DashScope-OssResourceResolve": "enable"  # Required for OSS URL
+            }
+            
+            # Debug: Print request info (without full base64)
+            debug_payload = dict(payload)
+            if 'input' in debug_payload and 'img_url' in debug_payload['input']:
+                img_url = debug_payload['input']['img_url']
+                if img_url and len(img_url) > 100:
+                    debug_payload['input']['img_url'] = f"{img_url[:50]}... (truncated, total length: {len(img_url)})"
+            print(f"Request payload: {debug_payload}")
+            
+            print("Submitting video generation request...")
+            response = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+            
+            # Check for errors and print detailed error message
+            if response.status_code != 200:
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    error_msg = f"API request failed (status {response.status_code}): {error_json}"
+                except:
+                    error_msg = f"API request failed (status {response.status_code}): {error_detail}"
+                print(error_msg)
+                return (EmptyVideoAdapter(), error_msg, "")
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if 'output' not in result or 'task_id' not in result['output']:
+                error_msg = f"Failed to get task ID from response: {result}"
+                print(error_msg)
+                return (EmptyVideoAdapter(), error_msg, "")
+                
+            task_id = result['output']['task_id']
+            print(f"Task submitted successfully. Task ID: {task_id}")
+            
+            # Poll for task completion
+            video_url = self.poll_task_status(task_id)
+            
+            if video_url:
+                # Create video adapter
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, video_url, task_id)
+            else:
+                error_msg = "Failed to generate video"
+                print(error_msg)
+                return (EmptyVideoAdapter(), error_msg, task_id)
+                
+        except Exception as e:
+            error_msg = f"Error in video generation: {str(e)}"
+            print(error_msg)
+            return (EmptyVideoAdapter(), error_msg, "")
+
+    def poll_task_status(self, task_id):
+        """Poll task status until completion or failure"""
+        url = f"https://dashscope.aliyuncs.com/api/v1/tasks/{task_id}"
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        
+        max_attempts = 60  # Maximum polling attempts
+        attempt = 0
+        
+        while attempt < max_attempts:
+            try:
+                response = requests.get(url, headers=headers, timeout=self.timeout)
+                response.raise_for_status()
+                result = response.json()
+                
+                if 'output' in result and 'task_status' in result['output']:
+                    status = result['output']['task_status']
+                    print(f"Task status: {status}")
+                    
+                    if status == 'SUCCEEDED':
+                        if 'video_url' in result['output']:
+                            return result['output']['video_url']
+                        else:
+                            print(f"No video URL in successful response: {result}")
+                            return None
+                    elif status == 'FAILED':
+                        error_msg = result['output'].get('message', 'Task failed')
+                        print(f"Task failed: {error_msg}")
+                        return None
+                else:
+                    print(f"Unexpected response structure: {result}")
+                    
+            except Exception as e:
+                print(f"Error polling task status: {str(e)}")
+                
+            attempt += 1
+            time.sleep(5)  # Wait 5 seconds before next poll
+            
+        print("Task polling timeout")
+        return None
+
+
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
@@ -15028,8 +15338,11 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana2_edit_S2A": Comfly_nano_banana2_edit_S2A,
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
     "ComflyGrok3VideoApi": ComflyGrok3VideoApi,
-    "Comfly_LLm_API": Comfly_LLm_API
+    "Comfly_LLm_API": Comfly_LLm_API,
+    "Comfly_wan2_6_API": Comfly_wan2_6_API
 }
+
+
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_api_set": "Zhenzhen API Settings",
@@ -15089,5 +15402,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana2_edit_S2A": "Zhenzhen_nano_banana2_edit_S2A",
     "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
     "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo",
-    "Comfly_LLm_API": "Zhenzhen LLM API"
+    "Comfly_LLm_API": "Zhenzhen LLM API",
+    "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video"
 }
+
+# Aliyun WanX 2.6 API Node
+# BASEURL is fixed to Aliyun official API
+
+__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
