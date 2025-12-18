@@ -5420,7 +5420,7 @@ class Comfly_gpt_image_1_edit:
             "optional": {
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
-                "model": ("STRING", {"default": "gpt-image-1"}),
+                "model": (["gpt-image-1", "gpt-image-1.5"], {"default": "gpt-image-1"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "size": (["auto", "1024x1024", "1536x1024", "1024x1536"], {"default": "auto"}),
@@ -5777,7 +5777,7 @@ class Comfly_gpt_image_1:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "model": ("STRING", {"default": "gpt-image-1"}),
+                "model": (["gpt-image-1", "gpt-image-1.5"], {"default": "gpt-image-1"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "size": (["auto", "1024x1024", "1536x1024", "1024x1536"], {"default": "auto"}),
