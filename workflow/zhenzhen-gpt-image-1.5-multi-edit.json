@@ -2,7 +2,7 @@
   "id": "9ae6082b-c7f4-433c-9971-7a8f65a3ea65",
   "revision": 0,
   "last_node_id": 100,
-  "last_link_id": 111,
+  "last_link_id": 110,
   "nodes": [
     {
       "id": 96,
@@ -16,7 +16,7 @@
         88
       ],
       "flags": {},
-      "order": 6,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -37,7 +37,7 @@
         "Node name for S&R": "easy showAnything"
       },
       "widgets_values": [
-        "**User**: Edit image with prompt: 女人看向左边\n\n**AI**: Generated edited image with gpt-image-1.5\n\n---"
+        "**User**: Edit image with prompt: 两个女人站在一起\n\n**AI**: Generated edited image with gpt-image-1.5\n\n---"
       ]
     },
     {
@@ -52,7 +52,7 @@
         270
       ],
       "flags": {},
-      "order": 4,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -70,39 +70,40 @@
       ]
     },
     {
-      "id": 95,
-      "type": "easy showAnything",
+      "id": 93,
+      "type": "LoadImage",
       "pos": [
-        3144.568698747199,
-        3263.2238071516053
+        1875.7088071663563,
+        3073.711639884776
       ],
       "size": [
-        239.90744862239399,
-        209.94998667150594
+        270,
+        314
       ],
       "flags": {},
-      "order": 5,
+      "order": 0,
       "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 104
-        }
-      ],
+      "inputs": [],
       "outputs": [
         {
-          "name": "output",
-          "type": "*",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            107
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
           "links": null
         }
       ],
       "properties": {
-        "Node name for S&R": "easy showAnything"
+        "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "Successfully edited 1 image(s)\nPrompt: 女人看向左边\nModel: gpt-image-1.5\nQuality: auto\n"
+        "盘发.png",
+        "image"
       ]
     },
     {
@@ -114,10 +115,10 @@
       ],
       "size": [
         400,
-        668
+        868
       ],
       "flags": {},
-      "order": 3,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -130,7 +131,7 @@
           "name": "image2",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 110
         },
         {
           "name": "image3",
@@ -181,7 +182,61 @@
           "link": null
         },
         {
-          "name": "mask",
+          "name": "mask1",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask2",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask3",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask4",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask5",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask6",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask7",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask8",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask9",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "mask10",
           "shape": 7,
           "type": "MASK",
           "link": null
@@ -194,6 +249,12 @@
             "name": "api_key"
           },
           "link": 106
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
         },
         {
           "name": "image",
@@ -234,7 +295,7 @@
         1,
         "auto",
         "auto",
-        198545171505979,
+        433867378350740,
         "randomize",
         true,
         "auto",
@@ -250,15 +311,15 @@
       "id": 97,
       "type": "Note",
       "pos": [
-        1917.2887924825993,
-        3857.69834289371
+        1807.853799531987,
+        3954.131158464053
       ],
       "size": [
         315.9946427017567,
         156.95788409940133
       ],
       "flags": {},
-      "order": 0,
+      "order": 1,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -268,6 +329,116 @@
       ],
       "color": "#432",
       "bgcolor": "#653"
+    },
+    {
+      "id": 99,
+      "type": "LoadImage",
+      "pos": [
+        1821.5783986853978,
+        3490.4783392440336
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            109
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00008_ifpke_1765900645.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "ResizeImagesByLongerEdge",
+      "pos": [
+        2202.2814110008853,
+        3510.4298856232294
+      ],
+      "size": [
+        295.2369140625,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 109
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            110
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ResizeImagesByLongerEdge"
+      },
+      "widgets_values": [
+        1536
+      ]
+    },
+    {
+      "id": 95,
+      "type": "easy showAnything",
+      "pos": [
+        3155.151487749423,
+        3248.5707146869877
+      ],
+      "size": [
+        239.90744862239399,
+        209.94998667150594
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Successfully edited 1 image(s) from 2 input image(s)\nPrompt: 两个女人站在一起\nModel: gpt-image-1.5\nQuality: auto\n"
+      ]
     },
     {
       "id": 98,
@@ -281,7 +452,7 @@
         106
       ],
       "flags": {},
-      "order": 1,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -300,43 +471,6 @@
         "zhenzhen",
         "",
         ""
-      ]
-    },
-    {
-      "id": 93,
-      "type": "LoadImage",
-      "pos": [
-        1923.383457560683,
-        3277.4124188423516
-      ],
-      "size": [
-        270,
-        314
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            107
-          ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "盘发.png",
-        "image"
       ]
     }
   ],
@@ -370,7 +504,7 @@
       98,
       0,
       92,
-      11,
+      20,
       "STRING"
     ],
     [
@@ -379,6 +513,22 @@
       0,
       92,
       0,
+      "IMAGE"
+    ],
+    [
+      109,
+      99,
+      0,
+      100,
+      0,
+      "IMAGE"
+    ],
+    [
+      110,
+      100,
+      0,
+      92,
+      1,
       "IMAGE"
     ]
   ],
@@ -413,10 +563,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.9229223420846833,
+      "scale": 1.015214576293154,
       "offset": [
-        -1180.288232288657,
-        -2681.2986422161393
+        -1408.7941325211607,
+        -2923.0401337271983
       ]
     },
     "frontendVersion": "1.33.13",

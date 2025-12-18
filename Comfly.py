@@ -5414,11 +5414,29 @@ class Comfly_gpt_image_1_edit:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
                 "prompt": ("STRING", {"multiline": True}),
             },
             "optional": {
-                "mask": ("MASK",),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image10": ("IMAGE",),
+                "mask1": ("MASK",),
+                "mask2": ("MASK",),
+                "mask3": ("MASK",),
+                "mask4": ("MASK",),
+                "mask5": ("MASK",),
+                "mask6": ("MASK",),
+                "mask7": ("MASK",),
+                "mask8": ("MASK",),
+                "mask9": ("MASK",),
+                "mask10": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
                 "model": (["gpt-image-1", "gpt-image-1.5"], {"default": "gpt-image-1"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
@@ -5523,29 +5541,55 @@ class Comfly_gpt_image_1_edit:
                 wait_time = min(2 ** (attempt - 1), 60)
                 time.sleep(wait_time)
     
-    def edit_image(self, image, prompt, model="gpt-image-1", n=1, quality="auto", 
-              seed=0, mask=None, api_key="", size="auto", clear_chats=True,
+    def edit_image(self, prompt, model="gpt-image-1", n=1, quality="auto", 
+              seed=0, api_key="", size="auto", clear_chats=True,
               background="auto", output_compression=100, output_format="png",
-              max_retries=5, initial_timeout=300, input_fidelity="low", partial_images=0):
+              max_retries=5, initial_timeout=300, input_fidelity="low", partial_images=0,
+              image1=None, image2=None, image3=None, image4=None, image5=None,
+              image6=None, image7=None, image8=None, image9=None, image10=None,
+              mask1=None, mask2=None, mask3=None, mask4=None, mask5=None,
+              mask6=None, mask7=None, mask8=None, mask9=None, mask10=None):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
- 
-        original_image = image
-        original_batch_size = image.shape[0]
+
+        # Collect all provided images and masks
+        all_images = [image1, image2, image3, image4, image5, 
+                     image6, image7, image8, image9, image10]
+        all_masks = [mask1, mask2, mask3, mask4, mask5,
+                    mask6, mask7, mask8, mask9, mask10]
+        
+        # Filter out None values and pair images with masks
+        provided_images = []
+        provided_masks = []
+        for i, (img, msk) in enumerate(zip(all_images, all_masks)):
+            if img is not None:
+                provided_images.append(img)
+                provided_masks.append(msk)  # Can be None
+                if msk is not None:
+                    print(f"Image {i+1} has mask")
+        
+        if not provided_images:
+            error_message = "No images provided. Please provide at least one image."
+            print(error_message)
+            blank_image = Image.new('RGB', (1024, 1024), color='white')
+            blank_tensor = pil2tensor(blank_image)
+            return (blank_tensor, error_message, self.format_conversation_history())
+        
+        image_count = len(provided_images)
+        print(f"Processing {image_count} input images")
+        
+        # Use first image as original for reference (no merging needed)
+        original_image = provided_images[0]
         use_saved_image = False
 
+        # Handle conversation history (only for single image case)
         if not clear_chats and Comfly_gpt_image_1_edit._last_edited_image is not None:
-            if original_batch_size > 1:
-                last_batch_size = Comfly_gpt_image_1_edit._last_edited_image.shape[0]
-                last_image_first = Comfly_gpt_image_1_edit._last_edited_image[0:1]
-                if last_image_first.shape[1:] == original_image.shape[1:]:
-                    image = torch.cat([last_image_first, original_image[1:]], dim=0)
-                    use_saved_image = True
-            else:
-                image = Comfly_gpt_image_1_edit._last_edited_image
+            # Only use saved image if we have exactly one input image
+            if image_count == 1:
+                provided_images[0] = Comfly_gpt_image_1_edit._last_edited_image
                 use_saved_image = True
 
         if clear_chats:
@@ -5563,43 +5607,54 @@ class Comfly_gpt_image_1_edit:
             
             files = {}
  
-            if image is not None:
-                batch_size = image.shape[0]
-                for i in range(batch_size):
-                    single_image = image[i:i+1]
-                    scaled_image = downscale_input(single_image).squeeze()
-                    
-                    image_np = (scaled_image.numpy() * 255).astype(np.uint8)
-                    img = Image.fromarray(image_np)
-                    img_byte_arr = io.BytesIO()
-                    img.save(img_byte_arr, format='PNG')
-                    img_byte_arr.seek(0)
-                    
-                    if batch_size == 1:
-                        files['image'] = ('image.png', img_byte_arr, 'image/png')
-                    else:
-                        if 'image[]' not in files:
-                            files['image[]'] = []
-                        files['image[]'].append(('image_{}.png'.format(i), img_byte_arr, 'image/png'))
-            
-            if mask is not None:
-                if image.shape[0] != 1:
-                    raise Exception("Cannot use a mask with multiple images")
-                if image is None:
-                    raise Exception("Cannot use a mask without an input image")
-                if mask.shape[1:] != image.shape[1:-1]:
-                    raise Exception("Mask and Image must be the same size")
+            # Process all provided images with their corresponding masks
+            for i, (single_image, single_mask) in enumerate(zip(provided_images, provided_masks)):
+                # Get single image from tensor (handle batch dimension)
+                if len(single_image.shape) == 4:
+                    img_to_process = single_image[0:1]
+                else:
+                    img_to_process = single_image.unsqueeze(0)
                 
-                batch, height, width = mask.shape
-                rgba_mask = torch.zeros(height, width, 4, device="cpu")
-                rgba_mask[:,:,3] = (1-mask.squeeze().cpu())
-                scaled_mask = downscale_input(rgba_mask.unsqueeze(0)).squeeze()
-                mask_np = (scaled_mask.numpy() * 255).astype(np.uint8)
-                mask_img = Image.fromarray(mask_np)
-                mask_byte_arr = io.BytesIO()
-                mask_img.save(mask_byte_arr, format='PNG')
-                mask_byte_arr.seek(0)
-                files['mask'] = ('mask.png', mask_byte_arr, 'image/png')
+                scaled_image = downscale_input(img_to_process).squeeze()
+                
+                image_np = (scaled_image.numpy() * 255).astype(np.uint8)
+                img = Image.fromarray(image_np)
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format='PNG')
+                img_byte_arr.seek(0)
+                
+                # Store files for multi-image upload
+                if image_count == 1:
+                    files['image'] = ('image.png', img_byte_arr, 'image/png')
+                else:
+                    if 'image[]' not in files:
+                        files['image[]'] = []
+                    files['image[]'].append((f'image_{i}.png', img_byte_arr, 'image/png'))
+                
+                # Process corresponding mask if exists
+                if single_mask is not None:
+                    # Validate mask size matches image
+                    if single_mask.shape[1:] != single_image.shape[1:-1]:
+                        print(f"Warning: Mask {i+1} size {single_mask.shape[1:]} doesn't match image {i+1} size {single_image.shape[1:-1]}, skipping mask")
+                        continue
+                    
+                    batch, height, width = single_mask.shape
+                    rgba_mask = torch.zeros(height, width, 4, device="cpu")
+                    rgba_mask[:,:,3] = (1-single_mask.squeeze().cpu())
+                    scaled_mask = downscale_input(rgba_mask.unsqueeze(0)).squeeze()
+                    mask_np = (scaled_mask.numpy() * 255).astype(np.uint8)
+                    mask_img = Image.fromarray(mask_np)
+                    mask_byte_arr = io.BytesIO()
+                    mask_img.save(mask_byte_arr, format='PNG')
+                    mask_byte_arr.seek(0)
+                    
+                    if image_count == 1:
+                        files['mask'] = ('mask.png', mask_byte_arr, 'image/png')
+                    else:
+                        if 'mask[]' not in files:
+                            files['mask[]'] = []
+                        files['mask[]'].append((f'mask_{i}.png', mask_byte_arr, 'image/png'))
+
 
             data = {
                 'prompt': prompt,
@@ -5628,14 +5683,18 @@ class Comfly_gpt_image_1_edit:
 
             pbar.update_absolute(30)
 
+            # Handle mask files in request
             try:
                 if 'image[]' in files:
+                    # Multiple images case
                     image_files = []
                     for file_tuple in files['image[]']:
                         image_files.append(('image', file_tuple))
 
-                    if 'mask' in files:
-                        image_files.append(('mask', files['mask']))
+                    # Add multiple masks if exists
+                    if 'mask[]' in files:
+                        for mask_tuple in files['mask[]']:
+                            image_files.append(('mask', mask_tuple))
 
                     response = self.make_request_with_retry(
                         f"{baseurl}/v1/images/edits",
@@ -5645,6 +5704,7 @@ class Comfly_gpt_image_1_edit:
                         initial_timeout=initial_timeout
                     )
                 else:
+                    # Single image case
                     request_files = []
                     if 'image' in files:
                         request_files.append(('image', files['image']))
@@ -5720,7 +5780,7 @@ class Comfly_gpt_image_1_edit:
 
             if edited_images:
                 combined_tensor = torch.cat(edited_images, dim=0)
-                response_info = f"Successfully edited {len(edited_images)} image(s)\n"
+                response_info = f"Successfully edited {len(edited_images)} image(s) from {image_count} input image(s)\n"
                 response_info += f"Prompt: {prompt}\n"
                 response_info += f"Model: {model}\n"
                 response_info += f"Quality: {quality}\n"
