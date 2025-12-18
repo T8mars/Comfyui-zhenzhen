@@ -106,6 +106,11 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
+### 20251219
+
+新增gemini-3-flash-preview模型
+昨天谷歌大香蕉2 Default分组基本一点问题没有，大家可以继续用便宜的分组，优质分组做紧急备用
+
 ### 20251218-3
 
 更新gpt-image-1和gpt-image-1-edit节点，支持gpt-image-1.5模型
