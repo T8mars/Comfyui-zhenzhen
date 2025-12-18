@@ -204,7 +204,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分\n每日工作台签到领积分"
+        "APIKEY\n\nAPI申请地址：https://ai.t8star.cn/register?aff=cbff0534884\n注册送0.2积分\n每日工作台签到领积分"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -229,7 +229,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "\nAPI申请地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2美元\n\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\nComfyui调用API节点(支持本地部署)：https://github.com/T8mars/Comfyui-zhenzhen\n\n"
+        "\nAPI申请地址：https://ai.t8star.cn/register?aff=cbff0534884\n注册送0.2美元\n\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\nComfyui调用API节点(支持本地部署)：https://github.com/T8mars/Comfyui-zhenzhen\n\n"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -389,7 +389,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "veo3特价模型基准1.5RMB/8S，模型名字：\nveo3 文生视频\nveo3-fast 文生视频\nveo3-fast-frames 图生视频\n\nVeo3 Pro模型3RMB/8S，模型名字：\nveo3-pro 文生视频\nveo3-pro-frames 图生视频\n高质量模式，价格也高一点\n\nVeo3.1 特价模型基准1.5RMB/8S，模型名字：\nveo3.1 文生视频，图生视频\nveo3.1-components 文生视频，图生视频，多参1-2张\n注意veo3.1-components，支持多图参考，Veo3.1支持首尾帧\n\nVeo3.1 Pro模型基准3RMB/8S，模型名字：\nveo3.1-pro  文生视频，图生视频，首尾帧\n高质量模式，价格也高一点\n\n注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=dP7j 为准"
+        "veo3特价模型基准1.5RMB/8S，模型名字：\nveo3 文生视频\nveo3-fast 文生视频\nveo3-fast-frames 图生视频\n\nVeo3 Pro模型3RMB/8S，模型名字：\nveo3-pro 文生视频\nveo3-pro-frames 图生视频\n高质量模式，价格也高一点\n\nVeo3.1 特价模型基准1.5RMB/8S，模型名字：\nveo3.1 文生视频，图生视频\nveo3.1-components 文生视频，图生视频，多参1-2张\n注意veo3.1-components，支持多图参考，Veo3.1支持首尾帧\n\nVeo3.1 Pro模型基准3RMB/8S，模型名字：\nveo3.1-pro  文生视频，图生视频，首尾帧\n高质量模式，价格也高一点\n\n注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=cbff0534884 为准"
       ],
       "color": "#432",
       "bgcolor": "#653"

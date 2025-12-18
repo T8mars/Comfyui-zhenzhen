@@ -1,0 +1,370 @@
+{
+  "id": "9ae6082b-c7f4-433c-9971-7a8f65a3ea65",
+  "revision": 0,
+  "last_node_id": 98,
+  "last_link_id": 106,
+  "nodes": [
+    {
+      "id": 93,
+      "type": "LoadImage",
+      "pos": [
+        2034.4506421997153,
+        3264.2018419248056
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            102
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "盘发.png",
+        "image"
+      ]
+    },
+    {
+      "id": 96,
+      "type": "easy showAnything",
+      "pos": [
+        3130.1340620298342,
+        3588.409712665916
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 105
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**User**: Edit image with prompt: 女人看向左边\n\n**AI**: Generated edited image with gpt-image-1.5\n\n---"
+      ]
+    },
+    {
+      "id": 92,
+      "type": "Comfly_gpt_image_1_edit",
+      "pos": [
+        2650.1420149326577,
+        3269.926034601024
+      ],
+      "size": [
+        400,
+        488
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 102
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 106
+        }
+      ],
+      "outputs": [
+        {
+          "name": "edited_image",
+          "type": "IMAGE",
+          "links": [
+            103
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            104
+          ]
+        },
+        {
+          "name": "chats",
+          "type": "STRING",
+          "links": [
+            105
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_gpt_image_1_edit"
+      },
+      "widgets_values": [
+        "女人看向左边",
+        "",
+        "gpt-image-1.5",
+        1,
+        "auto",
+        "auto",
+        629611517853014,
+        "randomize",
+        true,
+        "auto",
+        100,
+        "png",
+        5,
+        900,
+        "low",
+        0
+      ]
+    },
+    {
+      "id": 98,
+      "type": "Comfly_api_set",
+      "pos": [
+        2271.3673634174934,
+        3766.150932285746
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            106
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 97,
+      "type": "Note",
+      "pos": [
+        1905.0579061102371,
+        3761.3620757777594
+      ],
+      "size": [
+        315.9946427017567,
+        156.95788409940133
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "apikey注册：https://ai.t8star.cn/register?aff=cbff0534884\n注册送0.2积分，左侧工作台每日签到领积分\n\n推荐用openai优质分组，不要用Default分组，那个基本不出图\n目前测试时长是200秒左右"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 94,
+      "type": "SaveImage",
+      "pos": [
+        3486.0447712274436,
+        3270.5003644733433
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 103
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 95,
+      "type": "easy showAnything",
+      "pos": [
+        3144.568698747199,
+        3263.2238071516053
+      ],
+      "size": [
+        239.90744862239399,
+        209.94998667150594
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Successfully edited 1 image(s)\nPrompt: 女人看向左边\nModel: gpt-image-1.5\nQuality: auto\n"
+      ]
+    }
+  ],
+  "links": [
+    [
+      102,
+      93,
+      0,
+      92,
+      0,
+      "IMAGE"
+    ],
+    [
+      103,
+      92,
+      0,
+      94,
+      0,
+      "IMAGE"
+    ],
+    [
+      104,
+      92,
+      1,
+      95,
+      0,
+      "*"
+    ],
+    [
+      105,
+      92,
+      2,
+      96,
+      0,
+      "*"
+    ],
+    [
+      106,
+      98,
+      0,
+      92,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 6,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        220.1370504809976,
+        1664.8095258052301,
+        2969.2521276513385,
+        338.2774185112669
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        1421.0526049257958,
+        2704.9079622297854,
+        3064.3046537412465,
+        306.4736592332083
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7627457372600679,
+      "offset": [
+        -1279.0538688223353,
+        -2576.596102213758
+      ]
+    },
+    "frontendVersion": "1.33.13",
+    "workflowRendererVersion": "LG",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
