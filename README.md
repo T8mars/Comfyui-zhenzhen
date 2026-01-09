@@ -110,6 +110,13 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 Openai调整需要账号验证手机，所以我们sora2正在扩容，需要点时间，目前不是特别稳定，正在处理中
 
+### 20260109
+
+Claude 4.5 opus Default渠道恢复
+Veo3.1 恢复
+Grok vieo 3 恢复
+Sora2正在继续扩容，目前出现超时请重试，我们正在不断扩容！
+
 ### 20251219-3
 
 目前由于openai官方问题，sora2的API大批出现问题，等待官方修复，并非我们问题
