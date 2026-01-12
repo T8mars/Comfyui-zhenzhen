@@ -1,0 +1,748 @@
+{
+  "id": "b75f71b7-f4a2-48f1-9653-44cea7205105",
+  "revision": 0,
+  "last_node_id": 27,
+  "last_link_id": 41,
+  "nodes": [
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        650.8826904296875,
+        1308.511962890625
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "prompt"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5,
+      "type": "easy showAnything",
+      "pos": [
+        2230.36669921875,
+        1486.42529296875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "{\n  \"status\": \"success\",\n  \"id\": \"94e824b3-e01b-4580-a68e-15a3aa45f995\",\n  \"result\": {\n    \"prompt\": \"Reduce the overall brightness and direct light on the woman\\u2019s face and upper body so the scene appears dimmer and softer, as if lit in low ambient light, while keeping all colors, contrast, background elements, composition, and the woman\\u2019s appearance, clothing, and expression unchanged. Maintain natural shadow transitions and avoid adding new light sources or altering the existing perspective.\",\n    \"sample\": \"https://bfldeliveryscus.blob.core.windows.net/results/2026/01/12/bed42e4c038c43d0a9a0266c997dc094_sample.jpeg?se=2026-01-12T11%3A12%3A07Z&sp=r&sv=2024-11-04&sr=b&rsct=image/jpeg&sig=mefG9yMnssbhiElJhgmTpIV61nLgf82%2BKWN3cXrsoB8%3D\",\n    \"seed\": 4033400551,\n    \"start_time\": 1768215692.3971727\n  },\n  \"prompt\": \"\\u5149\\u7ebf\\u53d8\\u5f97\\u660f\\u6697\",\n  \"seed\": 4033400551,\n  \"width\": 1080,\n  \"height\": 1920,\n  \"image_url\": \"https://bfldeliveryscus.blob.core.windows.net/results/2026/01/12/bed42e4c038c43d0a9a0266c997dc094_sample.jpeg?se=2026-01-12T11%3A12%3A07Z&sp=r&sv=2024-11-04&sr=b&rsct=image/jpeg&sig=mefG9yMnssbhiElJhgmTpIV61nLgf82%2BKWN3cXrsoB8%3D\",\n  \"duration\": null,\n  \"start_time\": 1768215692.3971727,\n  \"end_time\": null\n}"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 1,
+      "type": "easy showAnything",
+      "pos": [
+        2231.587646484375,
+        1333.4783935546875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "a1b402b4a9c0ddd35c0ac1197579f8f7b121ff3e",
+        "Node name for S&R": "easy showAnything",
+        "widget_ue_connectable": {},
+        "ttNbgOverride": {
+          "bgcolor": "#593930",
+          "groupcolor": "#b06634",
+          "color": "#332922"
+        }
+      },
+      "widgets_values": [
+        "https://bfldeliveryscus.blob.core.windows.net/results/2026/01/12/bed42e4c038c43d0a9a0266c997dc094_sample.jpeg?se=2026-01-12T11%3A12%3A07Z&sp=r&sv=2024-11-04&sr=b&rsct=image/jpeg&sig=mefG9yMnssbhiElJhgmTpIV61nLgf82%2BKWN3cXrsoB8%3D"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 3,
+      "type": "Note",
+      "pos": [
+        2218.424072265625,
+        1145.5548095703125
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "如果预览视频节点没出视频，可以再下面SHOWANYTHING那里，有地址"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 9,
+      "type": "Note",
+      "pos": [
+        502.6195373535156,
+        1632.8043212890625
+      ],
+      "size": [
+        559.0477905273438,
+        228.00534057617188
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "\nAPI申请地址：https://ai.t8star.cn/register?aff=cbff0534884\n注册送0.2美元\n\n\n注册后，点击左侧令牌，创建令牌，用Default分组，不要用跟随用户分组！！\n然后复制API到APIKEY即可\n\nComfyui调用API节点(支持本地部署)：https://github.com/T8mars/Comfyui-zhenzhen\n\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 19,
+      "type": "SaveImage",
+      "pos": [
+        2384.906982421875,
+        1780.7032470703125
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 34
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.8.2",
+        "Node name for S&R": "SaveImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "CR Prompt Text",
+      "pos": [
+        1015.6778564453125,
+        1301.889892578125
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            38
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "光线变得昏暗"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [
+        1552.0850830078125,
+        1293.4110107421875
+      ],
+      "size": [
+        548.9761352539062,
+        298.6236267089844
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "价格计算方式",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "已经支持bfl/flux-2-pro模型，此模型按量付费，不同分辨率不同价格\n官方文档：\nhttps://docs.bfl.ai/api-reference/tasks/generate-or-edit-an-image-with-flux2-[pro]\n\n价格计算器：\nhttps://bfl.ai/pricing\n\n实际价格约为官方的7.7折，这个价格根据官方的COST，没法说的特别明白，需要自己查询"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "LoadImage",
+      "pos": [
+        1106.4080810546875,
+        1613.05126953125
+      ],
+      "size": [
+        270,
+        314.00006103515625
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          }
+        },
+        {
+          "label": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            37
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "098B94AFF11EC4A112E1849BA918971E.png",
+        "image"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "JWInteger",
+      "pos": [
+        551.4378051757812,
+        2010.5684814453125
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "name": "value",
+          "type": "INT",
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "INT",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            40
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-various",
+        "ver": "5bd85aaf7616878471469c4ec7e11bbd0cef3bf2",
+        "Node name for S&R": "JWInteger",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        1080
+      ]
+    },
+    {
+      "id": 22,
+      "type": "JWInteger",
+      "pos": [
+        558.3225708007812,
+        2169.18603515625
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "name": "value",
+          "type": "INT",
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "INT",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            41
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-various",
+        "ver": "5bd85aaf7616878471469c4ec7e11bbd0cef3bf2",
+        "Node name for S&R": "JWInteger",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        1920
+      ]
+    },
+    {
+      "id": 27,
+      "type": "Comfly_Flux_2_Max",
+      "pos": [
+        1622.3493957658018,
+        1884.9208049899642
+      ],
+      "size": [
+        400,
+        396
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 37
+        },
+        {
+          "name": "input_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_image_8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 38
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 39
+        },
+        {
+          "name": "width",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 40
+        },
+        {
+          "name": "height",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 41
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            34
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            35
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "04327d65c223a3d31a08c6ede3fd67d3f4859a81",
+        "Node name for S&R": "Comfly_Flux_2_Max"
+      },
+      "widgets_values": [
+        "",
+        "",
+        1251616427,
+        "randomize",
+        1024,
+        1024,
+        2,
+        "jpeg"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Comfly_api_set",
+      "pos": [
+        1074.6785806107946,
+        2017.7174278452965
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "api_base",
+          "name": "api_base",
+          "type": "COMBO",
+          "widget": {
+            "name": "api_base"
+          }
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          }
+        },
+        {
+          "label": "custom_ip",
+          "name": "custom_ip",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "custom_ip"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            39
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "04327d65c223a3d31a08c6ede3fd67d3f4859a81",
+        "Node name for S&R": "Comfly_api_set",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      34,
+      27,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      35,
+      27,
+      1,
+      1,
+      0,
+      "STRING"
+    ],
+    [
+      36,
+      27,
+      2,
+      5,
+      0,
+      "STRING"
+    ],
+    [
+      37,
+      11,
+      0,
+      27,
+      0,
+      "IMAGE"
+    ],
+    [
+      38,
+      12,
+      0,
+      27,
+      8,
+      "STRING"
+    ],
+    [
+      39,
+      14,
+      0,
+      27,
+      9,
+      "STRING"
+    ],
+    [
+      40,
+      21,
+      0,
+      27,
+      10,
+      "INT"
+    ],
+    [
+      41,
+      22,
+      0,
+      27,
+      11,
+      "INT"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        476.8347473144531,
+        708.3858642578125,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6588450000000037,
+      "offset": [
+        -451.9242420930557,
+        -890.1559226790648
+      ]
+    },
+    "frontendVersion": "1.36.13",
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "workflowRendererVersion": "LG"
+  },
+  "version": 0.4
+}

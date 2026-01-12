@@ -1,0 +1,660 @@
+{
+  "id": "60240853-23b3-4a6a-8699-956870f1aaf6",
+  "revision": 0,
+  "last_node_id": 34,
+  "last_link_id": 22,
+  "nodes": [
+    {
+      "id": 23,
+      "type": "Comfly_Mju",
+      "pos": [
+        2575.2659052370996,
+        1131.5153179067756
+      ],
+      "size": [
+        353.06658935546875,
+        174
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            14
+          ]
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_Mju",
+        "aux_id": "ainewsto/Comfyui_Comfly_v2"
+      },
+      "widgets_values": [
+        "",
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Comfly_Mjv",
+      "pos": [
+        3402.6674555300683,
+        1081.7841167349006
+      ],
+      "size": [
+        374.2900085449219,
+        253.6300048828125
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "Comfyui_Comfly",
+        "ver": "b3185506cac77694fb2130b2e6c978aaa5be111c",
+        "Node name for S&R": "Comfly_Mjv",
+        "aux_id": "ainewsto/Comfyui_Comfly_v2"
+      },
+      "widgets_values": [
+        "",
+        false,
+        false,
+        false,
+        1,
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 33,
+      "type": "Comfly_mjstyle",
+      "pos": [
+        728.837337091837,
+        729.5307268214594
+      ],
+      "size": [
+        500,
+        550
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "style_positive",
+          "type": "STRING",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "style_negative",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "04327d65c223a3d31a08c6ede3fd67d3f4859a81",
+        "Node name for S&R": "Comfly_mjstyle",
+        "values": [],
+        "currentStyleType": ""
+      },
+      "widgets_values": [
+        "mj_art",
+        ""
+      ]
+    },
+    {
+      "id": 27,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1496.9198359011625,
+        859.9965801138063
+      ],
+      "size": [
+        588.4142456054688,
+        154.83099365234375
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "title": "mjstyle_view",
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "f2838ed5e59de4d73cde5c98354b87a8d3200190",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 31,
+      "type": "Comfly_Mj",
+      "pos": [
+        957.7568419182327,
+        1527.307903116735
+      ],
+      "size": [
+        400,
+        554
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "no",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "s",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "iw",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "name": "r",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "cw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sv",
+          "shape": 7,
+          "type": "COMBO",
+          "link": null
+        },
+        {
+          "name": "oref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "cref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "sref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "STRING",
+          "link": 21
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "04327d65c223a3d31a08c6ede3fd67d3f4859a81",
+        "Node name for S&R": "Comfly_Mj",
+        "aux_id": "ainewsto/Comfyui_Comfly_v2"
+      },
+      "widgets_values": [
+        "美丽的卡通女孩，--niji 7",
+        "fast mode",
+        "美丽的卡通女孩，--niji 7",
+        "",
+        "1:1",
+        "niji 7",
+        false,
+        false,
+        636011971,
+        "randomize"
+      ]
+    },
+    {
+      "id": 34,
+      "type": "CR Prompt Text",
+      "pos": [
+        426.20522617278544,
+        1870.0247977272466
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 26,
+      "type": "PreviewImage",
+      "pos": [
+        2473.443228063197,
+        1390.5925059040505
+      ],
+      "size": [
+        788.0629272460938,
+        818.4010620117188
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "label": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 25,
+      "type": "PreviewImage",
+      "pos": [
+        3492.217350353099,
+        1509.6852156667944
+      ],
+      "size": [
+        852.7117919921875,
+        815.7576904296875
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [
+        {
+          "label": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 28,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1341.9566203152117,
+        1179.2895180996366
+      ],
+      "size": [
+        590.6380615234375,
+        217.42532348632812
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "mjtext_view",
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "f2838ed5e59de4d73cde5c98354b87a8d3200190",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "美丽的卡通女孩，--niji 7 --niji 7 --ar 1:1 --fast"
+      ]
+    },
+    {
+      "id": 30,
+      "type": "PreviewImage",
+      "pos": [
+        1477.6583686916756,
+        1531.5158807632215
+      ],
+      "size": [
+        787.3584594726562,
+        815.804443359375
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      11,
+      31,
+      2,
+      23,
+      0,
+      "STRING"
+    ],
+    [
+      12,
+      23,
+      1,
+      24,
+      0,
+      "STRING"
+    ],
+    [
+      13,
+      24,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      23,
+      0,
+      26,
+      0,
+      "IMAGE"
+    ],
+    [
+      15,
+      31,
+      1,
+      28,
+      0,
+      "STRING"
+    ],
+    [
+      17,
+      31,
+      0,
+      30,
+      0,
+      "IMAGE"
+    ],
+    [
+      19,
+      33,
+      0,
+      27,
+      0,
+      "STRING"
+    ],
+    [
+      21,
+      27,
+      0,
+      31,
+      11,
+      "STRING"
+    ],
+    [
+      22,
+      34,
+      0,
+      31,
+      12,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -353.9808349609375,
+        -424.7069396972656,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "",
+      "bounding": [
+        893.9198359011629,
+        667.9965801138063,
+        3170,
+        1682
+      ],
+      "color": "#88A",
+      "font_size": 35,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "U1-U4",
+      "bounding": [
+        2296.919835901162,
+        992.9965801138063,
+        829,
+        1254
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "More",
+      "bounding": [
+        3143.919835901162,
+        992.9965801138063,
+        881,
+        1255
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.283902517749528,
+      "offset": [
+        -377.9414658667665,
+        -1196.77130342388
+      ]
+    },
+    "frontendVersion": "1.36.13",
+    "workflowRendererVersion": "LG",
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
