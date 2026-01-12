@@ -8,6 +8,10 @@ https://www.runninghub.cn/?inviteCode=rh-v1121
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
 My favorite girl Go YounJung
 
+# 企鹅版Nano Banana Pro,Sora2,Veo3.1无限并发整合包V5，感谢企鹅：
+夸克网盘：https://pan.quark.cn/s/445806b40baa
+谷歌盘：https://drive.google.com/file/d/1Ie384HYnA_nF5yOUqi57jm1WdeqpLiVW/view?usp=sharing
+
 # 网站价格和宗旨：
 
 本站开设初衷是提供平价的API给粉丝朋友玩最新的海外模型，并非盈利目的，秉承这一理念，我们的价格毛利不到10%，去掉正常缴税和人工开发维护，服务器成本后几乎没有利润，所以并非盈利性质网站，没有任何议价空间，也不支持用于商业目的的二次开发，仅服务于粉丝朋友，望理解，每个月发票数量有限，需要自己承担所有税费5-25%
@@ -109,6 +113,13 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 ### 通知
 
 Openai调整需要账号验证手机，所以我们sora2正在扩容，需要点时间，目前不是特别稳定，正在处理中
+
+### 20260112
+
+更新支持minimax hailuo 2.3 I2V图生视频及工作流
+更新支持Flux2 max图像编辑及工作流
+更新支持Mj niji 7及工作流，注意这个目前不支持用apisetting节点，我下个版本更新，直接输入KEY即可
+网站教程顶部增加基础报错教程以及企鹅无限并发整合包
 
 ### 20260109
 
