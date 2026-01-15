@@ -66,7 +66,7 @@ class Comfly_api_set:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "api_base": (["zhenzhen", "ip", "hk", "us"], {"default": "zhenzhen"}),
+                "api_base": (["zhenzhen", "ip"], {"default": "zhenzhen"}),
                 "apikey": ("STRING", {"default": ""}),
             },
             "optional": {
@@ -84,9 +84,7 @@ class Comfly_api_set:
         
         base_url_mapping = {
             "zhenzhen": "https://ai.t8star.cn",
-            "ip": custom_ip,
-            "hk": "https://hk-api.gptbest.vip",
-            "us": "https://api.gptbest.vip"
+            "ip": custom_ip
         }
         
         if api_base == "ip" and not custom_ip.strip():
@@ -8390,7 +8388,7 @@ class Comfly_Googel_Veo3:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1", "veo3.1-pro", "veo3.1-components"], {"default": "veo3"}),
+                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1","veo3.1-fast", "veo3.1-pro", "veo3.1-components", "veo3.1-components-4k", "veo3.1-pro-4k", "veo3.1-4k"], {"default": "veo3.1-fast"}),
                 "enhance_prompt": ("BOOLEAN", {"default": False}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
             },

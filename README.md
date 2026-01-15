@@ -112,7 +112,14 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 通知
 
-Openai调整需要账号验证手机，所以我们sora2正在扩容，需要点时间，目前不是特别稳定，正在处理中
+这两天openai服务器不正常，并非我们问题，发现sora2超时都是因为openai官方问题
+
+
+### 20260115
+
+更新支持veo3.1-fast,4k,pro 4k等模型及节点支持，fast 基准0.2 4K 基准0.5 Pro 4K 基准2，工作流不变，只需要选择新模型
+更新vidu q2多参工作流：zhenzhen-vidu-q2-multi-ref-i2v.json
+Api Setting节点废弃2个不用的接口地址（US,HK）
 
 ### 20260112
 
