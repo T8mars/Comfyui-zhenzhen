@@ -118,14 +118,19 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 ### 20260115
 
 更新支持veo3.1-fast,4k,pro 4k等模型及节点支持，fast 基准0.2 4K 基准0.5 Pro 4K 基准2，工作流不变，只需要选择新模型
+
 更新vidu q2多参工作流：zhenzhen-vidu-q2-multi-ref-i2v.json
+
 Api Setting节点废弃2个不用的接口地址（US,HK）
 
 ### 20260112
 
 更新支持minimax hailuo 2.3 I2V图生视频及工作流
+
 更新支持Flux2 max图像编辑及工作流
+
 更新支持Mj niji 7及工作流，注意这个目前不支持用apisetting节点，我下个版本更新，直接输入KEY即可
+
 网站教程顶部增加基础报错教程以及企鹅无限并发整合包
 
 ### 20260109
