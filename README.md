@@ -114,6 +114,13 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 这两天openai服务器不正常，并非我们问题，发现sora2超时都是因为openai官方问题
 
+### 20260116
+
+暂时取消veo3.1-fast模型，有点问题，等处理后添加，重写veo3.1节点，务必更新！
+
+新增veo3.1-4k工作流
+
+sora2-character角色获取节点新增from_task参数，创建角色可以通过taskid创建
 
 ### 20260115
 

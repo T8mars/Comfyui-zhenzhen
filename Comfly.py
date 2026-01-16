@@ -7000,22 +7000,24 @@ class Comfly_sora2_chat:
             return ("", "", "", json.dumps({"status": "error", "message": error_message}))
 
 
+
 class Comfly_sora2_character:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "video_url": ("STRING", {"multiline": False}),
                 "timestamps": ("STRING", {"default": "1,3", "multiline": False}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
             },
             "optional": {
+                "url": ("STRING", {"default": "", "multiline": False}),
+                "from_task": ("STRING", {"default": "", "multiline": False}),
                 "api_key": ("STRING", {"default": ""}),
             }
         }
     
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING")
-    RETURN_NAMES = ("character_id", "username", "permalink", "profile_picture_url", "response")
+    RETURN_NAMES = ("id", "username", "permalink", "profile_picture_url", "response")
     FUNCTION = "create_character"
     CATEGORY = "zhenzhen/Openai"
 
@@ -7029,7 +7031,7 @@ class Comfly_sora2_character:
             "Authorization": f"Bearer {self.api_key}"
         }
     
-    def create_character(self, video_url, timestamps="1,3", seed=0, api_key=""):
+    def create_character(self, timestamps="1,3", seed=0, url="", from_task="", api_key=""):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -7039,10 +7041,18 @@ class Comfly_sora2_character:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             return ("", "", "", "", json.dumps(error_response))
+
+        if url.strip() and from_task.strip():
+            error_response = {"status": "error", "message": "Parameters 'url' and 'from_task' are mutually exclusive. Please provide only one."}
+            return ("", "", "", "", json.dumps(error_response))
+
+        if not url.strip() and not from_task.strip():
+            error_response = {"status": "error", "message": "Either 'url' or 'from_task' parameter is required. Please provide one."}
+            return ("", "", "", "", json.dumps(error_response))
             
         try:
             if not timestamps or "," not in timestamps:
-                error_message = "Timestamps must be in format 'start,end' (e.g. '1,3')"
+                error_message = "Invalid timestamps format. Expected format: 'start,end' (e.g. '1,3')"
                 print(error_message)
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
@@ -7067,17 +7077,22 @@ class Comfly_sora2_character:
 
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
-            
+
             payload = {
-                "url": video_url,
                 "timestamps": timestamps
             }
-            
-            if seed > 0:
-                payload["seed"] = seed
+
+            if url.strip():
+                payload["url"] = url.strip()
+                print(f"Creating character from video URL: {url}")
+            elif from_task.strip():
+                payload["from_task"] = from_task.strip()
+                print(f"Creating character from task ID: {from_task}")
                 
             pbar.update_absolute(30)
             
+            print(f"Sending character creation request with payload: {json.dumps(payload)}")
+
             response = requests.post(
                 f"{baseurl}/sora/v1/characters",
                 headers=self.get_headers(),
@@ -7107,20 +7122,29 @@ class Comfly_sora2_character:
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(100)
-            
+
             response_data = {
                 "status": "success",
-                "character_id": character_id,
+                "id": character_id,
                 "username": username,
                 "permalink": permalink,
                 "profile_picture_url": profile_picture_url,
-                "video_url": video_url,
                 "timestamps": timestamps,
-                "duration": f"{duration:.1f}s",
-                "seed": seed if seed > 0 else "auto"
+                "duration": f"{duration:.1f}s"
             }
+
+            if url.strip():
+                response_data["source"] = "url"
+                response_data["url"] = url
+            else:
+                response_data["source"] = "from_task"
+                response_data["from_task"] = from_task
             
-            print(f"Character created successfully. ID: {character_id}, Username: {username}")
+            print(f"Character created successfully!")
+            print(f"Character ID: {character_id}")
+            print(f"Character username: {username}")
+            print(f"Usage: Use @{username} in your prompt to reference this character")
+            print(f"Example: @{username} dancing on stage")
             
             return (character_id, username, permalink, profile_picture_url, json.dumps(response_data))
             
@@ -7130,9 +7154,6 @@ class Comfly_sora2_character:
             import traceback
             traceback.print_exc()
             return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
-
-
-
 
 ############################# Flux ###########################
 
@@ -8382,13 +8403,119 @@ class Comfly_Flux_2_Flex:
 
 ############################# Googel ###########################
 
+
+
+class ComflyGeminiTextOnly:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": ("STRING", {"default": "gemini-2.5-pro"}),
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "video": ("VIDEO",),
+                "api_key": ("STRING", {"default": ""}),
+                "temperature": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01}),
+                "top_p": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "max_tokens": ("INT", {"default": 4096, "min": 1, "max": 8192}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("response",)
+    FUNCTION = "generate_text"
+    CATEGORY = "zhenzhen/Google"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 120
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def tensor_to_base64(self, tensor):
+        if tensor is None:
+            return None
+        if tensor.dtype != torch.uint8:
+            tensor = (tensor * 255).clamp(0, 255).byte()
+        tensor = tensor.cpu()
+        if tensor.shape[-1] == 3:
+            img = Image.fromarray(tensor.numpy(), 'RGB')
+        else:
+            img = Image.fromarray(tensor.numpy(), 'RGBA')
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    def generate_text(self, prompt, model, temperature, top_p, max_tokens, seed, image=None, video=None, api_key=""):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        if not self.api_key:
+            return ("API key not found in Comflyapi.json",)
+
+        try:
+            content = [{"type": "text", "text": prompt}]
+
+            if video is not None:
+                video_url = getattr(video, 'video_url', None)
+                if video_url:
+                    content.append({
+                        "type": "video_url",
+                        "video_url": {"url": video_url}
+                    })
+            elif image is not None:
+                if len(image.shape) == 4:
+                    image = image[0]
+                img_b64 = self.tensor_to_base64(image)
+                if img_b64:
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{img_b64}"}
+                    })
+
+            messages = [{"role": "user", "content": content}]
+
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "top_p": top_p,
+                "max_tokens": max_tokens,
+                "seed": seed if seed > 0 else None
+            }
+
+            response = requests.post(
+                f"{baseurl}/v1/chat/completions",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            text = result["choices"][0]["message"]["content"]
+            return (text,)
+
+        except Exception as e:
+            return (f"Error: {str(e)}",)            
+
+
 class Comfly_Googel_Veo3:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1","veo3.1-fast", "veo3.1-pro", "veo3.1-components", "veo3.1-components-4k", "veo3.1-pro-4k", "veo3.1-4k"], {"default": "veo3.1-fast"}),
+                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1","veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"], {"default": "veo3"}),
                 "enhance_prompt": ("BOOLEAN", {"default": False}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
             },
@@ -8429,11 +8556,9 @@ class Comfly_Googel_Veo3:
     
     def generate_video(self, prompt, model="veo3", enhance_prompt=False, aspect_ratio="16:9", apikey="", 
                       image1=None, image2=None, image3=None, seed=0, enable_upsample=False):
+        
         if apikey.strip():
             self.api_key = apikey
-            config = get_config()
-            config['api_key'] = apikey
-            save_config(config)
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
@@ -8454,10 +8579,16 @@ class Comfly_Googel_Veo3:
             if seed > 0:
                 payload["seed"] = seed
 
-            if model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro"] and aspect_ratio:
+            supported_models = [
+                "veo3", "veo3-fast", "veo3-pro", 
+                "veo3.1", "veo3.1-pro", "veo3.1-components", 
+                "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"
+            ]
+            
+            if model in supported_models and aspect_ratio:
                 payload["aspect_ratio"] = aspect_ratio
 
-            if model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro"] and enable_upsample:
+            if model in supported_models and enable_upsample:
                 payload["enable_upsample"] = enable_upsample
 
             if has_images:
@@ -8475,7 +8606,7 @@ class Comfly_Googel_Veo3:
                     payload["images"] = images_base64
 
             response = requests.post(
-                f"{baseurl}/google/v1/models/veo/videos",
+                f"{baseurl}/v2/videos/generations",
                 headers=self.get_headers(),
                 json=payload,
                 timeout=self.timeout
@@ -8487,49 +8618,42 @@ class Comfly_Googel_Veo3:
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
                 
             result = response.json()
-            
-            if result.get("code") != "success":
-                error_message = f"API returned error: {result.get('message', 'Unknown error')}"
-                print(error_message)
-                return ("", "", json.dumps({"code": "error", "message": error_message}))
-                
-            task_id = result.get("data")
+
+            task_id = result.get("task_id")
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
             
+            print(f"[Comfly_Googel_Veo3] Task submitted successfully. Task ID: {task_id}")
             pbar.update_absolute(30)
 
-            max_attempts = 60  
+            max_attempts = 150 
             attempts = 0
             video_url = None
             
             while attempts < max_attempts:
-                time.sleep(10)
+                time.sleep(2) 
                 attempts += 1
                 
                 try:
                     status_response = requests.get(
-                        f"{baseurl}/google/v1/tasks/{task_id}",
+                        f"{baseurl}/v2/videos/generations/{task_id}",
                         headers=self.get_headers(),
                         timeout=self.timeout
                     )
                     
                     if status_response.status_code != 200:
+                        print(f"[Comfly_Googel_Veo3] Status check failed with code: {status_response.status_code}")
                         continue
                         
                     status_result = status_response.json()
-                    
-                    if status_result.get("code") != "success":
-                        continue
-                    
-                    data = status_result.get("data", {})
-                    status = data.get("status", "")
-                    progress = data.get("progress", "0%")
-                    
+
+                    status = status_result.get("status", "")
+                    progress = status_result.get("progress", "0%")
+
                     try:
-                        if progress.endswith('%'):
+                        if progress and progress.endswith('%'):
                             progress_num = int(progress.rstrip('%'))
                             pbar_value = min(90, 30 + progress_num * 60 / 100)
                             pbar.update_absolute(pbar_value)
@@ -8538,46 +8662,51 @@ class Comfly_Googel_Veo3:
                         pbar.update_absolute(progress_value)
                     
                     if status == "SUCCESS":
-                        if "data" in data and "video_url" in data["data"]:
-                            video_url = data["data"]["video_url"]
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            print(f"[Comfly_Googel_Veo3] Video URL: {video_url}")
                             break
+                        else:
+                            print(f"[Comfly_Googel_Veo3] SUCCESS but no output found in data: {data}")
+                            
                     elif status == "FAILURE":
-                        fail_reason = data.get("fail_reason", "Unknown error")
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
-                        print(error_message)
+                        print(f"[Comfly_Googel_Veo3] {error_message}")
                         return ("", "", json.dumps({"code": "error", "message": error_message}))
-                        
+                                           
                 except Exception as e:
-                    print(f"Error checking generation status: {str(e)}")
+                    print(f"[Comfly_Googel_Veo3] Error checking generation status: {str(e)}")
             
             if not video_url:
                 error_message = "Failed to retrieve video URL after multiple attempts"
-                print(error_message)
+                print(f"[Comfly_Googel_Veo3] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
+
+            pbar.update_absolute(95)
             
-            if video_url:
-                pbar.update_absolute(95)
-                
-                response_data = {
-                    "code": "success",
-                    "task_id": task_id,
-                    "prompt": prompt,
-                    "model": model,
-                    "enhance_prompt": enhance_prompt,
-                    "aspect_ratio": aspect_ratio if model in ["veo3", "veo3-fast", "veo3-pro"] else "default",
-                    "enable_upsample": enable_upsample if model in ["veo3", "veo3-fast", "veo3-pro"] else False,
-                    "video_url": video_url,
-                    "images_count": len([img for img in [image1, image2, image3] if img is not None])
-                }
-                
-                video_adapter = ComflyVideoAdapter(video_url)
-                return (video_adapter, video_url, json.dumps(response_data))
+            response_data = {
+                "code": "success",
+                "task_id": task_id,
+                "prompt": prompt,
+                "model": model,
+                "enhance_prompt": enhance_prompt,
+                "aspect_ratio": aspect_ratio if model in supported_models else "default",
+                "enable_upsample": enable_upsample if model in supported_models else False,
+                "video_url": video_url,
+                "images_count": len([img for img in [image1, image2, image3] if img is not None])
+            }
+            
+            pbar.update_absolute(100)
+            
+            video_adapter = ComflyVideoAdapter(video_url)
+            return (video_adapter, video_url, json.dumps(response_data))
             
         except Exception as e:
             error_message = f"Error generating video: {str(e)}"
-            print(error_message)
+            print(f"[Comfly_Googel_Veo3] {error_message}")
             return ("", "", json.dumps({"code": "error", "message": error_message}))
-
 
 class Comfly_nano_banana:
     @classmethod
@@ -15770,6 +15899,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Flux_2_Flex": Comfly_Flux_2_Flex,
     "Comfly_Flux_2_Max": Comfly_Flux_2_Max,
     "Comfly_Googel_Veo3": Comfly_Googel_Veo3,
+    "ComflyGeminiTextOnly": ComflyGeminiTextOnly,    
     "Comfly_mj_video": Comfly_mj_video,
     "Comfly_mj_video_extend": Comfly_mj_video_extend,
     "Comfly_qwen_image": Comfly_qwen_image,
@@ -15835,6 +15965,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Flux_2_Flex": "Zhenzhen_Flux_2_Flex",
     "Comfly_Flux_2_Max": "zhenzhen_Flux_2_Max",
     "Comfly_Googel_Veo3": "Zhenzhen Google Veo3",
+    "ComflyGeminiTextOnly": "Zhenzhen GeminiTextOnly",
     "Comfly_mj_video": "Zhenzhen MJ Video",
     "Comfly_mj_video_extend": "Zhenzhen MJ Video Extend",
     "Comfly_qwen_image": "Zhenzhen_qwen_image",
