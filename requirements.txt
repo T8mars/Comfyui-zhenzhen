@@ -12,3 +12,4 @@ huggingface-hub
 psutil
 nest_asyncio
 openai
+opencv-python
