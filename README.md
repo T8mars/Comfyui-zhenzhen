@@ -114,10 +114,11 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 这两天openai服务器不正常，并非我们问题，发现sora2超时都是因为openai官方问题
 
-### 20260131
+### 20260131(晚上8点半通知)
 
-Sora2使用方式20260131方法
-目前可以用的是Default分组的sora-2-pro模型，支持HD和25S，Default的sora-2也已经陆续恢复，价格暂时没变，然后Openai已经修复了价格漏洞，Openai官方优质分组价格已回复到按秒收费，注意资损
+Sora2基本搞定，测了一天了，很稳定，模型请用：sora-2， 分组切换成 sora-vip，消费积分0.33334/次，请自行尝试，，15S，请自行尝试
+
+目前可以用的是Default分组的sora-2-pro模型，支持HD和25S，以及sora-vip分组的sora-2模型
 
 ### 20260116
 
