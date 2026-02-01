@@ -1,0 +1,269 @@
+{
+  "id": "fe637513-8894-41a2-a0da-fe4bcd7ff4ca",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 4,
+      "type": "easy showAnything",
+      "pos": [
+        1236.5157365564671,
+        -3816.334995848486
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5ec3b5ef861fe45c4e9966d17c4546e943417723",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://visioncoder.oss-cn-shanghai.aliyuncs.com/0cf8fcff-d834-4a5e-8a4e-074e80738ac3/7faf0ac6-8000-42ae-a9a6-4934802acfda/video.mp4"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "easy showAnything",
+      "pos": [
+        1178.2710115470177,
+        -3676.119970865505
+      ],
+      "size": [
+        399.25629209828753,
+        254.2779345179506
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5ec3b5ef861fe45c4e9966d17c4546e943417723",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"250f3bd2-2b37-404e-a027-8c8e0bfc9876\", \"prompt\": \"小黄鸭历险记\", \"model\": \"sora-2\", \"api_model\": \"sy_8\", \"orientation\": \"portrait\", \"size\": \"small\", \"duration\": \"15s\", \"seed\": 620017122, \"video_url\": \"https://visioncoder.oss-cn-shanghai.aliyuncs.com/0cf8fcff-d834-4a5e-8a4e-074e80738ac3/7faf0ac6-8000-42ae-a9a6-4934802acfda/video.mp4\", \"thumbnail_url\": \"https://visioncoder.oss-cn-shanghai.aliyuncs.com/0cf8fcff-d834-4a5e-8a4e-074e80738ac3/7faf0ac6-8000-42ae-a9a6-4934802acfda/thumbnail.png\"}"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LoadImage",
+      "pos": [
+        146.86352767202746,
+        -3994.532971543764
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.1",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00003_xhymy_1765705518.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "SaveVideo",
+      "pos": [
+        1597.2844475600627,
+        -3944.807129695268
+      ],
+      "size": [
+        270,
+        588.9090909090909
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.1",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "Comfly_sora2_new",
+      "pos": [
+        650.3386285152399,
+        -3969.424953666313
+      ],
+      "size": [
+        400,
+        296
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "c25229d3f37c693eaec6397d5250a687f27a97d5",
+        "Node name for S&R": "Comfly_sora2_new"
+      },
+      "widgets_values": [
+        "小黄鸭历险记",
+        "sora-2",
+        "portrait",
+        "small",
+        "15s",
+        "",
+        1525789929,
+        "randomize"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "VIDEO"
+    ],
+    [
+      2,
+      3,
+      0,
+      1,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "STRING"
+    ],
+    [
+      4,
+      1,
+      2,
+      5,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflowRendererVersion": "LG",
+    "ds": {
+      "scale": 1.088052886904795,
+      "offset": [
+        373.2810128042663,
+        4537.988959844274
+      ]
+    },
+    "frontendVersion": "1.37.11",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
