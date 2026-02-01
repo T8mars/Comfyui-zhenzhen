@@ -6541,6 +6541,330 @@ class Comfly_sora2_openai:
             return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
            
 
+
+class Comfly_sora2_new:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
+                "orientation": (["portrait", "landscape"], {"default": "portrait"}),
+                "size": (["small"], {"default": "small"}),
+                "duration": (["10s", "15s", "25s"], {"default": "15s"}),
+                "apikey": ("STRING", {"default": ""})
+            },
+            "optional": {
+                "reference_image": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Openai"
+
+    def __init__(self):
+        self.api_key = ""
+        self.base_url = "https://t8.ainewsto.com"
+        self.timeout = 900
+        self.session = requests.Session()
+        self.model_mapping = {
+            "sora-2": "sy_8",
+            "sora-2-pro": "sy_ore"
+        }
+        self.duration_mapping = {
+            "10s": 300,
+            "15s": 450,
+            "25s": 750
+        }
+
+    def get_headers(self):
+        return {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "69420",
+            "video-beta": "2025-10-20"
+        }
+    
+    def get_api_model(self, display_model):
+        return self.model_mapping.get(display_model, "sy_8")
+    
+    def get_n_frames(self, duration):
+        return self.duration_mapping.get(duration, 450)
+    
+    def validate_parameters(self, model, size, duration):
+        if duration == "25s" and model == "sora-2":
+            return False, "25s duration is only available for sora-2-pro model. Please select sora-2-pro or choose a shorter duration."
+
+        if size == "large" and duration == "25s":
+            return False, "25s duration cannot be used with large size. Please choose a smaller size or shorter duration."
+        
+        return True, None
+    
+    def upload_image(self, image_tensor, api_model):
+        """Upload image and return file_id"""
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            
+            img_byte_arr = BytesIO()
+            pil_image.save(img_byte_arr, format='JPEG')
+            img_byte_arr.seek(0)
+            
+            timestamp = int(time.time() * 1000)
+            filename = f"ai-generated-{timestamp}.jpg"
+            
+            files = {
+                'file': (filename, img_byte_arr, 'image/jpeg')
+            }
+            
+            data = {
+                'url': '/video/upload',
+                'method': 'POST',
+                'filename': filename,
+                'model': api_model
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "ngrok-skip-browser-warning": "69420",
+                "video-beta": "2025-10-20"
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/request",
+                headers=headers,
+                data=data,
+                files=files,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                print(f"Upload error: {response.status_code} - {response.text}")
+                return None
+                
+            result = response.json()
+            file_id = result.get("file_id")
+            
+            if file_id:
+                print(f"Image uploaded successfully. File ID: {file_id}")
+                return file_id
+            else:
+                print(f"No file_id in response: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    def create_video(self, prompt, display_model, orientation, size, duration, seed=0, reference_image=None):
+        """Create video task"""
+        try:
+            api_model = self.get_api_model(display_model)
+            n_frames = self.get_n_frames(duration)
+ 
+            payload = {
+                "url": "/video/create",
+                "method": "POST",
+                "data": {
+                    "prompt": prompt,
+                    "model": api_model,
+                    "orientation": orientation,
+                    "size": size,
+                    "n_frames": n_frames,
+                    "style": ""
+                }
+            }
+
+            if seed > 0:
+                payload["data"]["seed"] = seed
+                print(f"Using seed: {seed}")
+            
+            if reference_image is not None:
+                file_id = self.upload_image(reference_image, api_model)
+                if file_id:
+                    payload["data"]["reference_images"] = [
+                        {
+                            "kind": "upload",
+                            "file_id": file_id
+                        }
+                    ]
+                else:
+                    print("Warning: Failed to upload reference image, continuing without it")
+            
+            response = self.session.post(
+                f"{self.base_url}/api/request",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"Create video error: {response.status_code} - {response.text}"
+                print(error_message)
+                return None, error_message, api_model
+                
+            result = response.json()
+            task_id = result.get("task_id")
+            
+            if not task_id:
+                error_message = "No task_id in response"
+                print(error_message)
+                return None, error_message, api_model
+                
+            print(f"Video task created. Task ID: {task_id}")
+            return task_id, None, api_model
+            
+        except Exception as e:
+            error_message = f"Error creating video: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return None, error_message, None
+    
+    def check_status(self, task_id, api_model):
+        """Check video generation status"""
+        try:
+            payload = {
+                "url": "/video/status",
+                "method": "GET",
+                "params": {
+                    "id": task_id,
+                    "model": api_model
+                }
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/request",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                print(f"Status check error: {response.status_code} - {response.text}")
+                return None
+                
+            result = response.json()
+            return result
+            
+        except Exception as e:
+            print(f"Error checking status: {str(e)}")
+            return None
+    
+    def process(self, prompt, model, orientation, size, duration, apikey, reference_image=None, seed=0):
+        if not apikey.strip():
+            error_message = "API key is required"
+            print(error_message)
+            return ("", "", json.dumps({"status": "error", "message": error_message}))
+
+        is_valid, error_message = self.validate_parameters(model, size, duration)
+        if not is_valid:
+            print(error_message)
+            return ("", "", json.dumps({"status": "error", "message": error_message}))
+        
+        self.api_key = apikey.strip()
+        
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            
+            task_id, error, api_model = self.create_video(
+                prompt=prompt,
+                display_model=model,
+                orientation=orientation,
+                size=size,
+                duration=duration,
+                seed=seed,
+                reference_image=reference_image
+            )
+            
+            if error or not task_id:
+                return ("", "", json.dumps({"status": "error", "message": error or "Failed to create task"}))
+            
+            pbar.update_absolute(30)
+            
+            max_attempts = 300
+            attempts = 0
+            video_url = None
+            thumbnail_url = None
+            
+            print(f"Waiting for video generation (Task ID: {task_id})...")
+            
+            while attempts < max_attempts:
+                time.sleep(10)
+                attempts += 1
+                
+                status_data = self.check_status(task_id, api_model)
+                
+                if not status_data:
+                    continue
+                
+                status = status_data.get("status", "")
+                progress = status_data.get("progress", 0)
+                
+                pbar_value = min(90, 30 + int(progress * 0.6))
+                pbar.update_absolute(pbar_value)
+
+                if status == "completed":
+                    video_url = status_data.get("video_url")
+                    thumbnail_url = status_data.get("thumbnail_url")
+                    
+                    if video_url:
+                        print(f"Video generation completed!")
+                        print(f"Video URL: {video_url}")
+                        break
+                    else:
+                        error_message = "Video completed but no URL returned"
+                        print(error_message)
+                        return ("", "", json.dumps({"status": "error", "message": error_message}))
+                
+                elif status == "failed" or status == "error":
+                    error_message = f"Video generation failed with status: {status}"
+                    print(error_message)
+                    return ("", "", json.dumps({"status": "error", "message": error_message}))
+            
+            if not video_url:
+                error_message = f"Failed to get video URL after {max_attempts} attempts"
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
+            
+            video_adapter = ComflyVideoAdapter(video_url)
+            
+            pbar.update_absolute(100)
+            
+            response_data = {
+                "status": "success",
+                "task_id": task_id,
+                "prompt": prompt,
+                "model": model,
+                "api_model": api_model,
+                "orientation": orientation,
+                "size": size,
+                "duration": duration,
+                "seed": seed,
+                "video_url": video_url,
+                "thumbnail_url": thumbnail_url or ""
+            }
+            
+            return (
+                video_adapter,
+                video_url,
+                json.dumps(response_data, ensure_ascii=False)
+            )
+            
+        except Exception as e:
+            error_message = f"Error in video generation: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"status": "error", "message": error_message}))
+
+
+
 class Comfly_sora2:
     @classmethod
     def INPUT_TYPES(cls):
@@ -8515,7 +8839,7 @@ class Comfly_Googel_Veo3:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1","veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"], {"default": "veo3"}),
+                "model": (["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1","veo3.1-fast","veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"], {"default": "veo3"}),
                 "enhance_prompt": ("BOOLEAN", {"default": False}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
             },
@@ -8581,7 +8905,7 @@ class Comfly_Googel_Veo3:
 
             supported_models = [
                 "veo3", "veo3-fast", "veo3-pro", 
-                "veo3.1", "veo3.1-pro", "veo3.1-components", 
+                "veo3.1", "veo3.1-fast","veo3.1-pro", "veo3.1-components", 
                 "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"
             ]
             
@@ -15888,6 +16212,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_sora2": Comfly_sora2, 
     "Comfly_sora2_chat": Comfly_sora2_chat, 
     "Comfly_sora2_character": Comfly_sora2_character, 
+    "Comfly_sora2_new": Comfly_sora2_new,
     "ComflyJimengApi": ComflyJimengApi, 
     "Comfly_gpt_image_1_edit": Comfly_gpt_image_1_edit,
     "Comfly_gpt_image_1": Comfly_gpt_image_1,
@@ -15954,6 +16279,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_sora2": "Zhenzhen_sora2", 
     "Comfly_sora2_chat": "Zhenzhen_sora2_chat", 
     "Comfly_sora2_character": "Zhenzhen Sora2 Character",  
+    "Comfly_sora2_new": "Zhenhen Sora2 New",
     "ComflyJimengApi": "Zhenzhen Jimeng API", 
     "Comfly_gpt_image_1_edit": "Zhenzhen_gpt_image_1_edit",
     "Comfly_gpt_image_1": "Zhenzhen_gpt_image_1", 
