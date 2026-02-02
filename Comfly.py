@@ -6542,6 +6542,7 @@ class Comfly_sora2_openai:
            
 
 
+
 class Comfly_sora2_new:
     @classmethod
     def INPUT_TYPES(cls):
@@ -6550,7 +6551,7 @@ class Comfly_sora2_new:
                 "prompt": ("STRING", {"multiline": True}),
                 "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
                 "orientation": (["portrait", "landscape"], {"default": "portrait"}),
-                "size": (["small"], {"default": "small"}),
+                "size": (["small", "large"], {"default": "small"}),
                 "duration": (["10s", "15s", "25s"], {"default": "15s"}),
                 "apikey": ("STRING", {"default": ""})
             },
@@ -6563,7 +6564,7 @@ class Comfly_sora2_new:
     RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
     RETURN_NAMES = ("video", "video_url", "response")
     FUNCTION = "process"
-    CATEGORY = "zhenzhen/Openai"
+    CATEGORY = "Zhenzhen/Openai"
 
     def __init__(self):
         self.api_key = ""
@@ -6791,6 +6792,8 @@ class Comfly_sora2_new:
             attempts = 0
             video_url = None
             thumbnail_url = None
+            completed_wait_attempts = 0  
+            max_completed_wait = 300 
             
             print(f"Waiting for video generation (Task ID: {task_id})...")
             
@@ -6801,6 +6804,7 @@ class Comfly_sora2_new:
                 status_data = self.check_status(task_id, api_model)
                 
                 if not status_data:
+                    print(f"Attempt {attempts}/{max_attempts}: No status data received, retrying...")
                     continue
                 
                 status = status_data.get("status", "")
@@ -6818,19 +6822,44 @@ class Comfly_sora2_new:
                         print(f"Video URL: {video_url}")
                         break
                     else:
-                        error_message = "Video completed but no URL returned"
-                        print(error_message)
-                        return ("", "", json.dumps({"status": "error", "message": error_message}))
+                        completed_wait_attempts += 1
+                          
+                        if completed_wait_attempts >= max_completed_wait:
+                            error_message = f"Video completed but no URL returned after {max_completed_wait} additional attempts"
+                            print(error_message)
+                            print(f"Last status data: {json.dumps(status_data, ensure_ascii=False)}")
+                            return ("", "", json.dumps({
+                                "status": "error", 
+                                "message": error_message,
+                                "task_id": task_id,
+                                "last_status": status_data
+                            }))
+                        continue
                 
                 elif status == "failed" or status == "error":
                     error_message = f"Video generation failed with status: {status}"
+                    error_details = status_data.get("error", "No error details provided")
                     print(error_message)
-                    return ("", "", json.dumps({"status": "error", "message": error_message}))
+                    print(f"Error details: {error_details}")
+                    return ("", "", json.dumps({
+                        "status": "error", 
+                        "message": error_message,
+                        "error_details": error_details,
+                        "task_id": task_id
+                    }))
+
+                if status != "completed":
+                    completed_wait_attempts = 0
             
             if not video_url:
-                error_message = f"Failed to get video URL after {max_attempts} attempts"
+                error_message = f"Failed to get video URL after {attempts} attempts (max: {max_attempts})"
                 print(error_message)
-                return ("", "", json.dumps({"status": "error", "message": error_message}))
+                return ("", "", json.dumps({
+                    "status": "error", 
+                    "message": error_message,
+                    "task_id": task_id,
+                    "attempts": attempts
+                }))
             
             video_adapter = ComflyVideoAdapter(video_url)
             
