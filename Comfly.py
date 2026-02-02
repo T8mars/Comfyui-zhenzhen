@@ -6549,10 +6549,10 @@ class Comfly_sora2_new:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
+                "model": (["sora-2"], {"default": "sora-2"}),
                 "orientation": (["portrait", "landscape"], {"default": "portrait"}),
-                "size": (["small", "large"], {"default": "small"}),
-                "duration": (["10s", "15s", "25s"], {"default": "15s"}),
+                "size": (["small"], {"default": "small"}),
+                "duration": (["10s", "15s"], {"default": "15s"}),
                 "apikey": ("STRING", {"default": ""})
             },
             "optional": {
