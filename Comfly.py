@@ -6792,7 +6792,7 @@ class Comfly_sora2_new:
             video_url = None
             thumbnail_url = None
             completed_wait_attempts = 0  
-            max_completed_wait = 300 
+            max_completed_wait = 600 
             
             print(f"Waiting for video generation (Task ID: {task_id})...")
             
