@@ -6577,8 +6577,7 @@ class Comfly_sora2_new:
         }
         self.duration_mapping = {
             "10s": 300,
-            "15s": 450,
-            "25s": 750
+            "15s": 450
         }
 
     def get_headers(self):

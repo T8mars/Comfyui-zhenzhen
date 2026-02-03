@@ -113,6 +113,17 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 ### 通知
 
 这几天洛杉矶办事处网络出现一些问题，由于亚太地区海底光缆被切断导致我们骨干网络服务供应商NTT网络性能下降，目前该服务商已暂时停止服务。所波及影响是无论打开我们贞贞的AI工坊或者连通，请求API都需要开启魔法，望周知（修复时间未知）
+部分人完全是因为用的Vpn软件问题，请用常规软件！开Tun模式
+开源免费版仓库：https://github.com/2dust/v2rayN/releases
+下载Windows版本！
+另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
+
+
+### 20260203
+
+支持grok video新模型的10秒功能，增加分辨率选项，支持文生视频和图生视频，支持中文语言，删除老的工作流，新增2个新的工作流
+zhenzhen-grok3-video-t2v-v2.json
+zhenzhen-grok3-video-i2v-v2.json
 
 ### 20260202-2
 
