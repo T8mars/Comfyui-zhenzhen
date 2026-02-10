@@ -6349,7 +6349,7 @@ class Comfly_sora2_openai:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
+                "model": (["sora-2", "sora-2-pro","sora-2-vip"], {"default": "sora-2-vip"}),
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
@@ -6401,11 +6401,22 @@ class Comfly_sora2_openai:
             if seconds == "25":  
                 error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
                 print(error_message)
-                return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
             if size in ["1792x1024", "1024x1792"]:
                 error_message = "The sora-2 model does not support 1080P resolution. Please use sora-2-pro for 1080P videos."
                 print(error_message)
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
+            
+        if model == "sora-2-vip":
+         if seconds in ["25", "15"]:  
+                error_message = "The sora-2-vip model does not support 15 or 25 second videos. Please use sora-2-pro for 15s/25s videos."
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
+         if size in ["1792x1024", "1024x1792"]:
+                error_message = "The sora-2-vip model does not support 1080P resolution. Please use sora-2-pro for 1080P videos."
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
+
       
         pbar = comfy.utils.ProgressBar(100)
         pbar.update_absolute(10)
@@ -6899,7 +6910,7 @@ class Comfly_sora2:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["sora-2", "sora-2-pro"], {"default": "sora-2"}),
+                "model": (["sora-2", "sora-2-pro","sora-2-vip"], {"default": "sora-2"}),
                 "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
                 "duration": (["10", "15", "25"], {"default": "15"}),
                 "hd": ("BOOLEAN", {"default": False}),
@@ -6967,7 +6978,17 @@ class Comfly_sora2:
                 error_message = "The sora-2 model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
                 print(error_message)
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
-      
+        
+        if model == "sora-2-vip":
+            if duration in ["25", "15"]:  
+                error_message = "The sora-2-vip model does not support 15 or 25 second videos. Please use sora-2-pro for 15s/25s videos."
+                print(error_message)
+                return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
+            if hd:
+                error_message = "The sora-2-vip model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
+                print(error_message)
+                return ("", "", json.dumps({"status": "error", "message": error_message}))
+
         pbar = comfy.utils.ProgressBar(100)
         pbar.update_absolute(10)
         

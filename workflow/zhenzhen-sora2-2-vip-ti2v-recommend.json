@@ -1,0 +1,305 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "revision": 0,
+  "last_node_id": 63,
+  "last_link_id": 40,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "LoadImage",
+      "pos": [
+        2104.802296420464,
+        1142.0345737467328
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            38
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.12.3",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 60,
+      "type": "SaveVideo",
+      "pos": [
+        3211.8810264717963,
+        1203.4399380382235
+      ],
+      "size": [
+        270,
+        246.5
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 39
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.12.3",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 58,
+      "type": "Comfly_sora2",
+      "pos": [
+        2565.1238038826214,
+        1231.0056844755127
+      ],
+      "size": [
+        400,
+        340
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 38
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            39
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "f70fe3763e5bbe3fe3a8c8b83c07244d6bbe29f3",
+        "Node name for S&R": "Comfly_sora2"
+      },
+      "widgets_values": [
+        "一个女人拿着这个包包进行商品讲解",
+        "sora-2-vip",
+        "16:9",
+        "10",
+        false,
+        "",
+        318835536,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        2172.174820873559,
+        1633.3021651722177
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            40
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "f70fe3763e5bbe3fe3a8c8b83c07244d6bbe29f3",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        1774.932624495017,
+        1197.5868830210284
+      ],
+      "size": [
+        242.84572326965463,
+        123.50205732086079
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "api获取地址：https://ai.t8star.cn/register?aff=cbff0534884\n注册送0.2积分，每天工作台签到送积分\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 63,
+      "type": "Note",
+      "pos": [
+        2643.743617988421,
+        1680.9121294180761
+      ],
+      "size": [
+        242.84572326965463,
+        123.50205732086079
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "注意sora-2-vip模型只能10s,1.25积分每次，分组用default即可"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      38,
+      59,
+      0,
+      58,
+      0,
+      "IMAGE"
+    ],
+    [
+      39,
+      58,
+      0,
+      60,
+      0,
+      "VIDEO"
+    ],
+    [
+      40,
+      61,
+      0,
+      58,
+      4,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 2,
+      "title": "B站、Youtube:T8star-Aix",
+      "bounding": [
+        1367.21180513937,
+        649.589125816333,
+        2859.113137206591,
+        350.23877952853917
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9229599817706455,
+      "offset": [
+        -1698.204460641219,
+        -788.7590675797276
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "workflowRendererVersion": "LG",
+    "frontendVersion": "1.38.13",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
