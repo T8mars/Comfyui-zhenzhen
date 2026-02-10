@@ -118,6 +118,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260210
+
+新增sora-2-vip模型，单词1.25 只支持10S，分组选择default，生成成功率90%以上，生成时间150秒左右
+新增工作流：zhenzhen-sora2-2-vip-ti2v-recommend.json
 
 ### 20260203
 
