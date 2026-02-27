@@ -118,6 +118,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260228
+
+更新Grok3VideoApi节点，目前支持15S视频！漫剧，真人短剧必备！
+
 ### 20260227
 
 支持gemini-3.1-flash-image-preview模型，新增节点Zhenzhen Gemini 3.1 Flash Image Edit S2A
