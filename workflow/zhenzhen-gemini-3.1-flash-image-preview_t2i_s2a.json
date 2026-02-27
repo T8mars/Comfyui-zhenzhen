@@ -1,0 +1,496 @@
+{
+  "id": "2c352a1c-0f52-46ba-b0ae-cccc635b1147",
+  "revision": 0,
+  "last_node_id": 20,
+  "last_link_id": 17,
+  "nodes": [
+    {
+      "id": 14,
+      "type": "easy showAnything",
+      "pos": [
+        701.6890696363635,
+        127.19976293272681
+      ],
+      "size": [
+        140,
+        75.99999999999999
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "3ed55b9260a44863b14734cf63112037"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "easy showAnything",
+      "pos": [
+        715.7799787272725,
+        244.01794475090858
+      ],
+      "size": [
+        140,
+        75.99999999999997
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"3ed55b9260a44863b14734cf63112037\", \"model\": \"gemini-3.1-flash-image-preview\", \"mode\": \"text2img\", \"prompt\": \"\\u7f8e\\u4e3d\\u7684\\u5973\\u4eba\\u5728\\u4e66\\u5e97\\u770b\\u4e66\", \"aspect_ratio\": \"16:9\", \"image_size\": \"4K\", \"seed\": 107782041, \"images_count\": 1, \"image_url\": \"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\", \"all_urls\": [\"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\"]}"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [
+        1056.1546275018381,
+        13.893952035694626
+      ],
+      "size": [
+        517.2395813635544,
+        397.5711081921536
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 10
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        -586.2223588122656,
+        514.0691633658544
+      ],
+      "size": [
+        336.8444778362133,
+        159.17355371900828
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=cbff0534884\n\n左侧令牌，创建令牌，分组选择default，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用（comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 13,
+      "type": "easy showAnything",
+      "pos": [
+        690.9083107463225,
+        -22.551676052439362
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "CR Prompt Text",
+      "pos": [
+        -421.6045690046939,
+        189.023038184512
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "美丽的女人在书店看书"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "Comfly_gemini_3_1_flash_image_edit_S2A",
+      "pos": [
+        161.9326150909085,
+        -138.1633279763641
+      ],
+      "size": [
+        400,
+        564
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 17
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            11
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "3141fb931c0cdbf79a115d644ac9bb82094bb75e",
+        "Node name for S&R": "Comfly_gemini_3_1_flash_image_edit_S2A"
+      },
+      "widgets_values": [
+        "",
+        "text2img",
+        "gemini-3.1-flash-image-preview",
+        "16:9",
+        "4K",
+        "",
+        "",
+        "url",
+        1328820731,
+        "randomize"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "Comfly_api_set",
+      "pos": [
+        -216.52588585463621,
+        507.97588976568795
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "3141fb931c0cdbf79a115d644ac9bb82094bb75e",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      10,
+      11,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      11,
+      11,
+      1,
+      13,
+      0,
+      "STRING"
+    ],
+    [
+      12,
+      11,
+      2,
+      14,
+      0,
+      "STRING"
+    ],
+    [
+      13,
+      11,
+      3,
+      15,
+      0,
+      "STRING"
+    ],
+    [
+      15,
+      17,
+      0,
+      11,
+      15,
+      "STRING"
+    ],
+    [
+      17,
+      19,
+      0,
+      11,
+      14,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -465.73418057936925,
+        -754.4947286360468,
+        2890.2244432300004,
+        461.55880818
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8264462809917354,
+      "offset": [
+        1422.5261520908314,
+        299.3440455949811
+      ]
+    },
+    "workflowRendererVersion": "LG",
+    "frontendVersion": "1.39.14",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
