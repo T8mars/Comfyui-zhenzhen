@@ -28,7 +28,13 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
-# NanoBanana 2使用教程
+# Grok Video R2V视频参考平替seedance2.0教程及新版gemini 3.1 image（新版nano banana 2）
+
+Bilibili教程：https://www.bilibili.com/video/BV1iKPnzCEZY/
+
+Youtube教程：https://www.youtube.com/watch?v=Dky84Q49j0A
+
+# NanoBanana pro使用教程
 
 B站：https://www.bilibili.com/video/BV13MyPBzEjJ/
 
@@ -67,7 +73,7 @@ Youtube：https://www.youtube.com/watch?v=IZKLX1fyZIk
 
 整合包V3：https://pan.quark.cn/s/635ee1b917b6
 
-# Nano Banana2 + Sora2 +Gemeni 3 Pro一致性自动分镜剧本+漫画+音频+视频
+# Nano Banana pro + Sora2 +Gemeni 3 Pro一致性自动分镜剧本+漫画+音频+视频
 
 B站：https://www.bilibili.com/video/BV1zhUKBKEAp/
 
