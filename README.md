@@ -28,7 +28,7 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
-# Grok Video R2V视频参考平替seedance2.0教程及新版gemini 3.1 image（新版nano banana 2）
+# Grok Video Pro R2V 15s视频参考平替seedance2.0教程及新版gemini 3.1 image（新版nano banana 2）
 
 Bilibili教程：https://www.bilibili.com/video/BV1iKPnzCEZY/
 
