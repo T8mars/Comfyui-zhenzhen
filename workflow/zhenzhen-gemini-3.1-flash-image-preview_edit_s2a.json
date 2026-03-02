@@ -77,7 +77,7 @@
         "Node name for S&R": "easy showAnything"
       },
       "widgets_values": [
-        "{\"status\": \"success\", \"task_id\": \"3ed55b9260a44863b14734cf63112037\", \"model\": \"gemini-3.1-flash-image-preview\", \"mode\": \"text2img\", \"prompt\": \"\\u7f8e\\u4e3d\\u7684\\u5973\\u4eba\\u5728\\u4e66\\u5e97\\u770b\\u4e66\", \"aspect_ratio\": \"16:9\", \"image_size\": \"4K\", \"seed\": 107782041, \"images_count\": 1, \"image_url\": \"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\", \"all_urls\": [\"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\"]}"
+        "{\"status\": \"success\", \"task_id\": \"3ed55b9260a44863b14734cf63112037\", \"model\": \"gemini-3.1-flash-image-preview\", \"mode\": \"img2img\", \"prompt\": \"\\u7f8e\\u4e3d\\u7684\\u5973\\u4eba\\u5728\\u4e66\\u5e97\\u770b\\u4e66\", \"aspect_ratio\": \"16:9\", \"image_size\": \"4K\", \"seed\": 107782041, \"images_count\": 1, \"image_url\": \"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\", \"all_urls\": [\"https://webstatic.aiproxy.vip/output/20260227/9208/23ad199f-46b1-42e5-8eb0-854d4aaefd80.png\"]}"
       ]
     },
     {

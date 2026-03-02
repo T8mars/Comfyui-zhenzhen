@@ -1,0 +1,673 @@
+{
+  "id": "242a6140-7341-49ca-876b-c01366b39b84",
+  "revision": 0,
+  "last_node_id": 102,
+  "last_link_id": 105,
+  "nodes": [
+    {
+      "id": 92,
+      "type": "Comfly_api_set",
+      "pos": [
+        -2213.0673828125,
+        391.2283020019531
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "api_base",
+          "name": "api_base",
+          "type": "COMBO",
+          "widget": {
+            "name": "api_base"
+          }
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 89
+        },
+        {
+          "label": "custom_ip",
+          "name": "custom_ip",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "custom_ip"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            100
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set",
+        "ver": "a374cba455529175dfbe7205090b4bba15814bfe",
+        "widget_ue_connectable": {
+          "apikey": true
+        },
+        "aux_id": "T8mars/Comfyui-zhenzhen"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 101,
+      "type": "easy showAnything",
+      "pos": [
+        -671.60888671875,
+        574.4680786132812
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/65478c0d-d5d0-42ad-ab2c-6af347ecc317.mp4"
+      ]
+    },
+    {
+      "id": 99,
+      "type": "easy showAnything",
+      "pos": [
+        -915.4072265625,
+        559.2590942382812
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 102
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "grok:fe2deba2-9f1c-4368-bafd-e0eb616513c4"
+      ]
+    },
+    {
+      "id": 93,
+      "type": "Note",
+      "pos": [
+        -2676.096923828125,
+        114.02432250976562
+      ],
+      "size": [
+        242.84571838378906,
+        123.50205993652344
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "api获取地址：https://ai.t8star.cn/register?aff=dP7j\n注册送0.2积分，每天工作台签到送积分\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 100,
+      "type": "easy showAnything",
+      "pos": [
+        -1036.1253662109375,
+        748.7142333984375
+      ],
+      "size": [
+        472.160888671875,
+        216.154541015625
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 103
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "9947b8be70e17ceabafa4fa7f476b54626de4704",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "{\"code\": \"success\", \"url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/65478c0d-d5d0-42ad-ab2c-6af347ecc317.mp4\"}"
+      ]
+    },
+    {
+      "id": 102,
+      "type": "CR Prompt Text",
+      "pos": [
+        -2281.757080078125,
+        563.1666259765625
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            105
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CR Prompt Text",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "0-5秒（主观推镜头/拉扯互动）： 卧室光线昏暗，只有一丝冷色调的晨光漏进半掩的窗帘。镜头（观众视角）缓慢推进到凌乱的大床上。床中央是一个隆起的白色羽绒被团。镜头伸出一只手，试图轻轻扯开被角，却瞬间感受到被子内部传来一股极其倔强的反拉力，被子发出一声沉闷的摩擦声。 6-10秒（局部大特写/眼神杀）： 经过两秒的“拉扯拉锯战”，被窝被迫开了一条缝。贞贞乱蓬蓬的微卷长发散落在纯白枕头上，她半张脸埋在被子里，只露出一双还没完全清醒的眼睛。眼底褪去了平日的攻击性，透着一种刚睡醒的湿润与无辜。她像只护食的小动物，双手死死攥着领口的被子边缘。 11-15秒（动作突变/彻底摆烂）： 镜头再次向前逼近，试图把她“挖”出来。她眉头一皱，发出一声娇软的闷哼，随后猛地向后一滚，把自己连头带脚卷成了一个严丝合缝的“被子卷”，彻底切断与外界的联系。画面最后定格在她不小心露在被子外面、轻轻晃动抗议的白皙脚踝上。 【听觉与台词】 音效： 被子剧烈摩擦的簌簌声、清晨清脆但烦人的鸟鸣声。 台词（闷在被子里的慵懒奶音，带点起床气）： “别叫我……（裹紧）只要我不出这个被窝，假期就永远没有结束！休想抓我上班……”"
+      ]
+    },
+    {
+      "id": 87,
+      "type": "LoadImage",
+      "pos": [
+        -1929.65234375,
+        31.28475570678711
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          }
+        },
+        {
+          "label": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            101
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "348db42fdd26aa1732962fa8a7218adcc60b59f45e1c367667af9640a5277616.png",
+        "image"
+      ]
+    },
+    {
+      "id": 97,
+      "type": "ComflyGrok3VideoApi",
+      "pos": [
+        -1561.2286376953125,
+        254.6224365234375
+      ],
+      "size": [
+        400,
+        316
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 101
+        },
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 105
+        },
+        {
+          "label": "model",
+          "name": "model",
+          "type": "COMBO",
+          "widget": {
+            "name": "model"
+          }
+        },
+        {
+          "label": "ratio",
+          "name": "ratio",
+          "type": "COMBO",
+          "widget": {
+            "name": "ratio"
+          }
+        },
+        {
+          "label": "resolution",
+          "name": "resolution",
+          "type": "COMBO",
+          "widget": {
+            "name": "resolution"
+          }
+        },
+        {
+          "label": "api_key",
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 100
+        },
+        {
+          "label": "seed",
+          "name": "seed",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            98
+          ]
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            102
+          ]
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            103
+          ]
+        },
+        {
+          "label": "video_url",
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyGrok3VideoApi",
+        "ver": "18b3754d36e5b8db060efebd1b7dd4abb9cd5f91",
+        "widget_ue_connectable": {
+          "api_key": true
+        },
+        "aux_id": "T8mars/Comfyui-zhenzhen"
+      },
+      "widgets_values": [
+        "女人说：T8，你在干嘛呀",
+        "grok-video-3",
+        "9:16",
+        15,
+        "1080P",
+        426031888,
+        1765480363,
+        "randomize"
+      ]
+    },
+    {
+      "id": 98,
+      "type": "SaveVideo",
+      "pos": [
+        -314.92852783203125,
+        122.94119262695312
+      ],
+      "size": [
+        536.4256591796875,
+        1101.6456298828125
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 98
+        },
+        {
+          "label": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "label": "format",
+          "name": "format",
+          "type": "COMBO",
+          "widget": {
+            "name": "format"
+          }
+        },
+        {
+          "label": "codec",
+          "name": "codec",
+          "type": "COMBO",
+          "widget": {
+            "name": "codec"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video_url",
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 90,
+      "type": "CR Prompt Text",
+      "pos": [
+        -2413.951171875,
+        64.11612701416016
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            89
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CR Prompt Text",
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      89,
+      90,
+      0,
+      92,
+      1,
+      "STRING"
+    ],
+    [
+      98,
+      97,
+      0,
+      98,
+      0,
+      "VIDEO"
+    ],
+    [
+      100,
+      92,
+      0,
+      97,
+      5,
+      "STRING"
+    ],
+    [
+      101,
+      87,
+      0,
+      97,
+      0,
+      "IMAGE"
+    ],
+    [
+      102,
+      97,
+      1,
+      99,
+      0,
+      "*"
+    ],
+    [
+      103,
+      97,
+      2,
+      100,
+      0,
+      "*"
+    ],
+    [
+      104,
+      97,
+      3,
+      101,
+      0,
+      "*"
+    ],
+    [
+      105,
+      102,
+      0,
+      97,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube:T8star-Aix",
+      "bounding": [
+        -3060.765380859375,
+        -396.22821044921875,
+        2859.113037109375,
+        350.23876953125
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "VHS_KeepIntermediate": true,
+    "links_added_by_ue": [],
+    "VHS_MetadataImage": true,
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "VHS_latentpreviewrate": 0,
+    "frontendVersion": "1.23.0",
+    "VHS_latentpreview": false,
+    "ds": {
+      "scale": 0.5445000000000009,
+      "offset": [
+        1845.8483507374804,
+        232.78077969178563
+      ]
+    }
+  },
+  "version": 0.4
+}

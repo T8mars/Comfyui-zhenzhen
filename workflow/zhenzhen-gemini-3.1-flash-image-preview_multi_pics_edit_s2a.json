@@ -1,0 +1,645 @@
+{
+  "id": "435a775a-3ad5-481a-a906-38c56bc52ae1",
+  "revision": 0,
+  "last_node_id": 10,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "easy showAnything",
+      "pos": [
+        1938.243408203125,
+        1233.89794921875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"dc1a71e436274e5da501352f0299002d\", \"model\": \"gemini-3.1-flash-image-preview\", \"mode\": \"img2img\", \"prompt\": \"\\u56fe1\\u7684\\u5973\\u4eba\\u62ff\\u7740\\u56fe2\\u7684\\u5305\\u5728\\u5496\\u5561\\u5385\\uff0c\\u4eba\\u8138\\u4fdd\\u6301100%\\u4e00\\u81f4\\u6027\", \"aspect_ratio\": \"16:9\", \"image_size\": \"4K\", \"seed\": 1430839806, \"images_count\": 1, \"image_url\": \"https://webstatic.aiproxy.vip/output/20260301/9208/a33e25c5-4893-44ab-9b96-e00b2a844fba.png\", \"all_urls\": [\"https://webstatic.aiproxy.vip/output/20260301/9208/a33e25c5-4893-44ab-9b96-e00b2a844fba.png\"]}"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Note",
+      "pos": [
+        636.2410278320312,
+        1503.94921875
+      ],
+      "size": [
+        336.844482421875,
+        159.17355346679688
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=cbff0534884\n\n左侧令牌，创建令牌，分组选择default，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用（comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 6,
+      "type": "LoadImage",
+      "pos": [
+        859.5972900390625,
+        759.8402099609375
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1"
+      },
+      "widgets_values": [
+        "df24dae377e037202c446a46d0730d69d5f6124ef0e061d11dfa3068a2e3c472.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveImage",
+      "pos": [
+        2260.52294921875,
+        893.6971435546875
+      ],
+      "size": [
+        517.2395629882812,
+        397.57110595703125
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "label": "image_urls",
+          "name": "image_urls",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "SaveImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "easy showAnything",
+      "pos": [
+        1914.879638671875,
+        911.5360107421875
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260301/9208/a33e25c5-4893-44ab-9b96-e00b2a844fba.png"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "easy showAnything",
+      "pos": [
+        1931.69189453125,
+        1083.906005859375
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "anything",
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "name": "output",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "easy showAnything",
+        "cnr_id": "comfyui-easy-use",
+        "ver": "b11c63487243d183a967261bdf019c5afcec2cf7"
+      },
+      "widgets_values": [
+        "dc1a71e436274e5da501352f0299002d"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "LoadImage",
+      "pos": [
+        494.997314453125,
+        757.6402587890625
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            8
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1"
+      },
+      "widgets_values": [
+        "4af1faae06dfdf1c3ab2fdb1c896fc79fb5039d0cb84acf4defa118af9ef8bd9.png",
+        "image"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "CR Prompt Text",
+      "pos": [
+        800.8587646484375,
+        1178.903076171875
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        },
+        {
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "CR Prompt Text",
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca"
+      },
+      "widgets_values": [
+        "图1的女人拿着图2的包在咖啡厅，人脸保持100%一致性"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Comfly_gemini_3_1_flash_image_edit_S2A",
+      "pos": [
+        1384.39599609375,
+        851.7167358398438
+      ],
+      "size": [
+        400,
+        564
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image1",
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 2
+        },
+        {
+          "label": "image2",
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 8
+        },
+        {
+          "label": "image3",
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image4",
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image5",
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image6",
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image7",
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image8",
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image9",
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image10",
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image11",
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image12",
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image13",
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "image14",
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 3
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        },
+        {
+          "label": "image_url",
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            6
+          ]
+        },
+        {
+          "label": "task_id",
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            7
+          ]
+        },
+        {
+          "label": "response",
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {
+          "prompt": true,
+          "apikey": true
+        },
+        "Node name for S&R": "Comfly_gemini_3_1_flash_image_edit_S2A",
+        "cnr_id": "zhenzhen",
+        "ver": "3141fb931c0cdbf79a115d644ac9bb82094bb75e"
+      },
+      "widgets_values": [
+        "",
+        "img2img",
+        "gemini-3.1-flash-image-preview",
+        "16:9",
+        "4K",
+        "",
+        "",
+        "url",
+        1304004346,
+        "randomize"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Comfly_api_set",
+      "pos": [
+        1005.9375,
+        1497.85595703125
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "widget_ue_connectable": {},
+        "Node name for S&R": "Comfly_api_set",
+        "cnr_id": "zhenzhen",
+        "ver": "3141fb931c0cdbf79a115d644ac9bb82094bb75e"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      3,
+      1,
+      0,
+      "*"
+    ],
+    [
+      2,
+      6,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      4,
+      0,
+      3,
+      14,
+      "STRING"
+    ],
+    [
+      4,
+      5,
+      0,
+      3,
+      15,
+      "STRING"
+    ],
+    [
+      5,
+      3,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      3,
+      1,
+      8,
+      0,
+      "*"
+    ],
+    [
+      7,
+      3,
+      2,
+      9,
+      0,
+      "*"
+    ],
+    [
+      8,
+      10,
+      0,
+      3,
+      1,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        576.7999877929688,
+        182.40000915527344,
+        2890.224365234375,
+        461.5588073730469
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.6209213230591554,
+      "offset": [
+        -156.3624791923378,
+        -604.455996002336
+      ]
+    },
+    "frontendVersion": "1.23.0",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
