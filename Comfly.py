@@ -14924,7 +14924,13 @@ class ComflyGrok3VideoApi:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "image": ("IMAGE",),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
             }
         }
@@ -14975,7 +14981,7 @@ class ComflyGrok3VideoApi:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image=None, seed=0):
+    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -14994,24 +15000,30 @@ class ComflyGrok3VideoApi:
                 "prompt": prompt,
                 "model": model,
                 "ratio": ratio,
-                "duration": duration,
+                "duration": int(duration),
                 "resolution": resolution
             }
 
             if seed > 0:
                 payload["seed"] = seed
 
-            # Handle image input
-            image_url = None
-            if image is not None:
-                pbar.update_absolute(20)
-                image_url = self.upload_image(image)
-                if image_url:
-                    payload["images"] = [image_url]
-                else:
-                    error_message = "Failed to upload image. Please check your image and try again."
-                    print(error_message)
-                    return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            # Handle image inputs (up to 7 reference images)
+            all_images = [image1, image2, image3, image4, image5, image6, image7]
+            image_urls = []
+            
+            for i, img in enumerate(all_images):
+                if img is not None:
+                    pbar.update_absolute(15 + i * 2)
+                    uploaded_url = self.upload_image(img)
+                    if uploaded_url:
+                        image_urls.append(uploaded_url)
+                    else:
+                        error_message = f"Failed to upload image {i+1}. Please check your image and try again."
+                        print(error_message)
+                        return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            if image_urls:
+                payload["images"] = image_urls
 
             pbar.update_absolute(30)
             
