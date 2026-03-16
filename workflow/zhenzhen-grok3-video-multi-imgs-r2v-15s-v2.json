@@ -108,7 +108,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/65478c0d-d5d0-42ad-ab2c-6af347ecc317.mp4"
+        "https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/332f619e-f7cb-48ed-99f9-d7c6d3c6ae18.mp4"
       ]
     },
     {
@@ -148,7 +148,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "grok:fe2deba2-9f1c-4368-bafd-e0eb616513c4"
+        "grok:3d55dfa0-3065-4fe0-ae4f-87742d62077e"
       ]
     },
     {
@@ -213,7 +213,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "{\"code\": \"success\", \"url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/65478c0d-d5d0-42ad-ab2c-6af347ecc317.mp4\"}"
+        "{\"code\": \"success\", \"url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/332f619e-f7cb-48ed-99f9-d7c6d3c6ae18.mp4\"}"
       ]
     },
     {
@@ -280,57 +280,6 @@
         "video/ComfyUI",
         "auto",
         "auto"
-      ]
-    },
-    {
-      "id": 90,
-      "type": "CR Prompt Text",
-      "pos": [
-        -2413.951171875,
-        64.11612701416016
-      ],
-      "size": [
-        400,
-        200
-      ],
-      "flags": {
-        "collapsed": false
-      },
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "links": [
-            89
-          ]
-        },
-        {
-          "label": "show_help",
-          "name": "show_help",
-          "type": "STRING"
-        }
-      ],
-      "properties": {
-        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
-        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
-        "Node name for S&R": "CR Prompt Text",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        ""
       ]
     },
     {
@@ -493,7 +442,7 @@
         "15",
         "1080P",
         "",
-        0,
+        1152230231,
         "randomize"
       ]
     },
@@ -509,7 +458,7 @@
         314
       ],
       "flags": {},
-      "order": 2,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
@@ -551,7 +500,67 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "348db42fdd26aa1732962fa8a7218adcc60b59f45e1c367667af9640a5277616.png",
+        "93c59686-a8fa-47a3-8738-c4f5117a1f94.png",
+        "image"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "LoadImage",
+      "pos": [
+        -1904.8611215592844,
+        511.27408828396926
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "label": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            113
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "7840561f0bf1df0949920f737716bdc036487765fa147aa80bbd61ac672f0914.png",
         "image"
       ]
     },
@@ -601,67 +610,58 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "0-5秒（主观推镜头/拉扯互动）： 卧室光线昏暗，只有一丝冷色调的晨光漏进半掩的窗帘。镜头（观众视角）缓慢推进到凌乱的大床上。床中央是一个隆起的白色羽绒被团。镜头伸出一只手，试图轻轻扯开被角，却瞬间感受到被子内部传来一股极其倔强的反拉力，被子发出一声沉闷的摩擦声。 6-10秒（局部大特写/眼神杀）： 经过两秒的“拉扯拉锯战”，被窝被迫开了一条缝。贞贞乱蓬蓬的微卷长发散落在纯白枕头上，她半张脸埋在被子里，只露出一双还没完全清醒的眼睛。眼底褪去了平日的攻击性，透着一种刚睡醒的湿润与无辜。她像只护食的小动物，双手死死攥着领口的被子边缘。 11-15秒（动作突变/彻底摆烂）： 镜头再次向前逼近，试图把她“挖”出来。她眉头一皱，发出一声娇软的闷哼，随后猛地向后一滚，把自己连头带脚卷成了一个严丝合缝的“被子卷”，彻底切断与外界的联系。画面最后定格在她不小心露在被子外面、轻轻晃动抗议的白皙脚踝上。 【听觉与台词】 音效： 被子剧烈摩擦的簌簌声、清晨清脆但烦人的鸟鸣声。 台词（闷在被子里的慵懒奶音，带点起床气）： “别叫我……（裹紧）只要我不出这个被窝，假期就永远没有结束！休想抓我上班……”"
+        "@img1 带着 @img2 眼镜在逛街"
       ]
     },
     {
-      "id": 104,
-      "type": "LoadImage",
+      "id": 90,
+      "type": "CR Prompt Text",
       "pos": [
-        -1904.8611215592844,
-        511.27408828396926
+        -2413.951171875,
+        64.11612701416016
       ],
       "size": [
-        270,
-        314
+        400,
+        200
       ],
-      "flags": {},
+      "flags": {
+        "collapsed": false
+      },
       "order": 4,
       "mode": 0,
       "inputs": [
         {
-          "label": "image",
-          "name": "image",
-          "type": "COMBO",
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
           "widget": {
-            "name": "image"
-          },
-          "link": null
-        },
-        {
-          "label": "upload",
-          "name": "upload",
-          "type": "IMAGEUPLOAD",
-          "widget": {
-            "name": "upload"
-          },
-          "link": null
+            "name": "prompt"
+          }
         }
       ],
       "outputs": [
         {
-          "label": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
+          "label": "prompt",
+          "name": "prompt",
+          "type": "STRING",
           "links": [
-            113
+            89
           ]
         },
         {
-          "label": "MASK",
-          "name": "MASK",
-          "type": "MASK"
+          "label": "show_help",
+          "name": "show_help",
+          "type": "STRING"
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.3.71",
-        "Node name for S&R": "LoadImage",
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "348db42fdd26aa1732962fa8a7218adcc60b59f45e1c367667af9640a5277616.png",
-        "image"
+        ""
       ]
     }
   ],
@@ -769,10 +769,10 @@
     "frontendVersion": "1.39.14",
     "VHS_latentpreview": true,
     "ds": {
-      "scale": 0.7972024500000015,
+      "scale": 1.4122927695244547,
       "offset": [
-        3514.824880463455,
-        380.56425443065103
+        2795.137768603764,
+        122.0771176728818
       ]
     },
     "workflowRendererVersion": "LG"

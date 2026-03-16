@@ -124,6 +124,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260317
+
+新增工作流，zhenzhen-grok3-video-multi-imgs-r2v-15s-v2
+
 ### 20260316
 
 grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！
