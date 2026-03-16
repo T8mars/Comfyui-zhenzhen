@@ -118,7 +118,7 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 通知
 
-这几天洛杉矶办事处网络出现一些问题，由于亚太地区海底光缆被切断导致我们骨干网络服务供应商NTT网络性能下降，目前该服务商已暂时停止服务。所波及影响是无论打开我们贞贞的AI工坊或者连通，请求API都需要开启魔法，望周知（修复时间未知）
+我们是海外服务器，如果打不开贞贞的AI工坊或者连通不上，报443错误，请求API都需要开启魔法，望周知
 部分人完全是因为用的Vpn软件问题，请用常规软件！开Tun模式
 开源免费版仓库：https://github.com/2dust/v2rayN/releases
 下载Windows版本！
@@ -126,26 +126,20 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 20260316
 
-<<<<<<< HEAD
-grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！ 最多支持 7张参考图，需要在 prompt 中描述 @img1 @img2... @img7 ，这是固定格式 
-
-例如： @img1 一只T8拿着刀追 @img2 温总 
-
-=======
 grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！
+
 最多支持 7张参考图，需要在 prompt 中描述 @img1 @img2... @img7 ，这是固定格式
+
 例如： @img1 一只T8拿着刀追 @img2 温总
->>>>>>> e4d831d67285778f3f2e806a6409673b0ee5695d
+
 新增工作流，zhenzhen-grok3-video-r2v-Mul-Imgs-15s-v1.json
 
 ### 20260304
 
-<<<<<<< HEAD
-不好意思，昨天工作太晚刚起来，贞贞的AI工坊早上网站SSL证书过期了，导致API出问题，实在抱歉，已经修复 另外节点修正了一个传参错误，grok-video-3的duration应该传参string，已修正
-=======
 不好意思，昨天工作太晚刚起来，贞贞的AI工坊早上网站SSL证书过期了，导致API出问题，实在抱歉，已经修复
+
 另外节点修正了一个传参错误，grok-video-3的duration应该传参string，已修正
->>>>>>> e4d831d67285778f3f2e806a6409673b0ee5695d
+
 
 ### 20260303
 
@@ -158,7 +152,9 @@ grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！
 ### 20260227
 
 支持gemini-3.1-flash-image-preview模型，新增节点Zhenzhen Gemini 3.1 Flash Image Edit S2A
+
 更新工作流zhenzhen-gemini-3.1-flash-image-preview_edit_s2a.json
+
 更新工作流zhenzhen-gemini-3.1-flash-image-preview_t2i_s2a.json
 
 ### 20260213
@@ -168,12 +164,15 @@ grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！
 ### 20260210
 
 新增sora-2-vip模型，单词1.25 只支持10S，分组选择default，生成成功率90%以上，生成时间150秒左右
+
 新增工作流：zhenzhen-sora2-2-vip-ti2v-recommend.json
 
 ### 20260203
 
 支持grok video新模型的10秒功能，增加分辨率选项，支持文生视频和图生视频，支持中文语言，删除老的工作流，新增2个新的工作流
+
 zhenzhen-grok3-video-t2v-v2.json
+
 zhenzhen-grok3-video-i2v-v2.json
 
 ### 20260202-2
