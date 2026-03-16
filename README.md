@@ -124,6 +124,18 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260316
+
+grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！ 最多支持 7张参考图，需要在 prompt 中描述 @img1 @img2... @img7 ，这是固定格式 
+
+例如： @img1 一只T8拿着刀追 @img2 温总 
+
+新增工作流，zhenzhen-grok3-video-r2v-Mul-Imgs-15s-v1.json
+
+### 20260304
+
+不好意思，昨天工作太晚刚起来，贞贞的AI工坊早上网站SSL证书过期了，导致API出问题，实在抱歉，已经修复 另外节点修正了一个传参错误，grok-video-3的duration应该传参string，已修正
+
 ### 20260303
 
 更新grok video 15秒T2V及R2V工作流，更新新香蕉2工作流
