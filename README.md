@@ -126,15 +126,26 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 20260316
 
+<<<<<<< HEAD
 grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！ 最多支持 7张参考图，需要在 prompt 中描述 @img1 @img2... @img7 ，这是固定格式 
 
 例如： @img1 一只T8拿着刀追 @img2 温总 
 
+=======
+grok-3-video模型支持类seedance2.0多参，工作流和节点均已更新！
+最多支持 7张参考图，需要在 prompt 中描述 @img1 @img2... @img7 ，这是固定格式
+例如： @img1 一只T8拿着刀追 @img2 温总
+>>>>>>> e4d831d67285778f3f2e806a6409673b0ee5695d
 新增工作流，zhenzhen-grok3-video-r2v-Mul-Imgs-15s-v1.json
 
 ### 20260304
 
+<<<<<<< HEAD
 不好意思，昨天工作太晚刚起来，贞贞的AI工坊早上网站SSL证书过期了，导致API出问题，实在抱歉，已经修复 另外节点修正了一个传参错误，grok-video-3的duration应该传参string，已修正
+=======
+不好意思，昨天工作太晚刚起来，贞贞的AI工坊早上网站SSL证书过期了，导致API出问题，实在抱歉，已经修复
+另外节点修正了一个传参错误，grok-video-3的duration应该传参string，已修正
+>>>>>>> e4d831d67285778f3f2e806a6409673b0ee5695d
 
 ### 20260303
 
