@@ -126,6 +126,11 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
 ### 20260317
 
+grok-video-3模型已恢复使用，支持多参，15S，中文配音，分镜头，多宫格等
+sora-2模型默认分组已经暂时下架
+
+### 20260317
+
 新增工作流，zhenzhen-grok3-video-multi-imgs-r2v-15s-v2
 
 ### 20260316
