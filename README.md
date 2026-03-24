@@ -124,6 +124,20 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260323
+
+sora2 default 组恢复，价格恢复0.1 算力，sora pro 也恢复
+
+工作流:
+
+(新版0.1积分-支持真人)Sora2新图生视频V1(贞贞工坊-令牌分组选default) 
+
+https://www.runninghub.cn/post/2036008151446724610/?inviteCode=rh-v1121
+
+(新版0.1积分-支持真人)Sora2新文生视频V1(贞贞工坊-令牌分组选default) 
+
+https://www.runninghub.cn/post/2036011299909410818/?inviteCode=rh-v1121
+
 ### 20260317
 
 grok-video-3模型已恢复使用，支持多参，15S，中文配音，分镜头，多宫格等
