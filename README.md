@@ -124,6 +124,10 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260328
+
+由于 Sora 官方App 下架，default、Sora-vip 组将于2日后关闭，无法继续使用
+
 ### 20260323
 
 sora2 default 组恢复，价格恢复0.1 算力，sora pro 也恢复
