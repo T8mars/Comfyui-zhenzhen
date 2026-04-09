@@ -124,6 +124,19 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+
+### 20260409
+
+支持seedance2.0
+最新上架2个模型doubao-seedance-2-0-fast-260128，doubao-seedance-2-0-260128
+不同的传入，最终价格不同，注意传入参考视频，参考视频的秒数也计入价格
+便宜的可以考虑用480P FAST大概0.5算力左右，720P 满血版的大概1算力
+支持直接上传真人，也支持传入素材库保存ID永久使用
+调用教程（还没完全完善），网站左侧API文档，sdols
+更新工作流Seedance2.0-multiref-video-generate.json
+（目前节点有可能有点BUG，白天继续修复，目前上传资产有点问题，另外有可能生成成功了， COMFYUI还在跑，可以去网站异步任务的ID下载，白天修复）
+
+
 ### 20260331
 
 Veo3.1模型恢复，提高一定稳定性

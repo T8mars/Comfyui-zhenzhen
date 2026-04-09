@@ -16406,6 +16406,569 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             return (blank_tensor, "", "", json.dumps({"status": "query_error", "task_id": task_id, "message": error_message}))
 
 
+class Comfly_Doubao_Seedance2_0_asset:
+    """Upload media to Seedance asset system. Outputs asset:// ID for use in Seedance 2.0 node."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "asset_type": (["Image", "Video", "Audio"], {"default": "Image"}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
+                "url": ("STRING", {"default": "", "multiline": False}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("asset_id", "response")
+    FUNCTION = "create_asset"
+    CATEGORY = "zhenzhen/Doubao"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def upload_file(self, file_bytes, filename, content_type):
+        """Upload raw bytes to /v1/files, return URL"""
+        try:
+            files = {'file': (filename, file_bytes, content_type)}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            return result.get('url')
+        except Exception as e:
+            print(f"Error uploading file: {str(e)}")
+            return None
+
+    def upload_image_tensor(self, image_tensor):
+        """Convert IMAGE tensor to PNG bytes and upload"""
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        return self.upload_file(buffered.getvalue(), "image.png", "image/png")
+
+    def download_and_upload(self, url, asset_type):
+        """Download from URL then re-upload via /v1/files to get a hosted URL"""
+        try:
+            resp = requests.get(url, timeout=self.timeout)
+            resp.raise_for_status()
+            content_type = resp.headers.get("Content-Type", "application/octet-stream")
+
+            ext_map = {
+                "Image": (".png", "image/png"),
+                "Video": (".mp4", "video/mp4"),
+                "Audio": (".mp3", "audio/mpeg"),
+            }
+            ext, fallback_ct = ext_map.get(asset_type, (".bin", "application/octet-stream"))
+            if "octet-stream" in content_type:
+                content_type = fallback_ct
+
+            filename = f"upload{ext}"
+            return self.upload_file(resp.content, filename, content_type)
+        except Exception as e:
+            print(f"Error downloading from URL: {str(e)}")
+            return None
+
+    def create_asset(self, asset_type, apikey="", image=None, url=""):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+
+        if not self.api_key:
+            err = "API key not found in Comflyapi.json"
+            return ("", json.dumps({"code": "error", "message": err}))
+
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            hosted_url = None
+
+            # Priority: image tensor > url string
+            if image is not None and asset_type == "Image":
+                print("Uploading image tensor to /v1/files...")
+                hosted_url = self.upload_image_tensor(image)
+            elif url.strip():
+                input_url = url.strip()
+                # If already an asset:// id, just pass it through
+                if input_url.startswith("asset://"):
+                    return (input_url, json.dumps({"code": "success", "message": "Already an asset ID", "asset_id": input_url}))
+                # If it's a remote URL, download then re-upload
+                print(f"Downloading and re-uploading from URL: {input_url}")
+                hosted_url = self.download_and_upload(input_url, asset_type)
+            else:
+                err = "No input provided. Supply an image tensor or a URL."
+                return ("", json.dumps({"code": "error", "message": err}))
+
+            if not hosted_url:
+                err = "Failed to upload file to /v1/files"
+                return ("", json.dumps({"code": "error", "message": err}))
+
+            pbar.update_absolute(50)
+            print(f"File uploaded, URL: {hosted_url}")
+
+            payload = {
+                "url": hosted_url,
+                "assetType": asset_type
+            }
+
+            response = requests.post(
+                f"{baseurl}/seedance/v3/assets/create",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"Asset API Error: {response.status_code} - {response.text}"
+                print(err)
+                return ("", json.dumps({"code": "error", "message": err}))
+
+            result = response.json()
+
+            if result.get("code") != 0:
+                err = f"Asset creation failed: {result.get('msg', 'Unknown error')}"
+                print(err)
+                return ("", json.dumps({"code": "error", "message": err, "detail": result}))
+
+            asset_id = result.get("data", {}).get("assetId", "")
+            status = result.get("data", {}).get("status", "")
+
+            if not asset_id:
+                err = "No assetId in response"
+                return ("", json.dumps({"code": "error", "message": err, "detail": result}))
+
+            asset_uri = f"asset://{asset_id}"
+            print(f"Asset created: {asset_uri} (status: {status})")
+
+            pbar.update_absolute(100)
+
+            response_info = {
+                "code": "success",
+                "asset_id": asset_uri,
+                "asset_type": asset_type,
+                "status": status,
+                "uploaded_url": hosted_url
+            }
+
+            return (asset_uri, json.dumps(response_info, indent=2))
+
+        except Exception as e:
+            err = f"Error creating asset: {str(e)}"
+            print(err)
+            import traceback
+            traceback.print_exc()
+            return ("", json.dumps({"code": "error", "message": err}))
+        
+
+class Comfly_Doubao_Seedance2_0:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128"], {"default": "doubao-seedance-2-0-260128"}),
+                "duration": ([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], {"default": 5}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""}),
+                "ratio": (["16:9", "4:3", "1:1", "3:4", "9:16", "21:9"], {"default": "16:9"}),
+                "generate_audio": ("BOOLEAN", {"default": True}),
+                "watermark": ("BOOLEAN", {"default": False}),
+                "first_frame": ("IMAGE",),
+                "first_frame_url": ("STRING", {"default": "", "multiline": False}),
+                "last_frame": ("IMAGE",),
+                "last_frame_url": ("STRING", {"default": "", "multiline": False}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image_url1": ("STRING", {"default": "", "multiline": False}),
+                "image_url2": ("STRING", {"default": "", "multiline": False}),
+                "image_url3": ("STRING", {"default": "", "multiline": False}),
+                "image_url4": ("STRING", {"default": "", "multiline": False}),
+                "image_url5": ("STRING", {"default": "", "multiline": False}),
+                "image_url6": ("STRING", {"default": "", "multiline": False}),
+                "image_url7": ("STRING", {"default": "", "multiline": False}),
+                "image_url8": ("STRING", {"default": "", "multiline": False}),
+                "image_url9": ("STRING", {"default": "", "multiline": False}),
+                "video1": ("STRING", {"default": "", "multiline": False}),
+                "video2": ("STRING", {"default": "", "multiline": False}),
+                "video3": ("STRING", {"default": "", "multiline": False}),
+                "audio1": ("STRING", {"default": "", "multiline": False}),
+                "audio2": ("STRING", {"default": "", "multiline": False}),
+                "audio3": ("STRING", {"default": "", "multiline": False}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "task_id", "response")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Doubao"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 600
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def upload_file_bytes(self, file_bytes, filename, content_type):
+        try:
+            files = {'file': (filename, file_bytes, content_type)}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json().get('url')
+        except Exception as e:
+            print(f"Error uploading file: {str(e)}")
+            return None
+
+    def upload_image(self, image_tensor):
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        return self.upload_file_bytes(buffered.getvalue(), "image.png", "image/png")
+
+    def resolve_media_input(self, input_str, media_type):
+        if not input_str or not input_str.strip():
+            return None
+
+        val = input_str.strip()
+
+        if val.startswith("asset://"):
+            return val
+
+        if val.startswith("http://") or val.startswith("https://"):
+            try:
+                resp = requests.get(val, timeout=self.timeout)
+                resp.raise_for_status()
+                ext_map = {"image": (".png", "image/png"), "video": (".mp4", "video/mp4"), "audio": (".mp3", "audio/mpeg")}
+                ext, ct = ext_map.get(media_type, (".bin", "application/octet-stream"))
+                return self.upload_file_bytes(resp.content, f"upload{ext}", ct)
+            except Exception as e:
+                print(f"Error resolving URL {val}: {str(e)}")
+                return None
+
+        print(f"Unrecognized input format: {val}")
+        return None
+
+    def resolve_image_input(self, tensor, url_str):
+        if tensor is not None:
+            url = self.upload_image(tensor)
+            if url:
+                return url
+        return self.resolve_media_input(url_str, "image")
+
+    def generate_video(self, prompt, model, duration,
+                       apikey="", ratio="16:9", generate_audio=True, watermark=False,
+                       first_frame=None, first_frame_url="",
+                       last_frame=None, last_frame_url="",
+                       image1=None, image2=None, image3=None, image4=None, image5=None,
+                       image6=None, image7=None, image8=None, image9=None,
+                       image_url1="", image_url2="", image_url3="",
+                       image_url4="", image_url5="", image_url6="",
+                       image_url7="", image_url8="", image_url9="",
+                       video1="", video2="", video3="",
+                       audio1="", audio2="", audio3=""):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+
+        if not self.api_key:
+            err = "API key not found in Comflyapi.json"
+            print(err)
+            return ("", "", json.dumps({"code": "error", "message": err}))
+
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            content = [{"type": "text", "text": prompt}]
+
+            # --- First & Last Frame ---
+            first_url = self.resolve_image_input(first_frame, first_frame_url)
+            last_url = self.resolve_image_input(last_frame, last_frame_url)
+
+            if first_url and last_url:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": first_url},
+                    "role": "first_frame"
+                })
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": last_url},
+                    "role": "last_frame"
+                })
+                print(f"First frame added (role=first_frame)")
+                print(f"Last frame added (role=last_frame)")
+            elif first_url:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": first_url}
+                })
+                print(f"First frame added (no role)")
+            elif last_url:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": last_url}
+                })
+                print(f"Last frame added (no role)")
+
+            pbar.update_absolute(10)
+
+            # --- Reference Images ---
+            image_tensors = [image1, image2, image3, image4, image5, image6, image7, image8, image9]
+            image_urls_str = [image_url1, image_url2, image_url3, image_url4, image_url5, image_url6, image_url7, image_url8, image_url9]
+
+            ref_image_count = 0
+            for idx, img in enumerate(image_tensors):
+                if img is not None:
+                    print(f"Uploading reference image tensor {idx + 1}...")
+                    url = self.upload_image(img)
+                    if url:
+                        content.append({
+                            "type": "image_url",
+                            "image_url": {"url": url},
+                            "role": "reference_image"
+                        })
+                        ref_image_count += 1
+
+            for idx, url_str in enumerate(image_urls_str):
+                resolved = self.resolve_media_input(url_str, "image")
+                if resolved:
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {"url": resolved},
+                        "role": "reference_image"
+                    })
+                    ref_image_count += 1
+
+            pbar.update_absolute(15)
+
+            # --- Reference Videos ---
+            ref_video_count = 0
+            for v_str in [video1, video2, video3]:
+                resolved = self.resolve_media_input(v_str, "video")
+                if resolved:
+                    content.append({
+                        "type": "video_url",
+                        "video_url": {"url": resolved},
+                        "role": "reference_video"
+                    })
+                    ref_video_count += 1
+
+            # --- Reference Audios ---
+            ref_audio_count = 0
+            for a_str in [audio1, audio2, audio3]:
+                resolved = self.resolve_media_input(a_str, "audio")
+                if resolved:
+                    content.append({
+                        "type": "audio_url",
+                        "audio_url": {"url": resolved},
+                        "role": "reference_audio"
+                    })
+                    ref_audio_count += 1
+
+            pbar.update_absolute(20)
+
+            payload = {
+                "model": model,
+                "content": content,
+                "generate_audio": generate_audio,
+                "ratio": ratio,
+                "duration": int(duration),
+                "watermark": watermark
+            }
+
+            print(f"Submitting Seedance 2.0: model={model}, duration={duration}, ratio={ratio}, "
+                  f"first_frame={'yes' if first_url else 'no'}, last_frame={'yes' if last_url else 'no'}, "
+                  f"images={ref_image_count}, videos={ref_video_count}, audios={ref_audio_count}")
+
+            # --- Submit task ---
+            response = requests.post(
+                f"{baseurl}/seedance/v3/contents/generations/tasks",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text}"
+                print(err)
+                return ("", "", json.dumps({"code": "error", "message": err}))
+
+            result = response.json()
+            task_id = result.get("id", "")
+            if not task_id:
+                err = f"No task ID in response: {json.dumps(result)}"
+                print(err)
+                return ("", "", json.dumps({"code": "error", "message": err}))
+
+            print(f"Task submitted: {task_id}")
+            pbar.update_absolute(25)
+
+            # --- Poll for result ---
+            video_url = None
+            attempts = 0
+            max_attempts = 120
+            start_time = time.time()
+            max_wait_time = 600
+
+            while attempts < max_attempts:
+                elapsed = time.time() - start_time
+                if elapsed > max_wait_time:
+                    err = f"Task timeout after {elapsed:.1f}s"
+                    print(err)
+                    return ("", task_id, json.dumps({"code": "error", "message": err}))
+
+                time.sleep(5)
+                attempts += 1
+
+                try:
+                    status_resp = requests.get(
+                        f"{baseurl}/seedance/v3/contents/generations/tasks/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=30
+                    )
+
+                    if status_resp.status_code != 200:
+                        print(f"Poll attempt {attempts}: HTTP {status_resp.status_code}")
+                        continue
+
+                    status_data = status_resp.json()
+                    status = status_data.get("status", "")
+                    progress = status_data.get("progress", "")
+
+                    try:
+                        if isinstance(progress, str) and progress.endswith('%'):
+                            pnum = int(progress.rstrip('%'))
+                            pbar.update_absolute(min(90, 25 + pnum * 65 // 100))
+                        elif isinstance(progress, (int, float)):
+                            pbar.update_absolute(min(90, 25 + int(progress) * 65 // 100))
+                    except (ValueError, TypeError):
+                        pbar.update_absolute(min(85, 25 + attempts * 60 // max_attempts))
+
+                    if status.upper() in ("SUCCESS", "COMPLETED", "DONE", ""):
+                        video_url = self._extract_video_url(status_data)
+                        if video_url:
+                            print(f"Video ready: {video_url}")
+                            break
+
+                    if status.upper() in ("FAILED", "ERROR", "CANCELLED"):
+                        fail_reason = status_data.get("fail_reason", status_data.get("message", "Unknown error"))
+                        err = f"Task failed: {fail_reason}"
+                        print(err)
+                        return ("", task_id, json.dumps({"code": "error", "message": err, "detail": status_data}))
+
+                except requests.exceptions.Timeout:
+                    continue
+                except Exception as e:
+                    print(f"Poll error: {str(e)}")
+                    continue
+
+            if not video_url:
+                err = f"Failed to get video after {attempts} attempts ({time.time() - start_time:.1f}s)"
+                print(err)
+                return ("", task_id, json.dumps({"code": "error", "message": err}))
+
+            pbar.update_absolute(95)
+            video_adapter = ComflyVideoAdapter(video_url)
+
+            response_info = {
+                "code": "success",
+                "task_id": task_id,
+                "model": model,
+                "duration": duration,
+                "ratio": ratio,
+                "generate_audio": generate_audio,
+                "video_url": video_url,
+                "first_frame": bool(first_url),
+                "last_frame": bool(last_url),
+                "ref_images": ref_image_count,
+                "ref_videos": ref_video_count,
+                "ref_audios": ref_audio_count,
+            }
+
+            pbar.update_absolute(100)
+            return (video_adapter, task_id, json.dumps(response_info, indent=2))
+
+        except Exception as e:
+            err = f"Error: {str(e)}"
+            print(err)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"code": "error", "message": err}))
+
+    def _extract_video_url(self, data):
+        for key in ("video", "video_url", "url"):
+            val = data.get(key)
+            if val and isinstance(val, str) and val.startswith("http"):
+                return val
+
+        inner = data.get("data")
+        if isinstance(inner, dict):
+            for key in ("video", "video_url", "url"):
+                val = inner.get(key)
+                if val and isinstance(val, str) and val.startswith("http"):
+                    return val
+            videos = inner.get("videos", [])
+            if isinstance(videos, list) and videos:
+                url = videos[0].get("url") if isinstance(videos[0], dict) else (videos[0] if isinstance(videos[0], str) else None)
+                if url and isinstance(url, str) and url.startswith("http"):
+                    return url
+
+        content = data.get("content")
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "video_url":
+                    vu = item.get("video_url", {})
+                    if isinstance(vu, dict):
+                        url = vu.get("url")
+                        if url and url.startswith("http"):
+                            return url
+                    elif isinstance(vu, str) and vu.startswith("http"):
+                        return vu
+
+        task_result = data.get("task_result")
+        if isinstance(task_result, dict):
+            videos = task_result.get("videos", [])
+            if isinstance(videos, list) and videos:
+                url = videos[0].get("url") if isinstance(videos[0], dict) else None
+                if url:
+                    return url
+
+        return None
+
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
@@ -16469,6 +17032,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
     "ComflyGrok3VideoApi": ComflyGrok3VideoApi,
     "Comfly_LLm_API": Comfly_LLm_API,
+    "Comfly_Doubao_Seedance2_0": Comfly_Doubao_Seedance2_0,
+    "Comfly_Doubao_Seedance2_0_asset": Comfly_Doubao_Seedance2_0_asset,
     "Comfly_wan2_6_API": Comfly_wan2_6_API
 }
 
@@ -16537,6 +17102,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
     "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo",
     "Comfly_LLm_API": "Zhenzhen LLM API",
+    "Comfly_Doubao_Seedance2_0": "Zhenzhen Doubao Seedance 2.0",
+    "Comfly_Doubao_Seedance2_0_asset": "Zhenzhen Doubao Seedance 2.0 Asset Upload",
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video"
 }
 
