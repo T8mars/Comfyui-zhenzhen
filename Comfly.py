@@ -9087,7 +9087,7 @@ class Comfly_nano_banana:
         return {
             "required": {
                 "text": ("STRING", {"multiline": True}),
-                "model": (["nano-banana-2","gemini-3-pro-image-preview", "gemini-2.5-flash-image", "nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana"}),
+                "model": (["nano-banana-2","nano-banana-pro","gemini-3-pro-image-preview", "gemini-2.5-flash-image", "nano-banana", "nano-banana-hd", "gemini-2.5-flash-image-preview"], {"default": "nano-banana-pro"}),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -9560,7 +9560,7 @@ class Comfly_nano_banana2_edit:
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
-                "model": (["nano-banana-2", "nano-banana-2-2k", "nano-banana-2-4k"], {"default": "nano-banana-2"}),
+                "model": (["nano-banana-2", "nano-banana-pro","nano-banana-pro-2k", "nano-banana-pro-4k"], {"default": "nano-banana-pro"}),
                 "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
@@ -9609,7 +9609,7 @@ class Comfly_nano_banana2_edit:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def generate_image(self, prompt, mode="text2img", model="nano-banana-2", aspect_ratio="auto", 
+    def generate_image(self, prompt, mode="text2img", model="nano-banana-pro", aspect_ratio="auto", 
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
@@ -9643,7 +9643,7 @@ class Comfly_nano_banana2_edit:
                     "aspect_ratio": aspect_ratio
                 }
 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     payload["image_size"] = image_size
                     
                 if response_format:
@@ -9683,7 +9683,7 @@ class Comfly_nano_banana2_edit:
                     "aspect_ratio": aspect_ratio
                 }
                 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     data["image_size"] = image_size
                 
                 if response_format:
@@ -9722,7 +9722,7 @@ class Comfly_nano_banana2_edit:
             image_urls = []
             response_info = f"Generated {len(result['data'])} images using {model}\n"
 
-            if model == "nano-banana-2":
+            if model == "nano-banana-2" or model == "nano-banana-pro":
                 response_info += f"Image size: {image_size}\n"
             
             response_info += f"Aspect ratio: {aspect_ratio}\n"
@@ -9976,7 +9976,7 @@ class Comfly_nano_banana2_edit:
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
-                "model": (["nano-banana-2", "nano-banana-2-2k", "nano-banana-2-4k"], {"default": "nano-banana-2"}),
+                "model": (["nano-banana-2","nano-banana-pro", "nano-banana-pro-2k", "nano-banana-pro-4k"], {"default": "nano-banana-pro"}),
                 "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
@@ -10025,7 +10025,7 @@ class Comfly_nano_banana2_edit:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def generate_image(self, prompt, mode="text2img", model="nano-banana-2", aspect_ratio="auto", 
+    def generate_image(self, prompt, mode="text2img", model="nano-banana-pro", aspect_ratio="auto", 
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
@@ -10059,7 +10059,7 @@ class Comfly_nano_banana2_edit:
                     "aspect_ratio": aspect_ratio
                 }
 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     payload["image_size"] = image_size
                     
                 if response_format:
@@ -10099,7 +10099,7 @@ class Comfly_nano_banana2_edit:
                     "aspect_ratio": aspect_ratio
                 }
                 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     data["image_size"] = image_size
                 
                 if response_format:
@@ -10138,7 +10138,7 @@ class Comfly_nano_banana2_edit:
             image_urls = []
             response_info = f"Generated {len(result['data'])} images using {model}\n"
 
-            if model == "nano-banana-2":
+            if model == "nano-banana-2" or model == "nano-banana-pro":
                 response_info += f"Image size: {image_size}\n"
             
             response_info += f"Aspect ratio: {aspect_ratio}\n"
@@ -14321,7 +14321,7 @@ class Comfly_nano_banana2_edit_S2A:
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
-                "model": (["nano-banana-2", "nano-banana-2-2k", "nano-banana-2-4k"], {"default": "nano-banana-2"}),
+                "model": (["nano-banana-2","nano-banana-pro", "nano-banana-pro-2k", "nano-banana-pro-4k"], {"default": "nano-banana-pro"}),
                 "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
@@ -14412,7 +14412,7 @@ class Comfly_nano_banana2_edit_S2A:
                     "aspect_ratio": aspect_ratio
                 }
 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     payload["image_size"] = image_size
                     
                 if response_format:
@@ -14457,7 +14457,7 @@ class Comfly_nano_banana2_edit_S2A:
                     "aspect_ratio": aspect_ratio
                 }
                 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     data["image_size"] = image_size
                 
                 if response_format:
@@ -14504,7 +14504,7 @@ class Comfly_nano_banana2_edit_S2A:
                     "mode": mode,
                     "prompt": prompt,
                     "aspect_ratio": aspect_ratio,
-                    "image_size": image_size if model == "nano-banana-2" else None,
+                    "image_size": image_size if model == "nano-banana-2" or model == "nano-banana-pro" else None,
                     "seed": seed if seed > 0 else None,
                     "message": "Async task created successfully. Please use this task_id to query the result."
                 }
@@ -14607,7 +14607,8 @@ class Comfly_nano_banana2_edit_S2A:
                                             "mode": mode,
                                             "prompt": prompt,
                                             "aspect_ratio": aspect_ratio,
-                                            "image_size": image_size if model == "nano-banana-2" else None,
+                                            #"image_size": image_size if model == "nano-banana-2" else None,
+                                            "image_size": image_size if model == "nano-banana-2" or model == "nano-banana-pro" else None,
                                             "seed": seed if seed > 0 else None,
                                             "images_count": len(generated_tensors),
                                             "image_url": first_image_url,
@@ -14645,7 +14646,7 @@ class Comfly_nano_banana2_edit_S2A:
                 image_urls = []
                 response_info = f"Generated {len(result['data'])} images using {model}\n"
                 
-                if model == "nano-banana-2":
+                if model == "nano-banana-2" or model == "nano-banana-pro":
                     response_info += f"Image size: {image_size}\n"
                 
                 response_info += f"Aspect ratio: {aspect_ratio}\n"
@@ -14719,7 +14720,7 @@ class Comfly_nano_banana2_edit_S2A:
                         "mode": mode,
                         "prompt": prompt,
                         "aspect_ratio": aspect_ratio,
-                        "image_size": image_size if model == "nano-banana-2" else None,
+                        "image_size": image_size if model == "nano-banana-2" or model == "nano-banana-pro" else None,
                         "seed": result.get("seed", seed) if seed > 0 else None,
                         "images_count": len(generated_tensors),
                         "image_url": first_image_url,
