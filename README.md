@@ -124,8 +124,12 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+### 20260411
 
-### 20260409
+重写seedance2.0节点逻辑，修复BUG
+更新seedance2.0的3个工作流
+
+### 20260410
 
 支持seedance2.0真人ID上传永久复用，修复后端的一些BUG
 新增工作流Seedance2.0-asset-upload.json
