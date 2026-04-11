@@ -1,0 +1,877 @@
+{
+  "id": "019efec8-f788-4b9d-afeb-881f5f59a9ef",
+  "revision": 0,
+  "last_node_id": 29,
+  "last_link_id": 44,
+  "nodes": [
+    {
+      "id": 15,
+      "type": "SaveVideo",
+      "pos": [
+        955.3391594861362,
+        -405.84206086429606
+      ],
+      "size": [
+        865.1690866086692,
+        632.4957304615149
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 19
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.18.1",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "LoadImage",
+      "pos": [
+        -792.2902211877006,
+        -546.1805438185629
+      ],
+      "size": [
+        267.39506575903783,
+        350.4690793734705
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            34
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.18.1",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "未标题-1.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        -790.4542144909749,
+        -120.48194420490199
+      ],
+      "size": [
+        271.11678157794256,
+        338.5691947147345
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            35
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.18.1",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "9E7F5C042BAA5C726D3DA07E8B694188.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 26,
+      "type": "Comfly_Doubao_Seedance2_0_Asset",
+      "pos": [
+        -438.6105925583881,
+        675.114247504137
+      ],
+      "size": [
+        349.034765625,
+        178.93425262353958
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 36
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset_id",
+          "type": "STRING",
+          "links": [
+            42
+          ]
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0_Asset"
+      },
+      "widgets_values": [
+        "",
+        "音频"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LoadAudio",
+      "pos": [
+        -851.3267924145715,
+        717.6111959983039
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.18.1",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "audio (8).wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 29,
+      "type": "CR Prompt Text",
+      "pos": [
+        -1375.4726572754018,
+        151.65588842540188
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            43
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "语音参考上传音频的四川话\n视觉基调：霓虹暗调酒吧、全息打碟机、蓝色声波可视化特效。\n角色设定：\n\n女主：银色机能风反光夹克、高马尾、脖子上挂着发光电竞耳机。\n卡通T8：@image2，头上戴着极具反差感的巨大DJ监听耳机。\n\n镜头设计：\n\n镜1 (0-3s)[近景] 霓虹打碟台前，女主猛地推高全息音量推子，巨大的蓝色声波向四周炸开，她兴奋地回头。\n语音：“哎哟喂，这次感觉真厉害了，”\n\n镜2 (3-6s)[中景] 全息屏幕上不断闪过各种开源AI音乐模型的Logo，背景里虚空投影出T8。\n语音：“虽然每次开源模型都号称对标suno，”"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "Comfly_Doubao_Seedance2_0_Asset",
+      "pos": [
+        -431.6661967661285,
+        -527.6638633605999
+      ],
+      "size": [
+        349.034765625,
+        178.93425262353958
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 34
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset_id",
+          "type": "STRING",
+          "links": [
+            39
+          ]
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0_Asset"
+      },
+      "widgets_values": [
+        "",
+        "贞贞"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "Comfly_Doubao_Seedance2_0",
+      "pos": [
+        446.13982293290553,
+        -384.90329438916496
+      ],
+      "size": [
+        418.03513308597053,
+        726
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "first_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "last_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video1",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video2",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video3",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio1",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio2",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio3",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 43
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 18
+        },
+        {
+          "name": "asset_bundle",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "asset_bundle"
+          },
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "last_frame_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0"
+      },
+      "widgets_values": [
+        "",
+        "doubao-seedance-2-0-fast-260128",
+        4,
+        "16:9",
+        "480p",
+        "",
+        true,
+        false,
+        false,
+        false,
+        1840754185,
+        "randomize",
+        ""
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Comfly_Doubao_Seedance2_0_Asset",
+      "pos": [
+        -420.9024528667229,
+        64.85475537657739
+      ],
+      "size": [
+        349.034765625,
+        178.93425262353958
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 35
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset_id",
+          "type": "STRING",
+          "links": [
+            40
+          ]
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0_Asset"
+      },
+      "widgets_values": [
+        "",
+        "T8"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Comfly_Doubao_Seedance2_0_AssetIdBundle",
+      "pos": [
+        -21.88898795883355,
+        -98.33827823394974
+      ],
+      "size": [
+        358.3111328125,
+        466
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 38
+        },
+        {
+          "name": "ref_image1",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "ref_image1"
+          },
+          "link": 39
+        },
+        {
+          "name": "ref_image2",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "ref_image2"
+          },
+          "link": 40
+        },
+        {
+          "name": "audio1",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "audio1"
+          },
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset_bundle",
+          "type": "STRING",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0_AssetIdBundle"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 12,
+      "type": "Comfly_api_set",
+      "pos": [
+        -1397.4989736252253,
+        -148.743273043943
+      ],
+      "size": [
+        573.0304372905834,
+        164.9418470702508
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            18,
+            25,
+            31,
+            32,
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      18,
+      12,
+      0,
+      16,
+      18,
+      "STRING"
+    ],
+    [
+      19,
+      16,
+      0,
+      15,
+      0,
+      "VIDEO"
+    ],
+    [
+      23,
+      22,
+      0,
+      16,
+      19,
+      "STRING"
+    ],
+    [
+      25,
+      12,
+      0,
+      23,
+      3,
+      "STRING"
+    ],
+    [
+      31,
+      12,
+      0,
+      26,
+      3,
+      "STRING"
+    ],
+    [
+      32,
+      12,
+      0,
+      24,
+      3,
+      "STRING"
+    ],
+    [
+      34,
+      14,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      35,
+      19,
+      0,
+      24,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      20,
+      0,
+      26,
+      2,
+      "AUDIO"
+    ],
+    [
+      38,
+      12,
+      0,
+      22,
+      0,
+      "STRING"
+    ],
+    [
+      39,
+      23,
+      0,
+      22,
+      1,
+      "STRING"
+    ],
+    [
+      40,
+      24,
+      0,
+      22,
+      2,
+      "STRING"
+    ],
+    [
+      42,
+      26,
+      0,
+      22,
+      3,
+      "STRING"
+    ],
+    [
+      43,
+      29,
+      0,
+      16,
+      17,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        -1244.677205475592,
+        -1223.605331301856,
+        2836.38525390625,
+        427.2743835449219
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8140274938684069,
+      "offset": [
+        1943.18331440199,
+        621.7742304656005
+      ]
+    },
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
