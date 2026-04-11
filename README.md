@@ -124,6 +124,9 @@ Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 下载Windows版本！
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
+目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
+由于openai风控严重，暂时可用的分组是sora-vip分组
+
 ### 20260411
 
 重写seedance2.0节点逻辑，修复BUG
