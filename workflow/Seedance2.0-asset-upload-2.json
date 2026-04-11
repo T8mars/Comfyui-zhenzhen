@@ -1,8 +1,8 @@
 {
   "id": "88ac5dad-efd7-40bb-84fe-fbaefdee1fa9",
   "revision": 0,
-  "last_node_id": 139,
-  "last_link_id": 306,
+  "last_node_id": 141,
+  "last_link_id": 307,
   "nodes": [
     {
       "id": 134,
@@ -79,91 +79,6 @@
       "widgets_values": [
         "未标题-1.jpg",
         "image"
-      ]
-    },
-    {
-      "id": 137,
-      "type": "Comfly_Doubao_Seedance2_0_Asset",
-      "pos": [
-        749.34106839334,
-        942.6486382207704
-      ],
-      "size": [
-        409.034765625,
-        122
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 301
-        },
-        {
-          "name": "video",
-          "shape": 7,
-          "type": "VIDEO",
-          "link": null
-        },
-        {
-          "name": "audio",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "apikey",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "apikey"
-          },
-          "link": 302
-        },
-        {
-          "name": "name",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "name"
-          },
-          "link": 306
-        }
-      ],
-      "outputs": [
-        {
-          "name": "asset_id",
-          "type": "STRING",
-          "links": [
-            303
-          ]
-        },
-        {
-          "name": "status",
-          "type": "STRING",
-          "links": [
-            304
-          ]
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": [
-            305
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
-        "Node name for S&R": "Comfly_Doubao_Seedance2_0_Asset"
-      },
-      "widgets_values": [
-        "",
-        ""
       ]
     },
     {
@@ -278,15 +193,15 @@
       ]
     },
     {
-      "id": 138,
+      "id": 141,
       "type": "easy showAnything",
       "pos": [
-        1293.7014543193413,
-        999.5983422246051
+        1227.1607744656628,
+        1059.9544644732994
       ],
       "size": [
-        414.41606483473447,
-        198.27708760821224
+        140,
+        26
       ],
       "flags": {},
       "order": 6,
@@ -296,7 +211,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 305
+          "link": 307
         }
       ],
       "outputs": [
@@ -310,9 +225,91 @@
         "cnr_id": "comfyui-easy-use",
         "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
         "Node name for S&R": "easy showAnything"
+      }
+    },
+    {
+      "id": 137,
+      "type": "Comfly_Doubao_Seedance2_0_Asset",
+      "pos": [
+        749.34106839334,
+        942.6486382207704
+      ],
+      "size": [
+        409.034765625,
+        122
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 301
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 302
+        },
+        {
+          "name": "name",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "name"
+          },
+          "link": 306
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset_id",
+          "type": "STRING",
+          "links": [
+            303
+          ]
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": [
+            304
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            307
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fb38a3255160c05e2a49ca269eae7472900e1ab4",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0_Asset"
       },
       "widgets_values": [
-        "{\n  \"code\": 0,\n  \"msg\": \"success\",\n  \"errorMessages\": null,\n  \"data\": {\n    \"assetId\": \"asset-20260411224222-bcnbh\",\n    \"groupId\": \"group-20260409201110-2v29p\",\n    \"name\": \"\\u8d1e\\u8d1e\",\n    \"status\": \"Active\",\n    \"assetType\": \"Image\",\n    \"previewUrl\": \"https://ark-media-asset.tos-cn-beijing.volces.com/2108947892/041122422038372043.png?X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Credential=AKTP0VyX37NH37peqQWqz0vNoKw3iEdjoqen5xk77Vb63v%2F20260411%2Fcn-beijing%2Ftos%2Frequest&X-Tos-Date=20260411T144233Z&X-Tos-Expires=43200&X-Tos-Security-Token=nChB2Wjd1UzdmM1haV2o0Q0lU.CiQKEFBDclNTZUVvd2trRUdYUXkSEFtqJTcX5k36pn6jCIjjbbMQof3mzgYYh8zpzgYg-v3I6QcoBDCs7-stOh9Sb2xlRm9yQXJrQXNzZXQvUm9sZUZvckFya0Fzc2V0QgNhcmtSD1JvbGVGb3JBcmtBc3NldFgDegNhcms.YXcymZzFHjssvBmsbSR-OZnm0nuF76ejx-ExdvROmyJx8eMKPpKujCSjSNQ1_csQvdXy2oTBZ0Eun9CMERHh8Q&X-Tos-Signature=2ef0ec81fdc2b0f0aa7de3dda42df8cae9b3d7f96cb7e7a43aa349bbadc2ac14&X-Tos-SignedHeaders=host\",\n    \"sourceUrl\": \"https://files.closeai.fans/filesystem/uploads/9208/15f55b6a3fe1475eb0955ddabb0175e0/upload_6120128582.png\",\n    \"createTime\": \"2026-04-11T14:42:22.000+00:00\",\n    \"updateTime\": \"2026-04-11T14:42:22.000+00:00\"\n  }\n}"
+        "",
+        ""
       ]
     }
   ],
@@ -350,19 +347,19 @@
       "STRING"
     ],
     [
-      305,
-      137,
-      2,
-      138,
-      0,
-      "STRING"
-    ],
-    [
       306,
       139,
       0,
       137,
       4,
+      "STRING"
+    ],
+    [
+      307,
+      137,
+      2,
+      141,
+      0,
       "STRING"
     ]
   ],
@@ -384,10 +381,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.1173275430125087,
+      "scale": 1.9794138994267843,
       "offset": [
-        584.5565342683177,
-        -420.844691898389
+        -739.9251198512261,
+        -767.5476367947226
       ]
     },
     "frontendVersion": "1.42.10",
