@@ -133,6 +133,14 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260412
+
+seedance2.0支持2k,4k,1080p，更新视频教程
+
+Bilibili教程：https://www.bilibili.com/video/BV1YnDQBtEkP/
+
+Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
+
 ### 20260411
 
 重写seedance2.0节点逻辑，修复BUG
