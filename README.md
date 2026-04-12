@@ -103,6 +103,12 @@ Bilibili教程：https://www.bilibili.com/video/BV1SmmnBoEDz/
 
 Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
 
+# Seedance2.0效果大对比！comfyui-zhenzhen已支持满血版，支持真人不排队，高性价比方案，脱敏小技巧
+
+Bilibili教程：https://www.bilibili.com/video/BV1YnDQBtEkP/
+
+Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
+
 
 # 更新 Update：
 
