@@ -1,0 +1,467 @@
+{
+  "id": "88ac5dad-efd7-40bb-84fe-fbaefdee1fa9",
+  "revision": 0,
+  "last_node_id": 151,
+  "last_link_id": 315,
+  "nodes": [
+    {
+      "id": 145,
+      "type": "LoadImage",
+      "pos": [
+        89.35694320378838,
+        392.1813043983457
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            310
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "373DCD22AF79D076319A92F1106F8993.png",
+        "image"
+      ]
+    },
+    {
+      "id": 146,
+      "type": "SaveVideo",
+      "pos": [
+        994.9856714950864,
+        433.3012035379702
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 311
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 147,
+      "type": "easy showAnything",
+      "pos": [
+        1011.1862572085706,
+        633.4899408248095
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 312
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 148,
+      "type": "easy showAnything",
+      "pos": [
+        1022.5436946316604,
+        753.4128480883562
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 313
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 143,
+      "type": "Comfly_Googel_Veo3_Lite",
+      "pos": [
+        501.5725838446524,
+        599.3947454704963
+      ],
+      "size": [
+        400,
+        296
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 310
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 309
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 314
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 315
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            311
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            312
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            313
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fedcac59d42f4bb62f14dcd1a6b2b16aed870596",
+        "Node name for S&R": "Comfly_Googel_Veo3_Lite"
+      },
+      "widgets_values": [
+        "",
+        "veo3.1-lite",
+        false,
+        "16:9",
+        "",
+        580785041,
+        "randomize",
+        false
+      ]
+    },
+    {
+      "id": 144,
+      "type": "LoadImage",
+      "pos": [
+        92.37244693533671,
+        802.3436055901839
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            309
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 149,
+      "type": "CR Prompt Text",
+      "pos": [
+        10.22253885777578,
+        1178.2412837916638
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            314
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "女人拿着包展示商品"
+      ]
+    },
+    {
+      "id": 150,
+      "type": "Comfly_api_set",
+      "pos": [
+        -292.62031867235095,
+        838.3847216068623
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            315
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fedcac59d42f4bb62f14dcd1a6b2b16aed870596",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 151,
+      "type": "Note",
+      "pos": [
+        -345.7053607907782,
+        484.50342245299083
+      ],
+      "size": [
+        353.2765530743427,
+        145.11717310903532
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "令牌分组：\nveo&grok-备用1\n0.8积分/8秒\n\n仅该分组支持veo3.1-lite模型"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      309,
+      144,
+      0,
+      143,
+      1,
+      "IMAGE"
+    ],
+    [
+      310,
+      145,
+      0,
+      143,
+      0,
+      "IMAGE"
+    ],
+    [
+      311,
+      143,
+      0,
+      146,
+      0,
+      "VIDEO"
+    ],
+    [
+      312,
+      143,
+      1,
+      147,
+      0,
+      "STRING"
+    ],
+    [
+      313,
+      143,
+      2,
+      148,
+      0,
+      "STRING"
+    ],
+    [
+      314,
+      149,
+      0,
+      143,
+      3,
+      "STRING"
+    ],
+    [
+      315,
+      150,
+      0,
+      143,
+      4,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 7,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        -298.48902671472337,
+        -117.99214206468653,
+        2323.7129723138773,
+        408.63799187297957
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.487162959749654,
+      "offset": [
+        501.3511766471047,
+        -284.06549196375903
+      ]
+    },
+    "frontendVersion": "1.42.10",
+    "workflowRendererVersion": "Vue-corrected",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

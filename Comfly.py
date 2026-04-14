@@ -9229,6 +9229,204 @@ class Comfly_Googel_Veo3:
             print(f"[Comfly_Googel_Veo3] {error_message}")
             return ("", "", json.dumps({"code": "error", "message": error_message}))
 
+
+class Comfly_Googel_Veo3_Lite:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["veo3.1-lite"], {"default": "veo3.1-lite"}),
+                "enhance_prompt": ("BOOLEAN", {"default": False}),
+                "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "enable_upsample": ("BOOLEAN", {"default": False}),
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Google"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def image_to_base64(self, image_tensor):
+        """Convert tensor to base64 string"""
+        if image_tensor is None:
+            return None
+            
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    
+    def generate_video(self, prompt, model="veo3.1-lite", enhance_prompt=False, aspect_ratio="16:9", apikey="", 
+                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False):
+        
+        if apikey.strip():
+            self.api_key = apikey
+            
+        if not self.api_key:
+            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            return ("", "", json.dumps(error_response))
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            has_images = any(img is not None for img in [image1, image2, image3])
+ 
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "enhance_prompt": enhance_prompt
+            }
+ 
+            if seed > 0:
+                payload["seed"] = seed
+
+            supported_models = [
+                "veo3.1-lite"
+            ]
+            
+            if model in supported_models and aspect_ratio:
+                payload["aspect_ratio"] = aspect_ratio
+
+            if model in supported_models and enable_upsample:
+                payload["enable_upsample"] = enable_upsample
+
+            if has_images:
+                images_base64 = []
+                for img in [image1, image2, image3]:
+                    if img is not None:
+                        batch_size = img.shape[0]
+                        for i in range(batch_size):
+                            single_image = img[i:i+1]
+                            image_base64 = self.image_to_base64(single_image)
+                            if image_base64:
+                                images_base64.append(f"data:image/png;base64,{image_base64}")
+                
+                if images_base64:
+                    payload["images"] = images_base64
+
+            response = requests.post(
+                f"{baseurl}/v2/videos/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API Error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}))
+                
+            result = response.json()
+
+            task_id = result.get("task_id")
+            if not task_id:
+                error_message = "No task ID returned from API"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}))
+            
+            print(f"[Comfly_Googel_Veo3_Lite] Task submitted successfully. Task ID: {task_id}")
+            pbar.update_absolute(30)
+
+            max_attempts = 150 
+            attempts = 0
+            video_url = None
+            
+            while attempts < max_attempts:
+                time.sleep(2) 
+                attempts += 1
+                
+                try:
+                    status_response = requests.get(
+                        f"{baseurl}/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    
+                    if status_response.status_code != 200:
+                        print(f"[Comfly_Googel_Veo3_Lite] Status check failed with code: {status_response.status_code}")
+                        continue
+                        
+                    status_result = status_response.json()
+
+                    status = status_result.get("status", "")
+                    progress = status_result.get("progress", "0%")
+
+                    try:
+                        if progress and progress.endswith('%'):
+                            progress_num = int(progress.rstrip('%'))
+                            pbar_value = min(90, 30 + progress_num * 60 / 100)
+                            pbar.update_absolute(pbar_value)
+                    except (ValueError, AttributeError):
+                        progress_value = min(80, 30 + (attempts * 50 // max_attempts))
+                        pbar.update_absolute(progress_value)
+                    
+                    if status == "SUCCESS":
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            print(f"[Comfly_Googel_Veo3_Lite] Video URL: {video_url}")
+                            break
+                        else:
+                            print(f"[Comfly_Googel_Veo3_Lite] SUCCESS but no output found in data: {data}")
+                            
+                    elif status == "FAILURE":
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+                        return ("", "", json.dumps({"code": "error", "message": error_message}))
+                                           
+                except Exception as e:
+                    print(f"[Comfly_Googel_Veo3_Lite] Error checking generation status: {str(e)}")
+            
+            if not video_url:
+                error_message = "Failed to retrieve video URL after multiple attempts"
+                print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+                return ("", "", json.dumps({"code": "error", "message": error_message}))
+
+            pbar.update_absolute(95)
+            
+            response_data = {
+                "code": "success",
+                "task_id": task_id,
+                "prompt": prompt,
+                "model": model,
+                "enhance_prompt": enhance_prompt,
+                "aspect_ratio": aspect_ratio if model in supported_models else "default",
+                "enable_upsample": enable_upsample if model in supported_models else False,
+                "video_url": video_url,
+                "images_count": len([img for img in [image1, image2, image3] if img is not None])
+            }
+            
+            pbar.update_absolute(100)
+            
+            video_adapter = ComflyVideoAdapter(video_url)
+            return (video_adapter, video_url, json.dumps(response_data))
+            
+        except Exception as e:
+            error_message = f"Error generating video: {str(e)}"
+            print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+            return ("", "", json.dumps({"code": "error", "message": error_message}))
+
 class Comfly_nano_banana:
     @classmethod
     def INPUT_TYPES(cls):
@@ -15294,6 +15492,240 @@ class ComflyGrok3VideoApi:
             return ("", "", json.dumps({"code": "error", "message": error_message}), "")
 
 
+class ComflyGrok3VideoApi30S:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "model": (["grok-video-3"], {"default": "grok-video-3"}),
+                "ratio": (["2:3", "3:2", "16:9", "9:16", "1:1"], {"default": "1:1"}),
+                "duration": ([str(i) for i in range(6, 31)], {"default": "15"}),
+                "resolution": (["720P"], {"default": "720P"}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+            }
+        }
+    
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "task_id", "response", "video_url")
+    FUNCTION = "generate_video"
+    CATEGORY = "zhenzhen/Grok"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+    
+    def upload_image(self, image_tensor):
+        """Upload image to the file endpoint and return the URL"""
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+
+            files = {'file': ('image.png', file_content, 'image/png')}
+
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                files=files,
+                timeout=self.timeout
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if 'url' in result:
+                return result['url']
+            else:
+                print(f"Unexpected response from file upload API: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            return None
+    
+    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+            
+        if not self.api_key:
+            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            return ("", "", json.dumps(error_response), "")
+            
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            payload = {
+                "prompt": prompt,
+                "model": model,
+                "ratio": ratio,
+                "duration": int(duration),
+                "resolution": resolution
+            }
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            # Handle image inputs (up to 7 reference images)
+            all_images = [image1, image2, image3, image4, image5, image6, image7]
+            image_urls = []
+            
+            for i, img in enumerate(all_images):
+                if img is not None:
+                    pbar.update_absolute(15 + i * 2)
+                    uploaded_url = self.upload_image(img)
+                    if uploaded_url:
+                        image_urls.append(uploaded_url)
+                    else:
+                        error_message = f"Failed to upload image {i+1}. Please check your image and try again."
+                        print(error_message)
+                        return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            if image_urls:
+                payload["images"] = image_urls
+
+            pbar.update_absolute(30)
+            
+            # Submit video generation request
+            response = requests.post(
+                f"{baseurl}/v2/videos/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            
+            if response.status_code != 200:
+                error_message = f"API error: {response.status_code} - {response.text}"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+                
+            result = response.json()
+            
+            # Extract task_id from response
+            task_id = result.get("task_id")
+            if not task_id:
+                error_message = "No task ID returned from API"
+                print(error_message)
+                return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+            
+            pbar.update_absolute(40)
+            
+            # Poll for video generation completion
+            video_url = None
+            attempts = 0
+            max_attempts = 200  # Wait up to 3 minutes (36 * 5 seconds)
+            start_time = time.time()
+            max_wait_time = 600  # 5 minutes
+        
+            while attempts < max_attempts:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+
+                if elapsed_time > max_wait_time:
+                    error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
+                    print(error_message)
+                    return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                
+                time.sleep(5)  
+                attempts += 1
+                
+                try:
+                    # Query task status
+                    status_response = requests.get(
+                        f"{baseurl}/v2/videos/generations/{task_id}",
+                        headers=self.get_headers(),
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                        
+                    status_result = status_response.json()
+                    
+                    # Check task status
+                    status = status_result.get("status", "UNKNOWN")
+                    
+                    # Update progress bar based on status
+                    if status == "IN_PROGRESS":
+                        progress = status_result.get("progress", "0%")
+                        try:
+                            if progress.endswith('%'):
+                                progress_num = int(progress.rstrip('%'))
+                                pbar_value = min(90, 40 + progress_num * 50 / 100)
+                                pbar.update_absolute(pbar_value)
+                        except (ValueError, AttributeError):
+                            progress_value = min(80, 40 + (attempts * 40 // max_attempts))
+                            pbar.update_absolute(progress_value)
+                    
+                    # Handle different statuses
+                    if status == "SUCCESS":
+                        # Extract video URL from successful response
+                        data = status_result.get("data", {})
+                        if "output" in data:
+                            video_url = data["output"]
+                            break
+                        else:
+                            continue
+                    
+                    elif status == "FAILURE":
+                        fail_reason = status_result.get("fail_reason", "Unknown error")
+                        error_message = f"Video generation failed: {fail_reason}"
+                        print(error_message)
+                        return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+                    
+                    elif status in ["NOT_START", "IN_PROGRESS"]:
+                        continue
+                    else:
+                        continue
+                    
+                except requests.exceptions.Timeout:
+                    continue
+                except Exception as e:
+                    continue
+            
+            if not video_url:
+                error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
+                print(error_message)
+                return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
+
+            if video_url:
+                pbar.update_absolute(95)
+                print(f"Video generation completed, URL: {video_url}")            
+                
+                # Return video adapter
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, task_id, json.dumps({"code": "success", "url": video_url}), video_url)
+            
+        except Exception as e:
+            error_message = f"Error generating video: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            return ("", "", json.dumps({"code": "error", "message": error_message}), "")
+
+
 WEB_DIRECTORY = "./web"    
         
 def encode_image_b64(ref_image):
@@ -17428,6 +17860,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Flux_2_Flex": Comfly_Flux_2_Flex,
     "Comfly_Flux_2_Max": Comfly_Flux_2_Max,
     "Comfly_Googel_Veo3": Comfly_Googel_Veo3,
+        "Comfly_Googel_Veo3_Lite": Comfly_Googel_Veo3_Lite,
     "ComflyGeminiTextOnly": ComflyGeminiTextOnly,    
     "Comfly_mj_video": Comfly_mj_video,
     "Comfly_mj_video_extend": Comfly_mj_video_extend,
@@ -17456,6 +17889,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_gemini_3_1_flash_image_edit_S2A": Comfly_gemini_3_1_flash_image_edit_S2A,
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
     "ComflyGrok3VideoApi": ComflyGrok3VideoApi,
+    "ComflyGrok3VideoApi30S": ComflyGrok3VideoApi30S,
     "Comfly_LLm_API": Comfly_LLm_API,
     "Comfly_Doubao_Seedance2_0": Comfly_Doubao_Seedance2_0,
     "Comfly_Doubao_Seedance2_0_Asset":Comfly_Doubao_Seedance2_0_Asset,
@@ -17499,6 +17933,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Flux_2_Flex": "Zhenzhen_Flux_2_Flex",
     "Comfly_Flux_2_Max": "zhenzhen_Flux_2_Max",
     "Comfly_Googel_Veo3": "Zhenzhen Google Veo3",
+        "Comfly_Googel_Veo3_Lite": "Zhenzhen Google Veo3 Lite",
     "ComflyGeminiTextOnly": "Zhenzhen GeminiTextOnly",
     "Comfly_mj_video": "Zhenzhen MJ Video",
     "Comfly_mj_video_extend": "Zhenzhen MJ Video Extend",
@@ -17526,6 +17961,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana2_edit_S2A": "Zhenzhen_nano_banana2_edit_S2A",
     "Comfly_gemini_3_1_flash_image_edit_S2A": "Zhenzhen Gemini 3.1 Flash Image Edit S2A",
     "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
+    "ComflyGrok3VideoApi30S": "Zhenzhen Grok3 Video 30S",
     "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo",
     "Comfly_LLm_API": "Zhenzhen LLM API",
     "Comfly_Doubao_Seedance2_0": "Zhenzhen Doubao Seedance 2.0",

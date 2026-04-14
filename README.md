@@ -133,6 +133,35 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260414
+
+新增节点
+
+Zhenzhen Google Veo3 Lite
+
+支持veo3.1-lite模型及原本的模型，仅支持令牌分组：veo&grok-备用1
+
+新增节点
+
+Zhenzhen Grok3 Video 30S
+
+令牌分组：
+
+veo&grok-备用1
+
+只支持720P 时长可以6-30秒
+
+veo&grok-备用2
+
+支持720和1080P
+
+时长只能10秒和15秒
+
+更新对应的工作流
+
+目前后端可能有点问题，白天我在检查下
+
+
 ### 20260412
 
 seedance2.0支持2k,4k,1080p，更新视频教程

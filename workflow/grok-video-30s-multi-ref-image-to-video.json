@@ -1,0 +1,876 @@
+{
+  "id": "659fabf1-c9a6-4bf4-a0cd-c2d6b1cdfdae",
+  "revision": 0,
+  "last_node_id": 1773,
+  "last_link_id": 3292,
+  "nodes": [
+    {
+      "id": 1759,
+      "type": "JWInteger",
+      "pos": [
+        -9932.708984375,
+        4368.58154296875
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "INT",
+          "name": "INT",
+          "type": "INT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-various",
+        "ver": "5bd85aaf7616878471469c4ec7e11bbd0cef3bf2",
+        "Node name for S&R": "JWInteger",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        1280
+      ]
+    },
+    {
+      "id": 1761,
+      "type": "Float",
+      "pos": [
+        -10122.1318359375,
+        4541.69140625
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "FLOAT",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyLiterals",
+        "ver": "bdddb08ca82d90d75d97b1d437a652e0284a32ac",
+        "Node name for S&R": "Float",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        24.000000000000004
+      ]
+    },
+    {
+      "id": 1764,
+      "type": "SaveVideo",
+      "pos": [
+        -6859.773036941738,
+        4484.850694105281
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 3285
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 1769,
+      "type": "LoadImage",
+      "pos": [
+        -8098.3199918198525,
+        4377.288654429727
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3289
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "AD2CFA34DEA6117416A82A7B8E085920.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 1770,
+      "type": "LoadImage",
+      "pos": [
+        -8093.319991819853,
+        4722.80522527574
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3290
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "E7566F90F5C332B8AF9AD3B1A0B941A6.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 1773,
+      "type": "Note",
+      "pos": [
+        -8508.583922643436,
+        4564.305939493217
+      ],
+      "size": [
+        353.2765530743427,
+        145.11717310903532
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "令牌分组：\nveo&grok-备用1\n只支持720P 时长可以6-30秒\nveo&grok-备用2\n\n支持720和1080P\n时长只能10秒和15秒"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 1762,
+      "type": "ComflyGrok3VideoApi30S",
+      "pos": [
+        -7583.318856656031,
+        4457.4529716494835
+      ],
+      "size": [
+        400,
+        376
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 3289
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 3290
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 3291
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 3292
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            3285
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fedcac59d42f4bb62f14dcd1a6b2b16aed870596",
+        "Node name for S&R": "ComflyGrok3VideoApi30S"
+      },
+      "widgets_values": [
+        "",
+        "grok-video-3",
+        "9:16",
+        "15",
+        "720P",
+        "",
+        841102022,
+        "randomize"
+      ]
+    },
+    {
+      "id": 1771,
+      "type": "CR Prompt Text",
+      "pos": [
+        -8515.45176717185,
+        5034.105995888636
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            3291
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "两个女人抱在一起"
+      ]
+    },
+    {
+      "id": 1772,
+      "type": "Comfly_api_set",
+      "pos": [
+        -8496.452884543867,
+        4835.222322045266
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            3292
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "fedcac59d42f4bb62f14dcd1a6b2b16aed870596",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      3285,
+      1762,
+      0,
+      1764,
+      0,
+      "VIDEO"
+    ],
+    [
+      3289,
+      1769,
+      0,
+      1762,
+      0,
+      "IMAGE"
+    ],
+    [
+      3290,
+      1770,
+      0,
+      1762,
+      1,
+      "IMAGE"
+    ],
+    [
+      3291,
+      1771,
+      0,
+      1762,
+      7,
+      "STRING"
+    ],
+    [
+      3292,
+      1772,
+      0,
+      1762,
+      8,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        -8697.630143187103,
+        3853.751518562571,
+        2807.221954824581,
+        458.8134523222029
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "VHS_latentpreview": true,
+    "node_versions": {
+      "comfyui-videohelpersuite": "3234937ff5f3ca19068aaba5042771514de2429d",
+      "ComfyUI-KJNodes": "c88ac88a8f8a6a090a0d5d607156090cb2911503",
+      "comfy-core": "0.16.4",
+      "flow_control": "d9eebfaa1a6a33067e8c9108ef093b48279c4cbb",
+      "ComfyUI-MelBandRoFormer": "b68d9077815387b64d596f8c39607052b95b6eba"
+    },
+    "ds": {
+      "scale": 1.283902517749519,
+      "offset": [
+        8684.610423609247,
+        -4293.537889862208
+      ]
+    },
+    "VHS_KeepIntermediate": true,
+    "comfy_fork_version": "feature/av_inference@a6994ed1",
+    "VHS_MetadataImage": true,
+    "ue_links": [],
+    "workflowRendererVersion": "LG",
+    "VHS_latentpreviewrate": 0,
+    "frontendVersion": "1.42.10",
+    "prompt": {
+      "1": {
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": {
+          "ckpt_name": "ltx-av-step-1751000_vocoder_24K.safetensors"
+        },
+        "_meta": {
+          "title": "Load Checkpoint"
+        }
+      },
+      "2": {
+        "class_type": "LTXVGemmaCLIPModelLoader",
+        "inputs": {
+          "ltxv_path": "ltx-av-step-1751000_vocoder_24K.safetensors",
+          "gemma_path": "gemma-3-12b-it-qat-q4_0-unquantized_readout_proj/model/model.safetensors",
+          "max_length": 1024
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 Gemma 3 Model Loader"
+        }
+      },
+      "3": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "A medium close-up shot features a Caucasian man with a closely shaven head and face, wearing a black baseball cap with \"PNTR\" in white letters on the front, and a dark grey t-shirt with \"JUST DO IT\" visible across his chest. A small black microphone is clipped to his shirt collar. He is positioned slightly to the left of the frame, looking intently downwards and to his right, his eyes focused off-camera. His facial expression is one of deep concentration, with his brow slightly furrowed. As he looks down, a quick sniff sound is heard, and then he speaks with a deep male voice and a slightly frustrated tone, saying, \"I think it's so bad.\" The camera remains static throughout, maintaining a shallow depth of field, which keeps the man in sharp focus while the background is softly blurred, revealing a light-colored wall with white wooden shelving or trim, and a partially open white wooden door on the right. After a brief pause, another short, audible sniff is heard. The man then continues to speak, his voice maintaining the same quality, as he states, \"So bad. So bad.\" He elaborates further, emphasizing his point with a final statement, \"This got to be, it's got to be the worst tool I've ever seen.\"",
+          "clip": [
+            "2",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, unreadable text on shirt or hat, incorrect lettering on cap (“PNTR”), incorrect t-shirt slogan (“JUST DO IT”), missing microphone, misplaced microphone, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, smiling, laughing, exaggerated sadness, wrong gaze direction, eyes looking at camera, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, missing sniff sounds, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, missing door or shelves, missing shallow depth of field, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts.",
+          "clip": [
+            "2",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "8": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        },
+        "_meta": {
+          "title": "KSamplerSelect"
+        }
+      },
+      "9": {
+        "class_type": "LTXVScheduler",
+        "inputs": {
+          "stretch": true,
+          "latent": [
+            "28",
+            0
+          ],
+          "max_shift": 2.05,
+          "terminal": 0.1,
+          "steps": 20,
+          "base_shift": 0.95
+        },
+        "_meta": {
+          "title": "LTXVScheduler"
+        }
+      },
+      "11": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 10
+        },
+        "_meta": {
+          "title": "RandomNoise"
+        }
+      },
+      "12": {
+        "class_type": "VAEDecode",
+        "inputs": {
+          "vae": [
+            "1",
+            2
+          ],
+          "samples": [
+            "29",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "13": {
+        "class_type": "LTXVAudioVAELoader",
+        "inputs": {
+          "ckpt_name": "ltx-av-step-1751000_vocoder_24K.safetensors"
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 LTXV Audio VAE Loader"
+        }
+      },
+      "14": {
+        "class_type": "LTXVAudioVAEDecode",
+        "inputs": {
+          "audio_vae": [
+            "13",
+            0
+          ],
+          "samples": [
+            "29",
+            1
+          ]
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 LTXV Audio VAE Decode"
+        }
+      },
+      "15": {
+        "class_type": "VHS_VideoCombine",
+        "inputs": {
+          "save_output": true,
+          "filename_prefix": "AnimateDiff",
+          "images": [
+            "12",
+            0
+          ],
+          "loop_count": 0,
+          "pix_fmt": "yuv420p",
+          "save_metadata": true,
+          "crf": 19,
+          "trim_to_audio": false,
+          "format": "video/h264-mp4",
+          "audio": [
+            "14",
+            0
+          ],
+          "frame_rate": [
+            "23",
+            0
+          ],
+          "pingpong": false
+        },
+        "_meta": {
+          "title": "Video Combine 🎥🅥🅗🅢"
+        }
+      },
+      "17": {
+        "class_type": "MultimodalGuider",
+        "inputs": {
+          "skip_blocks": "29",
+          "negative": [
+            "22",
+            1
+          ],
+          "model": [
+            "28",
+            1
+          ],
+          "positive": [
+            "22",
+            0
+          ],
+          "parameters": [
+            "18",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 Multimodal Guider"
+        }
+      },
+      "18": {
+        "class_type": "GuiderParameters",
+        "inputs": {
+          "modality": "VIDEO",
+          "cfg": 3,
+          "rescale": 0,
+          "stg": 0,
+          "parameters": [
+            "19",
+            0
+          ],
+          "modality_scale": 3
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 Guider Parameters"
+        }
+      },
+      "19": {
+        "class_type": "GuiderParameters",
+        "inputs": {
+          "modality": "AUDIO",
+          "cfg": 7,
+          "rescale": 0,
+          "stg": 0,
+          "modality_scale": 3
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 Guider Parameters"
+        }
+      },
+      "21": {
+        "class_type": "PreviewAudio",
+        "inputs": {
+          "audio": [
+            "14",
+            0
+          ],
+          "audioUI": ""
+        },
+        "_meta": {
+          "title": "PreviewAudio"
+        }
+      },
+      "22": {
+        "class_type": "LTXVConditioning",
+        "inputs": {
+          "negative": [
+            "4",
+            0
+          ],
+          "positive": [
+            "3",
+            0
+          ],
+          "frame_rate": [
+            "23",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "LTXVConditioning"
+        }
+      },
+      "23": {
+        "class_type": "FloatConstant",
+        "inputs": {
+          "value": 25
+        },
+        "_meta": {
+          "title": "Float Constant"
+        }
+      },
+      "26": {
+        "class_type": "LTXVEmptyLatentAudio",
+        "inputs": {
+          "batch_size": 1,
+          "frame_rate": [
+            "42",
+            0
+          ],
+          "frames_number": [
+            "27",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 LTXV Empty Latent Audio"
+        }
+      },
+      "27": {
+        "class_type": "INTConstant",
+        "inputs": {
+          "value": 105
+        },
+        "_meta": {
+          "title": "INT Constant"
+        }
+      },
+      "28": {
+        "class_type": "LTXVConcatAVLatent",
+        "inputs": {
+          "audio_latent": [
+            "26",
+            0
+          ],
+          "video_latent": [
+            "43",
+            0
+          ],
+          "model": [
+            "44",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 LTXV Concat AV Latent"
+        }
+      },
+      "29": {
+        "class_type": "LTXVSeparateAVLatent",
+        "inputs": {
+          "av_latent": [
+            "41",
+            0
+          ],
+          "model": [
+            "28",
+            1
+          ]
+        },
+        "_meta": {
+          "title": "🅛🅣🅧 LTXV Separate AV Latent"
+        }
+      },
+      "41": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "guider": [
+            "17",
+            0
+          ],
+          "latent_image": [
+            "28",
+            0
+          ],
+          "noise": [
+            "11",
+            0
+          ],
+          "sigmas": [
+            "9",
+            0
+          ],
+          "sampler": [
+            "8",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "SamplerCustomAdvanced"
+        }
+      },
+      "42": {
+        "class_type": "CM_FloatToInt",
+        "inputs": {
+          "a": [
+            "23",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "FloatToInt"
+        }
+      },
+      "43": {
+        "class_type": "EmptyLTXVLatentVideo",
+        "inputs": {
+          "batch_size": 1,
+          "width": 768,
+          "length": [
+            "27",
+            0
+          ],
+          "height": 512
+        },
+        "_meta": {
+          "title": "EmptyLTXVLatentVideo"
+        }
+      },
+      "44": {
+        "class_type": "LTXVSequenceParallelMultiGPUPatcher",
+        "inputs": {
+          "disable_backup": false,
+          "torch_compile": true,
+          "model": [
+            "1",
+            0
+          ]
+        },
+        "_meta": {
+          "title": "LTXVSequenceParallelMultiGPUPatcher"
+        }
+      },
+      "45": {
+        "class_type": "LTXVAddGuide",
+        "inputs": {
+          "strength": 1,
+          "frame_idx": 0
+        },
+        "_meta": {
+          "title": "LTXVAddGuide"
+        }
+      }
+    }
+  },
+  "version": 0.4
+}
