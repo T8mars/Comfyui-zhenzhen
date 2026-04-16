@@ -11341,7 +11341,7 @@ class Comfly_suno_description:
             "required": {
                 "title": ("STRING", {"default": ""}),
                 "description_prompt": ("STRING", {"multiline": True}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v4.5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
@@ -11365,7 +11365,7 @@ class Comfly_suno_description:
             "Authorization": "Bearer " + self.api_key
         }
     
-    def generate_music(self, title, description_prompt, version="v4.5", seed=0, make_instrumental=False, apikey=""):
+    def generate_music(self, title, description_prompt, version="v5.5", seed=0, make_instrumental=False, apikey=""):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11384,7 +11384,8 @@ class Comfly_suno_description:
             "v4": "chirp-v4",
             "v4.5": "chirp-auk",
             "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow"
+            "v5": "chirp-crow",
+            "v5.5": "chirp-fenix"           
         }
         
         mv = mv_mapping.get(version, "chirp-auk")
@@ -11694,7 +11695,7 @@ class Comfly_suno_custom:
         return {
             "required": {
                 "title": ("STRING", {"default": ""}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v4.5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
                 "prompt": ("STRING", {"multiline": True}), 
                 "tags": ("STRING", {"default": ""}),  
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
@@ -11721,7 +11722,7 @@ class Comfly_suno_custom:
             "Authorization": "Bearer " + self.api_key
         }
     
-    def generate_music(self, title, version="v4.5", prompt="", tags="", seed=0, apikey=""):
+    def generate_music(self, title, version="v5.5", prompt="", tags="", seed=0, apikey=""):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11741,7 +11742,8 @@ class Comfly_suno_custom:
             "v4": "chirp-v4",
             "v4.5": "chirp-auk",
             "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow"
+            "v5": "chirp-crow",
+            "v5.5": "chirp-fenix" 
         }
         
         mv = mv_mapping.get(version, "chirp-auk")
@@ -12141,7 +12143,7 @@ class Comfly_suno_upload_extend:
                 "tags": ("STRING", {"default": ""}),
                 "title": ("STRING", {"default": ""}),
                 "continue_at": ("INT", {"default": 28, "min": 0, "max": 120}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
@@ -12183,7 +12185,8 @@ class Comfly_suno_upload_extend:
             "v4": "chirp-v4",
             "v4.5": "chirp-auk",
             "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow"
+            "v5": "chirp-crow",
+            "v5.5": "chirp-fenix" 
         }
         
         mv = mv_mapping.get(version, "chirp-crow")
@@ -12368,7 +12371,7 @@ class Comfly_suno_cover:
                 "prompt": ("STRING", {"multiline": True}),
                 "title": ("STRING", {"default": ""}),
                 "tags": ("STRING", {"default": ""}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5"], {"default": "v5"}),
+                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
             "optional": {
@@ -12413,7 +12416,8 @@ class Comfly_suno_cover:
             "v4": "chirp-v4-tau",
             "v4.5": "chirp-auk",
             "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow"
+            "v5": "chirp-crow",
+            "v5.5": "chirp-fenix"   
         }
         
         mv = mv_mapping.get(version, "chirp-v4-tau")
@@ -17860,7 +17864,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Flux_2_Flex": Comfly_Flux_2_Flex,
     "Comfly_Flux_2_Max": Comfly_Flux_2_Max,
     "Comfly_Googel_Veo3": Comfly_Googel_Veo3,
-        "Comfly_Googel_Veo3_Lite": Comfly_Googel_Veo3_Lite,
+     "Comfly_Googel_Veo3_Lite": Comfly_Googel_Veo3_Lite,
     "ComflyGeminiTextOnly": ComflyGeminiTextOnly,    
     "Comfly_mj_video": Comfly_mj_video,
     "Comfly_mj_video_extend": Comfly_mj_video_extend,
@@ -17933,7 +17937,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Flux_2_Flex": "Zhenzhen_Flux_2_Flex",
     "Comfly_Flux_2_Max": "zhenzhen_Flux_2_Max",
     "Comfly_Googel_Veo3": "Zhenzhen Google Veo3",
-        "Comfly_Googel_Veo3_Lite": "Zhenzhen Google Veo3 Lite",
+    "Comfly_Googel_Veo3_Lite": "Zhenzhen Google Veo3 Lite",
     "ComflyGeminiTextOnly": "Zhenzhen GeminiTextOnly",
     "Comfly_mj_video": "Zhenzhen MJ Video",
     "Comfly_mj_video_extend": "Zhenzhen MJ Video Extend",

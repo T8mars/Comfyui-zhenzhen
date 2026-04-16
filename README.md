@@ -133,6 +133,16 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+
+### 20260416
+
+更新支持suno v5.5模型，效果真的太棒了！
+
+新增工作流：zhenzhen-suno-v5.5-excellent.json
+
+另外高允贞新剧4.18上线，大家记得来看哦！
+
+
 ### 20260414
 
 新增节点
