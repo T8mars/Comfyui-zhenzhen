@@ -136,6 +136,11 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 
 ### 20260416
 
+seedance2.0节点支持原生native1080p，效果炸裂
+目前后端还没匹配，今晚更新，先把节点更新了！
+
+### 20260416
+
 更新支持suno v5.5模型，效果真的太棒了！
 
 新增工作流：zhenzhen-suno-v5.5-excellent.json
