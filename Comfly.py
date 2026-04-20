@@ -6136,6 +6136,265 @@ class Comfly_gpt_image_1:
             return (blank_tensor, error_message)
 
 
+class Comfly_gpt_image_2:
+    """GPT-Image-2 node: supports both image generation and image editing via Chat Completions API"""
+
+    _last_generated_image_urls = ""
+    _conversation_history = []
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "model": (["gpt-image-2"], {"default": "gpt-image-2"}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
+                "size": (["auto", "1024x1024", "1536x1024", "1024x1536"], {"default": "auto"}),
+                "background": (["auto", "transparent", "opaque"], {"default": "auto"}),
+                "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
+                "moderation": (["auto", "low"], {"default": "auto"}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "clear_chats": ("BOOLEAN", {"default": True}),
+                "image_download_timeout": ("INT", {"default": 600, "min": 60, "max": 1200, "step": 10}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls", "chats")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Openai"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 900
+        self.image_download_timeout = 600
+        self.api_endpoint = f"{baseurl}/v1/chat/completions"
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image):
+        """Convert PIL image to base64 string"""
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    def extract_image_urls(self, response_text):
+        """Extract image URLs from markdown format in response"""
+        image_pattern = r'!\[.*?\]\((.*?)\)'
+        matches = re.findall(image_pattern, response_text)
+        if not matches:
+            url_pattern = r'https?://\S+\.(?:jpg|jpeg|png|gif|webp)'
+            matches = re.findall(url_pattern, response_text)
+        if not matches:
+            all_urls_pattern = r'https?://\S+'
+            matches = re.findall(all_urls_pattern, response_text)
+        return matches if matches else []
+
+    def download_image(self, url, timeout=30):
+        """Download image from URL and convert to tensor"""
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            }
+            response = requests.get(url, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            image = Image.open(BytesIO(response.content))
+            return pil2tensor(image)
+        except Exception as e:
+            print(f"[Comfly_gpt_image_2] Error downloading image from {url}: {str(e)}")
+            return None
+
+    def format_conversation_history(self):
+        """Format the conversation history for display"""
+        if not Comfly_gpt_image_2._conversation_history:
+            return ""
+        formatted_history = ""
+        for entry in Comfly_gpt_image_2._conversation_history:
+            formatted_history += f"**User**: {entry['user']}\n\n"
+            formatted_history += f"**AI**: {entry['ai']}\n\n"
+            formatted_history += "---\n\n"
+        return formatted_history.strip()
+
+    def send_request(self, payload):
+        """Send a streaming request to the API and collect full response"""
+        full_response = ""
+        try:
+            payload["stream"] = True
+            response = requests.post(
+                self.api_endpoint,
+                headers=self.get_headers(),
+                json=payload,
+                stream=True,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            for line in response.iter_lines():
+                if line:
+                    line_text = line.decode('utf-8').strip()
+                    if line_text.startswith('data: '):
+                        data = line_text[6:]
+                        if data == '[DONE]':
+                            break
+                        try:
+                            chunk = json.loads(data)
+                            if 'choices' in chunk and chunk['choices']:
+                                delta = chunk['choices'][0].get('delta', {})
+                                if 'content' in delta:
+                                    full_response += delta['content']
+                        except json.JSONDecodeError:
+                            continue
+            print(f"[Comfly_gpt_image_2] Stream complete, response length: {len(full_response)}")
+            print(f"[Comfly_gpt_image_2] Response content: {full_response[-200:]}")
+            return full_response
+        except requests.exceptions.Timeout:
+            raise TimeoutError(f"API request timed out after {self.timeout} seconds")
+        except requests.exceptions.HTTPError as e:
+            raise Exception(f"HTTP Error: {e.response.status_code} - {e.response.text[:500]}")
+        except Exception as e:
+            raise Exception(f"Error in API request: {str(e)}")
+
+    def process(self, prompt, model="gpt-image-2", quality="auto", size="auto",
+                background="auto", output_format="png", moderation="auto",
+                seed=0, clear_chats=True, image_download_timeout=600, api_key="",
+                image1=None, image2=None, image3=None, image4=None):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            self.image_download_timeout = image_download_timeout
+
+            if clear_chats:
+                Comfly_gpt_image_2._conversation_history = []
+
+            if not self.api_key:
+                error_message = "API key not found in Comflyapi.json"
+                print(f"[Comfly_gpt_image_2] {error_message}")
+                blank_img = Image.new('RGB', (1024, 1024), color='white')
+                return (pil2tensor(blank_img), error_message, "", self.format_conversation_history())
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+            # Build message content
+            content = []
+            content.append({"type": "text", "text": prompt})
+
+            # If not clearing chats and has previous image, use it for editing
+            if not clear_chats and Comfly_gpt_image_2._last_generated_image_urls:
+                prev_image_url = Comfly_gpt_image_2._last_generated_image_urls.split('\n')[0].strip()
+                if prev_image_url:
+                    print(f"[Comfly_gpt_image_2] Using previous image URL: {prev_image_url}")
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {"url": prev_image_url}
+                    })
+            else:
+                # Process input images for editing
+                all_images = [image1, image2, image3, image4]
+                for i, img in enumerate(all_images):
+                    if img is not None:
+                        batch_size = img.shape[0]
+                        for b in range(min(batch_size, 1)):
+                            pil_image = tensor2pil(img[b:b+1])[0]
+                            image_base64 = self.image_to_base64(pil_image)
+                            content.append({
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/png;base64,{image_base64}"}
+                            })
+                        print(f"[Comfly_gpt_image_2] Added image {i+1} to request")
+
+            messages = [{
+                "role": "user",
+                "content": content
+            }]
+
+            payload = {
+                "model": model,
+                "messages": messages,
+            }
+
+            pbar.update_absolute(20)
+            print(f"[Comfly_gpt_image_2] Sending request to API with model: {model}")
+
+            response_text = self.send_request(payload)
+            print(f"[Comfly_gpt_image_2] Got response, length: {len(response_text)}")
+
+            pbar.update_absolute(50)
+
+            Comfly_gpt_image_2._conversation_history.append({
+                "user": prompt,
+                "ai": response_text
+            })
+
+            technical_response = f"**Model**: {model}\n**Quality**: {quality}\n**Size**: {size}\n**Background**: {background}\n**Seed**: {seed}\n**Time**: {timestamp}"
+
+            image_urls = self.extract_image_urls(response_text)
+            image_urls_string = "\n".join(image_urls) if image_urls else ""
+
+            if image_urls:
+                Comfly_gpt_image_2._last_generated_image_urls = image_urls_string
+
+            chat_history = self.format_conversation_history()
+
+            if image_urls:
+                try:
+                    img_tensors = []
+                    for i, url in enumerate(image_urls):
+                        print(f"[Comfly_gpt_image_2] Downloading image {i+1}/{len(image_urls)} from: {url}")
+                        pbar.update_absolute(min(80, 40 + (i+1) * 40 // len(image_urls)))
+                        img_tensor = self.download_image(url, self.image_download_timeout)
+                        if img_tensor is not None:
+                            img_tensors.append(img_tensor)
+
+                    if img_tensors:
+                        combined_tensor = torch.cat(img_tensors, dim=0)
+                        pbar.update_absolute(100)
+                        return (combined_tensor, technical_response, image_urls_string, chat_history)
+                except Exception as e:
+                    print(f"[Comfly_gpt_image_2] Error processing image URLs: {str(e)}")
+
+            # Fallback: return input images or blank
+            all_images = [image1, image2, image3, image4]
+            first_image = next((img for img in all_images if img is not None), None)
+            if first_image is not None:
+                pbar.update_absolute(100)
+                return (first_image, technical_response, image_urls_string, chat_history)
+            else:
+                blank_img = Image.new('RGB', (1024, 1024), color='white')
+                pbar.update_absolute(100)
+                return (pil2tensor(blank_img), technical_response, image_urls_string, chat_history)
+
+        except Exception as e:
+            error_message = f"[Comfly_gpt_image_2] Error: {str(e)}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            all_images = [image1, image2, image3, image4]
+            first_image = next((img for img in all_images if img is not None), None)
+            if first_image is not None:
+                return (first_image, error_message, "", self.format_conversation_history())
+            else:
+                blank_img = Image.new('RGB', (1024, 1024), color='white')
+                return (pil2tensor(blank_img), error_message, "", self.format_conversation_history())
+
+
 class ComflyChatGPTApi:
  
     _last_generated_image_urls = ""
@@ -17856,6 +18115,7 @@ NODE_CLASS_MAPPINGS = {
     "ComflyJimengApi": ComflyJimengApi, 
     "Comfly_gpt_image_1_edit": Comfly_gpt_image_1_edit,
     "Comfly_gpt_image_1": Comfly_gpt_image_1,
+    "Comfly_gpt_image_2": Comfly_gpt_image_2,
     "ComflyJimengVideoApi": ComflyJimengVideoApi,
     "Comfly_Flux_Kontext": Comfly_Flux_Kontext,
     "Comfly_Flux_Kontext_Edit": Comfly_Flux_Kontext_Edit,
@@ -17928,7 +18188,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_sora2_new": "Zhenhen Sora2 New",
     "ComflyJimengApi": "Zhenzhen Jimeng API", 
     "Comfly_gpt_image_1_edit": "Zhenzhen_gpt_image_1_edit",
-    "Comfly_gpt_image_1": "Zhenzhen_gpt_image_1", 
+    "Comfly_gpt_image_1": "Zhenzhen_gpt_image_1",
+    "Comfly_gpt_image_2": "Zhenzhen_gpt_image_2",
     "ComflyJimengVideoApi": "Zhenzhen Jimeng Video API",
     "Comfly_Flux_Kontext": "Zhenzhen_Flux_Kontext",
     "Comfly_Flux_Kontext_Edit": "Zhenzhen_Flux_Kontext_Edit",

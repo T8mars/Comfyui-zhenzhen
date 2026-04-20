@@ -1,0 +1,491 @@
+{
+  "id": "29ef93d4-b560-42b6-a8cf-39338bfbb1d6",
+  "revision": 0,
+  "last_node_id": 39,
+  "last_link_id": 32,
+  "nodes": [
+    {
+      "id": 37,
+      "type": "easy showAnything",
+      "pos": [
+        3541.288944132338,
+        1226.3097008472637
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**User**: 这个角色的全身作为杂志视觉图，游戏攻略本的一页纵向长图。用精美的哥特式设计，构成带有忧郁氛围的奇幻插画与日语文字。请随意设定她的名字和背景设定，并将参数视觉化。构成要素包括：点阵画、类似《最终幻想》风格的RPG战斗画面截图、必杀技的技能截图。生成该内容的所有图像。\n\n**AI**: 正在生成图片，请稍候...\n\n生成中... 8%\n生成中... 16%\n生成中... 27%\n生成中... 39%\n生成中... 52%\n生成中... 66%\n生成中... 78%\n生成中... 88%\n生成中... 94%\n生成中... 97%\n生成中... 97%\n生成中... 97%\n生成中... 97%\n\n\n图像生成完成\n图像 1:\n![image](https://midjourney-plus.oss-us-west-1.aliyuncs.com/6a7f76da-e565-44ff-abd5-cf04c89ee4d5.png)\n\n\n\n---"
+      ]
+    },
+    {
+      "id": 32,
+      "type": "SaveImage",
+      "pos": [
+        3950.104775641172,
+        988.2279307632926
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 26
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 35,
+      "type": "easy showAnything",
+      "pos": [
+        3603.2492913391197,
+        1430.3797353138978
+      ],
+      "size": [
+        262.5171332722093,
+        156.6033934652603
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**Model**: gpt-image-2\n**Quality**: auto\n**Size**: auto\n**Background**: auto\n**Seed**: 360341011872989\n**Time**: 2026-04-20 11:21:28"
+      ]
+    },
+    {
+      "id": 36,
+      "type": "easy showAnything",
+      "pos": [
+        3383.2459518384594,
+        1466.3959714177313
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 30
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://midjourney-plus.oss-us-west-1.aliyuncs.com/6a7f76da-e565-44ff-abd5-cf04c89ee4d5.png"
+      ]
+    },
+    {
+      "id": 33,
+      "type": "Comfly_api_set",
+      "pos": [
+        2384.2898977291684,
+        1255.0658055792126
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 38,
+      "type": "Note",
+      "pos": [
+        1816.6707135041513,
+        1176.8588421223888
+      ],
+      "size": [
+        395.43827275259264,
+        239.3251201409605
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "注意，由于现在没有完全全量，我们是手动筛选账号，最坑的是GPT还会回收灰度的功能，所以是一定概率生成最新gpt-image-2的效果！如果不能接受就等全量更新后，这个主要是给没有账号的朋友测试的，非商用\n\n贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=cbff0534884\n\n左侧令牌，创建令牌，分组选择default分组，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用 （comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 34,
+      "type": "CR Prompt Text",
+      "pos": [
+        2358.2633133737872,
+        968.3720493293602
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            28
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "这个角色的全身作为杂志视觉图，游戏攻略本的一页纵向长图。用精美的哥特式设计，构成带有忧郁氛围的奇幻插画与日语文字。请随意设定她的名字和背景设定，并将参数视觉化。构成要素包括：点阵画、类似《最终幻想》风格的RPG战斗画面截图、必杀技的技能截图。生成该内容的所有图像。"
+      ]
+    },
+    {
+      "id": 31,
+      "type": "Comfly_gpt_image_2",
+      "pos": [
+        2885.3531269129257,
+        1103.594929435475
+      ],
+      "size": [
+        400,
+        412
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 32
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 28
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            26
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            29
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            30
+          ]
+        },
+        {
+          "name": "chats",
+          "type": "STRING",
+          "links": [
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08",
+        "Node name for S&R": "Comfly_gpt_image_2"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "gpt-image-2",
+        "auto",
+        "auto",
+        "auto",
+        "png",
+        "auto",
+        685669009219986,
+        "randomize",
+        true,
+        600
+      ]
+    },
+    {
+      "id": 39,
+      "type": "LoadImage",
+      "pos": [
+        2423.014362751173,
+        1446.8146468009306
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            32
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "23B1293688BA86521241DACC28D59635.jpg",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      26,
+      31,
+      0,
+      32,
+      0,
+      "IMAGE"
+    ],
+    [
+      27,
+      33,
+      0,
+      31,
+      5,
+      "STRING"
+    ],
+    [
+      28,
+      34,
+      0,
+      31,
+      4,
+      "STRING"
+    ],
+    [
+      29,
+      31,
+      1,
+      35,
+      0,
+      "STRING"
+    ],
+    [
+      30,
+      31,
+      2,
+      36,
+      0,
+      "STRING"
+    ],
+    [
+      31,
+      31,
+      3,
+      37,
+      0,
+      "STRING"
+    ],
+    [
+      32,
+      39,
+      0,
+      31,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        922.0818234622727,
+        341.5090955977516,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.116781577942477,
+      "offset": [
+        -1694.7310618017632,
+        -699.021544241864
+      ]
+    },
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

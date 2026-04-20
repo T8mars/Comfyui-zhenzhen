@@ -133,8 +133,19 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+20260420
 
-### 20260416
+新增节点：Zhenzhen_gpt_image_2，支持最新gpt-image-2模型，由于该模型并未全量，所以不保证每个图片都是gpt-image-2生成，仅供测试，不是非常推荐
+
+新增工作流
+
+zhenzhen-gpt-image-2图像编辑（非100%）.json
+
+zhenzhen-gpt-image-2文生图(非100%).json
+
+Suno+V5.5顶级纯音乐生成V1(基准0.5_两首歌-贞贞AI工坊).json
+
+### 20260417
 
 seedance2.0节点支持原生native1080p，效果炸裂
 目前后端还没匹配，今晚更新，先把节点更新了！
