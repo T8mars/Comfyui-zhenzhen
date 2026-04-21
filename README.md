@@ -140,6 +140,7 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 新增工作流：
 
 gpt-image-2-全量版文生图.json
+
 gpt-image-2-全量版图像编辑.json
 
 ### 20260420
