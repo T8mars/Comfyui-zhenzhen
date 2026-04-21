@@ -1,0 +1,486 @@
+{
+  "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
+  "revision": 0,
+  "last_node_id": 20,
+  "last_link_id": 18,
+  "nodes": [
+    {
+      "id": 14,
+      "type": "easy showAnything",
+      "pos": [
+        1589.6520106953694,
+        427.24733240277897
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "72e3fd5095904540bd91622ae2eacdd2"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "easy showAnything",
+      "pos": [
+        1613.9005717102032,
+        557.0525183376691
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"72e3fd5095904540bd91622ae2eacdd2\", \"model\": \"gpt-image-2\", \"mode\": \"text2img\", \"prompt\": \"Main subject in realistic cosplay style in foreground\\\" + \\\"secondary characters in 2D illustration style in background\\\" \\n \\\"OVERLORD ALBEDO\\\"elegant serif typography, gold foil texture\\\" \\\"Cinematic studio lighting\\\"  \\\"Baroque dark fantasy\\\"\", \"quality\": \"auto\", \"size\": \"auto\", \"seed\": null, \"images_count\": 1, \"image_url\": \"https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png\", \"all_urls\": [\"https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png\"]}"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Comfly_gpt_image_2_S2A",
+      "pos": [
+        1139.8631363636366,
+        187.51807272727248
+      ],
+      "size": [
+        400,
+        460
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 18
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 16
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            13
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            14
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
+        "Node name for S&R": "Comfly_gpt_image_2_S2A"
+      },
+      "widgets_values": [
+        "",
+        "img2img",
+        "",
+        "gpt-image-2",
+        "auto",
+        "auto",
+        "auto",
+        "png",
+        "auto",
+        1,
+        "",
+        "url",
+        1613410983,
+        "randomize"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "CR Prompt Text",
+      "pos": [
+        618.2470563349585,
+        149.68910624741747
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            16
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "Main subject in realistic cosplay style in foreground\" + \"secondary characters in 2D illustration style in background\" \n \"OVERLORD ALBEDO\"elegant serif typography, gold foil texture\" \"Cinematic studio lighting\"  \"Baroque dark fantasy\""
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LoadImage",
+      "pos": [
+        634.5062581049878,
+        635.3199141825389
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            18
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "未标题-1.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "Comfly_api_set",
+      "pos": [
+        628.4719328449935,
+        419.12547920890955
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 19,
+      "type": "Note",
+      "pos": [
+        207.73602513924706,
+        195.457775401788
+      ],
+      "size": [
+        376.0766273546651,
+        239.1483911879535
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "全量gpt-image-2，支持异步任务\n\n\n贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=dP7j\n\n左侧令牌，创建令牌，分组选择default分组，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用 （comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 13,
+      "type": "easy showAnything",
+      "pos": [
+        1588.9984599567836,
+        286.8864839758832
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [
+        1979.7083593054379,
+        217.34503437296223
+      ],
+      "size": [
+        621.2396694214876,
+        500.5785123966941
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 12
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    }
+  ],
+  "links": [
+    [
+      12,
+      10,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      13,
+      10,
+      1,
+      13,
+      0,
+      "STRING"
+    ],
+    [
+      14,
+      10,
+      2,
+      14,
+      0,
+      "STRING"
+    ],
+    [
+      15,
+      10,
+      3,
+      16,
+      0,
+      "STRING"
+    ],
+    [
+      16,
+      17,
+      0,
+      10,
+      4,
+      "STRING"
+    ],
+    [
+      17,
+      18,
+      0,
+      10,
+      5,
+      "STRING"
+    ],
+    [
+      18,
+      20,
+      0,
+      10,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -80.34036431349105,
+        -352.63922718539186,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.2100000000000006,
+      "offset": [
+        -703.8596379826677,
+        79.77788184524057
+      ]
+    },
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

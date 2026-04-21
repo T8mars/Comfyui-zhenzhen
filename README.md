@@ -133,7 +133,16 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
-20260420
+### 20260421
+
+新增节点：Zhenzhen_gpt_image_2_S2A，注意一定要用这个新的，这个是异步任务，之前的是chat，只有异步任务失败才会退费，目前0.04积分/次，我们只保留10%的运营毛利
+
+新增工作流：
+
+gpt-image-2-全量版文生图.json
+gpt-image-2-全量版图像编辑.json
+
+### 20260420
 
 新增节点：Zhenzhen_gpt_image_2，支持最新gpt-image-2模型，由于该模型并未全量，所以不保证每个图片都是gpt-image-2生成，仅供测试，不是非常推荐
 
