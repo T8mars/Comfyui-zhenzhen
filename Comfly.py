@@ -6136,6 +6136,541 @@ class Comfly_gpt_image_1:
             return (blank_tensor, error_message)
 
 
+
+class Comfly_gpt_image_2_official:
+
+    _GPT_IMAGE2_SIZE_CHOICES = [
+        "auto",
+        "1024x1024",
+        "1536x1024",
+        "1024x1536",
+        "2048x2048",
+        "2048x1152",
+        "3840x2160",
+        "2160x3840",
+    ]
+
+    @staticmethod
+    def _parse_size_wh(size_str):
+        m = re.match(r"^(\d+)x(\d+)$", size_str.strip())
+        if not m:
+            return None, None
+        return int(m.group(1)), int(m.group(2))
+
+    @classmethod
+    def _validate_gpt_image2_size(cls, size_str):
+        """
+        gpt-image-2: long edge <= 3840; both sides multiple of 16; aspect <= 3:1;
+        total pixels in [655360, 8294400]. (Larger than ~2560x1440 is documented as experimental.)
+        """
+        if size_str == "auto":
+            return True, None
+        w, h = cls._parse_size_wh(size_str)
+        if w is None:
+            return False, "size 格式须为 宽x高，例如 1024x1024"
+        if max(w, h) > 3840:
+            return False, "长边须 <= 3840px"
+        if w % 16 != 0 or h % 16 != 0:
+            return False, "宽、高均须为 16 的倍数"
+        lo, hi = min(w, h), max(w, h)
+        if hi / lo > 3.0 + 1e-9:
+            return False, "长边:短边 不得超过 3:1"
+        px = w * h
+        if px < 655360 or px > 8294400:
+            return False, "总像素须在 655,360～8,294,400 之间"
+        return True, None
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "mask": ("MASK",),
+                "api_key": ("STRING", {"default": ""}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 10}),
+                "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
+                "size": (cls._GPT_IMAGE2_SIZE_CHOICES, {"default": "auto"}),
+                "background": (["auto", "opaque"], {"default": "auto"}),
+                "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
+                "output_compression": ("INT", {"default": 100, "min": 0, "max": 100}),
+                "moderation": (["auto", "low"], {"default": "auto"}),
+                "async_mode": ("BOOLEAN", {"default": True}),
+                "webhook": ("STRING", {"default": ""}),
+                "max_poll_attempts": ("INT", {"default": 300, "min": 10, "max": 1000}),
+                "poll_interval": ("INT", {"default": 5, "min": 2, "max": 60}),
+                "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
+                "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Openai"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+        self.session = requests.Session()
+        retry_strategy = requests.packages.urllib3.util.retry.Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST"]
+        )
+        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+
+    def _auth_headers_bearer(self):
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def _headers_json(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def make_request_with_retry(self, url, data=None, files=None, max_retries=5, initial_timeout=300):
+        for attempt in range(1, max_retries + 1):
+            current_timeout = min(initial_timeout * (1.5 ** (attempt - 1)), 1200)
+            try:
+                if files is not None:
+                    response = self.session.post(
+                        url,
+                        headers=self._auth_headers_bearer(),
+                        data=data,
+                        files=files,
+                        timeout=current_timeout
+                    )
+                else:
+                    response = self.session.post(
+                        url,
+                        headers=self._headers_json(),
+                        json=data,
+                        timeout=current_timeout
+                    )
+                response.raise_for_status()
+                return response
+            except requests.exceptions.Timeout:
+                if attempt == max_retries:
+                    raise
+                time.sleep(min(2 ** (attempt - 1), 60))
+            except requests.exceptions.ConnectionError:
+                if attempt == max_retries:
+                    raise
+                time.sleep(min(2 ** (attempt - 1), 60))
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code in (400, 401, 403):
+                    raise
+                if attempt == max_retries:
+                    raise
+                time.sleep(min(2 ** (attempt - 1), 60))
+            except Exception:
+                if attempt == max_retries:
+                    raise
+                time.sleep(min(2 ** (attempt - 1), 60))
+
+    def get_headers_multipart(self):
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def _blank_input_file(self):
+        buf = io.BytesIO()
+        Image.new("RGB", (1024, 1024), color="white").save(buf, format="PNG")
+        buf.seek(0)
+        return ("blank.png", buf, "image/png")
+
+    def _build_official_edits_multipart(
+        self, prompt, image, mask, n, quality, size, background,
+        output_format, output_compression, moderation
+    ):
+        """
+        组装与 OpenAI /v1/images/edits 一致的 form：无图时传空白 1024×1024 作为 image。
+        返回 (data, request_files) 供 requests 的 data= 与 files= 使用。
+        """
+        if mask is not None and image is None:
+            raise Exception("使用 mask 时必须提供 input image")
+
+        files = {}
+        if image is None:
+            files["image"] = self._blank_input_file()
+            batch_size = 1
+        else:
+            batch_size = image.shape[0]
+            for i in range(batch_size):
+                single_image = image[i : i + 1]
+                scaled_image = downscale_input(single_image).squeeze()
+                image_np = (scaled_image.numpy() * 255).astype(np.uint8)
+                img = Image.fromarray(image_np)
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format="PNG")
+                img_byte_arr.seek(0)
+                if batch_size == 1:
+                    files["image"] = ("image.png", img_byte_arr, "image/png")
+                else:
+                    if "image[]" not in files:
+                        files["image[]"] = []
+                    files["image[]"].append(
+                        ("image_{}.png".format(i), img_byte_arr, "image/png")
+                    )
+
+        if mask is not None:
+            if batch_size != 1:
+                raise Exception("Mask requires a single input image")
+            if mask.shape[1:] != image.shape[1:-1]:
+                raise Exception("Mask and Image must be the same size")
+            _batch, height, width = mask.shape
+            rgba_mask = torch.zeros(height, width, 4, device="cpu")
+            rgba_mask[:, :, 3] = 1 - mask.squeeze().cpu()
+            scaled_mask = downscale_input(rgba_mask.unsqueeze(0)).squeeze()
+            mask_np = (scaled_mask.numpy() * 255).astype(np.uint8)
+            mask_img = Image.fromarray(mask_np)
+            mask_byte_arr = io.BytesIO()
+            mask_img.save(mask_byte_arr, format="PNG")
+            mask_byte_arr.seek(0)
+            files["mask"] = ("mask.png", mask_byte_arr, "image/png")
+
+        data = {
+            "prompt": prompt,
+            "model": "gpt-image-2",
+            "n": str(n),
+            "quality": quality,
+            "moderation": moderation,
+        }
+        if size != "auto":
+            data["size"] = size
+        if background != "auto":
+            data["background"] = background
+        if output_compression != 100:
+            data["output_compression"] = str(output_compression)
+        if output_format != "png":
+            data["output_format"] = output_format
+
+        if "image[]" in files:
+            request_files = []
+            for file_tuple in files["image[]"]:
+                request_files.append(("image", file_tuple))
+            if "mask" in files:
+                request_files.append(("mask", files["mask"]))
+        else:
+            request_files = []
+            if "image" in files:
+                request_files.append(("image", files["image"]))
+            if "mask" in files:
+                request_files.append(("mask", files["mask"]))
+
+        return data, request_files
+
+    def _decode_b64_url_one(self, b64_json, image_url, max_retries, initial_timeout):
+        """One image entry to tensor or None."""
+        if b64_json:
+            b64_data = b64_json
+            if b64_data.startswith("data:image"):
+                b64_data = b64_data.split(",", 1)[-1]
+            elif b64_data.startswith("data:image/png;base64,"):
+                b64_data = b64_data[len("data:image/png;base64,") :]
+            image_data = base64.b64decode(b64_data)
+            pil_img = Image.open(BytesIO(image_data))
+            return pil2tensor(pil_img)
+        if image_url:
+            for download_attempt in range(1, max_retries + 1):
+                try:
+                    img_response = requests.get(
+                        image_url,
+                        timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
+                    )
+                    img_response.raise_for_status()
+                    pil_img = Image.open(BytesIO(img_response.content))
+                    return pil2tensor(pil_img)
+                except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                    if download_attempt == max_retries:
+                        return None
+                    time.sleep(min(2 ** (download_attempt - 1), 60))
+        return None
+
+    def _async_official(
+        self,
+        prompt,
+        image,
+        mask,
+        pbar,
+        max_poll_attempts,
+        poll_interval,
+        webhook,
+        n,
+        quality,
+        size,
+        background,
+        output_format,
+        output_compression,
+        moderation,
+        max_retries,
+        initial_timeout,
+    ):
+        data, request_files = self._build_official_edits_multipart(
+            prompt, image, mask, n, quality, size, background,
+            output_format, output_compression, moderation,
+        )
+        url = f"{baseurl}/v1/images/edits?async=true"
+        if webhook.strip():
+            url += f"&webhook={webhook.strip()}"
+
+        pbar.update_absolute(10)
+        response = requests.post(
+            url,
+            headers=self.get_headers_multipart(),
+            data=data,
+            files=request_files,
+            timeout=self.timeout,
+        )
+        if response.status_code != 200:
+            raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
+
+        submit_result = response.json()
+        task_id = submit_result.get("task_id") or submit_result.get("data")
+        if not task_id:
+            raise RuntimeError(f"No task_id in response: {submit_result}")
+
+        print(f"Task submitted. Task ID: {task_id}")
+        pbar.update_absolute(20)
+
+        query_url = f"{baseurl}/v1/images/tasks/{task_id}"
+        final_result = None
+        image_url_first = ""
+
+        for attempts in range(1, max_poll_attempts + 1):
+            time.sleep(poll_interval)
+            try:
+                status_response = requests.get(
+                    query_url, headers=self.get_headers_multipart(), timeout=self.timeout
+                )
+                if status_response.status_code != 200:
+                    print(f"Status check failed: {status_response.status_code}")
+                    continue
+                status_data = status_response.json()
+                inner = status_data.get("data", {}) if isinstance(status_data, dict) else {}
+                status = inner.get("status", "")
+                progress_str = inner.get("progress", "0%")
+                try:
+                    if isinstance(progress_str, str) and progress_str.endswith("%"):
+                        progress_value = int(progress_str[:-1])
+                        pbar_value = min(95, 20 + int(progress_value * 0.75))
+                        pbar.update_absolute(pbar_value)
+                except (ValueError, AttributeError):
+                    pass
+
+                if status == "SUCCESS":
+                    result_data = inner.get("data", {})
+                    data_array = (
+                        result_data.get("data", []) if isinstance(result_data, dict) else []
+                    )
+                    tensors = []
+                    for item in data_array or []:
+                        u = item.get("url", "") or ""
+                        bj = item.get("b64_json", "") or ""
+                        if u and not image_url_first:
+                            image_url_first = u
+                        t = self._decode_b64_url_one(
+                            bj, u, max_retries, initial_timeout
+                        )
+                        if t is not None:
+                            tensors.append(t)
+                    if not tensors:
+                        raise RuntimeError("Async task SUCCESS but no decodable image in data")
+                    final_result = status_data
+                    combined = torch.cat(tensors, dim=0)
+                    pbar.update_absolute(100)
+                    return (combined, image_url_first, task_id, final_result)
+                if status == "FAILURE":
+                    fail_reason = inner.get("fail_reason", "Unknown error")
+                    raise RuntimeError(f"Task failed: {fail_reason}")
+            except RuntimeError:
+                raise
+            except Exception as e:
+                print(f"Error polling task status: {str(e)}")
+        raise RuntimeError(f"Failed to get image after {max_poll_attempts} poll attempts")
+
+    def _items_to_tensors(self, result, max_retries=5, initial_timeout=300):
+        """Parse Images API data[] b64_json or url into a list of tensors."""
+        out = []
+        for item in result.get("data", []) or []:
+            if "b64_json" in item and item["b64_json"]:
+                b64_data = item["b64_json"]
+                if b64_data.startswith("data:image"):
+                    b64_data = b64_data.split(",", 1)[-1]
+                elif b64_data.startswith("data:image/png;base64,"):
+                    b64_data = b64_data[len("data:image/png;base64,"):]
+                image_data = base64.b64decode(b64_data)
+                pil_img = Image.open(BytesIO(image_data))
+                out.append(pil2tensor(pil_img))
+            elif "url" in item and item["url"]:
+                for download_attempt in range(1, max_retries + 1):
+                    try:
+                        img_response = requests.get(
+                            item["url"],
+                            timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                        )
+                        img_response.raise_for_status()
+                        pil_img = Image.open(BytesIO(img_response.content))
+                        out.append(pil2tensor(pil_img))
+                        break
+                    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                        if download_attempt == max_retries:
+                            break
+                        time.sleep(min(2 ** (download_attempt - 1), 60))
+        return out
+
+    def _edits(
+        self, prompt, image, mask, n, quality, size, background,
+        output_format, output_compression, moderation, max_retries, initial_timeout, pbar
+    ):
+
+        data, request_files = self._build_official_edits_multipart(
+            prompt, image, mask, n, quality, size, background,
+            output_format, output_compression, moderation,
+        )
+        pbar.update_absolute(20)
+        response = self.make_request_with_retry(
+            f"{baseurl}/v1/images/edits",
+            data=data,
+            files=request_files,
+            max_retries=max_retries,
+            initial_timeout=initial_timeout,
+        )
+        pbar.update_absolute(60)
+        return response.json()
+
+    def generate(
+        self, prompt, image=None, mask=None, api_key="",
+        n=1, quality="auto", size="auto", background="auto",
+        output_format="png", output_compression=100, moderation="auto",
+        async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
+        max_retries=5, initial_timeout=900, seed=0
+    ):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        blank = Image.new('RGB', (1024, 1024), color='white')
+        blank_t = pil2tensor(blank)
+
+        if not self.api_key:
+            msg = "API key not found in Comflyapi.json"
+            print(msg)
+            return (blank_t, "", msg)
+
+        pbar = comfy.utils.ProgressBar(100)
+        pbar.update_absolute(5)
+
+        def _info_common(mode_line):
+            s = f"**Comfly gpt-image-2 (official)** {mode_line}\n"
+            s += f"Model: gpt-image-2\n"
+            s += f"Prompt: {prompt}\n"
+            s += f"Quality: {quality}\n"
+            if size != "auto":
+                s += f"Size: {size}\n"
+                w, h = self._parse_size_wh(size)
+                if w is not None and h is not None and w * h > 2560 * 1440:
+                    s += "（总像素大于约 2560×1440，文档中视为实验性输出）\n"
+            if background != "auto":
+                s += f"Background: {background}\n"
+            s += f"Output: {output_format}\n"
+            return s
+
+        try:
+            if size != "auto":
+                ok, err_msg = self._validate_gpt_image2_size(size)
+                if not ok:
+                    print(err_msg)
+                    return (blank_t, "", err_msg)
+
+            if async_mode:
+                combined, image_url, task_id, final_result = self._async_official(
+                    prompt,
+                    image,
+                    mask,
+                    pbar,
+                    max_poll_attempts,
+                    poll_interval,
+                    webhook,
+                    n,
+                    quality,
+                    size,
+                    background,
+                    output_format,
+                    output_compression,
+                    moderation,
+                    max_retries,
+                    initial_timeout,
+                )
+                mode = "async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}"
+                info = _info_common(mode)
+                info += f"Task ID: {task_id}\n"
+                if image_url:
+                    info += f"Image URL: {image_url}\n"
+                if final_result:
+                    inner = final_result.get("data", {})
+                    inner_data = inner.get("data", {}) if isinstance(inner, dict) else {}
+                    if (
+                        isinstance(inner_data, dict)
+                        and "usage" in inner_data
+                    ):
+                        usage = inner_data["usage"]
+                        info += f"Total Tokens: {usage.get('total_tokens', 'N/A')}\n"
+                return (combined, image_url or "", info)
+
+            result = self._edits(
+                prompt, image, mask, n, quality, size, background,
+                output_format, output_compression, moderation,
+                max_retries, initial_timeout, pbar
+            )
+            mode = "sync: /v1/images/edits (multipart" + (
+                ", blank ref" if image is None else ""
+            ) + (", mask" if mask is not None else "") + ")"
+
+            if "data" not in result or not result["data"]:
+                msg = f"No image data in response: {result}"
+                print(msg)
+                return (blank_t, "", msg)
+
+            tensors = self._items_to_tensors(result, max_retries, initial_timeout)
+            pbar.update_absolute(95)
+
+            if not tensors:
+                msg = "No images decoded from response"
+                print(msg)
+                return (blank_t, "", msg)
+
+            combined = torch.cat(tensors, dim=0)
+            pbar.update_absolute(100)
+
+            info = _info_common(mode)
+            if "usage" in result:
+                u = result["usage"]
+                if isinstance(u, dict):
+                    if "total_tokens" in u:
+                        info += f"Total tokens: {u['total_tokens']}\n"
+                    if "input_tokens" in u:
+                        info += f"Input tokens: {u['input_tokens']}\n"
+                    if "output_tokens" in u:
+                        info += f"Output tokens: {u['output_tokens']}\n"
+
+            return (combined, "", info)
+
+        except Exception as e:
+            error_message = f"Comfly_gpt_image_2_official error: {str(e)}"
+            import traceback
+            print(traceback.format_exc())
+            print(error_message)
+            return (blank_t, "", error_message)            
+
+
 class Comfly_gpt_image_2:
     """GPT-Image-2 node: supports both image generation and image editing via Chat Completions API"""
 
@@ -18693,6 +19228,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0": Comfly_Doubao_Seedance2_0,
     "Comfly_Doubao_Seedance2_0_Asset":Comfly_Doubao_Seedance2_0_Asset,
     "Comfly_Doubao_Seedance2_0_AssetIdBundle":Comfly_Doubao_Seedance2_0_AssetIdBundle,
+    "Comfly_gpt_image_2_official":Comfly_gpt_image_2_official,
     "Comfly_wan2_6_API": Comfly_wan2_6_API
 }
 
@@ -18768,6 +19304,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0": "Zhenzhen Doubao Seedance 2.0",
     "Comfly_Doubao_Seedance2_0_Asset": "Zhenzhen Doubao Seedance 2.0 Asset Upload",
     "Comfly_Doubao_Seedance2_0_AssetIdBundle": "Zhenzhen Doubao_Seedance2_0_AssetIdBundle",
+    "Comfly_gpt_image_2_official":"zhenzhen-gpt-image-2-official",
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video"
 }
 

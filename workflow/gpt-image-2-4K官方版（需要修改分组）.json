@@ -1,0 +1,424 @@
+{
+  "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
+  "revision": 0,
+  "last_node_id": 21,
+  "last_link_id": 24,
+  "nodes": [
+    {
+      "id": 19,
+      "type": "Note",
+      "pos": [
+        207.73602513924706,
+        195.457775401788
+      ],
+      "size": [
+        376.0766273546651,
+        239.1483911879535
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "全量gpt-image-2，支持异步任务\n\n\n贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=dP7j\n\n左侧令牌，创建令牌，分组选择default分组，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用 （comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [
+        1969.4604254211404,
+        294.45247238949116
+      ],
+      "size": [
+        621.2396694214876,
+        500.5785123966941
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 20
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "easy showAnything",
+      "pos": [
+        1662.6984599567836,
+        289.0864839758832
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "CR Prompt Text",
+      "pos": [
+        618.2470563349585,
+        149.68910624741747
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            23
+          ]
+        },
+        {
+          "name": "show_help",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI_Comfyroll_CustomNodes",
+        "ver": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca",
+        "Node name for S&R": "CR Prompt Text"
+      },
+      "widgets_values": [
+        "Main subject in realistic cosplay style in foreground\" + \"secondary characters in 2D illustration style in background\" \n \"OVERLORD ALBEDO\"elegant serif typography, gold foil texture\" \"Cinematic studio lighting\"  \"Baroque dark fantasy\"，图像比例21:9"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LoadImage",
+      "pos": [
+        441.62633491515305,
+        767.7665242227041
+      ],
+      "size": [
+        270,
+        314.00000000000006
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "未标题-1.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "Comfly_gpt_image_2_official",
+      "pos": [
+        894.0375880532603,
+        412.7879961106554
+      ],
+      "size": [
+        400,
+        512
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 19
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 23
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            20
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            22
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
+        "Node name for S&R": "Comfly_gpt_image_2_official"
+      },
+      "widgets_values": [
+        "",
+        "",
+        1,
+        "auto",
+        "3840x2160",
+        "auto",
+        "png",
+        100,
+        "auto",
+        true,
+        "",
+        300,
+        5,
+        5,
+        900,
+        900313846213625,
+        "randomize"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "easy showAnything",
+      "pos": [
+        1458.2835324283087,
+        457.5236613783906
+      ],
+      "size": [
+        465.039584760661,
+        255.28954654321035
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2\nPrompt: Main subject in realistic cosplay style in foreground\" + \"secondary characters in 2D illustration style in background\" \n \"OVERLORD ALBEDO\"elegant serif typography, gold foil texture\" \"Cinematic studio lighting\"  \"Baroque dark fantasy\"，图像比例21:9\nQuality: auto\nSize: 3840x2160\n（总像素大于约 2560×1440，文档中视为实验性输出）\nOutput: png\nTask ID: 811ebc7563f14722bf27b423e8e710d7\nImage URL: https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png\nTotal Tokens: 14329\n"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "Comfly_api_set",
+      "pos": [
+        265.79178804614116,
+        554.3621433711934
+      ],
+      "size": [
+        599.212485485964,
+        159.2750495184755
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      19,
+      20,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      21,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      21,
+      1,
+      13,
+      0,
+      "STRING"
+    ],
+    [
+      22,
+      21,
+      2,
+      14,
+      0,
+      "STRING"
+    ],
+    [
+      23,
+      17,
+      0,
+      21,
+      2,
+      "STRING"
+    ],
+    [
+      24,
+      18,
+      0,
+      21,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站、Youtube：T8star-Aix",
+      "bounding": [
+        -80.34036431349105,
+        -352.63922718539186,
+        4168,
+        309
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.5644739300537773,
+      "offset": [
+        621.1986273027792,
+        676.3679476313571
+      ]
+    },
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
