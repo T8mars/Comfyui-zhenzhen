@@ -1,95 +1,19 @@
 {
-  "id": "29ef93d4-b560-42b6-a8cf-39338bfbb1d6",
+  "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
   "revision": 0,
-  "last_node_id": 41,
-  "last_link_id": 39,
+  "last_node_id": 23,
+  "last_link_id": 32,
   "nodes": [
     {
-      "id": 37,
-      "type": "easy showAnything",
-      "pos": [
-        3541.288944132338,
-        1226.3097008472637
-      ],
-      "size": [
-        210,
-        88
-      ],
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 37
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "*",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
-      },
-      "widgets_values": [
-        "https://files.closeai.fans/filesystem/output/20260423/68cf2fb7-d58b-4458-9ab5-7432dcd99acb.png"
-      ]
-    },
-    {
-      "id": 36,
-      "type": "easy showAnything",
-      "pos": [
-        3383.2459518384594,
-        1466.3959714177313
-      ],
-      "size": [
-        210,
-        88
-      ],
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 38
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "*",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
-      },
-      "widgets_values": [
-        "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2\nPrompt: image1的女孩抱着image2的狗\nQuality: auto\nSize: 2048x1152\nOutput: png\nTask ID: e1207c9da6c244faaba03ea17e0314ad\nImage URL: https://files.closeai.fans/filesystem/output/20260423/68cf2fb7-d58b-4458-9ab5-7432dcd99acb.png\nTotal Tokens: 3712\n"
-      ]
-    },
-    {
-      "id": 38,
+      "id": 19,
       "type": "Note",
       "pos": [
-        1816.6707135041513,
-        1176.8588421223888
+        207.73602513924706,
+        195.457775401788
       ],
       "size": [
-        395.43827275259264,
-        239.3251201409605
+        376.0766273546651,
+        239.1483911879535
       ],
       "flags": {},
       "order": 0,
@@ -98,21 +22,52 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "注意，由于现在没有完全全量，我们是手动筛选账号，最坑的是GPT还会回收灰度的功能，所以是一定概率生成最新gpt-image-2的效果！如果不能接受就等全量更新后，这个主要是给没有账号的朋友测试的，非商用\n\n贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=cbff0534884\n\n左侧令牌，创建令牌，分组选择default分组，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用 （comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
+        "全量gpt-image-2，支持异步任务\n\n\n贞贞的AI工坊（注册送0.2刀，各种API）：https://ai.t8star.cn/register?aff=dP7j\n\n左侧令牌，创建令牌，分组选择default分组，随便取个名字，复制API即可使用，支持直接用（聊天模式），也支持各种工具调用 （comfyui,sillytavern,cusor等），每日签到领积分\n\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen"
       ],
       "color": "#432",
       "bgcolor": "#653"
     },
     {
-      "id": 39,
-      "type": "LoadImage",
+      "id": 12,
+      "type": "SaveImage",
       "pos": [
-        2329.853377727651,
-        1417.871458059898
+        1969.4604254211404,
+        294.45247238949116
       ],
       "size": [
-        270,
-        314
+        621.2396694214876,
+        500.5785123966941
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 30
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "CR Prompt Text",
+      "pos": [
+        618.2470563349585,
+        149.68910624741747
+      ],
+      "size": [
+        400,
+        200
       ],
       "flags": {},
       "order": 1,
@@ -120,88 +75,10 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            33
-          ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "u=994655153,1707769523&fm=253&app=120&f=JPEG.jpg",
-        "image"
-      ]
-    },
-    {
-      "id": 41,
-      "type": "LoadImage",
-      "pos": [
-        2315.8594194321545,
-        1795.5151994168039
-      ],
-      "size": [
-        270,
-        314
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            39
-          ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "97D99014AAFD1168D1E1032369BEAAA4.jpg",
-        "image"
-      ]
-    },
-    {
-      "id": 34,
-      "type": "CR Prompt Text",
-      "pos": [
-        2156.2940595401565,
-        914.646234734046
-      ],
-      "size": [
-        400,
-        200
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
           "name": "prompt",
           "type": "STRING",
           "links": [
-            35
+            28
           ]
         },
         {
@@ -216,35 +93,148 @@
         "Node name for S&R": "CR Prompt Text"
       },
       "widgets_values": [
-        "image1的女孩抱着image2的狗"
+        "Main subject in realistic cosplay style in foreground\" + \"secondary characters in 2D illustration style in background\" \n \"OVERLORD ALBEDO\"elegant serif typography, gold foil texture\" \"Cinematic studio lighting\"  \"Baroque dark fantasy\"，图像比例21:9"
       ]
     },
     {
-      "id": 40,
+      "id": 20,
+      "type": "LoadImage",
+      "pos": [
+        441.62633491515305,
+        767.7665242227041
+      ],
+      "size": [
+        270,
+        314.00000000000006
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "未标题-1.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "easy showAnything",
+      "pos": [
+        1437.8952505765603,
+        550.2667840372384
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 13,
+      "type": "easy showAnything",
+      "pos": [
+        1469.971187229511,
+        196.35921124861048
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png"
+      ]
+    },
+    {
+      "id": 23,
       "type": "Comfly_gpt_image_2_official",
       "pos": [
-        2892.832299874187,
-        956.9361045257538
+        894.0375880532603,
+        412.7879961106554
       ],
       "size": [
         400,
-        792
+        836
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": 33
+          "link": 27
         },
         {
           "name": "image2",
           "shape": 7,
           "type": "IMAGE",
-          "link": 39
+          "link": null
         },
         {
           "name": "image3",
@@ -342,7 +332,7 @@
           "widget": {
             "name": "prompt"
           },
-          "link": 35
+          "link": 28
         },
         {
           "name": "api_key",
@@ -351,7 +341,7 @@
           "widget": {
             "name": "api_key"
           },
-          "link": 34
+          "link": 29
         }
       ],
       "outputs": [
@@ -359,27 +349,27 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            36
+            30
           ]
         },
         {
           "name": "image_url",
           "type": "STRING",
           "links": [
-            37
+            31
           ]
         },
         {
           "name": "response",
           "type": "STRING",
           "links": [
-            38
+            32
           ]
         }
       ],
       "properties": {
         "cnr_id": "zhenzhen",
-        "ver": "234b19b2e8b8ffb83f8df1d182b56795eae9ed3d",
+        "ver": "a15046b956e025b725e7281dcbb066b6c1863f0f",
         "Node name for S&R": "Comfly_gpt_image_2_official"
       },
       "widgets_values": [
@@ -387,7 +377,7 @@
         "",
         1,
         "auto",
-        "2048x1152",
+        "auto",
         "auto",
         "png",
         100,
@@ -398,54 +388,24 @@
         5,
         5,
         900,
-        624978952492930,
-        "randomize"
+        962057492745166,
+        "randomize",
+        false
       ]
     },
     {
-      "id": 32,
-      "type": "SaveImage",
-      "pos": [
-        3809.7472496487408,
-        910.9906201218993
-      ],
-      "size": [
-        1117.6342120579511,
-        1091.996635807045
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 36
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "ComfyUI"
-      ]
-    },
-    {
-      "id": 33,
+      "id": 18,
       "type": "Comfly_api_set",
       "pos": [
-        2330.021406418658,
-        1219.7912974063477
+        265.79178804614116,
+        554.3621433711934
       ],
       "size": [
-        270,
-        106
+        599.212485485964,
+        159.2750495184755
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -453,78 +413,71 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            34
+            29
           ]
         }
       ],
       "properties": {
         "cnr_id": "zhenzhen",
-        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
         "Node name for S&R": "Comfly_api_set"
       },
       "widgets_values": [
         "zhenzhen",
         "",
-        ""
+        "",
+        false
       ]
     }
   ],
   "links": [
     [
-      33,
-      39,
+      27,
+      20,
       0,
-      40,
+      23,
       0,
       "IMAGE"
     ],
     [
-      34,
-      33,
+      28,
+      17,
       0,
-      40,
-      18,
-      "STRING"
-    ],
-    [
-      35,
-      34,
-      0,
-      40,
+      23,
       17,
       "STRING"
     ],
     [
-      36,
-      40,
+      29,
+      18,
       0,
+      23,
+      18,
+      "STRING"
+    ],
+    [
+      30,
+      23,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      23,
+      1,
+      13,
+      0,
+      "STRING"
+    ],
+    [
       32,
-      0,
-      "IMAGE"
-    ],
-    [
-      37,
-      40,
-      1,
-      37,
-      0,
-      "STRING"
-    ],
-    [
-      38,
-      40,
+      23,
       2,
-      36,
+      22,
       0,
       "STRING"
-    ],
-    [
-      39,
-      41,
-      0,
-      40,
-      1,
-      "IMAGE"
     ]
   ],
   "groups": [
@@ -532,8 +485,8 @@
       "id": 1,
       "title": "B站、Youtube：T8star-Aix",
       "bounding": [
-        922.0818234622727,
-        341.5090955977516,
+        -80.34036431349105,
+        -352.63922718539186,
         4168,
         309
       ],
@@ -545,19 +498,12 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.0152559799477086,
+      "scale": 0.6830134553650707,
       "offset": [
-        -1345.1304117712427,
-        -840.43594713143
+        5.691969787077483,
+        181.19930448838159
       ]
     },
-    "links_added_by_ue": [],
-    "ue_links": [],
-    "0246.VERSION": [
-      0,
-      0,
-      4
-    ],
     "frontendVersion": "1.42.10",
     "VHS_latentpreview": true,
     "VHS_latentpreviewrate": 0,
