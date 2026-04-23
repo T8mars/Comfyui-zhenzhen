@@ -219,6 +219,7 @@ class Comfly_api_set:
             },
             "optional": {
                 "custom_ip": ("STRING", {"default": "", "placeholder": "Enter IP when using 'ip' option (e.g. http://104.194.8.112:9088)"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -227,7 +228,7 @@ class Comfly_api_set:
     FUNCTION = "set_api_base"
     CATEGORY = "zhenzhen"
 
-    def set_api_base(self, api_base, apikey="", custom_ip=""):
+    def set_api_base(self, api_base, apikey="", custom_ip="", skip_error=False):
         global baseurl
         
         base_url_mapping = {
@@ -619,6 +620,7 @@ class Comfly_upload(ComflyBaseNode):
             "required": {
                 "image": ("IMAGE",),
                 "api_key": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             },
         }
     
@@ -689,7 +691,7 @@ class Comfly_upload(ComflyBaseNode):
             error_message = f"Timeout error: Request to upload image timed out after {self.timeout} seconds"
             raise Exception(error_message)
         
-    def upload_image(self, image, api_key=""):
+    def upload_image(self, image, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -793,6 +795,7 @@ class Comfly_Mj(ComflyBaseNode):
                 "video": ("BOOLEAN", {"default": False}),
                 "tile": ("BOOLEAN", {"default": False}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -809,7 +812,7 @@ class Comfly_Mj(ComflyBaseNode):
         self.image = None
         self.text = ""
 
-    def process_input(self, speed, text, text_en="", image=None, model_version=None, ar=None, no=None, c=None, s=None, iw=None, r=None, sw=None, cw=None, sv=None, video=False, tile=False, seed=0, cref="none", oref="none", sref="none", positive="", api_key=""):
+    def process_input(self, speed, text, text_en="", image=None, model_version=None, ar=None, no=None, c=None, s=None, iw=None, r=None, sw=None, cw=None, sv=None, video=False, tile=False, seed=0, cref="none", oref="none", sref="none", positive="", api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -1050,7 +1053,8 @@ class Comfly_Mju(ComflyBaseNode):
                 "U4": ("BOOLEAN", {"default": False})
             },
             "optional": {
-                "api_key": ("STRING", {"default": ""})
+                "api_key": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -1059,7 +1063,7 @@ class Comfly_Mju(ComflyBaseNode):
     FUNCTION = "run"
     CATEGORY = "zhenzhen/Midjourney"
 
-    def run(self, taskId, U1=False, U2=False, U3=False, U4=False, api_key=""):
+    def run(self, taskId, U1=False, U2=False, U3=False, U4=False, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -1094,6 +1098,8 @@ class Comfly_Mju(ComflyBaseNode):
             print(f"Error in run method: {str(e)}")
             blank_image = Image.new('RGB', (512, 512), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, "")
 
 
@@ -1526,6 +1532,7 @@ class Comfly_Mjv(ComflyBaseNode):
                 "pan_right": ("BOOLEAN", {"default": False}),
                 "pan_up": ("BOOLEAN", {"default": False}),
                 "pan_down": ("BOOLEAN", {"default": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -1534,7 +1541,7 @@ class Comfly_Mjv(ComflyBaseNode):
     FUNCTION = "run"
     CATEGORY = "zhenzhen/Midjourney"
 
-    def run(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False, api_key=""):
+    def run(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -1582,6 +1589,8 @@ class Comfly_Mjv(ComflyBaseNode):
             print(f"Error in run method: {str(e)}")
             blank_image = Image.new('RGB', (512, 512), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor,)
 
     async def process_input(self, taskId, upsample_v6_2x_subtle=False, upsample_v6_2x_creative=False, costume_zoom=False, zoom=1.0, pan_left=False, pan_right=False, pan_up=False, pan_down=False):
@@ -1826,7 +1835,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -1876,7 +1886,7 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
         except Exception as e:
             return None, f"Error fetching task result: {str(e)}"
 
-    def swap_face(self, source_image, target_image, api_key="", seed=0):
+    def swap_face(self, source_image, target_image, api_key="", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -1890,6 +1900,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
             target_base64 = self.image_to_base64(target_image)
             
             if not source_base64 or not target_base64:
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Mj_swap_face] Failed to convert images to base64 format")
                 return (source_image, "Failed to convert images to base64 format")
             
             payload = {
@@ -1916,6 +1928,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Mj_swap_face] {error_message}")
                 return (source_image, error_message)
                 
             result = response.json()
@@ -1923,6 +1937,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
             if "result" not in result:
                 error_message = "No task ID (result field) in API response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Mj_swap_face] {error_message}")
                 return (source_image, error_message)
                 
             task_id = result["result"]
@@ -1961,6 +1977,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
                     if not image_url:
                         error_message = "No image URL in completed task result"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Mj_swap_face] {error_message}")
                         return (source_image, error_message)
                     
                     print(f"Found image URL: {image_url}")
@@ -1979,18 +1997,24 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
                     except Exception as e:
                         error_message = f"Error downloading swapped face image: {str(e)}"
                         print(error_message)
+                        if not skip_error:
+                            raise
                         return (source_image, error_message)
                 
                 elif status == "FAILURE":
                     fail_reason = task_result.get("fail_reason", "Unknown failure")
                     error_message = f"Task failed: {fail_reason}"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Mj_swap_face] {error_message}")
                     return (source_image, error_message)
                 
                 time.sleep(self.poll_interval)
             
             error_message = f"Task timed out after {self.timeout} seconds"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Mj_swap_face] {error_message}")
             return (source_image, error_message)
             
         except Exception as e:
@@ -1998,6 +2022,8 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (source_image, error_message)
 
 
@@ -2018,6 +2044,7 @@ class Comfly_mj_video(ComflyBaseNode):
                 "image": ("IMAGE",),
                 "notify_hook": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -2113,7 +2140,7 @@ class Comfly_mj_video(ComflyBaseNode):
         print(f"Final extracted video URLs: {video_urls}")
         return video_urls
 
-    def generate_video(self, prompt, motion="Low", api_key="", image=None, notify_hook="", seed=0):
+    def generate_video(self, prompt, motion="Low", api_key="", image=None, notify_hook="", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -2125,6 +2152,8 @@ class Comfly_mj_video(ComflyBaseNode):
                 "message": "API key not provided. Please set your API key."
             })
             empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_mj_video] {error_response}")
             return (*empty_adapters, "", error_response)
             
         pbar = comfy.utils.ProgressBar(100)
@@ -2163,12 +2192,16 @@ class Comfly_mj_video(ComflyBaseNode):
                 print(error_message)
                 error_response = json.dumps({"status": "error", "message": error_message})
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise
                 return (*empty_adapters, "", error_response)
             except requests.exceptions.RequestException as e:
                 error_message = f"API request error during submission: {str(e)}"
                 print(error_message)
                 error_response = json.dumps({"status": "error", "message": error_message})
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise
                 return (*empty_adapters, "", error_response)
             
             result = response.json()
@@ -2181,6 +2214,8 @@ class Comfly_mj_video(ComflyBaseNode):
                     "message": error_message
                 })
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_mj_video] {error_message}")
                 return (*empty_adapters, "", error_response)
                 
             task_id = result["result"]
@@ -2213,6 +2248,8 @@ class Comfly_mj_video(ComflyBaseNode):
                             "message": error_message
                         })
                         empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_mj_video] {error_message}")
                         return (*empty_adapters, task_id, error_response)
 
                     progress = task_result.get("progress", "0%")
@@ -2255,6 +2292,8 @@ class Comfly_mj_video(ComflyBaseNode):
                     "response_data": task_result
                 })
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_mj_video] {error_message}")
                 return (*empty_adapters, task_id, error_response)
 
             video_adapters = []
@@ -2284,6 +2323,8 @@ class Comfly_mj_video(ComflyBaseNode):
             })
 
             empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+            if not skip_error:
+                raise
             return (*empty_adapters, "", error_response)
 
 
@@ -2319,6 +2360,7 @@ class Comfly_mjstyle:
             "optional": {
                 "positive": ("STRING", {"forceInput": True}),
                 "negative": ("STRING", {"forceInput": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             },
             "hidden": {"extra_pnginfo": "EXTRA_PNGINFO", "unique_id": "UNIQUE_ID"},
         }
@@ -2346,7 +2388,7 @@ class Comfly_mjstyle:
         else:
             return prompt
 
-    def run(self, extra_pnginfo, unique_id, styles_type, positive="", negative=""):
+    def run(self, extra_pnginfo, unique_id, styles_type, positive="", negative="", skip_error=False):
         values = []
         for node in extra_pnginfo["workflow"]["nodes"]:
             if node["id"] == int(unique_id):
@@ -2391,6 +2433,7 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -2409,7 +2452,7 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             "Authorization": f"Bearer {self.api_key}"
         }
 
-    def extend_video(self, task_id, index=0, api_key=""):
+    def extend_video(self, task_id, index=0, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -2419,6 +2462,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             error_message = "API key not provided. Please set your API key."
             print(error_message)
             empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_mj_video_extend] {error_message}")
             return (*empty_adapters, "", error_message)
             
         pbar = comfy.utils.ProgressBar(100)
@@ -2444,6 +2489,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_mj_video_extend] {error_message}")
                 return (*empty_adapters, "", error_message)
                 
             result = response.json()
@@ -2451,6 +2498,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
                 error_message = f"API Error: {result.get('description', 'Unknown error')}"
                 print(error_message)
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_mj_video_extend] {error_message}")
                 return (*empty_adapters, "", error_message)
             
             new_task_id = result["result"]
@@ -2479,6 +2528,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
                         error_message = f"Video extension failed: {fail_reason}"
                         print(error_message)
                         empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_mj_video_extend] {error_message}")
                         return (*empty_adapters, new_task_id, error_message)
 
                     progress = status_result.get("progress", "0%")
@@ -2551,6 +2602,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
                 error_message = "Failed to retrieve video URLs from the response"
                 print(error_message)
                 empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_mj_video_extend] {error_message}")
                 return (*empty_adapters, new_task_id, error_message)
 
             video_adapters = []
@@ -2576,6 +2629,8 @@ class Comfly_mj_video_extend(ComflyBaseNode):
             error_message = f"Error in video extension: {str(e)}"
             print(error_message)
             empty_adapters = [ComflyVideoAdapter("") for _ in range(4)]
+            if not skip_error:
+                raise
             return (*empty_adapters, "", error_message)
         
 ############################# Kling ###########################
@@ -2600,7 +2655,8 @@ class Comfly_kling_text2video:
                 "camera": (["none", "horizontal", "vertical", "zoom", "vertical_shake", "horizontal_shake", 
                           "rotate", "master_down_zoom", "master_zoom_up", "master_right_rotate_zoom", 
                           "master_left_rotate_zoom"], {"default": "none"}),
-                "camera_value": ("FLOAT", {"default": 0, "min": -10, "max": 10, "step": 0.1})
+                "camera_value": ("FLOAT", {"default": 0, "min": -10, "max": 10, "step": 0.1}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -2679,7 +2735,7 @@ class Comfly_kling_text2video:
         return json.dumps(camera_mappings.get(camera, camera_mappings["none"]))
 
     def generate_video(self, prompt, model_name, imagination, aspect_ratio, mode, duration, num_videos, 
-                  negative_prompt="", camera="none", camera_value=0, seed=0, api_key=""):
+                  negative_prompt="", camera="none", camera_value=0, seed=0, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -2688,6 +2744,8 @@ class Comfly_kling_text2video:
             
         if not self.api_key:
             error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_kling_text2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
             
         camera_json = {}
@@ -2726,6 +2784,8 @@ class Comfly_kling_text2video:
             result = response.json()
             if result["code"] != 0:
                 error_response = {"task_status": "failed", "task_status_msg": f"API Error: {result['message']}"}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_text2video] {error_response}")
                 return ("", "", "", "", json.dumps(error_response))
                 
             task_id = result["data"]["task_id"]
@@ -2767,10 +2827,14 @@ class Comfly_kling_text2video:
                         "task_status_msg": error_msg,
                     }
                     print(f"Task failed: {error_msg}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_kling_text2video] {error_msg}")
                     return ("", "", task_id, "", json.dumps(error_response))
         except Exception as e:
             error_response = {"task_status": "failed", "task_status_msg": f"Error generating video: {str(e)}"}
             print(f"Error generating video: {str(e)}")
+            if not skip_error:
+                raise
             return ("", "", "", "", json.dumps(error_response))
 
 
@@ -2798,6 +2862,7 @@ class Comfly_kling_image2video:
                           "rotate", "master_down_zoom", "master_zoom_up", "master_right_rotate_zoom", 
                           "master_left_rotate_zoom"], {"default": "none"}),
                 "camera_value": ("FLOAT", {"default": 0, "min": -10, "max": 10, "step": 0.1}),      
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -2848,7 +2913,7 @@ class Comfly_kling_image2video:
             return False
 
     def generate_video(self, image, prompt, model_name, imagination, aspect_ratio, mode, duration, 
-                  num_videos, negative_prompt="", camera="none", camera_value=0, seed=0, image_tail=None, api_key=""):
+                  num_videos, negative_prompt="", camera="none", camera_value=0, seed=0, image_tail=None, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -2857,6 +2922,8 @@ class Comfly_kling_image2video:
             
         if not self.api_key:
             error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_kling_image2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
 
         has_tail_image = image_tail is not None
@@ -2877,6 +2944,8 @@ class Comfly_kling_image2video:
                     "task_status": "failed", 
                     "task_status_msg": warning_message
                 }
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_image2video] {error_response}")
                 return ("", "", "", "", json.dumps(error_response))
         
         camera_json = {}
@@ -2943,11 +3012,15 @@ class Comfly_kling_image2video:
                 error_message = f"Error: {response.status_code} {response.reason} - {response.text}"
                 print(error_message)
                 error_response = {"task_status": "failed", "task_status_msg": error_message}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_image2video] {error_message}")
                 return ("", "", "", "", json.dumps(error_response))
             
             result = response.json()
             if result["code"] != 0:
                 error_response = {"task_status": "failed", "task_status_msg": f"API Error: {result['message']}"}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_image2video] {error_message}")
                 return ("", "", "", "", json.dumps(error_response))
                 
             task_id = result["data"]["task_id"]
@@ -2995,10 +3068,14 @@ class Comfly_kling_image2video:
                         "task_status_msg": error_msg,
                     }
                     print(f"Task failed: {error_msg}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_kling_image2video] {error_msg}")
                     return ("", "", task_id, "", json.dumps(error_response))
         except Exception as e:
             error_response = {"task_status": "failed", "task_status_msg": f"Error generating video: {str(e)}"}
             print(f"Error generating video: {str(e)}")
+            if not skip_error:
+                raise
             return ("", "", "", "", json.dumps(error_response))
 
     def get_camera_json(self, camera, camera_value=0):
@@ -3038,7 +3115,8 @@ class Comfly_kling_multi_image2video:
                 "api_key": ("STRING", {"default": ""}),
                 "max_retries": ("INT", {"default": 10, "min": 1, "max": 30}),
                 "initial_timeout": ("INT", {"default": 600, "min": 30, "max": 900}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -3184,7 +3262,7 @@ class Comfly_kling_multi_image2video:
     
     def generate_video(self, prompt, model_name, mode, duration, aspect_ratio, negative_prompt="", 
                   image1=None, image2=None, image3=None, image4=None, api_key="", 
-                  max_retries=10, initial_timeout=300, seed=0):
+                  max_retries=10, initial_timeout=300, seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -3193,6 +3271,8 @@ class Comfly_kling_multi_image2video:
             
         if not self.api_key:
             error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
             
         pbar = comfy.utils.ProgressBar(100)
@@ -3208,6 +3288,8 @@ class Comfly_kling_multi_image2video:
                     
             if not image_list:
                 error_response = {"task_status": "failed", "task_status_msg": "No valid images provided"}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_response}")
                 return ("", "", "", "", json.dumps(error_response))
 
             payload = {
@@ -3242,6 +3324,8 @@ class Comfly_kling_multi_image2video:
                 error_message = f"API Error: {result['message']}"
                 print(error_message)
                 error_response = {"task_status": "failed", "task_status_msg": error_message}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_message}")
                 return ("", "", "", "", json.dumps(error_response))
                 
             task_id = result["data"]["task_id"]
@@ -3280,6 +3364,8 @@ class Comfly_kling_multi_image2video:
                     "task_status_msg": error_msg,
                 }
                 print(f"Task failed: {error_msg}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_msg}")
                 return ("", "", task_id, "", json.dumps(error_response))
             
             else:
@@ -3289,6 +3375,8 @@ class Comfly_kling_multi_image2video:
                     "task_status_msg": error_msg,
                 }
                 print(f"Task error: {error_msg}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_msg}")
                 return ("", "", task_id, "", json.dumps(error_response))
         
         except Exception as e:
@@ -3296,6 +3384,8 @@ class Comfly_kling_multi_image2video:
             traceback.print_exc()
             error_response = {"task_status": "failed", "task_status_msg": f"Error generating video: {str(e)}"}
             print(f"Error generating video: {str(e)}")
+            if not skip_error:
+                raise
             return ("", "", "", "", json.dumps(error_response))
 
 
@@ -3308,7 +3398,8 @@ class Comfly_video_extend:
                 "prompt": ("STRING", {"default": "", "multiline": True}),
             },
             "optional": {
-                "api_key": ("STRING", {"default": ""})
+                "api_key": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -3321,7 +3412,7 @@ class Comfly_video_extend:
         self.api_key = get_config().get('api_key', '')
         self.timeout = 300
 
-    def extend_video(self, video_id, prompt="", api_key=""):
+    def extend_video(self, video_id, prompt="", api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -3330,6 +3421,8 @@ class Comfly_video_extend:
             
         if not self.api_key:
             error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_video_extend] {error_response}")
             return ("", "", json.dumps(error_response))
             
         headers = {
@@ -3351,6 +3444,8 @@ class Comfly_video_extend:
             result = response.json()
             if result["code"] != 0:
                 error_response = {"task_status": "failed", "task_status_msg": f"API Error: {result['message']}"}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_video_extend] {error_response}")
                 return ("", "", json.dumps(error_response))
                 
             task_id = result["data"]["task_id"]
@@ -3396,11 +3491,15 @@ class Comfly_video_extend:
                         "task_status_msg": error_msg,
                     }
                     print(f"Task failed: {error_msg}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_video_extend] {error_msg}")
                     return ("", "", json.dumps(error_response))
                     
         except Exception as e:
             error_response = {"task_status": "failed", "task_status_msg": f"Error extending video: {str(e)}"}
             print(f"Error extending video: {str(e)}")
+            if not skip_error:
+                raise
             return ("", "", json.dumps(error_response))
 
 
@@ -3492,7 +3591,8 @@ class Comfly_lip_sync:
                 "video_url": ("STRING", {"default": ""}),
                 "audio_type": (["file", "url"], {"default": "file"}),
                 "audio_file": ("STRING", {"default": ""}),
-                "audio_url": ("STRING", {"default": ""})
+                "audio_url": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -3508,7 +3608,7 @@ class Comfly_lip_sync:
         self.en_voice_map = {name: voice_id for name, voice_id in self.__class__.en_voices}
         
     def process_lip_sync(self, video_id, task_id, mode, text, voice_language, zh_voice, en_voice, voice_speed, seed=0,
-                    video_url="", audio_type="file", audio_file="", audio_url="", api_key=""):
+                    video_url="", audio_type="file", audio_file="", audio_url="", api_key="", skip_error=False):
     
         if api_key.strip():
             self.api_key = api_key
@@ -3518,6 +3618,8 @@ class Comfly_lip_sync:
             
         if not self.api_key:
             error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_lip_sync] {error_response}")
             return ("", "", "", json.dumps(error_response))
         
         if voice_language == "zh":
@@ -3558,6 +3660,8 @@ class Comfly_lip_sync:
             result = response.json()
             if result["code"] != 0:
                 error_response = {"task_status": "failed", "task_status_msg": f"API Error: {result['message']}"}
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_lip_sync] {error_response}")
                 return ("", "", "", json.dumps(error_response))
                     
             task_id = result["data"]["task_id"]
@@ -3599,11 +3703,15 @@ class Comfly_lip_sync:
                         "task_status_msg": error_msg,
                     }
                     print(f"Task failed: {error_msg}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_lip_sync] {error_msg}")
                     return ("", "", task_id, json.dumps(error_response))
                         
         except Exception as e:
             error_response = {"task_status": "failed", "task_status_msg": f"Error in lip sync process: {str(e)}"}
             print(f"Error in lip sync process: {str(e)}")
+            if not skip_error:
+                raise
             return ("", "", "", json.dumps(error_response))
    
 
@@ -3642,6 +3750,7 @@ class ComflyGeminiAPI:
                 "object_image": ("IMAGE",),  
                 "subject_image": ("IMAGE",),
                 "scene_image": ("IMAGE",),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -3705,7 +3814,7 @@ class ComflyGeminiAPI:
         return (width, height)
 
     def process(self, prompt, model, resolution, num_images, temperature, top_p, seed, timeout=120, 
-                object_image=None, subject_image=None, scene_image=None, api_key=""):
+                object_image=None, subject_image=None, scene_image=None, api_key="", skip_error=False):
 
         if api_key.strip():
             self.api_key = api_key
@@ -3867,11 +3976,15 @@ class ComflyGeminiAPI:
         except TimeoutError as e:
             error_message = f"API timeout error: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return self.handle_error(object_image, subject_image, scene_image, error_message, resolution)
             
         except Exception as e:
             error_message = f"Error calling Gemini API: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return self.handle_error(object_image, subject_image, scene_image, error_message, resolution)
     
     def handle_error(self, object_image, subject_image, scene_image, error_message, resolution="1024x1024"):
@@ -3912,7 +4025,8 @@ class Comfly_Doubao_Seedream:
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
-                "watermark": ("BOOLEAN", {"default": True})
+                "watermark": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -3948,7 +4062,7 @@ class Comfly_Doubao_Seedream:
     
     def generate_image(self, prompt, model, response_format="url", size="1024x1024", 
                        Custom_size="1536x1024", guidance_scale=2.5, apikey="", 
-                       seed=-1, watermark=True):
+                       seed=-1, watermark=True, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -3960,6 +4074,8 @@ class Comfly_Doubao_Seedream:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
             return (blank_tensor, error_message)
             
         try:
@@ -3974,6 +4090,8 @@ class Comfly_Doubao_Seedream:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                     return (blank_tensor, error_message)
                 final_size = result
             
@@ -4003,6 +4121,8 @@ class Comfly_Doubao_Seedream:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                 return (blank_tensor, error_message)
                 
             result = response.json()
@@ -4014,6 +4134,8 @@ class Comfly_Doubao_Seedream:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                 return (blank_tensor, error_message)
             
             image_url = None
@@ -4026,6 +4148,8 @@ class Comfly_Doubao_Seedream:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                     return (blank_tensor, error_message)
                     
                 try:
@@ -4037,6 +4161,8 @@ class Comfly_Doubao_Seedream:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise
                     return (blank_tensor, error_message)
             else:
                 b64_data = result["data"][0].get("b64_json")
@@ -4045,6 +4171,8 @@ class Comfly_Doubao_Seedream:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                     return (blank_tensor, error_message)
                     
                 image_data = BytesIO(base64.b64decode(b64_data))
@@ -4072,6 +4200,8 @@ class Comfly_Doubao_Seedream:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise
                 return (blank_tensor, error_message)
                 
         except Exception as e:
@@ -4079,6 +4209,8 @@ class Comfly_Doubao_Seedream:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message)
 
 
@@ -4107,6 +4239,7 @@ class Comfly_Doubao_Seedream_4:
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
                 "watermark": ("BOOLEAN", {"default": True}),
                 "stream": ("BOOLEAN", {"default": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -4184,7 +4317,7 @@ class Comfly_Doubao_Seedream_4:
                   aspect_ratio="1:1", width=1024, height=1024, apikey="", 
                   image1=None, image2=None, image3=None, image4=None, image5=None, 
                   sequential_image_generation="disabled", max_images=1, seed=-1, 
-                  watermark=True, stream=False):
+                  watermark=True, stream=False, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -4196,6 +4329,8 @@ class Comfly_Doubao_Seedream_4:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedream_4] {error_message}")
             return (blank_tensor, error_message, "")
             
         try:
@@ -4260,6 +4395,8 @@ class Comfly_Doubao_Seedream_4:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             result = response.json()
@@ -4271,6 +4408,8 @@ class Comfly_Doubao_Seedream_4:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4] {error_message}")
                 return (blank_tensor, error_message, "")
             
             image_url = None
@@ -4312,6 +4451,8 @@ class Comfly_Doubao_Seedream_4:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4] {error_message}")
                 return (blank_tensor, error_message, "")
             
             combined_tensor = torch.cat(generated_images, dim=0)
@@ -4345,6 +4486,8 @@ class Comfly_Doubao_Seedream_4:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
 
 class Comfly_Doubao_Seedream_4_5:
@@ -4372,6 +4515,7 @@ class Comfly_Doubao_Seedream_4_5:
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "stream": ("BOOLEAN", {"default": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -4436,7 +4580,7 @@ class Comfly_Doubao_Seedream_4_5:
                   aspect_ratio="1:1", width=1024, height=1024, apikey="", 
                   image1=None, image2=None, image3=None, image4=None, image5=None, 
                   sequential_image_generation="disabled", max_images=1, seed=-1, 
-                  watermark=True, stream=False):
+                  watermark=True, stream=False, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -4448,6 +4592,8 @@ class Comfly_Doubao_Seedream_4_5:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedream_4_5] {error_message}")
             return (blank_tensor, error_message, "")
             
         try:
@@ -4512,6 +4658,8 @@ class Comfly_Doubao_Seedream_4_5:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4_5] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             result = response.json()
@@ -4523,6 +4671,8 @@ class Comfly_Doubao_Seedream_4_5:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4_5] {error_message}")
                 return (blank_tensor, error_message, "")
             
             image_url = None
@@ -4564,6 +4714,8 @@ class Comfly_Doubao_Seedream_4_5:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedream_4_5] {error_message}")
                 return (blank_tensor, error_message, "")
             
             combined_tensor = torch.cat(generated_images, dim=0)
@@ -4597,6 +4749,8 @@ class Comfly_Doubao_Seedream_4_5:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
 
 
@@ -4615,7 +4769,8 @@ class Comfly_Doubao_Seededit:
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
-                "watermark": ("BOOLEAN", {"default": True})
+                "watermark": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -4635,7 +4790,7 @@ class Comfly_Doubao_Seededit:
         }
     
     def edit_image(self, image, prompt, model, response_format="url", size="adaptive", 
-                guidance_scale=5.5, apikey="", seed=-1, watermark=True):
+                guidance_scale=5.5, apikey="", seed=-1, watermark=True, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -4645,6 +4800,8 @@ class Comfly_Doubao_Seededit:
         if not self.api_key:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
             return (image, error_message)
             
         try:
@@ -4682,6 +4839,8 @@ class Comfly_Doubao_Seededit:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
                 return (image, error_message)
                 
             result = response.json()
@@ -4691,6 +4850,8 @@ class Comfly_Doubao_Seededit:
             if "data" not in result or not result["data"]:
                 error_message = "No image data in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
                 return (image, error_message)
             
             image_url = None
@@ -4701,6 +4862,8 @@ class Comfly_Doubao_Seededit:
                 if not image_url:
                     error_message = "No image URL in response"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
                     return (image, error_message)
                     
                 try:
@@ -4710,12 +4873,16 @@ class Comfly_Doubao_Seededit:
                 except Exception as e:
                     error_message = f"Error downloading image: {str(e)}"
                     print(error_message)
+                    if not skip_error:
+                        raise
                     return (image, error_message)
             else:
                 b64_data = result["data"][0].get("b64_json")
                 if not b64_data:
                     error_message = "No base64 data in response"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
                     return (image, error_message)
                     
                 image_data = BytesIO(base64.b64decode(b64_data))
@@ -4741,11 +4908,15 @@ class Comfly_Doubao_Seededit:
             except Exception as e:
                 error_message = f"Error processing edited image: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (image, error_message)
                 
         except Exception as e:
             error_message = f"Error editing image: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return (image, error_message)
 
 
@@ -4770,6 +4941,7 @@ class ComflyJimengApi:
                 "logo_opacity": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.1}),
                 "image": ("IMAGE",),  
                 "image_url": ("STRING", {"default": "", "multiline": False}),  
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -4838,7 +5010,7 @@ class ComflyJimengApi:
     
     def generate_image(self, prompt, scale=2.5, seed=-1, width=1328, height=1328, use_pre_llm=False, 
                       add_logo=False, logo_position="右下角", logo_language="中文", 
-                      logo_text="", logo_opacity=0.3, api_key="", image=None, image_url=""):
+                      logo_text="", logo_opacity=0.3, api_key="", image=None, image_url="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -4852,6 +5024,8 @@ class ComflyJimengApi:
 
                 blank_image = Image.new('RGB', (width, height), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                 return (blank_tensor, error_message, "")
 
             pbar = comfy.utils.ProgressBar(100)
@@ -4971,20 +5145,28 @@ class ComflyJimengApi:
                         error_message = f"Error downloading result image: {str(e)}"
                         print(error_message)
                         if image is not None:
+                            if not skip_error:
+                                raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                             return (image, response_info + f"\n\nError: {error_message}", image_url)
                         else:
                             blank_image = Image.new('RGB', (width, height), color='white')
                             blank_tensor = pil2tensor(blank_image)
+                            if not skip_error:
+                                raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                             return (blank_tensor, response_info + f"\n\nError: {error_message}", image_url)
                 else:
                     error_message = "No image URL found in response"
                     print(error_message)
                     response_info = f"**Error: {error_message}**\n\nFull response: {full_response}"
                     if image is not None:
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                         return (image, response_info, "")
                     else:
                         blank_image = Image.new('RGB', (width, height), color='white')
                         blank_tensor = pil2tensor(blank_image)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                         return (blank_tensor, response_info, "")
             
             else:
@@ -5011,6 +5193,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise
                     return (blank_tensor, response_info, "")
 
                 if response.status_code != 200:
@@ -5019,6 +5203,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                     return (blank_tensor, response_info, "")
                     
                 result = response.json()
@@ -5031,6 +5217,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                     return (blank_tensor, response_info, "")
 
                 image_url = ""
@@ -5046,6 +5234,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}\nFull response: {json.dumps(result, indent=2)}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyJimengApi] {error_message}")
                     return (blank_tensor, response_info, "")
                 
                 print(f"Found image URL: {image_url}")
@@ -5059,6 +5249,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise
                     return (blank_tensor, response_info, image_url)  
                 except Exception as e:
                     error_message = f"Error downloading result image: {str(e)}"
@@ -5066,6 +5258,8 @@ class ComflyJimengApi:
                     response_info += f"Error: {error_message}"
                     blank_image = Image.new('RGB', (width, height), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise
                     return (blank_tensor, response_info, image_url)  
                     
                 generated_image = Image.open(BytesIO(img_response.content))
@@ -5087,6 +5281,8 @@ class ComflyJimengApi:
             print(error_message)
             blank_image = Image.new('RGB', (width, height), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
             
     def extract_image_urls(self, response_text):
@@ -5114,7 +5310,8 @@ class ComflyJimengVideoApi:
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
                 "image": ("IMAGE",),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -5164,7 +5361,7 @@ class ComflyJimengVideoApi:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_video(self, prompt, duration, aspect_ratio, cfg_scale, api_key="", image=None, seed=0):
+    def generate_video(self, prompt, duration, aspect_ratio, cfg_scale, api_key="", image=None, seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -5173,6 +5370,8 @@ class ComflyJimengVideoApi:
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[ComflyJimengVideoApi] {error_response}")
             return ("", "", json.dumps(error_response), "")
             
         try:
@@ -5198,6 +5397,8 @@ class ComflyJimengVideoApi:
                 else:
                     error_message = "Failed to upload image. Please check your image and try again."
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                     return ("", "", json.dumps({"code": "error", "message": error_message}), "")
 
             pbar.update_absolute(30)
@@ -5211,6 +5412,8 @@ class ComflyJimengVideoApi:
             if response.status_code != 200:
                 error_message = f"API error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
                 
             result = response.json()
@@ -5218,12 +5421,16 @@ class ComflyJimengVideoApi:
             if result.get("code") != "success":
                 error_message = f"API returned error: {result.get('message', 'Unknown error')}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
                 
             task_id = result.get("data")
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
             
             pbar.update_absolute(40)
@@ -5240,6 +5447,8 @@ class ComflyJimengVideoApi:
                 if elapsed_time > max_wait_time:
                     error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                     return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                 
                 time.sleep(5)  
@@ -5302,6 +5511,8 @@ class ComflyJimengVideoApi:
                         fail_reason = data.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                         return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                     
                     elif status in ["PENDING", "PROCESSING", "RUNNING"]:
@@ -5317,6 +5528,8 @@ class ComflyJimengVideoApi:
             if not video_url:
                 error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyJimengVideoApi] {error_message}")
                 return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
 
             if video_url:
@@ -5331,6 +5544,8 @@ class ComflyJimengVideoApi:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"code": "error", "message": error_message}), "")
 
 
@@ -5351,6 +5566,7 @@ class ComflySeededit:
                 "logo_position": (["右下角", "左下角", "左上角", "右上角"], {"default": "右下角"}),
                 "logo_language": (["中文", "英文"], {"default": "中文"}),
                 "logo_text": ("STRING", {"default": "", "multiline": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -5387,7 +5603,7 @@ class ComflySeededit:
         return language_map.get(language_str, 0)
     
     def edit_image(self, image, prompt, scale=0.5, seed=-1, add_logo=False, logo_position="右下角", 
-                   logo_language="中文", logo_text="", api_key=""):
+                   logo_language="中文", logo_text="", api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -5398,6 +5614,8 @@ class ComflySeededit:
             if not self.api_key:
                 error_message = "API key not found in Comflyapi.json"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflySeededit] {error_message}")
                 return (image, error_message, "")
                 
             # Convert tensor to PIL image
@@ -5456,6 +5674,8 @@ class ComflySeededit:
                 error_message = f"API request timed out after {self.timeout} seconds"
                 print(error_message)
                 response_info += f"Error: {error_message}"
+                if not skip_error:
+                    raise
                 return (image, response_info, "")
             
             # Check for status code
@@ -5463,6 +5683,8 @@ class ComflySeededit:
                 error_message = f"API Error: Status {response.status_code}\nResponse: {response.text}"
                 print(error_message)
                 response_info += f"Error: {error_message}"
+                if not skip_error:
+                    raise RuntimeError(f"[ComflySeededit] {error_message}")
                 return (image, response_info, "")
                 
             result = response.json()
@@ -5474,6 +5696,8 @@ class ComflySeededit:
                 error_message = f"API Error: {result.get('message', 'Unknown error')}\nDetails: {json.dumps(result, indent=2)}"
                 print(error_message)
                 response_info += f"Error: {error_message}"
+                if not skip_error:
+                    raise RuntimeError(f"[ComflySeededit] {error_message}")
                 return (image, response_info, "")
             
             # Get the result image URL
@@ -5488,6 +5712,8 @@ class ComflySeededit:
                 error_message = "No image URL found in response"
                 print(error_message)
                 response_info += f"Error: {error_message}\nFull response: {json.dumps(result, indent=2)}"
+                if not skip_error:
+                    raise RuntimeError(f"[ComflySeededit] {error_message}")
                 return (image, response_info, "")
             
             print(f"Found image URL: {image_url}")
@@ -5500,11 +5726,15 @@ class ComflySeededit:
                 error_message = f"Timeout while downloading result image after {self.timeout} seconds"
                 print(error_message)
                 response_info += f"Error: {error_message}"
+                if not skip_error:
+                    raise
                 return (image, response_info, image_url)  # Return the URL even though download failed
             except Exception as e:
                 error_message = f"Error downloading result image: {str(e)}"
                 print(error_message)
                 response_info += f"Error: {error_message}"
+                if not skip_error:
+                    raise
                 return (image, response_info, image_url)  # Return the URL even though download failed
                 
             edited_image = Image.open(BytesIO(img_response.content))
@@ -5526,6 +5756,8 @@ class ComflySeededit:
             error_message = f"Error in image editing: {str(e)}"
             print(error_message)
             # Return original image on error with error message
+            if not skip_error:
+                raise
             return (image, error_message, "")
 
 
@@ -5594,6 +5826,7 @@ class Comfly_gpt_image_1_edit:
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "input_fidelity": (["low", "high"], {"default": "low"}),
                 "partial_images": ([0, 1, 2, 3], {"default": 0}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -5691,7 +5924,7 @@ class Comfly_gpt_image_1_edit:
               image1=None, image2=None, image3=None, image4=None, image5=None,
               image6=None, image7=None, image8=None, image9=None, image10=None,
               mask1=None, mask2=None, mask3=None, mask4=None, mask5=None,
-              mask6=None, mask7=None, mask8=None, mask9=None, mask10=None):
+              mask6=None, mask7=None, mask8=None, mask9=None, mask10=None, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -5719,6 +5952,8 @@ class Comfly_gpt_image_1_edit:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_gpt_image_1_edit] {error_message}")
             return (blank_tensor, error_message, self.format_conversation_history())
         
         image_count = len(provided_images)
@@ -5743,6 +5978,8 @@ class Comfly_gpt_image_1_edit:
             if not self.api_key:
                 error_message = "API key not found in Comflyapi.json"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1_edit] {error_message}")
                 return (original_image, error_message, self.format_conversation_history())
           
             pbar = comfy.utils.ProgressBar(100)
@@ -5865,10 +6102,14 @@ class Comfly_gpt_image_1_edit:
             except TimeoutError as e:
                 error_message = f"API timeout error: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (original_image, error_message, self.format_conversation_history())
             except Exception as e:
                 error_message = f"API request error: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (original_image, error_message, self.format_conversation_history())
 
             pbar.update_absolute(50)
@@ -5877,6 +6118,8 @@ class Comfly_gpt_image_1_edit:
             if "data" not in result or not result["data"]:
                 error_message = "No image data in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1_edit] {error_message}")
                 return (original_image, error_message, self.format_conversation_history())
 
             edited_images = []
@@ -5961,6 +6204,8 @@ class Comfly_gpt_image_1_edit:
             else:
                 error_message = "No edited images in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1_edit] {error_message}")
                 return (original_image, error_message, self.format_conversation_history())
             
         except Exception as e:
@@ -5968,6 +6213,8 @@ class Comfly_gpt_image_1_edit:
             import traceback
             print(traceback.format_exc())  
             print(error_message)
+            if not skip_error:
+                raise
             return (original_image, error_message, self.format_conversation_history())
         
 
@@ -5988,6 +6235,7 @@ class Comfly_gpt_image_1:
                 "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
                 "moderation": (["auto", "low"], {"default": "auto"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -6008,7 +6256,7 @@ class Comfly_gpt_image_1:
     
     def generate_image(self, prompt, model="gpt-image-1", n=1, quality="auto", 
                 size="auto", background="auto", output_format="png", 
-                moderation="auto", seed=0, api_key=""):
+                moderation="auto", seed=0, api_key="", skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -6022,6 +6270,8 @@ class Comfly_gpt_image_1:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1] {error_message}")
                 return (blank_tensor, error_message)
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
@@ -6051,6 +6301,8 @@ class Comfly_gpt_image_1:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1] {error_message}")
                 return (blank_tensor, error_message)
 
             result = response.json()
@@ -6096,6 +6348,8 @@ class Comfly_gpt_image_1:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1] {error_message}")
                 return (blank_tensor, response_info)
 
             if "usage" in result:
@@ -6126,6 +6380,8 @@ class Comfly_gpt_image_1:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_1] {error_message}")
                 return (blank_tensor, response_info)
                 
         except Exception as e:
@@ -6133,6 +6389,8 @@ class Comfly_gpt_image_1:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message)
 
 
@@ -6219,6 +6477,7 @@ class Comfly_gpt_image_2_official:
                 "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -6573,7 +6832,7 @@ class Comfly_gpt_image_2_official:
         output_format="png", output_compression=100, moderation="auto",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
         max_retries=5, initial_timeout=900, seed=0
-    ):
+    , skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -6586,6 +6845,8 @@ class Comfly_gpt_image_2_official:
         if not self.api_key:
             msg = "API key not found in Comflyapi.json"
             print(msg)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_gpt_image_2_official] {msg}")
             return (blank_t, "", msg)
 
         # 收集所有输入图像，展平为单帧列表（支持不同尺寸）
@@ -6621,6 +6882,8 @@ class Comfly_gpt_image_2_official:
                 ok, err_msg = self._validate_gpt_image2_size(size)
                 if not ok:
                     print(err_msg)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_gpt_image_2_official] {err_msg}")
                     return (blank_t, "", err_msg)
 
             if async_mode:
@@ -6670,6 +6933,8 @@ class Comfly_gpt_image_2_official:
             if "data" not in result or not result["data"]:
                 msg = f"No image data in response: {result}"
                 print(msg)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2_official] {msg}")
                 return (blank_t, "", msg)
 
             tensors = self._items_to_tensors(result, max_retries, initial_timeout)
@@ -6678,6 +6943,8 @@ class Comfly_gpt_image_2_official:
             if not tensors:
                 msg = "No images decoded from response"
                 print(msg)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2_official] {msg}")
                 return (blank_t, "", msg)
 
             combined = torch.cat(tensors, dim=0)
@@ -6701,6 +6968,8 @@ class Comfly_gpt_image_2_official:
             import traceback
             print(traceback.format_exc())
             print(error_message)
+            if not skip_error:
+                raise
             return (blank_t, "", error_message)            
 
 
@@ -6731,6 +7000,7 @@ class Comfly_gpt_image_2:
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "clear_chats": ("BOOLEAN", {"default": True}),
                 "image_download_timeout": ("INT", {"default": 600, "min": 60, "max": 1200, "step": 10}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -6836,7 +7106,7 @@ class Comfly_gpt_image_2:
     def process(self, prompt, model="gpt-image-2", quality="auto", size="auto",
                 background="auto", output_format="png", moderation="auto",
                 seed=0, clear_chats=True, image_download_timeout=600, api_key="",
-                image1=None, image2=None, image3=None, image4=None):
+                image1=None, image2=None, image3=None, image4=None, skip_error=False):
 
         if api_key.strip():
             self.api_key = api_key
@@ -6854,6 +7124,8 @@ class Comfly_gpt_image_2:
                 error_message = "API key not found in Comflyapi.json"
                 print(f"[Comfly_gpt_image_2] {error_message}")
                 blank_img = Image.new('RGB', (1024, 1024), color='white')
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2] {error_message}")
                 return (pil2tensor(blank_img), error_message, "", self.format_conversation_history())
 
             pbar = comfy.utils.ProgressBar(100)
@@ -6957,9 +7229,13 @@ class Comfly_gpt_image_2:
             all_images = [image1, image2, image3, image4]
             first_image = next((img for img in all_images if img is not None), None)
             if first_image is not None:
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2] {error_message}")
                 return (first_image, error_message, "", self.format_conversation_history())
             else:
                 blank_img = Image.new('RGB', (1024, 1024), color='white')
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2] {error_message}")
                 return (pil2tensor(blank_img), error_message, "", self.format_conversation_history())
 
 
@@ -6989,6 +7265,7 @@ class Comfly_gpt_image_2_S2A:
                 "task_id": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -7019,7 +7296,7 @@ class Comfly_gpt_image_2_S2A:
                        quality="auto", size="auto", background="auto",
                        output_format="png", moderation="auto", n=1,
                        task_id="", response_format="url", seed=0, api_key="",
-                       image1=None, image2=None, image3=None, image4=None):
+                       image1=None, image2=None, image3=None, image4=None, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -7031,6 +7308,8 @@ class Comfly_gpt_image_2_S2A:
             print(f"[Comfly_gpt_image_2_S2A] {error_message}")
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_gpt_image_2_S2A] {error_message}")
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
 
         try:
@@ -7132,6 +7411,8 @@ class Comfly_gpt_image_2_S2A:
                 print(f"[Comfly_gpt_image_2_S2A] {error_message}")
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
 
             result = response.json()
@@ -7199,6 +7480,8 @@ class Comfly_gpt_image_2_S2A:
                                 blank_image = Image.new('RGB', (1024, 1024), color='red')
                                 blank_tensor = pil2tensor(blank_image)
                                 pbar.update_absolute(100)
+                                if not skip_error:
+                                    raise RuntimeError(f"[Comfly_gpt_image_2_S2A] {error_msg}")
                                 return (blank_tensor, "", returned_task_id, json.dumps({"status": "failed", "task_id": returned_task_id, "message": error_msg}))
 
                         else:
@@ -7212,6 +7495,8 @@ class Comfly_gpt_image_2_S2A:
                 blank_image = Image.new('RGB', (512, 512), color='yellow')
                 blank_tensor = pil2tensor(blank_image)
                 pbar.update_absolute(100)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2_S2A] [Comfly_gpt_image_2_S2A] Task polling timed out")
                 return (blank_tensor, "", returned_task_id, json.dumps({"status": "timeout", "task_id": returned_task_id, "message": "Task polling timed out. Please query manually."}))
 
             elif "data" in result and result["data"]:
@@ -7224,6 +7509,8 @@ class Comfly_gpt_image_2_S2A:
                 print(f"[Comfly_gpt_image_2_S2A] {error_message}")
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gpt_image_2_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
 
         except Exception as e:
@@ -7233,6 +7520,8 @@ class Comfly_gpt_image_2_S2A:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
 
     def _process_image_data(self, actual_data, task_id, model, mode, prompt, quality, size, seed, pbar):
@@ -7521,6 +7810,7 @@ class ComflyChatGPTApi:
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
                 "image_download_timeout": ("INT", {"default": 600, "min": 300, "max": 1200, "step": 10}),
                 "clear_chats": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -7667,13 +7957,15 @@ class ComflyChatGPTApi:
 
     def process(self, prompt, model, clear_chats=True, files=None, image_url="", images=None, temperature=0.7, 
            max_tokens=4096, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0, seed=-1,
-           image_download_timeout=100, api_key=""):
+           image_download_timeout=100, api_key="", skip_error=False):
 
         if model.lower() == "gpt-image-1":
             error_message = "不支持此模型，请使用 gpt-4o-image，gpt-4o-image-vip，sora_image，sora_image-vip 这4个模型。"
             print(error_message)
 
             if images is not None:
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyChatGPTApi] {error_message}")
                 return (images, error_message, "", self.format_conversation_history())
             else:
                 blank_img = Image.new('RGB', (512, 512), color='white')
@@ -7696,6 +7988,8 @@ class ComflyChatGPTApi:
                 print(error_message)
                
                 blank_img = Image.new('RGB', (512, 512), color='white')
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyChatGPTApi] {error_message}")
                 return (pil2tensor(blank_img), error_message, "", self.format_conversation_history()) 
             
             pbar = comfy.utils.ProgressBar(100)
@@ -7839,6 +8133,8 @@ class ComflyChatGPTApi:
                 blank_img = Image.new('RGB', (512, 512), color='white')
                 blank_tensor = pil2tensor(blank_img)
                 pbar.update_absolute(100)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyChatGPTApi] 节点执行失败，请查看终端日志")
                 return (blank_tensor, technical_response, image_urls_string, chat_history)  
                 
         except Exception as e:
@@ -7846,10 +8142,14 @@ class ComflyChatGPTApi:
             print(error_message)
         
             if images is not None:
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyChatGPTApi] {error_message}")
                 return (images, error_message, "", self.format_conversation_history())  
             else:
                 blank_img = Image.new('RGB', (512, 512), color='white')
                 blank_tensor = pil2tensor(blank_img)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyChatGPTApi] {error_message}")
                 return (blank_tensor, error_message, "", self.format_conversation_history())
 
 class Comfly_sora2_openai:
@@ -7866,7 +8166,8 @@ class Comfly_sora2_openai:
                 "size": (["1280x720", "720x1280", "1792x1024", "1024x1792"], {"default": "1280x720"}),
                 "image": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "private": ("BOOLEAN", {"default": True})
+                "private": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -7895,7 +8196,7 @@ class Comfly_sora2_openai:
         pil_image.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
-    def process(self, prompt, model, apikey="", seconds="15", size="1280x720", image=None, seed=0, private=True):
+    def process(self, prompt, model, apikey="", seconds="15", size="1280x720", image=None, seed=0, private=True, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -7904,26 +8205,36 @@ class Comfly_sora2_openai:
             
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_openai] {error_response}")
             return ("", json.dumps(error_response), "", "0")
 
         if model == "sora-2":
             if seconds == "25":  
                 error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
             if size in ["1792x1024", "1024x1792"]:
                 error_message = "The sora-2 model does not support 1080P resolution. Please use sora-2-pro for 1080P videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
             
         if model == "sora-2-vip":
          if seconds in ["25", "15"]:  
                 error_message = "The sora-2-vip model does not support 15 or 25 second videos. Please use sora-2-pro for 15s/25s videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
          if size in ["1792x1024", "1024x1792"]:
                 error_message = "The sora-2-vip model does not support 1080P resolution. Please use sora-2-pro for 1080P videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
 
       
@@ -7966,6 +8277,8 @@ class Comfly_sora2_openai:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
                 
             result = response.json()
@@ -7973,6 +8286,8 @@ class Comfly_sora2_openai:
             if "id" not in result:
                 error_message = "No task ID in API response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
             
             task_id = result["id"]
@@ -8025,6 +8340,8 @@ class Comfly_sora2_openai:
                         fail_reason = status_data.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                         return ("", json.dumps({"status": "error", "message": error_message, "task_id": task_id}), "", actual_seed)
                         
                 except Exception as e:
@@ -8033,6 +8350,8 @@ class Comfly_sora2_openai:
             if not video_url:
                 error_message = f"Failed to get video URL after {max_attempts} attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_openai] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message, "task_id": task_id}), "", actual_seed)
             
             video_adapter = ComflyVideoAdapter(video_url)
@@ -8058,6 +8377,8 @@ class Comfly_sora2_openai:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
            
 
@@ -8078,6 +8399,7 @@ class Comfly_sora2_new:
             "optional": {
                 "reference_image": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -8275,15 +8597,19 @@ class Comfly_sora2_new:
             print(f"Error checking status: {str(e)}")
             return None
     
-    def process(self, prompt, model, orientation, size, duration, apikey, reference_image=None, seed=0):
+    def process(self, prompt, model, orientation, size, duration, apikey, reference_image=None, seed=0, skip_error=False):
         if not apikey.strip():
             error_message = "API key is required"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_new] {error_message}")
             return ("", "", json.dumps({"status": "error", "message": error_message}))
 
         is_valid, error_message = self.validate_parameters(model, size, duration)
         if not is_valid:
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_new] {error_message}")
             return ("", "", json.dumps({"status": "error", "message": error_message}))
         
         self.api_key = apikey.strip()
@@ -8303,6 +8629,8 @@ class Comfly_sora2_new:
             )
             
             if error or not task_id:
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_new] : error or ")
                 return ("", "", json.dumps({"status": "error", "message": error or "Failed to create task"}))
             
             pbar.update_absolute(30)
@@ -8347,6 +8675,8 @@ class Comfly_sora2_new:
                             error_message = f"Video completed but no URL returned after {max_completed_wait} additional attempts"
                             print(error_message)
                             print(f"Last status data: {json.dumps(status_data, ensure_ascii=False)}")
+                            if not skip_error:
+                                raise RuntimeError(f"[Comfly_sora2_new] {error_message}")
                             return ("", "", json.dumps({
                                 "status": "error", 
                                 "message": error_message,
@@ -8360,6 +8690,8 @@ class Comfly_sora2_new:
                     error_details = status_data.get("error", "No error details provided")
                     print(error_message)
                     print(f"Error details: {error_details}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_sora2_new] {error_message}")
                     return ("", "", json.dumps({
                         "status": "error", 
                         "message": error_message,
@@ -8373,6 +8705,8 @@ class Comfly_sora2_new:
             if not video_url:
                 error_message = f"Failed to get video URL after {attempts} attempts (max: {max_attempts})"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_new] {error_message}")
                 return ("", "", json.dumps({
                     "status": "error", 
                     "message": error_message,
@@ -8409,6 +8743,8 @@ class Comfly_sora2_new:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -8431,7 +8767,8 @@ class Comfly_sora2:
                 "image3": ("IMAGE",),
                 "image4": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "private": ("BOOLEAN", {"default": True})
+                "private": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -8462,7 +8799,7 @@ class Comfly_sora2:
         return f"data:image/png;base64,{base64_str}"
     
     def process(self, prompt, model, aspect_ratio="16:9", duration="10", hd=False, apikey="", 
-                image1=None, image2=None, image3=None, image4=None, seed=0, private=True):
+                image1=None, image2=None, image3=None, image4=None, seed=0, private=True, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -8471,31 +8808,43 @@ class Comfly_sora2:
             
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2] {error_response}")
             return ("", "", json.dumps(error_response))
 
         if duration == "25" and hd == True:
             error_message = "25s and hd parameters cannot be used together. Please choose only one of them."
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2] {error_message}")
             return ("", "", json.dumps({"status": "error", "message": error_message}))
             
         if model == "sora-2":
             if duration == "25":  
                 error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
             if hd:
                 error_message = "The sora-2 model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
         
         if model == "sora-2-vip":
             if duration in ["25", "15"]:  
                 error_message = "The sora-2-vip model does not support 15 or 25 second videos. Please use sora-2-pro for 15s/25s videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "0")        
             if hd:
                 error_message = "The sora-2-vip model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
 
         pbar = comfy.utils.ProgressBar(100)
@@ -8515,6 +8864,8 @@ class Comfly_sora2:
                 if not images:
                     error_message = "Failed to process any of the input images"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_sora2] {error_message}")
                     return ("", "", json.dumps({"status": "error", "message": error_message}))
                 
                 payload = {
@@ -8558,6 +8909,8 @@ class Comfly_sora2:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -8565,6 +8918,8 @@ class Comfly_sora2:
             if "task_id" not in result:
                 error_message = "No task ID in API response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message}))
             
             task_id = result["task_id"]
@@ -8613,6 +8968,8 @@ class Comfly_sora2:
                         fail_reason = status_data.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_sora2] {error_message}")
                         return ("", "", json.dumps({"status": "error", "message": error_message, "task_id": task_id}))
                         
                 except Exception as e:
@@ -8621,6 +8978,8 @@ class Comfly_sora2:
             if not video_url:
                 error_message = f"Failed to get video URL after {max_attempts} attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2] {error_message}")
                 return ("", "", json.dumps({"status": "error", "message": error_message, "task_id": task_id}))
             
             video_adapter = ComflyVideoAdapter(video_url)
@@ -8646,6 +9005,8 @@ class Comfly_sora2:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -8663,7 +9024,8 @@ class Comfly_sora2_chat:
                 "image": ("IMAGE",),
                 "hd": ("BOOLEAN", {"default": False}),
                 "apikey": ("STRING", {"default": ""}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -8694,7 +9056,7 @@ class Comfly_sora2_chat:
         return f"data:image/png;base64,{base64_str}"
     
     def generate_video(self, prompt, model="sora-2", duration="15", orientation="portrait", 
-                      image=None, hd=False, apikey="", seed=0):
+                      image=None, hd=False, apikey="", seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -8703,21 +9065,29 @@ class Comfly_sora2_chat:
             
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_chat] {error_response}")
             return ("", "", "", json.dumps(error_response))
 
         if duration == "25" and hd:
             error_message = "25s and hd parameters cannot be used together. Please choose only one of them."
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
             return ("", "", "", json.dumps({"status": "error", "message": error_message}))
  
         if model == "sora-2":
             if duration == "25":
                 error_message = "The sora-2 model does not support 25 second videos. Please use sora-2-pro for 25 second videos."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
                 return ("", "", "", json.dumps({"status": "error", "message": error_message}))
             if hd:
                 error_message = "The sora-2 model does not support HD mode. Please use sora-2-pro for HD videos or disable HD."
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
                 return ("", "", "", json.dumps({"status": "error", "message": error_message}))
       
         pbar = comfy.utils.ProgressBar(100)
@@ -8766,6 +9136,8 @@ class Comfly_sora2_chat:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
                 return ("", "", "", json.dumps({"status": "error", "message": error_message}))
 
             full_response = ""
@@ -8807,6 +9179,8 @@ class Comfly_sora2_chat:
             if not task_id:
                 error_message = "Failed to obtain task ID from the response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
                 return ("", "", "", json.dumps({"status": "error", "message": error_message, "response": full_response}))
             
             pbar.update_absolute(40)
@@ -8853,6 +9227,8 @@ class Comfly_sora2_chat:
             if not video_url:
                 error_message = f"Failed to get video URL after {max_attempts} attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_chat] {error_message}")
                 return ("", "", "", json.dumps({"status": "error", "message": error_message, "task_id": task_id}))
 
             video_adapter = ComflyVideoAdapter(video_url)
@@ -8879,6 +9255,8 @@ class Comfly_sora2_chat:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -8895,6 +9273,7 @@ class Comfly_sora2_character:
                 "url": ("STRING", {"default": "", "multiline": False}),
                 "from_task": ("STRING", {"default": "", "multiline": False}),
                 "api_key": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -8913,7 +9292,7 @@ class Comfly_sora2_character:
             "Authorization": f"Bearer {self.api_key}"
         }
     
-    def create_character(self, timestamps="1,3", seed=0, url="", from_task="", api_key=""):
+    def create_character(self, timestamps="1,3", seed=0, url="", from_task="", api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -8922,20 +9301,28 @@ class Comfly_sora2_character:
             
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_character] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
 
         if url.strip() and from_task.strip():
             error_response = {"status": "error", "message": "Parameters 'url' and 'from_task' are mutually exclusive. Please provide only one."}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_character] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
 
         if not url.strip() and not from_task.strip():
             error_response = {"status": "error", "message": "Either 'url' or 'from_task' parameter is required. Please provide one."}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_sora2_character] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
             
         try:
             if not timestamps or "," not in timestamps:
                 error_message = "Invalid timestamps format. Expected format: 'start,end' (e.g. '1,3')"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_character] {error_message}")
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
             try:
@@ -8945,16 +9332,22 @@ class Comfly_sora2_character:
                 if duration < 1:
                     error_message = "Duration must be at least 1 second (minimum difference between start and end)"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_sora2_character] {error_message}")
                     return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
                     
                 if duration > 3:
                     error_message = "Duration must be at most 3 seconds (maximum difference between start and end)"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_sora2_character] {error_message}")
                     return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
                     
             except ValueError:
                 error_message = "Invalid timestamps format. Use numbers separated by comma (e.g. '1.5,3.2')"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
 
             pbar = comfy.utils.ProgressBar(100)
@@ -8987,6 +9380,8 @@ class Comfly_sora2_character:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_character] {error_message}")
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -9001,6 +9396,8 @@ class Comfly_sora2_character:
             if not character_id:
                 error_message = "No character ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_sora2_character] {error_message}")
                 return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(100)
@@ -9035,6 +9432,8 @@ class Comfly_sora2_character:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", "", "", json.dumps({"status": "error", "message": error_message}))
 
 ############################# Flux ###########################
@@ -9066,6 +9465,7 @@ class Comfly_Flux_2_Max:
                 "height": ("INT", {"default": 1024, "min": 64, "max": 6000, "step": 8}),
                 "safety_tolerance": ("INT", {"default": 2, "min": 0, "max": 5}),
                 "output_format": (["jpeg", "png"], {"default": "jpeg"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -9098,7 +9498,7 @@ class Comfly_Flux_2_Max:
                       input_image_3=None, input_image_4=None, input_image_5=None,
                       input_image_6=None, input_image_7=None, input_image_8=None,
                       seed=-1, width=1024, height=1024, safety_tolerance=2, 
-                      output_format="jpeg"):
+                      output_format="jpeg", skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -9110,6 +9510,8 @@ class Comfly_Flux_2_Max:
             
         if not self.api_key:
             error_response = {"status": "failed", "message": "API key not found"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Flux_2_Max] {error_response}")
             return (default_tensor, "", json.dumps(error_response))
             
         pbar = comfy.utils.ProgressBar(100)
@@ -9161,6 +9563,8 @@ class Comfly_Flux_2_Max:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Max] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -9168,6 +9572,8 @@ class Comfly_Flux_2_Max:
             if "id" not in result:
                 error_message = "No task ID in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Max] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             task_id = result["id"]
@@ -9208,6 +9614,8 @@ class Comfly_Flux_2_Max:
                     elif status in ["Failed", "Error"]:
                         error_message = f"Task failed: {result_data.get('details', 'Unknown error')}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Flux_2_Max] {error_message}")
                         return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                         
                 except Exception as e:
@@ -9216,6 +9624,8 @@ class Comfly_Flux_2_Max:
             if not image_url:
                 error_message = "Failed to retrieve generated image URL after multiple attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Max] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
             
             pbar.update_absolute(90)
@@ -9248,6 +9658,8 @@ class Comfly_Flux_2_Max:
             except Exception as e:
                 error_message = f"Error downloading generated image: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (default_tensor, image_url, json.dumps({"status": "partial_success", "message": error_message, "image_url": image_url}))
             
         except Exception as e:
@@ -9255,6 +9667,8 @@ class Comfly_Flux_2_Max:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
 
 
@@ -9276,7 +9690,8 @@ class Comfly_Flux_Kontext:
                 "guidance": ("FLOAT", {"default": 3.5, "min": 1.0, "max": 20.0, "step": 0.5}),
                 "num_of_images": ("INT", {"default": 1, "min": 1, "max": 4}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
-                "clear_image": ("BOOLEAN", {"default": True})
+                "clear_image": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -9327,7 +9742,7 @@ class Comfly_Flux_Kontext:
     
     def generate_image(self, prompt, input_image=None, model="flux-kontext-pro", 
                   apikey="", aspect_ratio="Default", guidance=3.5, num_of_images=1,
-                  seed=-1, clear_image=True):
+                  seed=-1, clear_image=True, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -9341,6 +9756,8 @@ class Comfly_Flux_Kontext:
             if input_image is None:
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext] {error_message}")
                 return (blank_tensor, "")
             return (input_image, "")
         
@@ -9374,6 +9791,8 @@ class Comfly_Flux_Kontext:
                     if input_image is None:
                         blank_image = Image.new('RGB', (1024, 1024), color='white')
                         blank_tensor = pil2tensor(blank_image)
+                        if not skip_error:
+                            raise RuntimeError("[Comfly_Flux_Kontext] Failed to upload any images")
                         return (blank_tensor, "")
                     return (input_image, "")
  
@@ -9410,6 +9829,8 @@ class Comfly_Flux_Kontext:
                 if input_image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext] {error_message}")
                     return (blank_tensor, "")
                 return (input_image, "")
                 
@@ -9421,6 +9842,8 @@ class Comfly_Flux_Kontext:
                 if input_image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext] {error_message}")
                     return (blank_tensor, "")
                 return (input_image, "")
 
@@ -9464,6 +9887,8 @@ class Comfly_Flux_Kontext:
                 if input_image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext] {error_message}")
                     return (blank_tensor, "")
                 return (input_image, "")
             
@@ -9473,7 +9898,11 @@ class Comfly_Flux_Kontext:
             if input_image is None:
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext] {error_message}")
                 return (blank_tensor, "")
+            if not skip_error:
+                raise
             return (input_image, "")
          
         
@@ -9491,7 +9920,8 @@ class Comfly_Flux_Kontext_Edit:
                 "aspect_ratio": (["21:9", "16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", "9:21"], 
                          {"default": "1:1"}),
                 "num_of_images": ("INT", {"default": 1, "min": 1, "max": 4}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647})
+                "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -9511,7 +9941,7 @@ class Comfly_Flux_Kontext_Edit:
     
     def generate_image(self, prompt, image=None, model="flux-kontext-pro", 
                   apikey="", aspect_ratio="1:1", num_of_images=1,
-                  seed=-1):
+                  seed=-1, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -9525,6 +9955,8 @@ class Comfly_Flux_Kontext_Edit:
             if image is None:
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext_Edit] {error_message}")
                 return (blank_tensor, "")
             return (image, "")
         
@@ -9596,6 +10028,8 @@ class Comfly_Flux_Kontext_Edit:
                 if image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext_Edit] {error_message}")
                     return (blank_tensor, "")
                 return (image, "")
                 
@@ -9607,6 +10041,8 @@ class Comfly_Flux_Kontext_Edit:
                 if image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext_Edit] {error_message}")
                     return (blank_tensor, "")
                 return (image, "")
 
@@ -9646,6 +10082,8 @@ class Comfly_Flux_Kontext_Edit:
                 if image is None:
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Flux_Kontext_Edit] {error_message}")
                     return (blank_tensor, "")
                 return (image, "")
             
@@ -9655,7 +10093,11 @@ class Comfly_Flux_Kontext_Edit:
             if image is None:
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext_Edit] {error_message}")
                 return (blank_tensor, "")
+            if not skip_error:
+                raise
             return (image, "")
 
 
@@ -9676,7 +10118,8 @@ class Comfly_Flux_Kontext_bfl:
                          {"default": "1:1"}),
                 "output_format": (["png", "jpeg"], {"default": "png"}),
                 "prompt_upsampling": ("BOOLEAN", {"default": False}),
-                "safety_tolerance": ("INT", {"default": 2, "min": 0, "max": 6})
+                "safety_tolerance": ("INT", {"default": 2, "min": 0, "max": 6}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -9708,7 +10151,7 @@ class Comfly_Flux_Kontext_bfl:
     
     def generate_image(self, prompt, model="flux-kontext-pro", input_image=None, 
                       seed=-1, aspect_ratio="1:1", output_format="png", 
-                      prompt_upsampling=False, safety_tolerance=2, api_key=""):
+                      prompt_upsampling=False, safety_tolerance=2, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -9723,6 +10166,8 @@ class Comfly_Flux_Kontext_bfl:
             
         if not self.api_key:
             error_response = {"status": "failed", "message": "API key not found"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Flux_Kontext_bfl] {error_response}")
             return (default_tensor, "", json.dumps(error_response))
             
         pbar = comfy.utils.ProgressBar(100)
@@ -9761,6 +10206,8 @@ class Comfly_Flux_Kontext_bfl:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext_bfl] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -9768,6 +10215,8 @@ class Comfly_Flux_Kontext_bfl:
             if "id" not in result or "polling_url" not in result:
                 error_message = "Invalid response format from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext_bfl] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             task_id = result["id"]
@@ -9810,6 +10259,8 @@ class Comfly_Flux_Kontext_bfl:
             if not image_url:
                 error_message = "Failed to retrieve generated image URL after multiple attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_Kontext_bfl] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
 
             pbar.update_absolute(90)
@@ -9837,6 +10288,8 @@ class Comfly_Flux_Kontext_bfl:
             except Exception as e:
                 error_message = f"Error downloading generated image: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (default_tensor, image_url, json.dumps({"status": "partial_success", "message": error_message, "image_url": image_url}))
             
         except Exception as e:
@@ -9844,6 +10297,8 @@ class Comfly_Flux_Kontext_bfl:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
 
 class Comfly_Flux_2_Pro:
@@ -9872,6 +10327,7 @@ class Comfly_Flux_2_Pro:
                 "height": ("INT", {"default": 1024, "min": 64, "max": 6000, "step": 8}),
                 "safety_tolerance": ("INT", {"default": 2, "min": 0, "max": 5}),
                 "output_format": (["jpeg", "png"], {"default": "png"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -9904,7 +10360,7 @@ class Comfly_Flux_2_Pro:
                       input_image_3=None, input_image_4=None, input_image_5=None,
                       input_image_6=None, input_image_7=None, input_image_8=None,
                       seed=-1, width=1024, height=1024, safety_tolerance=2, 
-                      output_format="png"):
+                      output_format="png", skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -9917,6 +10373,8 @@ class Comfly_Flux_2_Pro:
             
         if not self.api_key:
             error_response = {"status": "failed", "message": "API key not found"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Flux_2_Pro] {error_response}")
             return (default_tensor, "", json.dumps(error_response))
             
         pbar = comfy.utils.ProgressBar(100)
@@ -9968,6 +10426,8 @@ class Comfly_Flux_2_Pro:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Pro] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -9975,6 +10435,8 @@ class Comfly_Flux_2_Pro:
             if "id" not in result:
                 error_message = "No task ID in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Pro] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             task_id = result["id"]
@@ -10013,6 +10475,8 @@ class Comfly_Flux_2_Pro:
                     elif status in ["Failed", "Error"]:
                         error_message = f"Task failed: {result_data.get('details', 'Unknown error')}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Flux_2_Pro] {error_message}")
                         return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                         
                 except Exception as e:
@@ -10021,6 +10485,8 @@ class Comfly_Flux_2_Pro:
             if not image_url:
                 error_message = "Failed to retrieve generated image URL after multiple attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Pro] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
             
             pbar.update_absolute(90)
@@ -10049,6 +10515,8 @@ class Comfly_Flux_2_Pro:
             except Exception as e:
                 error_message = f"Error downloading generated image: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (default_tensor, image_url, json.dumps({"status": "partial_success", "message": error_message, "image_url": image_url}))
             
         except Exception as e:
@@ -10056,6 +10524,8 @@ class Comfly_Flux_2_Pro:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
 
 
@@ -10089,6 +10559,7 @@ class Comfly_Flux_2_Flex:
                 "steps": ("INT", {"default": 50, "min": 1, "max": 50}),
                 "safety_tolerance": ("INT", {"default": 2, "min": 0, "max": 5}),
                 "output_format": (["jpeg", "png"], {"default": "png"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -10121,7 +10592,7 @@ class Comfly_Flux_2_Flex:
                       input_image_3=None, input_image_4=None, input_image_5=None,
                       input_image_6=None, input_image_7=None, input_image_8=None,
                       prompt_upsampling=True, seed=-1, width=1024, height=1024,
-                      guidance=5.0, steps=50, safety_tolerance=2, output_format="png"):
+                      guidance=5.0, steps=50, safety_tolerance=2, output_format="png", skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -10134,6 +10605,8 @@ class Comfly_Flux_2_Flex:
             
         if not self.api_key:
             error_response = {"status": "failed", "message": "API key not found"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Flux_2_Flex] {error_response}")
             return (default_tensor, "", json.dumps(error_response))
             
         pbar = comfy.utils.ProgressBar(100)
@@ -10188,6 +10661,8 @@ class Comfly_Flux_2_Flex:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Flex] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -10195,6 +10670,8 @@ class Comfly_Flux_2_Flex:
             if "id" not in result:
                 error_message = "No task ID in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Flex] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                 
             task_id = result["id"]
@@ -10233,6 +10710,8 @@ class Comfly_Flux_2_Flex:
                     elif status in ["Failed", "Error"]:
                         error_message = f"Task failed: {result_data.get('details', 'Unknown error')}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Flux_2_Flex] {error_message}")
                         return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
                         
                 except Exception as e:
@@ -10241,6 +10720,8 @@ class Comfly_Flux_2_Flex:
             if not image_url:
                 error_message = "Failed to retrieve generated image URL after multiple attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Flux_2_Flex] {error_message}")
                 return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
             
             pbar.update_absolute(90)
@@ -10272,6 +10753,8 @@ class Comfly_Flux_2_Flex:
             except Exception as e:
                 error_message = f"Error downloading generated image: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (default_tensor, image_url, json.dumps({"status": "partial_success", "message": error_message, "image_url": image_url}))
             
         except Exception as e:
@@ -10279,6 +10762,8 @@ class Comfly_Flux_2_Flex:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (default_tensor, "", json.dumps({"status": "failed", "message": error_message}))
 
 
@@ -10303,6 +10788,7 @@ class ComflyGeminiTextOnly:
                 "top_p": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "max_tokens": ("INT", {"default": 4096, "min": 1, "max": 8192}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -10335,7 +10821,7 @@ class ComflyGeminiTextOnly:
         img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-    def generate_text(self, prompt, model, temperature, top_p, max_tokens, seed, image=None, video=None, api_key=""):
+    def generate_text(self, prompt, model, temperature, top_p, max_tokens, seed, image=None, video=None, api_key="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -10388,6 +10874,8 @@ class ComflyGeminiTextOnly:
             return (text,)
 
         except Exception as e:
+            if not skip_error:
+                raise
             return (f"Error: {str(e)}",)            
 
 
@@ -10408,6 +10896,7 @@ class Comfly_Googel_Veo3:
                 "image3": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "enable_upsample": ("BOOLEAN", {"default": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -10437,13 +10926,15 @@ class Comfly_Googel_Veo3:
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
     def generate_video(self, prompt, model="veo3", enhance_prompt=False, aspect_ratio="16:9", apikey="", 
-                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False):
+                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False, skip_error=False):
         
         if apikey.strip():
             self.api_key = apikey
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Googel_Veo3] {error_response}")
             return ("", "", json.dumps(error_response))
             
         try:
@@ -10497,6 +10988,8 @@ class Comfly_Googel_Veo3:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
                 
             result = response.json()
@@ -10505,6 +10998,8 @@ class Comfly_Googel_Veo3:
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
             
             print(f"[Comfly_Googel_Veo3] Task submitted successfully. Task ID: {task_id}")
@@ -10556,6 +11051,8 @@ class Comfly_Googel_Veo3:
                         fail_reason = status_result.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(f"[Comfly_Googel_Veo3] {error_message}")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Googel_Veo3] {error_message}")
                         return ("", "", json.dumps({"code": "error", "message": error_message}))
                                            
                 except Exception as e:
@@ -10564,6 +11061,8 @@ class Comfly_Googel_Veo3:
             if not video_url:
                 error_message = "Failed to retrieve video URL after multiple attempts"
                 print(f"[Comfly_Googel_Veo3] {error_message}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
 
             pbar.update_absolute(95)
@@ -10588,6 +11087,8 @@ class Comfly_Googel_Veo3:
         except Exception as e:
             error_message = f"Error generating video: {str(e)}"
             print(f"[Comfly_Googel_Veo3] {error_message}")
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"code": "error", "message": error_message}))
 
 
@@ -10608,6 +11109,7 @@ class Comfly_Googel_Veo3_Lite:
                 "image3": ("IMAGE",),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "enable_upsample": ("BOOLEAN", {"default": False}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -10637,13 +11139,15 @@ class Comfly_Googel_Veo3_Lite:
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     
     def generate_video(self, prompt, model="veo3.1-lite", enhance_prompt=False, aspect_ratio="16:9", apikey="", 
-                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False):
+                      image1=None, image2=None, image3=None, seed=0, enable_upsample=False, skip_error=False):
         
         if apikey.strip():
             self.api_key = apikey
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_response}")
             return ("", "", json.dumps(error_response))
             
         try:
@@ -10695,6 +11199,8 @@ class Comfly_Googel_Veo3_Lite:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
                 
             result = response.json()
@@ -10703,6 +11209,8 @@ class Comfly_Googel_Veo3_Lite:
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
             
             print(f"[Comfly_Googel_Veo3_Lite] Task submitted successfully. Task ID: {task_id}")
@@ -10754,6 +11262,8 @@ class Comfly_Googel_Veo3_Lite:
                         fail_reason = status_result.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_message}")
                         return ("", "", json.dumps({"code": "error", "message": error_message}))
                                            
                 except Exception as e:
@@ -10762,6 +11272,8 @@ class Comfly_Googel_Veo3_Lite:
             if not video_url:
                 error_message = "Failed to retrieve video URL after multiple attempts"
                 print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}))
 
             pbar.update_absolute(95)
@@ -10786,6 +11298,8 @@ class Comfly_Googel_Veo3_Lite:
         except Exception as e:
             error_message = f"Error generating video: {str(e)}"
             print(f"[Comfly_Googel_Veo3_Lite] {error_message}")
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"code": "error", "message": error_message}))
 
 class Comfly_nano_banana:
@@ -10805,7 +11319,8 @@ class Comfly_nano_banana:
                 "top_p": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "apikey": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768})
+                "max_tokens": ("INT", {"default": 32768, "min": 1, "max": 32768}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -10876,7 +11391,7 @@ class Comfly_nano_banana:
 
     def process(self, text, model="gemini-2.5-flash-image-preview", 
                 image1=None, image2=None, image3=None, image4=None,
-                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768):
+                temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -10945,6 +11460,8 @@ class Comfly_nano_banana:
             except Exception as e:
                 error_message = f"API Error: {str(e)}"
                 print(error_message)
+                if not skip_error:
+                    raise
                 return (default_image, error_message, "")
 
             base64_pattern = r'data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)'
@@ -10985,14 +11502,20 @@ class Comfly_nano_banana:
                     return (generated_tensor, response_text, image_url)
                 except Exception as e:
                     print(f"Error downloading image: {str(e)}")
+                    if not skip_error:
+                        raise
                     return (default_image, f"{response_text}\n\nError downloading image: {str(e)}", image_url)
             else:
                 pbar.update_absolute(100)
+                if not skip_error:
+                    raise RuntimeError("[Comfly_nano_banana] Error downloading image (see terminal log for details)")
                 return (default_image, response_text, "")
                 
         except Exception as e:
             error_message = f"Error processing request: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return (default_image, error_message, "")
 
 
@@ -11012,7 +11535,8 @@ class Comfly_nano_banana_fal:
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
                 "image4": ("IMAGE",),
-                "apikey": ("STRING", {"default": ""})
+                "apikey": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -11077,7 +11601,7 @@ class Comfly_nano_banana_fal:
             return None
 
     def process(self, prompt, model, num_images=1, seed=0, image_way="image",
-                image1=None, image2=None, image3=None, image4=None, apikey=""):
+                image1=None, image2=None, image3=None, image4=None, apikey="", skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11174,6 +11698,8 @@ class Comfly_nano_banana_fal:
                 )
 
             if response.status_code != 200:
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana_fal] API Error: {response.status_code} - {response.text}")
                 return (default_image, f"API Error: {response.status_code} - {response.text}")
                 
             result = response.json()
@@ -11223,6 +11749,8 @@ class Comfly_nano_banana_fal:
                     time.sleep(1)
 
             if result_data is None:
+                if not skip_error:
+                    raise RuntimeError("[Comfly_nano_banana_fal] Error fetching result (see terminal log for details)")
                 return (default_image, "Failed to retrieve results after multiple attempts")
 
             if "images" not in result_data or not result_data["images"]:
@@ -11250,6 +11778,8 @@ class Comfly_nano_banana_fal:
                 pbar.update_absolute(100)
                 return (combined_tensor, f"Successfully generated {len(generated_images)} images using {model}")
             else:
+                if not skip_error:
+                    raise RuntimeError("[Comfly_nano_banana_fal] Error downloading image (see terminal log for details)")
                 return (default_image, "Failed to process any images from the API response")
                 
         except Exception as e:
@@ -11257,6 +11787,8 @@ class Comfly_nano_banana_fal:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (default_image, error_message)
 
 
@@ -11288,7 +11820,8 @@ class Comfly_nano_banana2_edit:
                 "image14": ("IMAGE",),
                 "apikey": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -11320,7 +11853,7 @@ class Comfly_nano_banana2_edit:
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
-                      apikey="", response_format="url", seed=0):
+                      apikey="", response_format="url", seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11332,6 +11865,8 @@ class Comfly_nano_banana2_edit:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
             return (blank_tensor, error_message, "")
             
         try:
@@ -11414,6 +11949,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             result = response.json()
@@ -11423,6 +11960,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
             
             generated_tensors = []
@@ -11473,6 +12012,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
             
         except Exception as e:
@@ -11482,6 +12023,8 @@ class Comfly_nano_banana2_edit:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
 
 
@@ -11504,7 +12047,8 @@ class Comfly_nano_banana_edit:
                 "image4": ("IMAGE",),
                 "apikey": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -11534,7 +12078,7 @@ class Comfly_nano_banana_edit:
     
     def generate_image(self, prompt, mode="text2img", model="nano-banana", aspect_ratio="1:1", 
                       image1=None, image2=None, image3=None, image4=None,
-                      apikey="", response_format="url", seed=0):  
+                      apikey="", response_format="url", seed=0, skip_error=False):  
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11546,6 +12090,8 @@ class Comfly_nano_banana_edit:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_nano_banana_edit] {error_message}")
             return (blank_tensor, error_message)
             
         try:
@@ -11615,6 +12161,8 @@ class Comfly_nano_banana_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana_edit] {error_message}")
                 return (blank_tensor, error_message)
                 
             result = response.json()
@@ -11624,6 +12172,8 @@ class Comfly_nano_banana_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana_edit] {error_message}")
                 return (blank_tensor, error_message)
             
             generated_tensors = []
@@ -11664,6 +12214,8 @@ class Comfly_nano_banana_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana_edit] {error_message}")
                 return (blank_tensor, error_message)
             
         except Exception as e:
@@ -11671,6 +12223,8 @@ class Comfly_nano_banana_edit:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message)
 
 
@@ -11704,7 +12258,8 @@ class Comfly_nano_banana2_edit:
                 "image14": ("IMAGE",),
                 "apikey": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -11736,7 +12291,7 @@ class Comfly_nano_banana2_edit:
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
-                      apikey="", response_format="url", seed=0):
+                      apikey="", response_format="url", seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -11748,6 +12303,8 @@ class Comfly_nano_banana2_edit:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
             return (blank_tensor, error_message, "")
             
         try:
@@ -11830,6 +12387,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             result = response.json()
@@ -11839,6 +12398,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
             
             generated_tensors = []
@@ -11889,6 +12450,8 @@ class Comfly_nano_banana2_edit:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
                 return (blank_tensor, error_message, "")
             
         except Exception as e:
@@ -11898,6 +12461,8 @@ class Comfly_nano_banana2_edit:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
 
 
@@ -11934,6 +12499,7 @@ class Comfly_qwen_image:
                 "enable_safety_checker": ("BOOLEAN", {"default": True}),
                 "negative_prompt": ("STRING", {"default": "", "multiline": True}),
                 "output_format": (["jpeg", "png"], {"default": "png"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -11954,7 +12520,7 @@ class Comfly_qwen_image:
  
     def generate_image(self, prompt, size, Custom_size, model, num_images=1,
                        api_key="", num_inference_steps=30, seed=0, guidance_scale=2.5, 
-                       enable_safety_checker=True, negative_prompt="", output_format="png"):
+                       enable_safety_checker=True, negative_prompt="", output_format="png", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -11967,6 +12533,8 @@ class Comfly_qwen_image:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             pbar = comfy.utils.ProgressBar(100)
@@ -11979,6 +12547,8 @@ class Comfly_qwen_image:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, error_message, "")
 
             payload = {
@@ -12022,6 +12592,8 @@ class Comfly_qwen_image:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, error_message, "")
                 
             result = response.json()
@@ -12063,6 +12635,8 @@ class Comfly_qwen_image:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, response_info, "")
                 
             if generated_images:
@@ -12076,6 +12650,8 @@ class Comfly_qwen_image:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, response_info, "")
                 
         except Exception as e:
@@ -12083,6 +12659,8 @@ class Comfly_qwen_image:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, error_message, "")
 
 
@@ -12112,6 +12690,7 @@ class Comfly_qwen_image_edit:
                 "output_format": (["jpeg", "png"], {"default": "png"}),
                 "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
                 "acceleration": (["none", "regular", "high"], {"default": "none"}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -12133,7 +12712,7 @@ class Comfly_qwen_image_edit:
     def edit_image(self, prompt, image, size, Custom_size, model,
                   apikey="", num_inference_steps=30, seed=0, guidance_scale=4.0, 
                   enable_safety_checker=True, negative_prompt="", output_format="png",
-                  num_images=1, acceleration="none"):
+                  num_images=1, acceleration="none", skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -12144,6 +12723,8 @@ class Comfly_qwen_image_edit:
             if not self.api_key:
                 error_message = "API key not found in Comflyapi.json"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, error_message, "")
                 
             pbar = comfy.utils.ProgressBar(100)
@@ -12154,6 +12735,8 @@ class Comfly_qwen_image_edit:
             if size == "Custom" and (Custom_size == "Enter custom size (e.g. 1280x720)" or "x" not in Custom_size):
                 error_message = "Please enter a valid custom size in the format 'widthxheight' (e.g. 1280x720)"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, error_message, "")
 
             pil_image = tensor2pil(image)[0]
@@ -12211,6 +12794,8 @@ class Comfly_qwen_image_edit:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, error_message, "")
                 
             result = response.json()
@@ -12251,6 +12836,8 @@ class Comfly_qwen_image_edit:
                 error_message = "No edited images in response"
                 print(error_message)
                 response_info += f"Error: {error_message}\n"
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, response_info, "")
                 
             if edited_images:
@@ -12262,11 +12849,15 @@ class Comfly_qwen_image_edit:
                 error_message = "No images were successfully processed"
                 print(error_message)
                 response_info += f"Error: {error_message}\n"
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, response_info, "")
                 
         except Exception as e:
             error_message = f"Error in image editing: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return (image, error_message, "")
 
 
@@ -12291,6 +12882,7 @@ class Comfly_Z_image_turbo:
                 "num_inference_steps": ("INT", {"default": 8, "min": 1, "max": 50, "step": 1}),
                 "output_quality": ("INT", {"default": 80, "min": 0, "max": 100, "step": 1}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -12311,7 +12903,7 @@ class Comfly_Z_image_turbo:
     
     def generate_image(self, prompt, model="z-image-turbo", size="1024x1024", output_format="jpg",
                       custom_size="1024x1024", apikey="", guidance_scale=0.0, num_inference_steps=8,
-                      output_quality=80, seed=0):
+                      output_quality=80, seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -12323,6 +12915,8 @@ class Comfly_Z_image_turbo:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
             return (blank_tensor, "", error_message)
             
         try:
@@ -12337,6 +12931,8 @@ class Comfly_Z_image_turbo:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                     return (blank_tensor, "", error_message)
                 
                 try:
@@ -12346,12 +12942,16 @@ class Comfly_Z_image_turbo:
                         print(error_message)
                         blank_image = Image.new('RGB', (1024, 1024), color='white')
                         blank_tensor = pil2tensor(blank_image)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                         return (blank_tensor, "", error_message)
                 except ValueError:
                     error_message = "Invalid custom size format. Use 'widthxheight' (e.g. 1280x720)"
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise
                     return (blank_tensor, "", error_message)
 
             try:
@@ -12388,6 +12988,8 @@ class Comfly_Z_image_turbo:
                 print(error_message)
                 blank_image = Image.new('RGB', (width, height), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                 return (blank_tensor, "", error_message)
                 
             result = response.json()
@@ -12429,6 +13031,8 @@ class Comfly_Z_image_turbo:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (width, height), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                 return (blank_tensor, "", response_info)
             
             pbar.update_absolute(90)
@@ -12443,6 +13047,8 @@ class Comfly_Z_image_turbo:
                 response_info += f"Error: {error_message}\n"
                 blank_image = Image.new('RGB', (width, height), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                 return (blank_tensor, "", response_info)
                 
         except Exception as e:
@@ -12452,6 +13058,8 @@ class Comfly_Z_image_turbo:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, "", error_message)
 
 
@@ -12476,6 +13084,7 @@ class Comfly_MiniMax_video:
                 "last_frame_image": ("IMAGE",),
                 "subject_reference": ("IMAGE",),  
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -12508,7 +13117,7 @@ class Comfly_MiniMax_video:
     
     def generate_video(self, prompt, model="MiniMax-Hailuo-02", duration="6", resolution="768P", 
                prompt_optimizer=True, fast_pretreatment=False, first_frame_image=None, last_frame_image=None,
-               subject_reference=None, api_key="", seed=0):
+               subject_reference=None, api_key="", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -12517,6 +13126,8 @@ class Comfly_MiniMax_video:
             
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_MiniMax_video] {error_response}")
             return (None, "", json.dumps(error_response))
             
         try:
@@ -12581,6 +13192,8 @@ class Comfly_MiniMax_video:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_MiniMax_video] {error_message}")
                 return (None, "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -12588,12 +13201,16 @@ class Comfly_MiniMax_video:
             if "base_resp" not in result or result["base_resp"]["status_code"] != 0:
                 error_message = f"API returned error: {result.get('base_resp', {}).get('status_msg', 'Unknown error')}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_MiniMax_video] {error_message}")
                 return (None, "", json.dumps({"status": "error", "message": error_message}))
                 
             task_id = result.get("task_id")
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_MiniMax_video] {error_message}")
                 return (None, "", json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(40)
@@ -12654,6 +13271,8 @@ class Comfly_MiniMax_video:
                     elif status == "Failed":
                         error_message = f"Video generation failed: {status_result.get('base_resp', {}).get('status_msg', 'Unknown error')}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_MiniMax_video] {error_message}")
                         return (None, task_id, json.dumps({"status": "error", "message": error_message}))
                     
                 except Exception as e:
@@ -12662,6 +13281,8 @@ class Comfly_MiniMax_video:
             if not file_id:
                 error_message = "Failed to retrieve file_id after multiple attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_MiniMax_video] {error_message}")
                 return (None, task_id, json.dumps({"status": "error", "message": error_message}))
                 
             if not video_url:
@@ -12689,6 +13310,8 @@ class Comfly_MiniMax_video:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return (None, "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -12707,7 +13330,8 @@ class Comfly_suno_description:
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
             "optional": {
-                "apikey": ("STRING", {"default": ""})
+                "apikey": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -12726,7 +13350,7 @@ class Comfly_suno_description:
             "Authorization": "Bearer " + self.api_key
         }
     
-    def generate_music(self, title, description_prompt, version="v5.5", seed=0, make_instrumental=False, apikey=""):
+    def generate_music(self, title, description_prompt, version="v5.5", seed=0, make_instrumental=False, apikey="", skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -12737,6 +13361,8 @@ class Comfly_suno_description:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_description] {error_message}")
             return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
         
         mv_mapping = {
@@ -12777,6 +13403,8 @@ class Comfly_suno_description:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_description] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
                 
             result = response.json()
@@ -12785,6 +13413,8 @@ class Comfly_suno_description:
                 error_message = "No task ID in response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_description] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
                 
             task_id = result.get("id")
@@ -12793,6 +13423,8 @@ class Comfly_suno_description:
                 error_message = "Expected at least 2 clips in the response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_description] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
                 
             clip_ids = [clip["id"] for clip in result["clips"]]
@@ -12800,6 +13432,8 @@ class Comfly_suno_description:
                 error_message = "Expected at least 2 clip IDs"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_description] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
                 
             pbar.update_absolute(30)
@@ -12854,6 +13488,8 @@ class Comfly_suno_description:
                 
                 if not final_clips:
                     empty_audio = create_audio_object("")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_suno_description] {error_message}")
                     return (empty_audio, empty_audio, "", "", "", task_id, error_message, "", "", "", "")
                 
             final_title = generated_title if generated_title else title
@@ -12927,6 +13563,8 @@ class Comfly_suno_description:
             import traceback
             traceback.print_exc()
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise
             return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
 
 
@@ -12939,7 +13577,8 @@ class Comfly_suno_lyrics:
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
             },
             "optional": {
-                "apikey": ("STRING", {"default": ""})
+                "apikey": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -12958,7 +13597,7 @@ class Comfly_suno_lyrics:
             "Authorization": "Bearer " + self.api_key
         }
         
-    def generate_lyrics(self, prompt, seed=0, apikey=""):
+    def generate_lyrics(self, prompt, seed=0, apikey="", skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -12968,6 +13607,8 @@ class Comfly_suno_lyrics:
         if not self.api_key:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_lyrics] {error_message}")
             return ("", json.dumps({"status": "error", "message": error_message}), "", "")
             
         try:
@@ -12986,6 +13627,8 @@ class Comfly_suno_lyrics:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_lyrics] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "")
                 
             result = response.json()
@@ -12993,6 +13636,8 @@ class Comfly_suno_lyrics:
             if "id" not in result:
                 error_message = "No task ID in response"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_lyrics] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "")
                 
             task_id = result.get("id")
@@ -13031,6 +13676,8 @@ class Comfly_suno_lyrics:
             if not lyrics_text:
                 error_message = f"Failed to generate lyrics after {max_attempts} attempts"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_lyrics] {error_message}")
                 return ("", json.dumps({"status": "error", "message": error_message}), "", "")
             
             success_response = {
@@ -13046,6 +13693,8 @@ class Comfly_suno_lyrics:
         except Exception as e:
             error_message = f"Error generating lyrics: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return ("", json.dumps({"status": "error", "message": error_message}), "", "")
 
 
@@ -13062,7 +13711,8 @@ class Comfly_suno_custom:
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
             },
             "optional": {
-                "apikey": ("STRING", {"default": ""})
+                "apikey": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -13083,7 +13733,7 @@ class Comfly_suno_custom:
             "Authorization": "Bearer " + self.api_key
         }
     
-    def generate_music(self, title, version="v5.5", prompt="", tags="", seed=0, apikey=""):
+    def generate_music(self, title, version="v5.5", prompt="", tags="", seed=0, apikey="", skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -13094,6 +13744,8 @@ class Comfly_suno_custom:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
             return (empty_audio, empty_audio, "", "", "", error_message, 
                 "", "", "", "", "", "")
         
@@ -13135,6 +13787,8 @@ class Comfly_suno_custom:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, 
                     "", "", "", "", "", "")
                 
@@ -13144,6 +13798,8 @@ class Comfly_suno_custom:
                 error_message = "No task ID in response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, 
                     "", "", "", "", "", "")
                 
@@ -13153,6 +13809,8 @@ class Comfly_suno_custom:
                 error_message = "Expected at least 2 clips in the response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
                 return (empty_audio, empty_audio, "", "", task_id, error_message, 
                     "", "", "", "", "", "")
                 
@@ -13161,6 +13819,8 @@ class Comfly_suno_custom:
                 error_message = "Expected at least 2 clip IDs"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
                 return (empty_audio, empty_audio, "", "", task_id, error_message, 
                     "", "", "", "", "", "")
                 
@@ -13214,6 +13874,8 @@ class Comfly_suno_custom:
                 
                 if not final_clips:
                     empty_audio = create_audio_object("")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_suno_custom] {error_message}")
                     return (empty_audio, empty_audio, "", "", task_id, error_message, 
                         "", "", "", "", "", "")
             final_title = generated_title if generated_title else title
@@ -13279,6 +13941,8 @@ class Comfly_suno_custom:
             import traceback
             traceback.print_exc()
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "", "", "")
         
 
@@ -13293,6 +13957,7 @@ class Comfly_suno_upload:
                 "api_key": ("STRING", {"default": ""}),
                 "upload_filename": ("STRING", {"default": "audio.mp3"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -13311,7 +13976,7 @@ class Comfly_suno_upload:
             "Authorization": f"Bearer {self.api_key}"
         }
 
-    def upload_audio(self, audio, api_key="", upload_filename="audio.mp3", seed=0):
+    def upload_audio(self, audio, api_key="", upload_filename="audio.mp3", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -13321,6 +13986,8 @@ class Comfly_suno_upload:
         if not self.api_key:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
             return ("", "", "", "", error_message)
             
         try:
@@ -13343,6 +14010,8 @@ class Comfly_suno_upload:
             if response.status_code != 200:
                 error_message = f"Failed to get upload URL: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
                 return ("", "", "", "", error_message)
                 
             upload_data = response.json()
@@ -13377,6 +14046,8 @@ class Comfly_suno_upload:
             if upload_response.status_code != 204:
                 error_message = f"Failed to upload audio: {upload_response.status_code}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
                 return ("", "", "", "", error_message)
                 
             pbar.update_absolute(50)
@@ -13396,6 +14067,8 @@ class Comfly_suno_upload:
             if finish_response.status_code != 200:
                 error_message = f"Failed to finish upload: {finish_response.status_code}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
                 return ("", "", "", "", error_message)
                 
             pbar.update_absolute(60)
@@ -13477,20 +14150,28 @@ class Comfly_suno_upload:
                     else:
                         error_message = f"Failed to initialize clip: {init_response.status_code}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
                         return ("", "", "", "", error_message)
                         
                 elif status in ["failed", "error"]:
                     error_message = f"Upload failed with status: {status}"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
                     return ("", "", "", "", error_message)
             
             error_message = "Upload timeout - status check exceeded maximum attempts"
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
             return ("", "", "", "", error_message)
             
         except Exception as e:
             error_message = f"Error uploading audio: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return ("", "", "", "", error_message)
 
 
@@ -13509,6 +14190,7 @@ class Comfly_suno_upload_extend:
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -13527,7 +14209,7 @@ class Comfly_suno_upload_extend:
             "Authorization": f"Bearer {self.api_key}"
         }
 
-    def extend_audio(self, clip_id, prompt, tags="", title="", continue_at=28, version="v5", api_key="", seed=0):
+    def extend_audio(self, clip_id, prompt, tags="", title="", continue_at=28, version="v5", api_key="", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -13538,6 +14220,8 @@ class Comfly_suno_upload_extend:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "")
 
         mv_mapping = {
@@ -13582,6 +14266,8 @@ class Comfly_suno_upload_extend:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "")
                 
             result = response.json()
@@ -13590,6 +14276,8 @@ class Comfly_suno_upload_extend:
                 error_message = "No task ID in response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "")
                 
             task_id = result.get("id")
@@ -13598,6 +14286,8 @@ class Comfly_suno_upload_extend:
                 error_message = "Expected at least 2 clips in the response"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
                 return (empty_audio, empty_audio, "", "", task_id, error_message, "", "", "")
                 
             clip_ids = [clip["id"] for clip in result["clips"]]
@@ -13651,6 +14341,8 @@ class Comfly_suno_upload_extend:
                 
                 if not final_clips:
                     empty_audio = create_audio_object("")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
                     return (empty_audio, empty_audio, "", "", task_id, error_message, "", "", "")
 
             audio_urls = []
@@ -13720,6 +14412,8 @@ class Comfly_suno_upload_extend:
             import traceback
             traceback.print_exc()
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "")
 
 
@@ -13739,6 +14433,7 @@ class Comfly_suno_cover:
                 "api_key": ("STRING", {"default": ""}),
                 "negative_tags": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -13759,7 +14454,7 @@ class Comfly_suno_cover:
         }
     
     def generate_cover(self, cover_clip_id, prompt, title="", tags="", version="v5", 
-                    make_instrumental=False, api_key="", negative_tags="", seed=0):
+                    make_instrumental=False, api_key="", negative_tags="", seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -13770,6 +14465,8 @@ class Comfly_suno_cover:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
         mv_mapping = {
             "v3.0": "chirp-v3.0",
@@ -13819,6 +14516,8 @@ class Comfly_suno_cover:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
                 
             result = response.json()
@@ -13861,12 +14560,16 @@ class Comfly_suno_cover:
                 error_message = f"Unexpected response format: {result}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
             
             if len(clips) == 0:
                 error_message = f"No clips found in response. Task ID: {task_id}"
                 print(error_message)
                 empty_audio = create_audio_object("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", task_id, error_message, "", "", "", "")
             if len(clips) < 2:
                 while len(clips) < 2:
@@ -13932,6 +14635,8 @@ class Comfly_suno_cover:
             import traceback
             traceback.print_exc()
             empty_audio = create_audio_object("")
+            if not skip_error:
+                raise
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
         
     def wait_for_task_completion(self, task_id, pbar):
@@ -14022,6 +14727,7 @@ class OpenAISoraAPIPlus:
                 "aspect_ratio": ("STRING", {"default": "16:9", "multiline": False, "options": ["16:9", "9:16"]}),
                 "hd": ("BOOLEAN", {"default": True}),
                 "duration": ("INT", {"default": 15, "options": [10, 15]}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -14030,7 +14736,7 @@ class OpenAISoraAPIPlus:
     FUNCTION = "generate"
     CATEGORY = "zhenzhen"
 
-    def generate(self, base_url, model, api_key, user_prompt,image=None,hd=True,duration=15,aspect_ratio="16:9"):
+    def generate(self, base_url, model, api_key, user_prompt,image=None,hd=True,duration=15,aspect_ratio="16:9", skip_error=False):
         """
         调用 ai.t8star.cn 的 sora-2 模型进行视频生成（流式）。
         请求：
@@ -14052,10 +14758,16 @@ class OpenAISoraAPIPlus:
           - timeout=600 秒
         """
         if not api_key:
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPIPlus] 错误：未配置API Key，请在节点参数中设置 api_key")
             return (None, "", "错误：未配置API Key，请在节点参数中设置 api_key")
         if not base_url:
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPIPlus] 错误：未配置 base_url，请在节点参数中设置 base_url")
             return (None, "", "错误：未配置 base_url，请在节点参数中设置 base_url")
         if not user_prompt.strip():
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPIPlus] 错误：user_prompt 为空，请提供视频描述")
             return (None, "", "错误：user_prompt 为空，请提供视频描述")
 
         try:
@@ -14088,6 +14800,8 @@ class OpenAISoraAPIPlus:
                     ]
                     print(f"[OpenAISoraAPI] 图生视频模式: 已附带输入图像，尺寸={pil_image.size}, base64长度={len(image_base64)}")
                 except Exception as e:
+                    if not skip_error:
+                        raise
                     return (None, f"输入图像处理失败: {e}", "")
                 messages = [{"role": "user", "content": content}]
             else:
@@ -14114,6 +14828,8 @@ class OpenAISoraAPIPlus:
             print(f"[OpenAISoraAPI] 响应状态码: {resp.status_code}")
 
             if resp.status_code != 200:
+                if not skip_error:
+                    raise RuntimeError(f"[OpenAISoraAPIPlus] API错误 (状态码: {resp.status_code}): {resp.text}")
                 return (None, f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
 
             reasoning_content, answer, tokens_usage = self._parse_302_stream(resp)
@@ -14131,6 +14847,8 @@ class OpenAISoraAPIPlus:
                         video2 = self._download_and_convert_video(video_url2)
                         return (video2, video_url2 or "", tu2)
                     else:
+                        if not skip_error:
+                            raise RuntimeError(f"[OpenAISoraAPIPlus] 非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}")
                         return (None, f"非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}", tokens_usage)
                 except Exception as _e:
                     print(f"[OpenAISoraAPI] 非流式降级异常: {_e}")
@@ -14140,14 +14858,24 @@ class OpenAISoraAPIPlus:
             video_output = self._download_and_convert_video(video_url)
             return (video_output, video_url or "", tokens_usage)
         except requests.exceptions.ConnectTimeout as e:
+            if not skip_error:
+                raise
             return (None, f"网络连接超时: 无法连接到API服务器。请检查网络连接或代理。错误: {e}", "")
         except requests.exceptions.Timeout as e:
+            if not skip_error:
+                raise
             return (None, f"请求超时: API响应时间过长。请稍后重试。错误: {e}", "")
         except requests.exceptions.ConnectionError as e:
+            if not skip_error:
+                raise
             return (None, f"网络连接错误: 无法建立到API的连接。请检查网络设置。错误: {e}", "")
         except requests.exceptions.RequestException as e:
+            if not skip_error:
+                raise
             return (None, f"API请求失败: {e}", "")
         except Exception as e:
+            if not skip_error:
+                raise
             return (None, f"处理失败: {e}", "")
 
     def _build_headers(self, api_key: str):
@@ -14524,6 +15252,7 @@ class OpenAISoraAPI:
             "optional": {
                 # 可选图像输入：提供则走“图生视频（image-to-video）”，不提供则为“文生视频（text-to-video）”
                 "image": ("IMAGE",),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -14532,7 +15261,7 @@ class OpenAISoraAPI:
     FUNCTION = "generate"
     CATEGORY = "zhenzhen"
 
-    def generate(self, base_url, model, api_key, user_prompt, image=None):
+    def generate(self, base_url, model, api_key, user_prompt, image=None, skip_error=False):
         """
         调用 ai.t8star.cn 的 sora-2 模型进行视频生成（流式）。
         请求：
@@ -14554,10 +15283,16 @@ class OpenAISoraAPI:
           - timeout=600 秒
         """
         if not api_key:
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPI] 错误：未配置API Key，请在节点参数中设置 api_key")
             return (None, "", "错误：未配置API Key，请在节点参数中设置 api_key")
         if not base_url:
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPI] 错误：未配置 base_url，请在节点参数中设置 base_url")
             return (None, "", "错误：未配置 base_url，请在节点参数中设置 base_url")
         if not user_prompt.strip():
+            if not skip_error:
+                raise RuntimeError(f"[OpenAISoraAPI] 错误：user_prompt 为空，请提供视频描述")
             return (None, "", "错误：user_prompt 为空，请提供视频描述")
 
         try:
@@ -14590,6 +15325,8 @@ class OpenAISoraAPI:
                     ]
                     print(f"[OpenAISoraAPI] 图生视频模式: 已附带输入图像，尺寸={pil_image.size}, base64长度={len(image_base64)}")
                 except Exception as e:
+                    if not skip_error:
+                        raise
                     return (None, f"输入图像处理失败: {e}", "")
                 messages = [{"role": "user", "content": content}]
             else:
@@ -14616,6 +15353,8 @@ class OpenAISoraAPI:
             print(f"[OpenAISoraAPI] 响应状态码: {resp.status_code}")
 
             if resp.status_code != 200:
+                if not skip_error:
+                    raise RuntimeError(f"[OpenAISoraAPI] API错误 (状态码: {resp.status_code}): {resp.text}")
                 return (None, f"API错误 (状态码: {resp.status_code}): {resp.text}", "")
 
             reasoning_content, answer, tokens_usage = self._parse_302_stream(resp)
@@ -14633,6 +15372,8 @@ class OpenAISoraAPI:
                         video2 = self._download_and_convert_video(video_url2)
                         return (video2, video_url2 or "", tu2)
                     else:
+                        if not skip_error:
+                            raise RuntimeError(f"[OpenAISoraAPI] 非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}")
                         return (None, f"非流式降级失败 (状态码: {resp2.status_code}): {resp2.text}", tokens_usage)
                 except Exception as _e:
                     print(f"[OpenAISoraAPI] 非流式降级异常: {_e}")
@@ -14642,14 +15383,24 @@ class OpenAISoraAPI:
             video_output = self._download_and_convert_video(video_url)
             return (video_output, video_url or "", tokens_usage)
         except requests.exceptions.ConnectTimeout as e:
+            if not skip_error:
+                raise
             return (None, f"网络连接超时: 无法连接到API服务器。请检查网络连接或代理。错误: {e}", "")
         except requests.exceptions.Timeout as e:
+            if not skip_error:
+                raise
             return (None, f"请求超时: API响应时间过长。请稍后重试。错误: {e}", "")
         except requests.exceptions.ConnectionError as e:
+            if not skip_error:
+                raise
             return (None, f"网络连接错误: 无法建立到API的连接。请检查网络设置。错误: {e}", "")
         except requests.exceptions.RequestException as e:
+            if not skip_error:
+                raise
             return (None, f"API请求失败: {e}", "")
         except Exception as e:
+            if not skip_error:
+                raise
             return (None, f"处理失败: {e}", "")
 
     def _build_headers(self, api_key: str):
@@ -15163,6 +15914,7 @@ class Comfly_vidu_img2video:
                 "off_peak": ("BOOLEAN", {"default": False}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "wm_position": ([1, 2, 3, 4], {"default": 3}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -15196,7 +15948,7 @@ class Comfly_vidu_img2video:
                       audio=False, voice_language="中文(普通话)", voice_id="male-qn-jingying", 
                       is_rec=False, duration=5, seed=0, resolution="720p", 
                       movement_amplitude="auto", bgm=False, off_peak=False, 
-                      watermark=False, wm_position=3):
+                      watermark=False, wm_position=3, skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -15207,6 +15959,8 @@ class Comfly_vidu_img2video:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_vidu_img2video] {error_response}")
             return (empty_video, "", "", json.dumps(error_response))
             
         try:
@@ -15218,6 +15972,8 @@ class Comfly_vidu_img2video:
                 error_message = "Failed to convert image to base64"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_img2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
             payload = {
@@ -15262,6 +16018,8 @@ class Comfly_vidu_img2video:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_img2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -15270,6 +16028,8 @@ class Comfly_vidu_img2video:
                 error_message = f"No task_id in response: {result}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_img2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             task_id = result.get("task_id")
@@ -15314,6 +16074,8 @@ class Comfly_vidu_img2video:
                         error_message = f"Video generation failed: {err_code}"
                         print(error_message)
                         empty_video = ComflyVideoAdapter("")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_vidu_img2video] {error_message}")
                         return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
                         
                 except Exception as e:
@@ -15323,6 +16085,8 @@ class Comfly_vidu_img2video:
                 error_message = f"Failed to retrieve video URL after {max_attempts} attempts"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_img2video] {error_message}")
                 return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(95)
@@ -15351,6 +16115,8 @@ class Comfly_vidu_img2video:
             import traceback
             traceback.print_exc()
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise
             return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -15378,6 +16144,7 @@ class Comfly_vidu_text2video:
                 "off_peak": ("BOOLEAN", {"default": False}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "wm_position": ([1, 2, 3, 4], {"default": 3}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -15399,7 +16166,7 @@ class Comfly_vidu_text2video:
     def generate_video(self, prompt, model="viduq2", api_key="", style="general",
                       duration=5, seed=0, aspect_ratio="16:9", resolution="720p",
                       movement_amplitude="auto", bgm=False, off_peak=False,
-                      watermark=False, wm_position=3):
+                      watermark=False, wm_position=3, skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -15410,6 +16177,8 @@ class Comfly_vidu_text2video:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_vidu_text2video] {error_response}")
             return (empty_video, "", "", json.dumps(error_response))
             
         try:
@@ -15452,6 +16221,8 @@ class Comfly_vidu_text2video:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_text2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -15460,6 +16231,8 @@ class Comfly_vidu_text2video:
                 error_message = f"No task_id in response: {result}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_text2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             task_id = result.get("task_id")
@@ -15504,6 +16277,8 @@ class Comfly_vidu_text2video:
                         error_message = f"Video generation failed: {err_code}"
                         print(error_message)
                         empty_video = ComflyVideoAdapter("")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_vidu_text2video] {error_message}")
                         return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
                         
                 except Exception as e:
@@ -15513,6 +16288,8 @@ class Comfly_vidu_text2video:
                 error_message = f"Failed to retrieve video URL after {max_attempts} attempts"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_text2video] {error_message}")
                 return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(95)
@@ -15540,6 +16317,8 @@ class Comfly_vidu_text2video:
             import traceback
             traceback.print_exc()
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise
             return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -15587,6 +16366,7 @@ class Comfly_vidu_ref2video:
                 "off_peak": ("BOOLEAN", {"default": False}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "wm_position": ([1, 2, 3, 4], {"default": 3}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -15624,7 +16404,7 @@ class Comfly_vidu_ref2video:
                       subject3_id="3", subject3_voice_id="",
                       duration=5, seed=0, aspect_ratio="16:9", resolution="720p",
                       movement_amplitude="auto", bgm=False, off_peak=False,
-                      watermark=False, wm_position=3):
+                      watermark=False, wm_position=3, skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -15635,6 +16415,8 @@ class Comfly_vidu_ref2video:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_vidu_ref2video] {error_response}")
             return (empty_video, "", "", json.dumps(error_response))
             
         try:
@@ -15654,6 +16436,8 @@ class Comfly_vidu_ref2video:
                 error_message = "No images provided. At least one image is required."
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_ref2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
             payload = {
@@ -15718,6 +16502,8 @@ class Comfly_vidu_ref2video:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_ref2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -15726,6 +16512,8 @@ class Comfly_vidu_ref2video:
                 error_message = f"No task_id in response: {result}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_ref2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             task_id = result.get("task_id")
@@ -15770,6 +16558,8 @@ class Comfly_vidu_ref2video:
                         error_message = f"Video generation failed: {err_code}"
                         print(error_message)
                         empty_video = ComflyVideoAdapter("")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_vidu_ref2video] {error_message}")
                         return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
                         
                 except Exception as e:
@@ -15779,6 +16569,8 @@ class Comfly_vidu_ref2video:
                 error_message = f"Failed to retrieve video URL after {max_attempts} attempts"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_ref2video] {error_message}")
                 return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(95)
@@ -15808,6 +16600,8 @@ class Comfly_vidu_ref2video:
             import traceback
             traceback.print_exc()
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise
             return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
 
@@ -15837,6 +16631,7 @@ class Comfly_vidu_start_end2video:
                 "off_peak": ("BOOLEAN", {"default": False}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "wm_position": ([1, 2, 3, 4], {"default": 3}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -15869,7 +16664,7 @@ class Comfly_vidu_start_end2video:
     def generate_video(self, start_image, end_image, model="viduq2-pro", prompt="", api_key="",
                       is_rec=False, duration=5, seed=0, resolution="720p",
                       movement_amplitude="auto", bgm=False, off_peak=False,
-                      watermark=False, wm_position=3):
+                      watermark=False, wm_position=3, skip_error=False):
         
         if api_key.strip():
             self.api_key = api_key
@@ -15880,6 +16675,8 @@ class Comfly_vidu_start_end2video:
         if not self.api_key:
             error_response = {"status": "error", "message": "API key not provided or not found in config"}
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_response}")
             return (empty_video, "", "", json.dumps(error_response))
             
         try:
@@ -15893,6 +16690,8 @@ class Comfly_vidu_start_end2video:
                 error_message = "Failed to convert start or end image to base64"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
 
             payload = {
@@ -15933,6 +16732,8 @@ class Comfly_vidu_start_end2video:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             result = response.json()
@@ -15941,6 +16742,8 @@ class Comfly_vidu_start_end2video:
                 error_message = f"No task_id in response: {result}"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_message}")
                 return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
                 
             task_id = result.get("task_id")
@@ -15985,6 +16788,8 @@ class Comfly_vidu_start_end2video:
                         error_message = f"Video generation failed: {err_code}"
                         print(error_message)
                         empty_video = ComflyVideoAdapter("")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_message}")
                         return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
                         
                 except Exception as e:
@@ -15994,6 +16799,8 @@ class Comfly_vidu_start_end2video:
                 error_message = f"Failed to retrieve video URL after {max_attempts} attempts"
                 print(error_message)
                 empty_video = ComflyVideoAdapter("")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_vidu_start_end2video] {error_message}")
                 return (empty_video, "", task_id, json.dumps({"status": "error", "message": error_message}))
             
             pbar.update_absolute(95)
@@ -16021,6 +16828,8 @@ class Comfly_vidu_start_end2video:
             import traceback
             traceback.print_exc()
             empty_video = ComflyVideoAdapter("")
+            if not skip_error:
+                raise
             return (empty_video, "", "", json.dumps({"status": "error", "message": error_message}))
         
 
@@ -16054,7 +16863,8 @@ class Comfly_nano_banana2_edit_S2A:
                 "apikey": ("STRING", {"default": ""}),
                 "task_id": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -16086,7 +16896,7 @@ class Comfly_nano_banana2_edit_S2A:
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
-                      apikey="", task_id="", response_format="url", seed=0):
+                      apikey="", task_id="", response_format="url", seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -16098,6 +16908,8 @@ class Comfly_nano_banana2_edit_S2A:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] {error_message}")
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
         
         try:
@@ -16197,6 +17009,8 @@ class Comfly_nano_banana2_edit_S2A:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -16335,6 +17149,8 @@ class Comfly_nano_banana2_edit_S2A:
                                 blank_image = Image.new('RGB', (1024, 1024), color='red')
                                 blank_tensor = pil2tensor(blank_image)
                                 pbar.update_absolute(100)
+                                if not skip_error:
+                                    raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] {error_msg}")
                                 return (blank_tensor, "", "", json.dumps({"status": "failed", "task_id": returned_task_id, "message": error_msg}))
                                 
                         else:
@@ -16348,6 +17164,8 @@ class Comfly_nano_banana2_edit_S2A:
                 blank_image = Image.new('RGB', (512, 512), color='yellow')
                 blank_tensor = pil2tensor(blank_image)
                 pbar.update_absolute(100)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] Task polling timed out")
                 return (blank_tensor, "", returned_task_id, json.dumps({"status": "timeout", "task_id": returned_task_id, "message": "Task polling timed out. Please query manually."}))
                 
             elif "data" in result and result["data"]:
@@ -16447,6 +17265,8 @@ class Comfly_nano_banana2_edit_S2A:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] {error_message}")
                     return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
                     
             else:
@@ -16455,6 +17275,8 @@ class Comfly_nano_banana2_edit_S2A:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_nano_banana2_edit_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
             
         except Exception as e:
@@ -16464,6 +17286,8 @@ class Comfly_nano_banana2_edit_S2A:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
     
     def _query_task_status(self, task_id, pbar):
@@ -16643,7 +17467,8 @@ class ComflyGrok3VideoApi:
                 "image5": ("IMAGE",),
                 "image6": ("IMAGE",),
                 "image7": ("IMAGE",),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -16693,7 +17518,7 @@ class ComflyGrok3VideoApi:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0):
+    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -16702,6 +17527,8 @@ class ComflyGrok3VideoApi:
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[ComflyGrok3VideoApi] {error_response}")
             return ("", "", json.dumps(error_response), "")
             
         try:
@@ -16732,6 +17559,8 @@ class ComflyGrok3VideoApi:
                     else:
                         error_message = f"Failed to upload image {i+1}. Please check your image and try again."
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                         return ("", "", json.dumps({"code": "error", "message": error_message}), "")
             
             if image_urls:
@@ -16750,6 +17579,8 @@ class ComflyGrok3VideoApi:
             if response.status_code != 200:
                 error_message = f"API error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
                 
             result = response.json()
@@ -16759,6 +17590,8 @@ class ComflyGrok3VideoApi:
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
             
             pbar.update_absolute(40)
@@ -16777,6 +17610,8 @@ class ComflyGrok3VideoApi:
                 if elapsed_time > max_wait_time:
                     error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                     return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                 
                 time.sleep(5)  
@@ -16824,6 +17659,8 @@ class ComflyGrok3VideoApi:
                         fail_reason = status_result.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                         return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                     
                     elif status in ["NOT_START", "IN_PROGRESS"]:
@@ -16839,6 +17676,8 @@ class ComflyGrok3VideoApi:
             if not video_url:
                 error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi] {error_message}")
                 return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
 
             if video_url:
@@ -16854,6 +17693,8 @@ class ComflyGrok3VideoApi:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"code": "error", "message": error_message}), "")
 
 
@@ -16877,7 +17718,8 @@ class ComflyGrok3VideoApi30S:
                 "image5": ("IMAGE",),
                 "image6": ("IMAGE",),
                 "image7": ("IMAGE",),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -16927,7 +17769,7 @@ class ComflyGrok3VideoApi30S:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0):
+    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0, skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -16936,6 +17778,8 @@ class ComflyGrok3VideoApi30S:
             
         if not self.api_key:
             error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            if not skip_error:
+                raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_response}")
             return ("", "", json.dumps(error_response), "")
             
         try:
@@ -16966,6 +17810,8 @@ class ComflyGrok3VideoApi30S:
                     else:
                         error_message = f"Failed to upload image {i+1}. Please check your image and try again."
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                         return ("", "", json.dumps({"code": "error", "message": error_message}), "")
             
             if image_urls:
@@ -16984,6 +17830,8 @@ class ComflyGrok3VideoApi30S:
             if response.status_code != 200:
                 error_message = f"API error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
                 
             result = response.json()
@@ -16993,6 +17841,8 @@ class ComflyGrok3VideoApi30S:
             if not task_id:
                 error_message = "No task ID returned from API"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                 return ("", "", json.dumps({"code": "error", "message": error_message}), "")
             
             pbar.update_absolute(40)
@@ -17011,6 +17861,8 @@ class ComflyGrok3VideoApi30S:
                 if elapsed_time > max_wait_time:
                     error_message = f"Video generation timeout after {elapsed_time:.1f} seconds (max: {max_wait_time}s)"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                     return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                 
                 time.sleep(5)  
@@ -17058,6 +17910,8 @@ class ComflyGrok3VideoApi30S:
                         fail_reason = status_result.get("fail_reason", "Unknown error")
                         error_message = f"Video generation failed: {fail_reason}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                         return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
                     
                     elif status in ["NOT_START", "IN_PROGRESS"]:
@@ -17073,6 +17927,8 @@ class ComflyGrok3VideoApi30S:
             if not video_url:
                 error_message = f"Video generation timeout or failed to retrieve video URL after {attempts} attempts, elapsed time: {elapsed_time:.1f}s"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_message}")
                 return ("", task_id, json.dumps({"code": "error", "message": error_message}), "")
 
             if video_url:
@@ -17088,6 +17944,8 @@ class ComflyGrok3VideoApi30S:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"code": "error", "message": error_message}), "")
 
 
@@ -17337,6 +18195,7 @@ class Comfly_LLm_API:
             "optional": {
                 "ref_image": ("IMAGE",),
                 "video": ("VIDEO",),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -17345,8 +18204,10 @@ class Comfly_LLm_API:
     FUNCTION = "Zhenzhen_run_llmapi"
     CATEGORY = "zhenzhen/LLM"
 
-    def Zhenzhen_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None):
+    def Zhenzhen_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None, skip_error=False):
         if OpenAI is None:
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_LLm_API] Error: OpenAI package not installed. Please install it with ")
             return ("Error: OpenAI package not installed. Please install it with 'pip install openai'",)
 
         client = OpenAI(api_key=api_key, base_url=api_baseurl)
@@ -17393,6 +18254,8 @@ class Comfly_LLm_API:
                 print(f"[LLM API] {error_msg}")
                 import traceback
                 traceback.print_exc()
+                if not skip_error:
+                    raise
                 return (error_msg,)
         elif ref_image is None:
             messages = [
@@ -17424,6 +18287,8 @@ class Comfly_LLm_API:
             except Exception as e:
                 error_msg = f"Error encoding image: {str(e)}"
                 print(f"[LLM API] {error_msg}")
+                if not skip_error:
+                    raise
                 return (error_msg,)
         
         try:
@@ -17467,6 +18332,7 @@ class Comfly_wan2_6_API:
                 "prompt_extend": ("BOOLEAN", {"default": True}),
                 "shot_type": (["single", "multi"], {"default": "multi"}),
                 "audio_enabled": ("BOOLEAN", {"default": True}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -17573,7 +18439,7 @@ class Comfly_wan2_6_API:
             print(f"[Zhenzhen_WanVideo ERROR] Image base64 conversion error: {str(e)}")
             return None
 
-    def generate_video(self, prompt, api_key, resolution, duration, image=None, audio_url="", prompt_extend=True, shot_type="multi", audio_enabled=True):
+    def generate_video(self, prompt, api_key, resolution, duration, image=None, audio_url="", prompt_extend=True, shot_type="multi", audio_enabled=True, skip_error=False):
         if not api_key.strip():
             config = get_config()
             api_key = config.get('api_key', '')
@@ -17581,6 +18447,8 @@ class Comfly_wan2_6_API:
         if not api_key:
             error_msg = "API key not found. Please provide an API key."
             print(error_msg)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_wan2_6_API] {error_msg}")
             return (EmptyVideoAdapter(), error_msg, "")
             
         self.api_key = api_key
@@ -17669,9 +18537,13 @@ class Comfly_wan2_6_API:
                     else:
                         error_msg = "Failed to generate video"
                         print(error_msg)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_wan2_6_API] {error_msg}")
                         return (EmptyVideoAdapter(), error_msg, task_id)
                 else:
                     print(f"[Zhenzhen_WanVideo ERROR] No task ID: {result}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_wan2_6_API] {error_msg}")
                     return (EmptyVideoAdapter(), "No task ID in response", "")
             else:
                 # Error handling
@@ -17697,10 +18569,14 @@ class Comfly_wan2_6_API:
                     error_message = response.text[:200] if response.text else "No details"
                 
                 print(f"[Zhenzhen_WanVideo ERROR] API error ({status_code}): {error_message}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_wan2_6_API] {error_message}")
                 return (EmptyVideoAdapter(), f"API error: {status_code} - {error_message}", "")
                 
         except Exception as e:
             print(f"[Zhenzhen_WanVideo ERROR] Video generation error: {str(e)}")
+            if not skip_error:
+                raise
             return (EmptyVideoAdapter(), str(e), "")
 
     def poll_task_status(self, task_id):
@@ -17784,7 +18660,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                 "apikey": ("STRING", {"default": ""}),
                 "task_id": ("STRING", {"default": ""}),
                 "response_format": (["url", "b64_json"], {"default": "url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647})  
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -17816,7 +18693,7 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                       image_size="2K", image1=None, image2=None, image3=None, image4=None,
                       image5=None, image6=None, image7=None, image8=None, image9=None, 
                       image10=None, image11=None, image12=None, image13=None, image14=None,
-                      apikey="", task_id="", response_format="url", seed=0):
+                      apikey="", task_id="", response_format="url", seed=0, skip_error=False):
         if apikey.strip():
             self.api_key = apikey
             config = get_config()
@@ -17828,6 +18705,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] {error_message}")
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
         
         try:
@@ -17927,6 +18806,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
                 
             result = response.json()
@@ -18064,6 +18945,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                                 blank_image = Image.new('RGB', (1024, 1024), color='red')
                                 blank_tensor = pil2tensor(blank_image)
                                 pbar.update_absolute(100)
+                                if not skip_error:
+                                    raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] {error_msg}")
                                 return (blank_tensor, "", "", json.dumps({"status": "failed", "task_id": returned_task_id, "message": error_msg}))
                                 
                         else:
@@ -18077,6 +18960,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                 blank_image = Image.new('RGB', (512, 512), color='yellow')
                 blank_tensor = pil2tensor(blank_image)
                 pbar.update_absolute(100)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] Task polling timed out")
                 return (blank_tensor, "", returned_task_id, json.dumps({"status": "timeout", "task_id": returned_task_id, "message": "Task polling timed out. Please query manually."}))
                 
             elif "data" in result and result["data"]:
@@ -18176,6 +19061,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                     print(error_message)
                     blank_image = Image.new('RGB', (1024, 1024), color='white')
                     blank_tensor = pil2tensor(blank_image)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] {error_message}")
                     return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
                     
             else:
@@ -18184,6 +19071,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_gemini_3_1_flash_image_edit_S2A] {error_message}")
                 return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
             
         except Exception as e:
@@ -18193,6 +19082,8 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             traceback.print_exc()
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
+            if not skip_error:
+                raise
             return (blank_tensor, "", "", json.dumps({"status": "failed", "message": error_message}))
     
     def _query_task_status(self, task_id, pbar):
@@ -18396,6 +19287,7 @@ class Comfly_Doubao_Seedance2_0:
                         "tooltip": "Wire from «Asset ID Bundle» output. JSON built from Asset Upload asset_id strings per slot.",
                     },
                 ),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -18552,7 +19444,7 @@ class Comfly_Doubao_Seedance2_0:
                        generate_audio=True, return_last_frame=False,
                        web_search=False,
                        watermark=False, seed=-1,
-                       asset_bundle=""):
+                       asset_bundle="", skip_error=False):
 
         blank_image = Image.new('RGB', (1, 1), color='black')
         blank_tensor = pil2tensor(blank_image)
@@ -18563,6 +19455,8 @@ class Comfly_Doubao_Seedance2_0:
             config['api_key'] = self.api_key
 
         if not self.api_key:
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] error")
             return ("", "", json.dumps({"error": "API key not found."}), "", blank_tensor)
 
         try:
@@ -18731,6 +19625,8 @@ class Comfly_Doubao_Seedance2_0:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] {error_message}")
                 return ("", "", json.dumps({"error": error_message}), "", blank_tensor)
 
             result = response.json()
@@ -18748,6 +19644,8 @@ class Comfly_Doubao_Seedance2_0:
             while True:
                 elapsed = time.time() - start_time
                 if elapsed > self.max_wait_time:
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] Timeout {elapsed:.1f}s")
                     return ("", task_id, json.dumps({"error": f"Timeout {elapsed:.1f}s", "task_id": task_id}), "", blank_tensor)
 
                 time.sleep(self.poll_interval)
@@ -18850,11 +19748,15 @@ class Comfly_Doubao_Seedance2_0:
                             break
                         else:
                             print(f"Succeeded but no video URL found: {json.dumps(status_data, indent=2)}")
+                            if not skip_error:
+                                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] Succeeded but no video URL found: {json.dumps(status_data, ensure_ascii=False)}")
                             return ("", task_id, json.dumps(status_data, indent=2), "", blank_tensor)
 
                     elif status == "failed":
                         fail_reason = status_data.get("fail_reason", "") or status_data.get("failReason", "")
                         print(f"Task failed: {fail_reason}")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] {fail_reason}")
                         return ("", task_id, json.dumps(status_data, indent=2), "", blank_tensor)
 
                 except requests.exceptions.Timeout:
@@ -18918,6 +19820,8 @@ class Comfly_Doubao_Seedance2_0:
                 pbar.update_absolute(100)
                 return (video_out, task_id, json.dumps(response_info, indent=2), video_url, last_frame_tensor)
             else:
+                if not skip_error:
+                    raise RuntimeError("[Comfly_Doubao_Seedance2_0] Video adapter init failed (see terminal log for details)")
                 return ("", task_id, json.dumps({"error": "No video URL"}), "", blank_tensor)
 
         except Exception as e:
@@ -18925,6 +19829,8 @@ class Comfly_Doubao_Seedance2_0:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"error": error_message}), "", blank_tensor)
         
 
@@ -18948,7 +19854,9 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
             opt[f"video{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
         for i in range(1, 4):
             opt[f"audio{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
-        return {"required": {}, "optional": opt}
+        return {
+            "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"}),
+        }
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("asset_bundle",)
@@ -18975,7 +19883,7 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
         audio1="",
         audio2="",
         audio3="",
-    ):
+     skip_error=False):
         def sid(x):
             return (x or "").strip() if x is not None else ""
 
@@ -19023,6 +19931,7 @@ class Comfly_Doubao_Seedance2_0_Asset:
                 "image": ("IMAGE",),
                 "video": (IO.VIDEO, {"tooltip": "Reference video; upload same as Seedance 2.0."}),
                 "audio": (IO.AUDIO, {"tooltip": "Reference audio; upload same as Seedance 2.0."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             },
         }
 
@@ -19054,7 +19963,7 @@ class Comfly_Doubao_Seedance2_0_Asset:
         response.raise_for_status()
         return response.json()
 
-    def upload_asset(self, apikey="", name="", image=None, video=None, audio=None):
+    def upload_asset(self, apikey="", name="", image=None, video=None, audio=None, skip_error=False):
         if apikey and str(apikey).strip():
             self.api_key = str(apikey).strip()
             config = get_config()
@@ -19063,6 +19972,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
         if not self.api_key:
             error_message = "API key not found."
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
             return ("", "", json.dumps({"error": error_message}))
 
         seed = Comfly_Doubao_Seedance2_0()
@@ -19093,11 +20004,15 @@ class Comfly_Doubao_Seedance2_0_Asset:
         else:
             err = "Connect image, video, or audio."
             print(err)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {err}")
             return ("", "", json.dumps({"error": err}))
 
         if not media_url:
             err = "Could not obtain HTTPS URL for asset (upload failed or empty media)."
             print(err)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {err}")
             return ("", "", json.dumps({"error": err}))
 
         display_name = (name or "").strip() or f"asset_{uuid.uuid4().hex[:12]}"
@@ -19122,6 +20037,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                 return ("", "", json.dumps({"error": error_message}))
 
             result = response.json()
@@ -19129,6 +20046,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
             if result.get("code") != 0:
                 error_message = result.get("msg", "Unknown error")
                 print(f"Asset upload failed: {error_message}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                 return ("", "", json.dumps(result, indent=2))
 
             data = result.get("data", {})
@@ -19150,6 +20069,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
                 if elapsed > self.max_wait_time:
                     error_message = f"Asset processing timeout after {elapsed:.1f}s. Last status: {status}"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                     return ("", status, json.dumps({"error": error_message, "asset_id": asset_id, "last_status": status}))
 
                 time.sleep(self.poll_interval)
@@ -19176,6 +20097,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
                     if status in ("Failed", "Error", "Deleted"):
                         error_message = f"Asset processing failed with status: {status}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                         return ("", status, json.dumps(query_result, indent=2))
 
                 except requests.exceptions.Timeout:
@@ -19188,6 +20111,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
         except Exception as e:
             error_message = f"Asset upload error: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"error": error_message}))
 
 
