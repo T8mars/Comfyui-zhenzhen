@@ -19298,9 +19298,9 @@ class Comfly_Doubao_Seedance2_0:
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
-        self.timeout = 600
+        self.timeout = 3600
         self.poll_interval = 10
-        self.max_wait_time = 600
+        self.max_wait_time = 3600
 
     def get_headers(self):
         return {
