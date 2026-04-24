@@ -133,6 +133,13 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260424-2
+
+新增节点zhenzhen-gpt-image-2-official_ratio，支持全比例分辨率，近似取值，包含特殊比例，如21:9等
+
+新增工作流：zhenzhen-gpt-image-2官方全比例4K版（支持多参）.json
+
+
 ### 20260424-1
 
 更新seedance2.0超时时间从10分钟调整为60分钟，防止部分时间长的返回不成功
