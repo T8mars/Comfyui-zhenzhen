@@ -28,86 +28,11 @@ B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
 
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
-# Grok Video Pro R2V 15s视频参考平替seedance2.0教程及新版gemini 3.1 image（新版nano banana 2）
+# 贞贞的AI工坊全模型使用教程（不断更新）：
 
-Bilibili教程：https://www.bilibili.com/video/BV1iKPnzCEZY/
+https://space.bilibili.com/385085361/lists/6620957?type=season
 
-Youtube教程：https://www.youtube.com/watch?v=Dky84Q49j0A
-
-# NanoBanana pro使用教程
-
-B站：https://www.bilibili.com/video/BV13MyPBzEjJ/
-
-Youtube：https://www.youtube.com/watch?v=J6Zg7SrU_BE
-
-# NanoBanana 2 4K使用教程(调价0.15)及VEO3.1调价到0.3
-
-Bilibili教程：https://www.bilibili.com/video/BV1g1ULBmEhA/
-
-Youtube教程：https://www.youtube.com/watch?v=MASUQv_SKGs
-
-# 通过Sora2全自动生成漫剧(老版UI)
-
-B站：https://www.bilibili.com/video/BV1pRCABsE9y/
-
-Youtube：https://www.youtube.com/watch?v=LvvD5HkKqHM
-
-# 通过Sora2全自动生成真人短剧+动画漫剧(新版UI)
-
-B站：https://www.bilibili.com/video/BV1pRCABsE9y/
-Youtube：待更新
-
-# Sora2整合包以及多参角色客串和ID创建教程
-
-B站：https://www.bilibili.com/video/BV16MChB8ERT/
-
-Youtube：https://www.youtube.com/watch?v=GsQnGBqRPnA
-
-整合包V2：https://pan.quark.cn/s/86d82abd2f17
-
-# Sora2无限并发整合包V3以及故事板支持，角色客串分镜大师脚本
-
-B站：https://www.bilibili.com/video/BV1nzUWB9EKx/
-
-Youtube：https://www.youtube.com/watch?v=IZKLX1fyZIk
-
-整合包V3：https://pan.quark.cn/s/635ee1b917b6
-
-# Nano Banana pro + Sora2 +Gemeni 3 Pro一致性自动分镜剧本+漫画+音频+视频
-
-B站：https://www.bilibili.com/video/BV1zhUKBKEAp/
-
-Youtube：https://www.youtube.com/watch?v=hRpdlEWCOws
-
-# Nano Banana Pro白图及各种报错解决方法，api令牌渠道分组使用方式
-
-B站：https://www.bilibili.com/video/BV1H3UuB2EJ3/
-
-Youtube：https://www.youtube.com/watch?v=HLYNWk3B1ho
-
-# NanoBanana Pro白图报错Failed to process any images解决办法
-
-Bilibili教程：https://www.bilibili.com/video/BV1wUSmBfEhv/
-
-Youtube教程：https://www.youtube.com/watch?v=_5CPM8vOi_s
-
-# NanoBanana Pro S2A异步任务节点使用教程（推荐）
-
-Bilibili教程：https://www.bilibili.com/video/BV1zs2WBjEsh/
-
-Youtube教程：https://www.youtube.com/watch?v=KB5NDfQ65Ug
-
-# Grok Video 3使用教程（文生视频/图生视频）
-
-Bilibili教程：https://www.bilibili.com/video/BV1SmmnBoEDz/
-
-Youtube教程：https://www.youtube.com/watch?v=P3zMzPLSLT4
-
-# Seedance2.0效果大对比！comfyui-zhenzhen已支持满血版，支持真人不排队，高性价比方案，脱敏小技巧
-
-Bilibili教程：https://www.bilibili.com/video/BV1YnDQBtEkP/
-
-Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
+https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 
 # 更新 Update：
@@ -132,6 +57,11 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
+
+### 20260425-1
+
+zhenzhen-gpt-image-2-official_ratio节点输入图从5张调整到16张
+
 
 ### 20260425
 

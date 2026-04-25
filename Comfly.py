@@ -7102,6 +7102,17 @@ class Comfly_gpt_image_2_official_ratio:
                 "image3": ("IMAGE",),
                 "image4": ("IMAGE",),
                 "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image10": ("IMAGE",),
+                "image11": ("IMAGE",),
+                "image12": ("IMAGE",),
+                "image13": ("IMAGE",),
+                "image14": ("IMAGE",),
+                "image15": ("IMAGE",),
+                "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
@@ -7199,12 +7210,17 @@ class Comfly_gpt_image_2_official_ratio:
         return ("blank.png", buf, "image/png")
 
     def _build_official_edits_multipart(
-        self, prompt, image1, image2, image3, image4, image5, mask, n, quality, size, background,
+        self, prompt, image1, image2, image3, image4, image5,
+        image6, image7, image8, image9, image10,
+        image11, image12, image13, image14, image15, image16,
+        mask, n, quality, size, background,
         output_format, output_compression, moderation
     ):
 
         input_images = []
-        for img in [image1, image2, image3, image4, image5]:
+        for img in [image1, image2, image3, image4, image5,
+                     image6, image7, image8, image9, image10,
+                     image11, image12, image13, image14, image15, image16]:
             if img is not None:
                 input_images.append(img)
         
@@ -7319,6 +7335,17 @@ class Comfly_gpt_image_2_official_ratio:
         image3,
         image4,
         image5,
+        image6,
+        image7,
+        image8,
+        image9,
+        image10,
+        image11,
+        image12,
+        image13,
+        image14,
+        image15,
+        image16,
         mask,
         pbar,
         max_poll_attempts,
@@ -7335,7 +7362,10 @@ class Comfly_gpt_image_2_official_ratio:
         initial_timeout,
     ):
         data, request_files = self._build_official_edits_multipart(
-            prompt, image1, image2, image3, image4, image5, mask, n, quality, size, background,
+            prompt, image1, image2, image3, image4, image5,
+            image6, image7, image8, image9, image10,
+            image11, image12, image13, image14, image15, image16,
+            mask, n, quality, size, background,
             output_format, output_compression, moderation,
         )
         url = f"{baseurl}/v1/images/edits?async=true"
@@ -7448,11 +7478,17 @@ class Comfly_gpt_image_2_official_ratio:
         return out
 
     def _edits(
-        self, prompt, image1, image2, image3, image4, image5, mask, n, quality, size, background,
+        self, prompt, image1, image2, image3, image4, image5,
+        image6, image7, image8, image9, image10,
+        image11, image12, image13, image14, image15, image16,
+        mask, n, quality, size, background,
         output_format, output_compression, moderation, max_retries, initial_timeout, pbar
     ):
         data, request_files = self._build_official_edits_multipart(
-            prompt, image1, image2, image3, image4, image5, mask, n, quality, size, background,
+            prompt, image1, image2, image3, image4, image5,
+            image6, image7, image8, image9, image10,
+            image11, image12, image13, image14, image15, image16,
+            mask, n, quality, size, background,
             output_format, output_compression, moderation,
         )
         pbar.update_absolute(20)
@@ -7467,8 +7503,11 @@ class Comfly_gpt_image_2_official_ratio:
         return response.json()
 
     def generate(
-        self, prompt, aspect_ratio="1:1", resolution="1k", image1=None, image2=None, 
-        image3=None, image4=None, image5=None, mask=None, api_key="",
+        self, prompt, aspect_ratio="1:1", resolution="1k",
+        image1=None, image2=None, image3=None, image4=None, image5=None,
+        image6=None, image7=None, image8=None, image9=None, image10=None,
+        image11=None, image12=None, image13=None, image14=None, image15=None, image16=None,
+        mask=None, api_key="",
         n=1, quality="auto", background="auto",
         output_format="png", output_compression=100, moderation="auto",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
@@ -7493,7 +7532,9 @@ class Comfly_gpt_image_2_official_ratio:
             print(error_msg)
             return (blank_t, "", error_msg)
 
-        input_images = [img for img in [image1, image2, image3, image4, image5] if img is not None]
+        input_images = [img for img in [image1, image2, image3, image4, image5,
+                         image6, image7, image8, image9, image10,
+                         image11, image12, image13, image14, image15, image16] if img is not None]
         num_input_images = len(input_images)
 
         pbar = comfy.utils.ProgressBar(100)
@@ -7530,6 +7571,17 @@ class Comfly_gpt_image_2_official_ratio:
                     image3,
                     image4,
                     image5,
+                    image6,
+                    image7,
+                    image8,
+                    image9,
+                    image10,
+                    image11,
+                    image12,
+                    image13,
+                    image14,
+                    image15,
+                    image16,
                     mask,
                     pbar,
                     max_poll_attempts,
@@ -7562,7 +7614,10 @@ class Comfly_gpt_image_2_official_ratio:
                 return (combined, image_url or "", info)
 
             result = self._edits(
-                prompt, image1, image2, image3, image4, image5, mask, n, quality, size, background,
+                prompt, image1, image2, image3, image4, image5,
+                image6, image7, image8, image9, image10,
+                image11, image12, image13, image14, image15, image16,
+                mask, n, quality, size, background,
                 output_format, output_compression, moderation,
                 max_retries, initial_timeout, pbar
             )
