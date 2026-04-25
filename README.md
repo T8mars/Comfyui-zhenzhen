@@ -1,5 +1,5 @@
 # 网站：[https://ai.t8star.cn](https://ai.t8star.cn/register?aff=cbff0534884)
-# 在线工作流海外版：
+# Online workflow overseas：
 https://www.runninghub.ai/?inviteCode=rh-v1121
 # 在线工作流国内版：
 https://www.runninghub.cn/?inviteCode=rh-v1121
@@ -7,10 +7,6 @@ https://www.runninghub.cn/?inviteCode=rh-v1121
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
 My favorite girl Go YounJung
-
-# 企鹅版Nano Banana Pro,Sora2,Veo3.1无限并发整合包V5，感谢企鹅：
-夸克网盘：https://pan.quark.cn/s/445806b40baa
-谷歌盘：https://drive.google.com/file/d/1Ie384HYnA_nF5yOUqi57jm1WdeqpLiVW/view?usp=sharing
 
 # 网站价格和宗旨：
 
