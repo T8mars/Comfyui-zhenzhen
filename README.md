@@ -133,6 +133,10 @@ Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260425
+
+zhenzhen-gpt-image-2-official_ratio节点增加skip_error参数
+
 ### 20260424-2
 
 新增节点zhenzhen-gpt-image-2-official_ratio，支持全比例分辨率，近似取值，包含特殊比例，如21:9等

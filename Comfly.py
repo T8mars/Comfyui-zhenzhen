@@ -7117,6 +7117,7 @@ class Comfly_gpt_image_2_official_ratio:
                 "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -7471,7 +7472,7 @@ class Comfly_gpt_image_2_official_ratio:
         n=1, quality="auto", background="auto",
         output_format="png", output_compression=100, moderation="auto",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
-        max_retries=5, initial_timeout=900, seed=0
+        max_retries=5, initial_timeout=900, seed=0, skip_error=False
     ):
         if api_key.strip():
             self.api_key = api_key
@@ -7603,6 +7604,8 @@ class Comfly_gpt_image_2_official_ratio:
             import traceback
             print(traceback.format_exc())
             print(error_message)
+            if not skip_error:
+                raise
             return (blank_t, "", error_message)
 
 
