@@ -18,6 +18,14 @@ My favorite girl Go YounJung
 
 API调用及开发教程：https://ai.t8star.cn/api-set
 
+# 贞贞的AI工坊新手无障碍整合包(windows版本)和教程：
+
+整合包：https://pan.quark.cn/s/da44855b0bfd
+
+B站教程：https://www.bilibili.com/video/BV1nooQBsEAf/
+
+youtube教程：https://www.youtube.com/watch?v=oitmGaRtYvc
+
 # 新版节点搭建，报错自查，API调用教程：
 
 B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
