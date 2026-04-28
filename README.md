@@ -62,6 +62,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260428-1
+
+修复Zhenzhen Doubao_Seedance2_0_AssetIdBundle节点
+
 ### 20260427-2
 
 gpt-image-2的default分组直接支持2K，4K，只需要0.04积分，需要最新的节点

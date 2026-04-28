@@ -20556,9 +20556,7 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
             opt[f"video{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
         for i in range(1, 4):
             opt[f"audio{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
-        return {
-            "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"}),
-        }
+        return {"required": {}, "optional": opt}
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("asset_bundle",)
@@ -20585,7 +20583,7 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
         audio1="",
         audio2="",
         audio3="",
-     skip_error=False):
+    ):
         def sid(x):
             return (x or "").strip() if x is not None else ""
 
@@ -20615,7 +20613,6 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
             "audios": audios,
         }
         return (json.dumps(payload, ensure_ascii=False),)
-
 
 class Comfly_Doubao_Seedance2_0_Asset:
     """
