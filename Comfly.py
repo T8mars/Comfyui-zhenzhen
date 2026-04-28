@@ -7139,6 +7139,7 @@ class Comfly_gpt_image_2_official_ratio:
                 "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "response_format": (["url", "b64_json"], {"default": "url"}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
@@ -7225,7 +7226,7 @@ class Comfly_gpt_image_2_official_ratio:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, size, background,
-        output_format, output_compression, moderation
+        output_format, output_compression, moderation, response_format="url"
     ):
 
         input_images = []
@@ -7295,6 +7296,8 @@ class Comfly_gpt_image_2_official_ratio:
             data["output_compression"] = str(output_compression)
         if output_format != "png":
             data["output_format"] = output_format
+        if response_format != "url":
+            data["response_format"] = response_format
 
         if "image[]" in files:
             request_files = []
@@ -7369,6 +7372,7 @@ class Comfly_gpt_image_2_official_ratio:
         output_format,
         output_compression,
         moderation,
+        response_format,
         max_retries,
         initial_timeout,
     ):
@@ -7377,7 +7381,7 @@ class Comfly_gpt_image_2_official_ratio:
             image6, image7, image8, image9, image10,
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, size, background,
-            output_format, output_compression, moderation,
+            output_format, output_compression, moderation, response_format,
         )
         url = f"{baseurl}/v1/images/edits?async=true"
         if webhook.strip():
@@ -7493,14 +7497,14 @@ class Comfly_gpt_image_2_official_ratio:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, size, background,
-        output_format, output_compression, moderation, max_retries, initial_timeout, pbar
+        output_format, output_compression, moderation, response_format, max_retries, initial_timeout, pbar
     ):
         data, request_files = self._build_official_edits_multipart(
             prompt, image1, image2, image3, image4, image5,
             image6, image7, image8, image9, image10,
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, size, background,
-            output_format, output_compression, moderation,
+            output_format, output_compression, moderation, response_format,
         )
         pbar.update_absolute(20)
         response = self.make_request_with_retry(
@@ -7521,6 +7525,7 @@ class Comfly_gpt_image_2_official_ratio:
         mask=None, api_key="",
         n=1, quality="auto", background="auto",
         output_format="png", output_compression=100, moderation="auto",
+        response_format="url",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
         max_retries=5, initial_timeout=900, seed=0, skip_error=False
     ):
@@ -7605,6 +7610,7 @@ class Comfly_gpt_image_2_official_ratio:
                     output_format,
                     output_compression,
                     moderation,
+                    response_format,
                     max_retries,
                     initial_timeout,
                 )
@@ -7629,7 +7635,7 @@ class Comfly_gpt_image_2_official_ratio:
                 image6, image7, image8, image9, image10,
                 image11, image12, image13, image14, image15, image16,
                 mask, n, quality, size, background,
-                output_format, output_compression, moderation,
+                output_format, output_compression, moderation, response_format,
                 max_retries, initial_timeout, pbar
             )
             mode = "sync: /v1/images/edits (multipart" + (

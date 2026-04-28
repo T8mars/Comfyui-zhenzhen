@@ -62,6 +62,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260428-2
+
+zhenzhen-gpt-image-2-official_ratio节点增加了response_format格式选择，可以URL或者BASE64，如果参考图过多，建议用URL
+修复了gpt-image-2 openai官-优质分组2K/4K的稳定性，目前很稳定了可以尝试
+目前报system error主要是OPENAI资源不足，我直接用他们的也几率失败，提示积分失败这个刚修了下，可能还有点问题，还在修，一会网站公告通知进度
+
 ### 20260428-1
 
 修复Zhenzhen Doubao_Seedance2_0_AssetIdBundle节点
