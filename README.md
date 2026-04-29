@@ -62,6 +62,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260429
+
+抱歉，之前不知道改什么把seedance2.0相关节点都改出问题了，已经修复
+
 ### 20260428-2
 
 zhenzhen-gpt-image-2-official_ratio节点增加了response_format格式选择，可以URL或者BASE64，如果参考图过多，建议用URL
