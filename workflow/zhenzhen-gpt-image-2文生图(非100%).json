@@ -1,8 +1,8 @@
 {
   "id": "29ef93d4-b560-42b6-a8cf-39338bfbb1d6",
   "revision": 0,
-  "last_node_id": 38,
-  "last_link_id": 31,
+  "last_node_id": 39,
+  "last_link_id": 37,
   "nodes": [
     {
       "id": 37,
@@ -23,7 +23,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 31
+          "link": 37
         }
       ],
       "outputs": [
@@ -34,119 +34,12 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "**User**: 这个角色的全身作为杂志视觉图，游戏攻略本的一页纵向长图。用精美的哥特式设计，构成带有忧郁氛围的奇幻插画与日语文字。请随意设定她的名字和背景设定，并将参数视觉化。构成要素包括：点阵画、类似《最终幻想》风格的RPG战斗画面截图、必杀技的技能截图。生成该内容的所有图像。\n\n**AI**: 正在生成图片，请稍候...\n\n生成中... 8%\n生成中... 16%\n生成中... 27%\n生成中... 39%\n生成中... 52%\n生成中... 66%\n生成中... 78%\n生成中... 88%\n生成中... 94%\n生成中... 97%\n生成中... 97%\n生成中... 97%\n生成中... 97%\n\n\n图像生成完成\n图像 1:\n![image](https://midjourney-plus.oss-us-west-1.aliyuncs.com/6a7f76da-e565-44ff-abd5-cf04c89ee4d5.png)\n\n\n\n---"
-      ]
-    },
-    {
-      "id": 31,
-      "type": "Comfly_gpt_image_2",
-      "pos": [
-        2885.3531269129257,
-        1103.594929435475
-      ],
-      "size": [
-        400,
-        412
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image1",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image2",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image3",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image4",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          },
-          "link": 28
-        },
-        {
-          "name": "api_key",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "api_key"
-          },
-          "link": 27
-        }
-      ],
-      "outputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            26
-          ]
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": [
-            29
-          ]
-        },
-        {
-          "name": "image_urls",
-          "type": "STRING",
-          "links": [
-            30
-          ]
-        },
-        {
-          "name": "chats",
-          "type": "STRING",
-          "links": [
-            31
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08",
-        "Node name for S&R": "Comfly_gpt_image_2"
-      },
-      "widgets_values": [
-        "",
-        "",
-        "gpt-image-2",
-        "auto",
-        "auto",
-        "auto",
-        "png",
-        "auto",
-        685669009219986,
-        "randomize",
-        true,
-        600
       ]
     },
     {
@@ -167,14 +60,14 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 26
+          "link": 34
         }
       ],
       "outputs": [],
       "properties": {
+        "Node name for S&R": "SaveImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "SaveImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "ComfyUI"
@@ -199,7 +92,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 29
+          "link": 35
         }
       ],
       "outputs": [
@@ -210,9 +103,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "**Model**: gpt-image-2\n**Quality**: auto\n**Size**: auto\n**Background**: auto\n**Seed**: 360341011872989\n**Time**: 2026-04-20 11:21:28"
@@ -237,7 +130,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 30
+          "link": 36
         }
       ],
       "outputs": [
@@ -248,9 +141,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "https://midjourney-plus.oss-us-west-1.aliyuncs.com/6a7f76da-e565-44ff-abd5-cf04c89ee4d5.png"
@@ -265,7 +158,7 @@
       ],
       "size": [
         270,
-        106
+        130
       ],
       "flags": {},
       "order": 0,
@@ -276,19 +169,20 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            27
+            33
           ]
         }
       ],
       "properties": {
+        "Node name for S&R": "Comfly_api_set",
         "cnr_id": "zhenzhen",
-        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08",
-        "Node name for S&R": "Comfly_api_set"
+        "ver": "d9ef2e97057240c641b130575f47d5fb4ef70e08"
       },
       "widgets_values": [
         "zhenzhen",
         "",
-        ""
+        "",
+        false
       ]
     },
     {
@@ -351,52 +245,158 @@
       "widgets_values": [
         "这个角色的全身作为杂志视觉图，游戏攻略本的一页纵向长图。用精美的哥特式设计，构成带有忧郁氛围的奇幻插画与日语文字。请随意设定她的名字和背景设定，并将参数视觉化。构成要素包括：点阵画、类似《最终幻想》风格的RPG战斗画面截图、必杀技的技能截图。生成该内容的所有图像。"
       ]
+    },
+    {
+      "id": 39,
+      "type": "Comfly_gpt_image_2",
+      "pos": [
+        2885.3531269129257,
+        1103.594929435475
+      ],
+      "size": [
+        400,
+        436
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 32
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            34
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            35
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            36
+          ]
+        },
+        {
+          "name": "chats",
+          "type": "STRING",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_gpt_image_2"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "gpt-image-2",
+        "auto",
+        "auto",
+        "auto",
+        "png",
+        "auto",
+        0,
+        "randomize",
+        true,
+        600,
+        false
+      ]
     }
   ],
   "links": [
     [
-      26,
-      31,
+      32,
+      34,
+      0,
+      39,
+      4,
+      "STRING"
+    ],
+    [
+      33,
+      33,
+      0,
+      39,
+      5,
+      "STRING"
+    ],
+    [
+      34,
+      39,
       0,
       32,
       0,
       "IMAGE"
     ],
     [
-      27,
-      33,
-      0,
-      31,
-      5,
-      "STRING"
-    ],
-    [
-      28,
-      34,
-      0,
-      31,
-      4,
-      "STRING"
-    ],
-    [
-      29,
-      31,
+      35,
+      39,
       1,
       35,
       0,
       "STRING"
     ],
     [
-      30,
-      31,
+      36,
+      39,
       2,
       36,
       0,
       "STRING"
     ],
     [
-      31,
-      31,
+      37,
+      39,
       3,
       37,
       0,
@@ -423,8 +423,8 @@
     "ds": {
       "scale": 1.3513057093103973,
       "offset": [
-        -1942.5982981446214,
-        -719.6830284371669
+        -2524.9979687577384,
+        -858.8077273892203
       ]
     },
     "links_added_by_ue": [],

@@ -1,8 +1,8 @@
 {
   "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
   "revision": 0,
-  "last_node_id": 21,
-  "last_link_id": 24,
+  "last_node_id": 22,
+  "last_link_id": 29,
   "nodes": [
     {
       "id": 19,
@@ -45,14 +45,14 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 20
+          "link": 27
         }
       ],
       "outputs": [],
       "properties": {
+        "Node name for S&R": "SaveImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "SaveImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "ComfyUI"
@@ -77,7 +77,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 21
+          "link": 28
         }
       ],
       "outputs": [
@@ -88,9 +88,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png"
@@ -153,9 +153,7 @@
         {
           "name": "IMAGE",
           "type": "IMAGE",
-          "links": [
-            19
-          ]
+          "links": []
         },
         {
           "name": "MASK",
@@ -164,106 +162,13 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "LoadImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "LoadImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "未标题-1.jpg",
         "image"
-      ]
-    },
-    {
-      "id": 21,
-      "type": "Comfly_gpt_image_2_official",
-      "pos": [
-        894.0375880532603,
-        412.7879961106554
-      ],
-      "size": [
-        400,
-        512
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 19
-        },
-        {
-          "name": "mask",
-          "shape": 7,
-          "type": "MASK",
-          "link": null
-        },
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          },
-          "link": 23
-        },
-        {
-          "name": "api_key",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "api_key"
-          },
-          "link": 24
-        }
-      ],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "links": [
-            20
-          ]
-        },
-        {
-          "name": "image_url",
-          "type": "STRING",
-          "links": [
-            21
-          ]
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": [
-            22
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
-        "Node name for S&R": "Comfly_gpt_image_2_official"
-      },
-      "widgets_values": [
-        "",
-        "",
-        1,
-        "auto",
-        "3840x2160",
-        "auto",
-        "png",
-        100,
-        "auto",
-        true,
-        "",
-        300,
-        5,
-        5,
-        900,
-        900313846213625,
-        "randomize"
       ]
     },
     {
@@ -285,7 +190,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 22
+          "link": 29
         }
       ],
       "outputs": [
@@ -296,9 +201,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2\nPrompt: Main subject in realistic cosplay style in foreground\" + \"secondary characters in 2D illustration style in background\" \n \"OVERLORD ALBEDO\"elegant serif typography, gold foil texture\" \"Cinematic studio lighting\"  \"Baroque dark fantasy\"，图像比例21:9\nQuality: auto\nSize: 3840x2160\n（总像素大于约 2560×1440，文档中视为实验性输出）\nOutput: png\nTask ID: 811ebc7563f14722bf27b423e8e710d7\nImage URL: https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png\nTotal Tokens: 14329\n"
@@ -324,69 +229,245 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            24
+            26
           ]
         }
       ],
       "properties": {
+        "Node name for S&R": "Comfly_api_set",
         "cnr_id": "zhenzhen",
-        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
-        "Node name for S&R": "Comfly_api_set"
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52"
       },
       "widgets_values": [
         "zhenzhen",
         "",
-        ""
+        "",
+        false
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Comfly_gpt_image_2_official",
+      "pos": [
+        894.0375880532603,
+        412.7879961106554
+      ],
+      "size": [
+        400,
+        860
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image15",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image16",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 25
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            28
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            29
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_gpt_image_2_official"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "gpt-image-2",
+        1,
+        "auto",
+        "auto",
+        "auto",
+        "png",
+        100,
+        "auto",
+        true,
+        "",
+        300,
+        5,
+        5,
+        900,
+        0,
+        "randomize",
+        false
       ]
     }
   ],
   "links": [
     [
-      19,
-      20,
+      25,
+      17,
       0,
-      21,
-      0,
-      "IMAGE"
+      22,
+      17,
+      "STRING"
     ],
     [
-      20,
-      21,
+      26,
+      18,
+      0,
+      22,
+      18,
+      "STRING"
+    ],
+    [
+      27,
+      22,
       0,
       12,
       0,
       "IMAGE"
     ],
     [
-      21,
-      21,
+      28,
+      22,
       1,
       13,
       0,
       "STRING"
     ],
     [
+      29,
       22,
-      21,
       2,
       14,
       0,
-      "STRING"
-    ],
-    [
-      23,
-      17,
-      0,
-      21,
-      2,
-      "STRING"
-    ],
-    [
-      24,
-      18,
-      0,
-      21,
-      3,
       "STRING"
     ]
   ],
@@ -408,10 +489,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.5644739300537773,
+      "scale": 0.8264462809917358,
       "offset": [
-        621.1986273027792,
-        676.3679476313571
+        -225.80778569722128,
+        90.72032463135692
       ]
     },
     "frontendVersion": "1.42.10",

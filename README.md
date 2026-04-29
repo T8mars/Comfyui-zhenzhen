@@ -62,6 +62,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260429-2
+
+新增gpt-image-2-all模型支持，对应功能开发中，4个gpt-image-2相关节点重新，且已支持新模型，工作流也都更新了
+
 ### 20260429
 
 抱歉，之前不知道改什么把seedance2.0相关节点都改出问题了，已经修复

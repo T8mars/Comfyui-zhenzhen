@@ -1,109 +1,9 @@
 {
   "id": "d596599d-c616-4b80-bc97-460fe832a3cb",
   "revision": 0,
-  "last_node_id": 14,
-  "last_link_id": 38,
+  "last_node_id": 18,
+  "last_link_id": 42,
   "nodes": [
-    {
-      "id": 9,
-      "type": "CR Prompt Text",
-      "pos": [
-        -375.2407531738281,
-        537.0703125
-      ],
-      "size": [
-        444.3182067871094,
-        268.1100769042969
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING"
-        },
-        {
-          "label": "show_help",
-          "name": "show_help",
-          "type": "STRING"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CR Prompt Text",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "这个节点有2个用法，如果令牌分组default，不支持4K，选择分辨率并在提示词里加上，有较高几率出现指定分辨率（相比之前2个节点），价格0.04积分，第二个办法就是把令牌分组改成openai优质，这是官方版，按照TOKEN收费，我之前跑的4K的大概1积分多，具体看设置和要求，并非固定\n\n\n贞贞的AI工坊（各种API）：https://ai.t8star.cn/register?aff=dP7j\n左侧令牌，创建令牌，随便取个名字，复制API即可使用，，每日签到领积分\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen\n\n\n"
-      ]
-    },
-    {
-      "id": 8,
-      "type": "LoadImage",
-      "pos": [
-        128.12640380859375,
-        543.7246704101562
-      ],
-      "size": [
-        274.080078125,
-        314.0000305175781
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "image",
-          "name": "image",
-          "type": "COMBO",
-          "widget": {
-            "name": "image"
-          }
-        },
-        {
-          "label": "upload",
-          "name": "upload",
-          "type": "IMAGEUPLOAD",
-          "widget": {
-            "name": "upload"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            33
-          ]
-        },
-        {
-          "label": "MASK",
-          "name": "MASK",
-          "type": "MASK"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoadImage",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "14ac69756fe7e72520e114f91af008ff1066c909527da450d6a94c8724045799.png",
-        "image"
-      ]
-    },
     {
       "id": 5,
       "type": "easy showAnything",
@@ -116,7 +16,7 @@
         97.67240905761719
       ],
       "flags": {},
-      "order": 7,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -124,7 +24,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 38
+          "link": 42
         }
       ],
       "outputs": [
@@ -139,7 +39,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Please input API KEY"
+        "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2-all\nPrompt: 美丽的女人在海边玩水\nAspect Ratio: 16:9\nResolution: 2k\nActual Size: 2560x1440\nQuality: auto\nInput Images: 1\nOutput: png\nTask ID: a74db3cbf7ff42118bc4e5e9be3e8e9b\nImage URL: https://webstatic.aiproxy.vip/output/20260429/9208/7479fb65-83b4-458f-bca7-4ad9b86d39f9/88128365-ae88-41df-bff9-9b1571bcb290.png\nTotal Tokens: 1140\n"
       ]
     },
     {
@@ -154,7 +54,7 @@
         112.32391357421875
       ],
       "flags": {},
-      "order": 6,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -162,7 +62,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 37
+          "link": 41
         }
       ],
       "outputs": [
@@ -177,7 +77,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Please input API KEY"
+        "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2-all\nPrompt: 美丽的女人在海边玩水\nAspect Ratio: 16:9\nResolution: 2k\nActual Size: 2560x1440\nQuality: auto\nInput Images: 1\nOutput: png\nTask ID: a74db3cbf7ff42118bc4e5e9be3e8e9b\nImage URL: https://webstatic.aiproxy.vip/output/20260429/9208/7479fb65-83b4-458f-bca7-4ad9b86d39f9/88128365-ae88-41df-bff9-9b1571bcb290.png\nTotal Tokens: 1140\n"
       ]
     },
     {
@@ -192,14 +92,14 @@
         624.9677734375
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "label": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 36
+          "link": 40
         },
         {
           "label": "filename_prefix",
@@ -226,136 +126,41 @@
       ]
     },
     {
-      "id": 7,
-      "type": "CR Prompt Text",
+      "id": 14,
+      "type": "Note",
       "pos": [
-        451.0205993652344,
-        553.2405395507812
+        -191.26317967698805,
+        949.3460115964638
       ],
       "size": [
-        400,
-        200
+        523.2066634329888,
+        222.00606909362136
       ],
       "flags": {},
-      "order": 2,
+      "order": 0,
       "mode": 0,
-      "inputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "links": [
-            27
-          ]
-        },
-        {
-          "label": "show_help",
-          "name": "show_help",
-          "type": "STRING"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CR Prompt Text",
-        "widget_ue_connectable": {}
-      },
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
       "widgets_values": [
-        "B站视频封面，顶级设计感，爆款封面，文字：“4K gpt-imag-2从未如此亲民”小字：“本地整合包更新，设计师福音”"
-      ]
+        "这个节点有2个用法，如果令牌分组default，不支持4K，选择分辨率并在提示词里加上，有较高几率出现指定分辨率（相比之前2个节点），价格0.04积分，第二个办法就是把令牌分组改成openai优质，这是官方版，按照TOKEN收费，我之前跑的4K的大概1积分多，具体看设置和要求，并非固定\n\n\n贞贞的AI工坊（各种API）：https://ai.t8star.cn/register?aff=dP7j\n左侧令牌，创建令牌，随便取个名字，复制API即可使用，，每日签到领积分\nComfyui调用API节点：https://github.com/T8mars/Comfyui-zhenzhen\n\n\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
     },
     {
-      "id": 4,
-      "type": "Comfly_api_set",
+      "id": 17,
+      "type": "Comfly_gpt_image_2_official_ratio",
       "pos": [
-        459.3480529785156,
-        883.3504638671875
+        846.7917100271733,
+        278.6365460520747
       ],
       "size": [
-        270,
-        130
+        609.202052032052,
+        1028.1431485174564
       ],
       "flags": {},
       "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "api_base",
-          "name": "api_base",
-          "type": "COMBO",
-          "widget": {
-            "name": "api_base"
-          }
-        },
-        {
-          "label": "apikey",
-          "name": "apikey",
-          "type": "STRING",
-          "widget": {
-            "name": "apikey"
-          }
-        },
-        {
-          "label": "custom_ip",
-          "name": "custom_ip",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "custom_ip"
-          }
-        },
-        {
-          "label": "skip_error",
-          "name": "skip_error",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "skip_error"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "label": "apikey",
-          "name": "apikey",
-          "type": "STRING",
-          "links": [
-            35
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Comfly_api_set",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "zhenzhen",
-        "",
-        "",
-        false
-      ]
-    },
-    {
-      "id": 14,
-      "type": "Comfly_gpt_image_2_official_ratio",
-      "pos": [
-        1010.3555297851562,
-        393.91009521484375
-      ],
-      "size": [
-        400,
-        888
-      ],
-      "flags": {},
-      "order": 4,
       "mode": 0,
       "inputs": [
         {
@@ -363,7 +168,7 @@
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": 33
+          "link": 38
         },
         {
           "label": "image2",
@@ -484,7 +289,7 @@
           "widget": {
             "name": "prompt"
           },
-          "link": 34
+          "link": null
         },
         {
           "label": "aspect_ratio",
@@ -512,7 +317,7 @@
           "widget": {
             "name": "api_key"
           },
-          "link": 35
+          "link": 39
         },
         {
           "label": "n",
@@ -661,7 +466,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            36
+            40
           ]
         },
         {
@@ -675,8 +480,8 @@
           "name": "response",
           "type": "STRING",
           "links": [
-            37,
-            38
+            41,
+            42
           ]
         }
       ],
@@ -684,11 +489,11 @@
         "Node name for S&R": "Comfly_gpt_image_2_official_ratio"
       },
       "widgets_values": [
-        "",
+        "美丽的女人在海边玩水",
         "16:9",
-        "4k",
+        "2k",
         "",
-        "gpt-image-2",
+        "gpt-image-2-all",
         1,
         "auto",
         "auto",
@@ -702,56 +507,175 @@
         5,
         5,
         900,
-        0,
+        156625463159258,
         "randomize",
         false
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Comfly_api_set",
+      "pos": [
+        459.3480529785156,
+        883.3504638671875
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "api_base",
+          "name": "api_base",
+          "type": "COMBO",
+          "widget": {
+            "name": "api_base"
+          }
+        },
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          }
+        },
+        {
+          "label": "custom_ip",
+          "name": "custom_ip",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "custom_ip"
+          }
+        },
+        {
+          "label": "skip_error",
+          "name": "skip_error",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "skip_error"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "apikey",
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            39
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 8,
+      "type": "LoadImage",
+      "pos": [
+        2.5623140344092548,
+        434.71848258421585
+      ],
+      "size": [
+        274.080078125,
+        314.0000305175781
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          }
+        },
+        {
+          "label": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            38
+          ]
+        },
+        {
+          "label": "MASK",
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "7c865e58-5712-4570-b84c-406c7800a534.png",
+        "image"
       ]
     }
   ],
   "links": [
     [
-      33,
+      38,
       8,
       0,
-      14,
+      17,
       0,
       "IMAGE"
     ],
     [
-      34,
-      7,
-      0,
-      14,
-      17,
-      "STRING"
-    ],
-    [
-      35,
+      39,
       4,
       0,
-      14,
+      17,
       20,
       "STRING"
     ],
     [
-      36,
-      14,
+      40,
+      17,
       0,
       1,
       0,
       "IMAGE"
     ],
     [
-      37,
-      14,
+      41,
+      17,
       2,
       2,
       0,
       "STRING"
     ],
     [
-      38,
-      14,
+      42,
+      17,
       2,
       5,
       0,
@@ -788,10 +712,10 @@
     "frontendVersion": "1.42.10",
     "VHS_latentpreview": false,
     "ds": {
-      "scale": 0.9646149645000023,
+      "scale": 0.7247295000000012,
       "offset": [
-        -662.2170583760095,
-        -177.59576725545605
+        721.6481360603989,
+        19.30478989447363
       ]
     }
   },

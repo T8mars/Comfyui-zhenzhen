@@ -1,8 +1,8 @@
 {
   "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
   "revision": 0,
-  "last_node_id": 20,
-  "last_link_id": 18,
+  "last_node_id": 21,
+  "last_link_id": 25,
   "nodes": [
     {
       "id": 14,
@@ -23,7 +23,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 14
+          "link": 24
         }
       ],
       "outputs": [
@@ -34,9 +34,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "72e3fd5095904540bd91622ae2eacdd2"
@@ -61,7 +61,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 15
+          "link": 25
         }
       ],
       "outputs": [
@@ -72,121 +72,12 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "{\"status\": \"success\", \"task_id\": \"72e3fd5095904540bd91622ae2eacdd2\", \"model\": \"gpt-image-2\", \"mode\": \"text2img\", \"prompt\": \"Main subject in realistic cosplay style in foreground\\\" + \\\"secondary characters in 2D illustration style in background\\\" \\n \\\"OVERLORD ALBEDO\\\"elegant serif typography, gold foil texture\\\" \\\"Cinematic studio lighting\\\"  \\\"Baroque dark fantasy\\\"\", \"quality\": \"auto\", \"size\": \"auto\", \"seed\": null, \"images_count\": 1, \"image_url\": \"https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png\", \"all_urls\": [\"https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png\"]}"
-      ]
-    },
-    {
-      "id": 10,
-      "type": "Comfly_gpt_image_2_S2A",
-      "pos": [
-        1139.8631363636366,
-        187.51807272727248
-      ],
-      "size": [
-        400,
-        460
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image1",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 18
-        },
-        {
-          "name": "image2",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image3",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image4",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          },
-          "link": 16
-        },
-        {
-          "name": "api_key",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "api_key"
-          },
-          "link": 17
-        }
-      ],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "links": [
-            12
-          ]
-        },
-        {
-          "name": "image_url",
-          "type": "STRING",
-          "links": [
-            13
-          ]
-        },
-        {
-          "name": "task_id",
-          "type": "STRING",
-          "links": [
-            14
-          ]
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": [
-            15
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
-        "Node name for S&R": "Comfly_gpt_image_2_S2A"
-      },
-      "widgets_values": [
-        "",
-        "img2img",
-        "",
-        "gpt-image-2",
-        "auto",
-        "auto",
-        "auto",
-        "png",
-        "auto",
-        1,
-        "",
-        "url",
-        1613410983,
-        "randomize"
       ]
     },
     {
@@ -247,7 +138,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            18
+            19
           ]
         },
         {
@@ -257,9 +148,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "LoadImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "LoadImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "未标题-1.jpg",
@@ -275,7 +166,7 @@
       ],
       "size": [
         270,
-        106
+        130
       ],
       "flags": {},
       "order": 2,
@@ -286,19 +177,20 @@
           "name": "apikey",
           "type": "STRING",
           "links": [
-            17
+            21
           ]
         }
       ],
       "properties": {
+        "Node name for S&R": "Comfly_api_set",
         "cnr_id": "zhenzhen",
-        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
-        "Node name for S&R": "Comfly_api_set"
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52"
       },
       "widgets_values": [
         "zhenzhen",
         "",
-        ""
+        "",
+        false
       ]
     },
     {
@@ -343,7 +235,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 13
+          "link": 23
         }
       ],
       "outputs": [
@@ -354,9 +246,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "https://midjourney-plus.oss-us-west-1.aliyuncs.com/004f4d84-60f5-4127-8478-de6aac9032cd.png"
@@ -380,76 +272,184 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 12
+          "link": 22
         }
       ],
       "outputs": [],
       "properties": {
+        "Node name for S&R": "SaveImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "SaveImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "ComfyUI"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "Comfly_gpt_image_2_S2A",
+      "pos": [
+        1139.8631363636366,
+        187.51807272727248
+      ],
+      "size": [
+        400,
+        484
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 19
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 20
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            23
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_gpt_image_2_S2A"
+      },
+      "widgets_values": [
+        "",
+        "img2img",
+        "",
+        "gpt-image-2",
+        "auto",
+        "auto",
+        "auto",
+        "png",
+        "auto",
+        1,
+        "",
+        "url",
+        0,
+        "randomize",
+        false
       ]
     }
   ],
   "links": [
     [
-      12,
-      10,
+      19,
+      20,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      17,
+      0,
+      21,
+      4,
+      "STRING"
+    ],
+    [
+      21,
+      18,
+      0,
+      21,
+      5,
+      "STRING"
+    ],
+    [
+      22,
+      21,
       0,
       12,
       0,
       "IMAGE"
     ],
     [
-      13,
-      10,
+      23,
+      21,
       1,
       13,
       0,
       "STRING"
     ],
     [
-      14,
-      10,
+      24,
+      21,
       2,
       14,
       0,
       "STRING"
     ],
     [
-      15,
-      10,
+      25,
+      21,
       3,
       16,
       0,
       "STRING"
-    ],
-    [
-      16,
-      17,
-      0,
-      10,
-      4,
-      "STRING"
-    ],
-    [
-      17,
-      18,
-      0,
-      10,
-      5,
-      "STRING"
-    ],
-    [
-      18,
-      20,
-      0,
-      10,
-      0,
-      "IMAGE"
     ]
   ],
   "groups": [
@@ -470,10 +470,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.2100000000000006,
+      "scale": 1.3310000000000008,
       "offset": [
-        -703.8596379826677,
-        79.77788184524057
+        -598.9760917768076,
+        53.256469373414845
       ]
     },
     "frontendVersion": "1.42.10",

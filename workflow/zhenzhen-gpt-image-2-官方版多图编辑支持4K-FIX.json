@@ -1,8 +1,8 @@
 {
   "id": "5ff7f513-f2c9-4710-bdde-009a96218a9c",
   "revision": 0,
-  "last_node_id": 23,
-  "last_link_id": 32,
+  "last_node_id": 24,
+  "last_link_id": 38,
   "nodes": [
     {
       "id": 19,
@@ -45,14 +45,14 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 30
+          "link": 36
         }
       ],
       "outputs": [],
       "properties": {
+        "Node name for S&R": "SaveImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "SaveImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "ComfyUI"
@@ -116,7 +116,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            27
+            33
           ]
         },
         {
@@ -126,9 +126,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "LoadImage",
         "cnr_id": "comfy-core",
-        "ver": "0.19.0",
-        "Node name for S&R": "LoadImage"
+        "ver": "0.19.0"
       },
       "widgets_values": [
         "未标题-1.jpg",
@@ -154,7 +154,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 32
+          "link": 38
         }
       ],
       "outputs": [
@@ -165,9 +165,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": []
     },
@@ -190,7 +190,7 @@
           "name": "anything",
           "shape": 7,
           "type": "*",
-          "link": 31
+          "link": 37
         }
       ],
       "outputs": [
@@ -201,16 +201,52 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "easy showAnything",
         "cnr_id": "comfyui-easy-use",
-        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad",
-        "Node name for S&R": "easy showAnything"
+        "ver": "8ba21d0b442002e66389d6e87faf828bfe05b2ad"
       },
       "widgets_values": [
         "https://files.closeai.fans/filesystem/output/20260422/ef090269-903a-4dce-8dac-866929dc5051.png"
       ]
     },
     {
-      "id": 23,
+      "id": 18,
+      "type": "Comfly_api_set",
+      "pos": [
+        265.79178804614116,
+        554.3621433711934
+      ],
+      "size": [
+        599.212485485964,
+        159.2750495184755
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            35
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set",
+        "cnr_id": "zhenzhen",
+        "ver": "26ae9be362b994d1370907d4228f527af6c84b52"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 24,
       "type": "Comfly_gpt_image_2_official",
       "pos": [
         894.0375880532603,
@@ -218,7 +254,7 @@
       ],
       "size": [
         400,
-        836
+        840
       ],
       "flags": {},
       "order": 4,
@@ -228,7 +264,7 @@
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": 27
+          "link": 33
         },
         {
           "name": "image2",
@@ -332,7 +368,7 @@
           "widget": {
             "name": "prompt"
           },
-          "link": 28
+          "link": 34
         },
         {
           "name": "api_key",
@@ -341,7 +377,7 @@
           "widget": {
             "name": "api_key"
           },
-          "link": 29
+          "link": 35
         }
       ],
       "outputs": [
@@ -349,32 +385,31 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            30
+            36
           ]
         },
         {
           "name": "image_url",
           "type": "STRING",
           "links": [
-            31
+            37
           ]
         },
         {
           "name": "response",
           "type": "STRING",
           "links": [
-            32
+            38
           ]
         }
       ],
       "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "a15046b956e025b725e7281dcbb066b6c1863f0f",
         "Node name for S&R": "Comfly_gpt_image_2_official"
       },
       "widgets_values": [
         "",
         "",
+        "gpt-image-2",
         1,
         "auto",
         "auto",
@@ -388,92 +423,56 @@
         5,
         5,
         900,
-        962057492745166,
+        0,
         "randomize",
-        false
-      ]
-    },
-    {
-      "id": 18,
-      "type": "Comfly_api_set",
-      "pos": [
-        265.79178804614116,
-        554.3621433711934
-      ],
-      "size": [
-        599.212485485964,
-        159.2750495184755
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "apikey",
-          "type": "STRING",
-          "links": [
-            29
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "26ae9be362b994d1370907d4228f527af6c84b52",
-        "Node name for S&R": "Comfly_api_set"
-      },
-      "widgets_values": [
-        "zhenzhen",
-        "",
-        "",
         false
       ]
     }
   ],
   "links": [
     [
-      27,
+      33,
       20,
       0,
-      23,
+      24,
       0,
       "IMAGE"
     ],
     [
-      28,
+      34,
       17,
       0,
-      23,
+      24,
       17,
       "STRING"
     ],
     [
-      29,
+      35,
       18,
       0,
-      23,
+      24,
       18,
       "STRING"
     ],
     [
-      30,
-      23,
+      36,
+      24,
       0,
       12,
       0,
       "IMAGE"
     ],
     [
-      31,
-      23,
+      37,
+      24,
       1,
       13,
       0,
       "STRING"
     ],
     [
-      32,
-      23,
+      38,
+      24,
       2,
       22,
       0,
@@ -498,10 +497,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6830134553650707,
+      "scale": 0.9090909090909091,
       "offset": [
-        5.691969787077483,
-        181.19930448838159
+        -393.4394346456797,
+        -114.08744179261012
       ]
     },
     "frontendVersion": "1.42.10",
