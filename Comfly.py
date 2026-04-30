@@ -103,7 +103,6 @@ def _parse_asset_bundle_only(bundle_json):
     )
 
 
-
 def _comfy_waveform_to_wav_bytes(waveform, sample_rate):
     """
     Encode Comfy AUDIO tensor to PCM WAV bytes without torchaudio.save (avoids TorchCodec requirement).
@@ -6467,6 +6466,7 @@ class Comfly_gpt_image_2_official:
                 "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
+                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "size": (cls._GPT_IMAGE2_SIZE_CHOICES, {"default": "auto"}),
@@ -6564,7 +6564,7 @@ class Comfly_gpt_image_2_official:
 
     def _build_official_edits_multipart(
         self, prompt, image, mask, n, quality, size, background,
-        output_format, output_compression, moderation
+        output_format, output_compression, moderation, model="gpt-image-2"
     ):
         """
         组装与 OpenAI /v1/images/edits 一致的 form：无图时传空白 1024×1024 作为 image。
@@ -6618,7 +6618,7 @@ class Comfly_gpt_image_2_official:
 
         data = {
             "prompt": prompt,
-            "model": "gpt-image-2",
+            "model": model,
             "n": str(n),
             "quality": quality,
             "moderation": moderation,
@@ -6690,12 +6690,13 @@ class Comfly_gpt_image_2_official:
         output_format,
         output_compression,
         moderation,
+        model,
         max_retries,
         initial_timeout,
     ):
         data, request_files = self._build_official_edits_multipart(
             prompt, image, mask, n, quality, size, background,
-            output_format, output_compression, moderation,
+            output_format, output_compression, moderation, model,
         )
         url = f"{baseurl}/v1/images/edits?async=true"
         if webhook.strip():
@@ -6808,12 +6809,12 @@ class Comfly_gpt_image_2_official:
 
     def _edits(
         self, prompt, image, mask, n, quality, size, background,
-        output_format, output_compression, moderation, max_retries, initial_timeout, pbar
+        output_format, output_compression, moderation, model, max_retries, initial_timeout, pbar
     ):
 
         data, request_files = self._build_official_edits_multipart(
             prompt, image, mask, n, quality, size, background,
-            output_format, output_compression, moderation,
+            output_format, output_compression, moderation, model,
         )
         pbar.update_absolute(20)
         response = self.make_request_with_retry(
@@ -6831,7 +6832,7 @@ class Comfly_gpt_image_2_official:
         image5=None, image6=None, image7=None, image8=None,
         image9=None, image10=None, image11=None, image12=None,
         image13=None, image14=None, image15=None, image16=None,
-        mask=None, api_key="",
+        mask=None, api_key="", model="gpt-image-2",
         n=1, quality="auto", size="auto", background="auto",
         output_format="png", output_compression=100, moderation="auto",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
@@ -6868,7 +6869,7 @@ class Comfly_gpt_image_2_official:
 
         def _info_common(mode_line):
             s = f"**Comfly gpt-image-2 (official)** {mode_line}\n"
-            s += f"Model: gpt-image-2\n"
+            s += f"Model: {model}\n"
             s += f"Prompt: {prompt}\n"
             s += f"Quality: {quality}\n"
             if size != "auto":
@@ -6906,6 +6907,7 @@ class Comfly_gpt_image_2_official:
                     output_format,
                     output_compression,
                     moderation,
+                    model,
                     max_retries,
                     initial_timeout,
                 )
@@ -6927,7 +6929,7 @@ class Comfly_gpt_image_2_official:
 
             result = self._edits(
                 prompt, image, mask, n, quality, size, background,
-                output_format, output_compression, moderation,
+                output_format, output_compression, moderation, model,
                 max_retries, initial_timeout, pbar
             )
             mode = "sync: /v1/images/edits (multipart" + (
@@ -7127,12 +7129,14 @@ class Comfly_gpt_image_2_official_ratio:
                 "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
+                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "background": (["auto", "opaque"], {"default": "auto"}),
                 "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
                 "output_compression": ("INT", {"default": 100, "min": 0, "max": 100}),
                 "moderation": (["auto", "low"], {"default": "auto"}),
+                "response_format": (["url", "b64_json"], {"default": "url"}),
                 "async_mode": ("BOOLEAN", {"default": True}),
                 "webhook": ("STRING", {"default": ""}),
                 "max_poll_attempts": ("INT", {"default": 300, "min": 10, "max": 1000}),
@@ -7140,7 +7144,6 @@ class Comfly_gpt_image_2_official_ratio:
                 "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                "response_format": (["url", "b64_json"], {"default": "url"}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
@@ -7227,7 +7230,7 @@ class Comfly_gpt_image_2_official_ratio:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, size, background,
-        output_format, output_compression, moderation, response_format="url"
+        output_format, output_compression, moderation, response_format="url", model="gpt-image-2"
     ):
 
         input_images = []
@@ -7285,7 +7288,7 @@ class Comfly_gpt_image_2_official_ratio:
 
         data = {
             "prompt": prompt,
-            "model": "gpt-image-2",
+            "model": model,
             "n": str(n),
             "quality": quality,
             "moderation": moderation,
@@ -7374,6 +7377,7 @@ class Comfly_gpt_image_2_official_ratio:
         output_compression,
         moderation,
         response_format,
+        model,
         max_retries,
         initial_timeout,
     ):
@@ -7382,7 +7386,7 @@ class Comfly_gpt_image_2_official_ratio:
             image6, image7, image8, image9, image10,
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, size, background,
-            output_format, output_compression, moderation, response_format,
+            output_format, output_compression, moderation, response_format, model,
         )
         url = f"{baseurl}/v1/images/edits?async=true"
         if webhook.strip():
@@ -7498,14 +7502,14 @@ class Comfly_gpt_image_2_official_ratio:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, size, background,
-        output_format, output_compression, moderation, response_format, max_retries, initial_timeout, pbar
+        output_format, output_compression, moderation, response_format, model, max_retries, initial_timeout, pbar
     ):
         data, request_files = self._build_official_edits_multipart(
             prompt, image1, image2, image3, image4, image5,
             image6, image7, image8, image9, image10,
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, size, background,
-            output_format, output_compression, moderation, response_format,
+            output_format, output_compression, moderation, response_format, model,
         )
         pbar.update_absolute(20)
         response = self.make_request_with_retry(
@@ -7523,7 +7527,7 @@ class Comfly_gpt_image_2_official_ratio:
         image1=None, image2=None, image3=None, image4=None, image5=None,
         image6=None, image7=None, image8=None, image9=None, image10=None,
         image11=None, image12=None, image13=None, image14=None, image15=None, image16=None,
-        mask=None, api_key="",
+        mask=None, api_key="", model="gpt-image-2",
         n=1, quality="auto", background="auto",
         output_format="png", output_compression=100, moderation="auto",
         response_format="url",
@@ -7559,7 +7563,7 @@ class Comfly_gpt_image_2_official_ratio:
 
         def _info_common(mode_line):
             s = f"**Comfly gpt-image-2 (official)** {mode_line}\n"
-            s += f"Model: gpt-image-2\n"
+            s += f"Model: {model}\n"
             s += f"Prompt: {prompt}\n"
             s += f"Aspect Ratio: {aspect_ratio}\n"
             s += f"Resolution: {resolution}\n"
@@ -7612,6 +7616,7 @@ class Comfly_gpt_image_2_official_ratio:
                     output_compression,
                     moderation,
                     response_format,
+                    model,
                     max_retries,
                     initial_timeout,
                 )
@@ -7636,7 +7641,7 @@ class Comfly_gpt_image_2_official_ratio:
                 image6, image7, image8, image9, image10,
                 image11, image12, image13, image14, image15, image16,
                 mask, n, quality, size, background,
-                output_format, output_compression, moderation, response_format,
+                output_format, output_compression, moderation, response_format, model,
                 max_retries, initial_timeout, pbar
             )
             mode = "sync: /v1/images/edits (multipart" + (
@@ -7696,7 +7701,7 @@ class Comfly_gpt_image_2:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
@@ -7960,7 +7965,7 @@ class Comfly_gpt_image_2_S2A:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
@@ -19953,7 +19958,6 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
 
 
 
-
 class Comfly_Doubao_Seedance2_0:
     @classmethod
     def INPUT_TYPES(cls):
@@ -19963,7 +19967,7 @@ class Comfly_Doubao_Seedance2_0:
                 "model": (["doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128"], {"default": "doubao-seedance-2-0-260128"}),
                 "duration": ("INT", {"default": 5, "min": 4, "max": 15, "step": 1}),
                 "ratio": (["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "9:21", "adaptive"], {"default": "16:9"}),
-                "resolution": (["720p", "480p", "native1080p"], {"default": "720p"}),
+                "resolution": (["720p", "480p", "native1080p", "1080p", "2k", "4k"], {"default": "720p"}),
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),
@@ -19997,6 +20001,7 @@ class Comfly_Doubao_Seedance2_0:
                         "tooltip": "Wire from «Asset ID Bundle» output. JSON built from Asset Upload asset_id strings per slot.",
                     },
                 ),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
 
@@ -20007,9 +20012,9 @@ class Comfly_Doubao_Seedance2_0:
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
-        self.timeout = 600
+        self.timeout = 3600
         self.poll_interval = 10
-        self.max_wait_time = 600
+        self.max_wait_time = 3600
 
     def get_headers(self):
         return {
@@ -20153,7 +20158,7 @@ class Comfly_Doubao_Seedance2_0:
                        generate_audio=True, return_last_frame=False,
                        web_search=False,
                        watermark=False, seed=-1,
-                       asset_bundle=""):
+                       asset_bundle="", skip_error=False):
 
         blank_image = Image.new('RGB', (1, 1), color='black')
         blank_tensor = pil2tensor(blank_image)
@@ -20164,6 +20169,8 @@ class Comfly_Doubao_Seedance2_0:
             config['api_key'] = self.api_key
 
         if not self.api_key:
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] error")
             return ("", "", json.dumps({"error": "API key not found."}), "", blank_tensor)
 
         try:
@@ -20332,6 +20339,8 @@ class Comfly_Doubao_Seedance2_0:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] {error_message}")
                 return ("", "", json.dumps({"error": error_message}), "", blank_tensor)
 
             result = response.json()
@@ -20349,6 +20358,8 @@ class Comfly_Doubao_Seedance2_0:
             while True:
                 elapsed = time.time() - start_time
                 if elapsed > self.max_wait_time:
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] Timeout {elapsed:.1f}s")
                     return ("", task_id, json.dumps({"error": f"Timeout {elapsed:.1f}s", "task_id": task_id}), "", blank_tensor)
 
                 time.sleep(self.poll_interval)
@@ -20451,11 +20462,15 @@ class Comfly_Doubao_Seedance2_0:
                             break
                         else:
                             print(f"Succeeded but no video URL found: {json.dumps(status_data, indent=2)}")
+                            if not skip_error:
+                                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] Succeeded but no video URL found: {json.dumps(status_data, ensure_ascii=False)}")
                             return ("", task_id, json.dumps(status_data, indent=2), "", blank_tensor)
 
                     elif status == "failed":
                         fail_reason = status_data.get("fail_reason", "") or status_data.get("failReason", "")
                         print(f"Task failed: {fail_reason}")
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Doubao_Seedance2_0] {fail_reason}")
                         return ("", task_id, json.dumps(status_data, indent=2), "", blank_tensor)
 
                 except requests.exceptions.Timeout:
@@ -20519,6 +20534,8 @@ class Comfly_Doubao_Seedance2_0:
                 pbar.update_absolute(100)
                 return (video_out, task_id, json.dumps(response_info, indent=2), video_url, last_frame_tensor)
             else:
+                if not skip_error:
+                    raise RuntimeError("[Comfly_Doubao_Seedance2_0] Video adapter init failed (see terminal log for details)")
                 return ("", task_id, json.dumps({"error": "No video URL"}), "", blank_tensor)
 
         except Exception as e:
@@ -20526,6 +20543,8 @@ class Comfly_Doubao_Seedance2_0:
             print(error_message)
             import traceback
             traceback.print_exc()
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"error": error_message}), "", blank_tensor)
         
 
@@ -20607,85 +20626,6 @@ class Comfly_Doubao_Seedance2_0_AssetIdBundle:
         }
         return (json.dumps(payload, ensure_ascii=False),)
 
-
-    """
-    Collect asset_id strings from «Comfly Doubao Seedance 2.0 Asset Upload» (one slot per wire),
-    same layout as Seedance 2.0, into one JSON for the main node's asset_bundle input.
-    """
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        opt = {
-            "apikey": ("STRING", {"default": ""}),
-            "first_frame": ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"}),
-            "last_frame": ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"}),
-        }
-        for i in range(1, 10):
-            opt[f"ref_image{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
-        for i in range(1, 4):
-            opt[f"video{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
-        for i in range(1, 4):
-            opt[f"audio{i}"] = ("STRING", {"default": "", "tooltip": "asset_id from Asset Upload"})
-        return {"required": {}, "optional": opt}
-
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("asset_bundle",)
-    FUNCTION = "bundle"
-    CATEGORY = "zhenzhen/Doubao"
-
-    def bundle(
-        self,
-        apikey="",
-        first_frame="",
-        last_frame="",
-        ref_image1="",
-        ref_image2="",
-        ref_image3="",
-        ref_image4="",
-        ref_image5="",
-        ref_image6="",
-        ref_image7="",
-        ref_image8="",
-        ref_image9="",
-        video1="",
-        video2="",
-        video3="",
-        audio1="",
-        audio2="",
-        audio3="",
-    ):
-        def sid(x):
-            return (x or "").strip() if x is not None else ""
-
-        ff = sid(first_frame)
-        lf = sid(last_frame)
-        ref_images = []
-        for i in range(1, 10):
-            t = sid(locals().get(f"ref_image{i}"))
-            if t:
-                ref_images.append(t)
-        videos = []
-        for i in range(1, 4):
-            t = sid(locals().get(f"video{i}"))
-            if t:
-                videos.append(t)
-        audios = []
-        for i in range(1, 4):
-            t = sid(locals().get(f"audio{i}"))
-            if t:
-                audios.append(t)
-
-        payload = {
-            "first_frame": ff,
-            "last_frame": lf,
-            "ref_images": ref_images,
-            "videos": videos,
-            "audios": audios,
-        }
-        return (json.dumps(payload, ensure_ascii=False),)
-
-
-
 class Comfly_Doubao_Seedance2_0_Asset:
     """
     Create Seedance asset from Comfy IMAGE / VIDEO / AUDIO.
@@ -20702,6 +20642,7 @@ class Comfly_Doubao_Seedance2_0_Asset:
                 "image": ("IMAGE",),
                 "video": (IO.VIDEO, {"tooltip": "Reference video; upload same as Seedance 2.0."}),
                 "audio": (IO.AUDIO, {"tooltip": "Reference audio; upload same as Seedance 2.0."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             },
         }
 
@@ -20733,7 +20674,7 @@ class Comfly_Doubao_Seedance2_0_Asset:
         response.raise_for_status()
         return response.json()
 
-    def upload_asset(self, apikey="", name="", image=None, video=None, audio=None):
+    def upload_asset(self, apikey="", name="", image=None, video=None, audio=None, skip_error=False):
         if apikey and str(apikey).strip():
             self.api_key = str(apikey).strip()
             config = get_config()
@@ -20742,6 +20683,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
         if not self.api_key:
             error_message = "API key not found."
             print(error_message)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
             return ("", "", json.dumps({"error": error_message}))
 
         seed = Comfly_Doubao_Seedance2_0()
@@ -20772,11 +20715,15 @@ class Comfly_Doubao_Seedance2_0_Asset:
         else:
             err = "Connect image, video, or audio."
             print(err)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {err}")
             return ("", "", json.dumps({"error": err}))
 
         if not media_url:
             err = "Could not obtain HTTPS URL for asset (upload failed or empty media)."
             print(err)
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {err}")
             return ("", "", json.dumps({"error": err}))
 
         display_name = (name or "").strip() or f"asset_{uuid.uuid4().hex[:12]}"
@@ -20801,6 +20748,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
             if response.status_code != 200:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                 return ("", "", json.dumps({"error": error_message}))
 
             result = response.json()
@@ -20808,6 +20757,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
             if result.get("code") != 0:
                 error_message = result.get("msg", "Unknown error")
                 print(f"Asset upload failed: {error_message}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                 return ("", "", json.dumps(result, indent=2))
 
             data = result.get("data", {})
@@ -20829,6 +20780,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
                 if elapsed > self.max_wait_time:
                     error_message = f"Asset processing timeout after {elapsed:.1f}s. Last status: {status}"
                     print(error_message)
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                     return ("", status, json.dumps({"error": error_message, "asset_id": asset_id, "last_status": status}))
 
                 time.sleep(self.poll_interval)
@@ -20855,6 +20808,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
                     if status in ("Failed", "Error", "Deleted"):
                         error_message = f"Asset processing failed with status: {status}"
                         print(error_message)
+                        if not skip_error:
+                            raise RuntimeError(f"[Comfly_Doubao_Seedance2_0_Asset] {error_message}")
                         return ("", status, json.dumps(query_result, indent=2))
 
                 except requests.exceptions.Timeout:
@@ -20867,6 +20822,8 @@ class Comfly_Doubao_Seedance2_0_Asset:
         except Exception as e:
             error_message = f"Asset upload error: {str(e)}"
             print(error_message)
+            if not skip_error:
+                raise
             return ("", "", json.dumps({"error": error_message}))
 
 
