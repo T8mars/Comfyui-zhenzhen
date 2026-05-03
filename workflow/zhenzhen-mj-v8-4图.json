@@ -1,0 +1,235 @@
+{
+  "id": "618ac4f7-7a78-4b48-b8cd-0f2d170220c4",
+  "revision": 0,
+  "last_node_id": 16,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 16,
+      "type": "SaveImage",
+      "pos": [
+        2587.4214423583207,
+        274.8584180976693
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 12
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "Comfly_api_set",
+      "pos": [
+        1499.8597975408084,
+        612.3142532498713
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Comfly_Mj",
+      "pos": [
+        1938.5543668517018,
+        273.90546318130333
+      ],
+      "size": [
+        400,
+        578
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "no",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "s",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "iw",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "name": "r",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "cw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sv",
+          "shape": 7,
+          "type": "COMBO",
+          "link": null
+        },
+        {
+          "name": "oref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "cref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "sref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_Mj"
+      },
+      "widgets_values": [
+        "一个可爱的女人",
+        "fast mode",
+        "",
+        "",
+        "1:1",
+        "v 8",
+        false,
+        false,
+        298527924,
+        "randomize",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      11,
+      15,
+      0,
+      14,
+      12,
+      "STRING"
+    ],
+    [
+      12,
+      14,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.3310000000000022,
+      "offset": [
+        -1294.180013800187,
+        -102.16670708948638
+      ]
+    },
+    "frontendVersion": "1.42.10"
+  },
+  "version": 0.4
+}
