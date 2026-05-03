@@ -779,7 +779,7 @@ class Comfly_Mj(ComflyBaseNode):
                 "text_en": ("STRING", {"multiline": True, "default": ""}),
                 "api_key": ("STRING", {"default": ""}),  
                 "ar": ("STRING", {"default": "1:1"}),
-                "model_version": (["v 8","v 7", "v 6.1", "v 6.0", "v 5.2", "v 5.1", "niji 7", "niji 6", "niji 5", "niji 4"], {"default": "v 8"}),
+                "model_version": (["v 8.1","v 8","v 7", "v 6.1", "v 6.0", "v 5.2", "v 5.1", "niji 7", "niji 6", "niji 5", "niji 4"], {"default": "v 8.1"}),
                 "no": ("STRING", {"default": "", "forceInput": True}),
                 "c": ("INT", {"default": 0, "min": 0, "max": 100, "forceInput": True}),
                 "s": ("INT", {"default": 0, "min": 0, "max": 1000, "forceInput": True}),
