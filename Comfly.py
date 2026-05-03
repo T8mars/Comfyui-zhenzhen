@@ -6982,6 +6982,7 @@ class Comfly_gpt_image_2_official:
 class Comfly_gpt_image_2_official_ratio:
 
     _ASPECT_RATIO_CHOICES = [
+        "auto",
         "1:1",
         "3:2",
         "2:3",
@@ -7097,6 +7098,8 @@ class Comfly_gpt_image_2_official_ratio:
     @classmethod
     def _get_size_from_params(cls, aspect_ratio, resolution):
         """根据 aspect_ratio 和 resolution 获取实际的 size"""
+        if aspect_ratio == "auto":
+            return "auto", None
         size = cls._SIZE_MAP.get((aspect_ratio, resolution))
         if size is None:
             return None, f"不支持的组合: {aspect_ratio} × {resolution}。"
@@ -7107,7 +7110,7 @@ class Comfly_gpt_image_2_official_ratio:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "aspect_ratio": (cls._ASPECT_RATIO_CHOICES, {"default": "1:1"}),
+                "aspect_ratio": (cls._ASPECT_RATIO_CHOICES, {"default": "auto"}),
                 "resolution": (cls._RESOLUTION_CHOICES, {"default": "1k"}),
             },
             "optional": {
