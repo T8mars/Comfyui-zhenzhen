@@ -1,4 +1,4 @@
-# 网站：[https://ai.t8star.cn](https://ai.t8star.cn/register?aff=cbff0534884)
+# 网站：[https://ai.t8star.org](https://ai.t8star.org/register?aff=cbff0534884)
 # Online workflow overseas：
 https://www.runninghub.ai/?inviteCode=rh-v1121
 # 在线工作流国内版：
@@ -14,9 +14,9 @@ My favorite girl Go YounJung
 
 # 网站使用及Api调用教程：
 
-网站使用教程：https://ai.t8star.cn/about
+网站使用教程：https://ai.t8star.org/about
 
-API调用及开发教程：https://ai.t8star.cn/api-set
+API调用及开发教程：https://ai.t8star.org/api-set
 
 # 贞贞的AI工坊新手无障碍整合包(windows版本)和教程：
 
