@@ -15150,7 +15150,6 @@ class Comfly_suno_cover:
                 "api_key": ("STRING", {"default": ""}),
                 "negative_tags": ("STRING", {"default": ""}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
     
@@ -15171,19 +15170,16 @@ class Comfly_suno_cover:
         }
     
     def generate_cover(self, cover_clip_id, prompt, title="", tags="", version="v5", 
-                    make_instrumental=False, api_key="", negative_tags="", seed=0, skip_error=False):
+                    make_instrumental=False, api_key="", negative_tags="", seed=0):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
-            save_config(config)
             
         if not self.api_key:
             error_message = "API key not found in Comflyapi.json"
             print(error_message)
             empty_audio = create_audio_object("")
-            if not skip_error:
-                raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
         mv_mapping = {
             "v3.0": "chirp-v3.0",
@@ -15192,7 +15188,7 @@ class Comfly_suno_cover:
             "v4.5": "chirp-auk",
             "v4.5+": "chirp-bluejay",
             "v5": "chirp-crow",
-            "v5.5": "chirp-fenix"   
+            "v5.5": "chirp-fenix"
         }
         
         mv = mv_mapping.get(version, "chirp-v4-tau")
@@ -15233,8 +15229,6 @@ class Comfly_suno_cover:
                 error_message = f"API Error: {response.status_code} - {response.text}"
                 print(error_message)
                 empty_audio = create_audio_object("")
-                if not skip_error:
-                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
                 
             result = response.json()
@@ -15277,16 +15271,12 @@ class Comfly_suno_cover:
                 error_message = f"Unexpected response format: {result}"
                 print(error_message)
                 empty_audio = create_audio_object("")
-                if not skip_error:
-                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
             
             if len(clips) == 0:
                 error_message = f"No clips found in response. Task ID: {task_id}"
                 print(error_message)
                 empty_audio = create_audio_object("")
-                if not skip_error:
-                    raise RuntimeError(f"[Comfly_suno_cover] {error_message}")
                 return (empty_audio, empty_audio, "", "", task_id, error_message, "", "", "", "")
             if len(clips) < 2:
                 while len(clips) < 2:
@@ -15352,8 +15342,6 @@ class Comfly_suno_cover:
             import traceback
             traceback.print_exc()
             empty_audio = create_audio_object("")
-            if not skip_error:
-                raise
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
         
     def wait_for_task_completion(self, task_id, pbar):
@@ -15407,7 +15395,6 @@ class Comfly_suno_cover:
         
         print(f"Task {task_id} did not complete within {max_attempts} attempts")
         return []
-
 
 class OpenAISoraAPIPlus:
     """
@@ -20550,6 +20537,7 @@ class Comfly_Doubao_Seedance2_0:
                 raise
             return ("", "", json.dumps({"error": error_message}), "", blank_tensor)
         
+
 
 
 class Comfly_Doubao_Seedance2_0_AssetIdBundle:

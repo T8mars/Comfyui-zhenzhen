@@ -62,6 +62,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260509-1
+
+修复seedance2.0节点的bundle asset的问题
+修复suno cover音乐翻唱报错，支持v5.5
+其他工作流如果哪个节点报错，对着节点右键刷新或者修复下，可能是参数位移了，重新添加，晚点我检查下
+
 ### 20260504-1
 
 gpt-image-2-official-ratio节点应用户要求，比例增加auto选项
