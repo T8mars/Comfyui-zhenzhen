@@ -62,6 +62,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260510
+
+为了更好的提供TOKEN服务，网站预计暂时停止注册功能（功能维护），仅提供老用户稳定使用，后续注册开放时间另行通知（暂时还没停止注册，提前通知，老用户稳定使用，正常维护）
+
 ### 20260509-1
 
 修复seedance2.0节点的bundle asset的问题
