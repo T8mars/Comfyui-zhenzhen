@@ -20,21 +20,15 @@ API调用及开发教程：https://ai.t8star.org/api-set
 
 # 贞贞的AI工坊新手无障碍整合包(windows版本)和教程：
 
-整合包(更新至v1.6)：https://pan.quark.cn/s/5e948ab145e1
-
-B站教程：https://www.bilibili.com/video/BV1nooQBsEAf/
+整合包(更新至v4.0A)：https://pan.quark.cn/s/5e948ab145e1
 
 youtube教程：https://www.youtube.com/watch?v=oitmGaRtYvc
 
 # 新版节点搭建，报错自查，API调用教程：
 
-B站：https://www.bilibili.com/video/BV1TzspzpEFJ/
-
 Youtube：https://www.youtube.com/watch?v=zwpjDCMCJOY
 
 # 贞贞的AI工坊全模型使用教程（不断更新）：
-
-https://space.bilibili.com/385085361/lists/6620957?type=season
 
 https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
@@ -228,8 +222,6 @@ veo&grok-备用2
 ### 20260412
 
 seedance2.0支持2k,4k,1080p，更新视频教程
-
-Bilibili教程：https://www.bilibili.com/video/BV1YnDQBtEkP/
 
 Youtube教程：https://www.youtube.com/watch?v=xR5zyNNYnNk
 
@@ -739,7 +731,6 @@ sora-2 Pro，无水印，基准价格1.7RMB，10S和15S支持HD，25S不支持HD
 
 更新了6个最终版工作流，可以直接使用
 
-B站教程：https://www.bilibili.com/video/BV1m3WszsEn7/
 Youtube教程：https://www.youtube.com/watch?v=bc8b5ZxPvJE
 
 ### 20251017-2:
