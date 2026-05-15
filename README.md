@@ -56,6 +56,32 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+
+### 20260515
+
+新增节点：Zhenzhen GPT Image 2 Fal，支持2K,4K，出图超快，4K只要70秒，无限并发，非常稳定，支持自定义分辨率，测试1K 0.111,2K 0.129，4K0.193，实际按照你自己的分辨率为准，注意设置的自定义尺寸一定要被16整除
+
+节点名字：Comfly_gpt_image_2_fal
+
+工作流（workflow目录下）：zhenzhen-gpt-image-2-fal.json
+
+令牌分组：default
+
+
+### 20260514
+
+
+·贞贞的工坊通知（停止注册，以下仅针对有账户用户，目前不会开放注册）
+
+目前已经完全关闭国内在线充值业务，QQ和微信（除原对公用户外）不再处理和回复国内用户相关问题，网站已经全面出海，如果问题以及原用户合规使用的充值请联系下方discord
+
+Discord：https://discord.com/（海外网站），搜索t8star，添加好友，务必发送一条消息，不然我这要半天才能加，有速率限制
+
+联系DISCORD充值，后续微信不再回复相关问题，有问题DISCORD，加DISCORD一定要发一句消息，如果不发我加不了，好友频率上限，微信不再回复
+
+贞贞的AI工坊Discord群组，https://discord.gg/FtzeAFw6（需要先进入这个，否则没法私信我）
+
+
 ### 20260510
 
 为了更好的提供TOKEN服务，网站预计暂时停止注册功能（功能维护），仅提供老用户稳定使用，后续注册开放时间另行通知（暂时还没停止注册，提前通知，老用户稳定使用，正常维护）
