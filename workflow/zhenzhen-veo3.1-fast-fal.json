@@ -1,0 +1,339 @@
+{
+  "id": "f1da9b5d-739a-4f8b-8df0-fd27e8414cd4",
+  "revision": 0,
+  "last_node_id": 3207,
+  "last_link_id": 6788,
+  "nodes": [
+    {
+      "id": 3201,
+      "type": "LoadImage",
+      "pos": [
+        3499.826301535796,
+        3852.1493239790634
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6782
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 3204,
+      "type": "Comfly_api_set",
+      "pos": [
+        3498.230897303518,
+        4278.406881253164
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            6783
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6wH80OCED0kIzs2wSCb8shtH7UmcetquKYMStSiGp7eQCgsB",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3205,
+      "type": "Comfly_veo3_1_fal",
+      "pos": [
+        3889.2625278596593,
+        3888.0985026939957
+      ],
+      "size": [
+        400,
+        392
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 6782
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 6783
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            6788
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            6785
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            6786
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_veo3_1_fal"
+      },
+      "widgets_values": [
+        "一个美丽的女人拿着这个包做展示",
+        "",
+        "16:9",
+        "8s",
+        "720p",
+        true,
+        false,
+        "4",
+        "image_url",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 3202,
+      "type": "easy showAnything",
+      "pos": [
+        4382.704000003865,
+        4206.633565080862
+      ],
+      "size": [
+        532.9231930672095,
+        134.4969560362506
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6786
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Model: veo3.1-fast (fal)\nResolution: 720p\nDuration: 8s\nAspect: 16:9\nVideo: https://v3b.fal.media/files/b/0a9a4c82/Q5niuVlv5ylhKejpSPo7R_06b12169bc4b43d286ce4e54db0fe1e1.mp4"
+      ]
+    },
+    {
+      "id": 3203,
+      "type": "easy showAnything",
+      "pos": [
+        4401.763120651829,
+        4032.579769568545
+      ],
+      "size": [
+        296.01036045361434,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6785
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9a4c82/Q5niuVlv5ylhKejpSPo7R_06b12169bc4b43d286ce4e54db0fe1e1.mp4"
+      ]
+    },
+    {
+      "id": 3207,
+      "type": "SaveVideo",
+      "pos": [
+        4766.387777199284,
+        3791.452022639422
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 6788
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      6782,
+      3201,
+      0,
+      3205,
+      0,
+      "IMAGE"
+    ],
+    [
+      6783,
+      3204,
+      0,
+      3205,
+      3,
+      "STRING"
+    ],
+    [
+      6785,
+      3205,
+      1,
+      3203,
+      0,
+      "STRING"
+    ],
+    [
+      6786,
+      3205,
+      2,
+      3202,
+      0,
+      "STRING"
+    ],
+    [
+      6788,
+      3205,
+      0,
+      3207,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        2796.2160501110034,
+        3068.6896405100842,
+        2988.309086879267,
+        393.4698426281134
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ds": {
+      "scale": 0.5832099585062326,
+      "offset": [
+        -1174.691123977631,
+        -2259.2655905435445
+      ]
+    }
+  },
+  "version": 0.4
+}

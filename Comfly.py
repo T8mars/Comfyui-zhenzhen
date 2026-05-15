@@ -20819,7 +20819,275 @@ class Comfly_Doubao_Seedance2_0_Asset:
 
 
 
-class Comfly_gpt_image_2_fal:
+class Comfly_veo3_1_fal:
+    """Veo 3.1 Fast Reference-to-Video via fal.ai Queue API.
+    Uses https://ai.t8star.cn/fal as proxy for https://queue.fal.run.
+    Generate videos from reference images using Google's Veo 3.1 Fast.
+    Endpoint: fal-ai/veo3.1/fast/reference-to-video
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
+                "duration": (["8s"], {"default": "8s"}),
+                "resolution": (["720p", "1080p", "4k"], {"default": "720p"}),
+                "generate_audio": ("BOOLEAN", {"default": True, "tooltip": "Whether to generate audio for the video."}),
+                "auto_fix": ("BOOLEAN", {"default": False, "tooltip": "Auto-fix prompts that fail content policy."}),
+                "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4", "tooltip": "1=most strict, 6=least strict."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*6s = 2 hours timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[veo3_1_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[veo3_1_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image1=None, image2=None, image3=None,
+                api_key="", aspect_ratio="16:9", duration="8s",
+                resolution="720p", generate_audio=True, auto_fix=False,
+                safety_tolerance="4", image_way="image_url",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "fal-ai/veo3.1/fast/reference-to-video"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "duration": duration,
+                "resolution": resolution,
+                "generate_audio": generate_audio,
+                "safety_tolerance": safety_tolerance,
+            }
+
+            if auto_fix:
+                payload["auto_fix"] = True
+
+            # Process input images
+            all_images = [image1, image2, image3]
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[veo3_1_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            if image_urls:
+                payload["image_urls"] = image_urls
+
+            pbar.update_absolute(25)
+            print(f"[veo3_1_fal] Submitting to {api_url} (ratio={aspect_ratio}, duration={duration}, resolution={resolution})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            result = response.json()
+
+            # Check for validation/error in response body
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync)
+            if "video" in result and result["video"]:
+                video_url = result["video"].get("url", "")
+                info = f"Model: veo3.1-fast (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nVideo: {video_url}"
+                pbar.update_absolute(100)
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, video_url, info)
+
+            # Queue mode: poll for result
+            request_id = result.get("request_id")
+            response_url = result.get("response_url", "")
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            # Fix response_url to use our proxy
+            if "queue.fal.run" in response_url:
+                response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+            print(f"[veo3_1_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        continue
+                    poll_data = poll_resp.json()
+
+                    if "video" in poll_data and poll_data["video"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("FAILED", "CANCELLED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[veo3_1_fal] {err}")
+                        return ("", "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[veo3_1_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[veo3_1_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(98)
+
+            # Extract video URL
+            video_url = result_data["video"].get("url", "")
+            if not video_url:
+                err = "No video URL in result"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(100)
+            info = f"Model: veo3.1-fast (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nVideo: {video_url}"
+            print(f"[veo3_1_fal] Done! Video: {video_url}")
+            video_adapter = ComflyVideoAdapter(video_url)
+            return (video_adapter, video_url, info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[veo3_1_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
     """GPT-Image-2 via fal.ai Queue API (independent from other gpt-image nodes).
     Uses https://ai.t8star.cn/fal as proxy for https://queue.fal.run.
     Supports text-to-image generation and image editing with mask.
@@ -21119,6 +21387,277 @@ class Comfly_gpt_image_2_fal:
             return (default_image, error_message, "")
 
 
+
+class Comfly_veo3_1_fal:
+    """Veo 3.1 Fast Reference-to-Video via fal.ai Queue API.
+    Uses https://ai.t8star.cn/fal as proxy for https://queue.fal.run.
+    Generate videos from reference images using Google's Veo 3.1 Fast.
+    Endpoint: fal-ai/veo3.1/fast/reference-to-video
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "aspect_ratio": (["16:9", "9:16"], {"default": "16:9"}),
+                "duration": (["8s"], {"default": "8s"}),
+                "resolution": (["720p", "1080p", "4k"], {"default": "720p"}),
+                "generate_audio": ("BOOLEAN", {"default": True, "tooltip": "Whether to generate audio for the video."}),
+                "auto_fix": ("BOOLEAN", {"default": False, "tooltip": "Auto-fix prompts that fail content policy."}),
+                "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4", "tooltip": "1=most strict, 6=least strict."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*6s = 2 hours timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[veo3_1_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[veo3_1_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image1=None, image2=None, image3=None,
+                api_key="", aspect_ratio="16:9", duration="8s",
+                resolution="720p", generate_audio=True, auto_fix=False,
+                safety_tolerance="4", image_way="image_url",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "fal-ai/veo3.1/fast/reference-to-video"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "duration": duration,
+                "resolution": resolution,
+                "generate_audio": generate_audio,
+                "safety_tolerance": safety_tolerance,
+            }
+
+            if auto_fix:
+                payload["auto_fix"] = True
+
+            # Process input images
+            all_images = [image1, image2, image3]
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[veo3_1_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            if image_urls:
+                payload["image_urls"] = image_urls
+
+            pbar.update_absolute(25)
+            print(f"[veo3_1_fal] Submitting to {api_url} (ratio={aspect_ratio}, duration={duration}, resolution={resolution})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            result = response.json()
+
+            # Check for validation/error in response body
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[veo3_1_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync)
+            if "video" in result and result["video"]:
+                video_url = result["video"].get("url", "")
+                info = f"Model: veo3.1-fast (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nVideo: {video_url}"
+                pbar.update_absolute(100)
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, video_url, info)
+
+            # Queue mode: poll for result
+            request_id = result.get("request_id")
+            response_url = result.get("response_url", "")
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            # Fix response_url to use our proxy
+            if "queue.fal.run" in response_url:
+                response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+            print(f"[veo3_1_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        continue
+                    poll_data = poll_resp.json()
+
+                    if "video" in poll_data and poll_data["video"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("FAILED", "CANCELLED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[veo3_1_fal] {err}")
+                        return ("", "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[veo3_1_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[veo3_1_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(98)
+
+            # Extract video URL
+            video_url = result_data["video"].get("url", "")
+            if not video_url:
+                err = "No video URL in result"
+                if not skip_error:
+                    raise RuntimeError(f"[veo3_1_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(100)
+            info = f"Model: veo3.1-fast (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nVideo: {video_url}"
+            print(f"[veo3_1_fal] Done! Video: {video_url}")
+            video_adapter = ComflyVideoAdapter(video_url)
+            return (video_adapter, video_url, info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[veo3_1_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
@@ -21192,7 +21731,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_gpt_image_2_official":Comfly_gpt_image_2_official,
     "Comfly_gpt_image_2_official_ratio":Comfly_gpt_image_2_official_ratio,
     "Comfly_wan2_6_API": Comfly_wan2_6_API,
-    "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal
+    "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal,
+    "Comfly_veo3_1_fal": Comfly_veo3_1_fal
 }
 
 
@@ -21270,7 +21810,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_gpt_image_2_official":"zhenzhen-gpt-image-2-official",
     "Comfly_gpt_image_2_official_ratio":"zhenzhen-gpt-image-2-official_ratio",
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video",
-    "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal"
+    "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal",
+    "Comfly_veo3_1_fal": "Zhenzhen Veo 3.1 Fast Ref2Video Fal"
 }
 
 # Aliyun WanX 2.6 API Node
