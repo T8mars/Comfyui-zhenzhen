@@ -20862,7 +20862,7 @@ class Comfly_gpt_image_2_fal:
 
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
-        self.timeout = 300
+        self.timeout = 12000
 
     def get_headers(self):
         return {
