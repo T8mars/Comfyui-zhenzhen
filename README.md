@@ -67,6 +67,8 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 令牌分组：default
 
+FAL渠道是预扣制，不是实际扣那么多，看网站左侧接入教程，有图片说明，实际扣费和你选的质量类型，输入图像，还有输出尺寸都有关系
+
 
 ### 20260514
 
