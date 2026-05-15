@@ -56,6 +56,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260515-4
+
+Comfly_veo3_1_fal更新，刚才弄错了
+
+
 ### 20260515-3
 
 新增节点：Comfly_veo3_1_fal
