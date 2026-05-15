@@ -20818,6 +20818,307 @@ class Comfly_Doubao_Seedance2_0_Asset:
             return ("", "", json.dumps({"error": error_message}))
 
 
+
+class Comfly_gpt_image_2_fal:
+    """GPT-Image-2 via fal.ai Queue API (independent from other gpt-image nodes).
+    Uses https://ai.t8star.cn/fal as proxy for https://queue.fal.run.
+    Supports text-to-image generation and image editing with mask.
+    """
+
+    FAL_BASE = f"{baseurl}/fal"  # replaces https://queue.fal.run
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+                "mode": (["generate", "edit"], {"default": "edit"}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "mask": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "quality": (["high", "medium", "low", "auto"], {"default": "auto"}),
+                "image_size": (["auto", "square_hd", "square", "portrait_4_3", "portrait_16_9", "landscape_4_3", "landscape_16_9", "custom"], {"default": "custom"}),
+                "custom_width": ("INT", {"default": 3840, "min": 256, "max": 3840, "step": 16, "tooltip": "Custom width (must be multiple of 16). Only used when image_size='custom'."}),
+                "custom_height": ("INT", {"default": 2160, "min": 256, "max": 3840, "step": 16, "tooltip": "Custom height (must be multiple of 16). Only used when image_size='custom'."}),
+                "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
+                "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "poll_interval": ("INT", {"default": 2, "min": 1, "max": 10, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 60, "min": 10, "max": 300, "step": 10}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\uff1b\u5173\u95ed\u65f6\uff08\u9ed8\u8ba4\uff09\u5931\u8d25\u76f4\u63a5\u629b\u51fa\u9519\u8bef\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Openai"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        """Convert tensor to base64 data URI"""
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        """Upload image to files API and get URL"""
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[gpt_image_2_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[gpt_image_2_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, mode="edit", image1=None, image2=None, image3=None, image4=None,
+                mask=None, api_key="", quality="high", image_size="auto",
+                custom_width=1024, custom_height=1024, num_images=1,
+                output_format="png", image_way="image_url", seed=0,
+                poll_interval=2, max_poll_attempts=60, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        # Default fallback image
+        all_images = [image1, image2, image3, image4]
+        default_image = next((img for img in all_images if img is not None), None)
+        if default_image is None:
+            default_image = pil2tensor(Image.new('RGB', (1024, 1024), color='white'))
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                return (default_image, err, "")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            # Determine endpoint
+            if mode == "edit":
+                endpoint = "openai/gpt-image-2/edit"
+            else:
+                endpoint = "openai/gpt-image-2"
+
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "quality": quality,
+                "num_images": num_images,
+                "output_format": output_format,
+            }
+
+            if image_size == "custom":
+                # Custom dimensions: both edges must be multiples of 16
+                w = (custom_width // 16) * 16
+                h = (custom_height // 16) * 16
+                payload["image_size"] = {"width": w, "height": h}
+            elif image_size != "auto" or mode == "generate":
+                payload["image_size"] = image_size
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            # Process input images
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[gpt_image_2_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            if image_urls:
+                payload["image_urls"] = image_urls
+
+            # Process mask
+            if mask is not None:
+                if image_way == "base64":
+                    mask_data = self.image_to_base64(mask)
+                else:
+                    mask_data = self.upload_image_to_get_url(mask)
+                if mask_data:
+                    payload["mask_image_url"] = mask_data
+                    print(f"[gpt_image_2_fal] Mask image prepared")
+
+            pbar.update_absolute(25)
+            print(f"[gpt_image_2_fal] Submitting to {api_url} (mode={mode}, quality={quality}, size={image_size})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                if not skip_error:
+                    raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                return (default_image, err, "")
+
+            result = response.json()
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync_mode or direct response)
+            if "images" in result and result["images"]:
+                result_data = result
+            else:
+                # Queue mode: poll for result
+                request_id = result.get("request_id")
+                response_url = result.get("response_url", "")
+
+                if not request_id:
+                    err = f"No request_id in response: {str(result)[:300]}"
+                    if not skip_error:
+                        raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                    return (default_image, err, "")
+
+                # Fix response_url to use our proxy
+                if "queue.fal.run" in response_url:
+                    response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+                if not response_url:
+                    response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+                print(f"[gpt_image_2_fal] Queued, request_id={request_id}, polling...")
+
+                result_data = None
+                for attempt in range(max_poll_attempts):
+                    progress = 30 + min(60, int((attempt + 1) / max_poll_attempts * 60))
+                    pbar.update_absolute(progress)
+                    time.sleep(poll_interval)
+
+                    try:
+                        poll_resp = requests.get(
+                            response_url,
+                            headers=self.get_headers(),
+                            timeout=self.timeout
+                        )
+                        if poll_resp.status_code != 200:
+                            continue
+                        poll_data = poll_resp.json()
+
+                        if "images" in poll_data and poll_data["images"]:
+                            result_data = poll_data
+                            break
+
+                        status = poll_data.get("status", "")
+                        if status in ("FAILED", "CANCELLED"):
+                            err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                            if not skip_error:
+                                raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                            return (default_image, err, "")
+
+                    except requests.exceptions.RequestException as e:
+                        print(f"[gpt_image_2_fal] Poll error: {e}")
+                        continue
+
+                if result_data is None:
+                    err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                    if not skip_error:
+                        raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                    return (default_image, err, "")
+
+            pbar.update_absolute(90)
+
+            # Download result images
+            images_list = result_data.get("images", [])
+            if not images_list:
+                err = "No images in result"
+                if not skip_error:
+                    raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                return (default_image, err, "")
+
+            generated_tensors = []
+            url_list = []
+
+            for i, img_info in enumerate(images_list):
+                img_url = img_info.get("url", "")
+                if not img_url:
+                    continue
+                url_list.append(img_url)
+                try:
+                    img_resp = requests.get(img_url, timeout=self.timeout)
+                    if img_resp.status_code == 200:
+                        pil_img = Image.open(BytesIO(img_resp.content))
+                        generated_tensors.append(pil2tensor(pil_img))
+                        print(f"[gpt_image_2_fal] Downloaded image {i+1}/{len(images_list)}")
+                except Exception as e:
+                    print(f"[gpt_image_2_fal] Error downloading image {i+1}: {e}")
+
+            if generated_tensors:
+                combined = torch.cat(generated_tensors, dim=0)
+                pbar.update_absolute(100)
+                urls_str = "\n".join(url_list)
+                info = f"Model: gpt-image-2 (fal)\nMode: {mode}\nQuality: {quality}\nSize: {image_size}\nImages: {len(generated_tensors)}"
+                return (combined, info, urls_str)
+
+            err = "Failed to download any result images"
+            if not skip_error:
+                raise RuntimeError(f"[gpt_image_2_fal] {err}")
+            return (default_image, err, "")
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[gpt_image_2_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
@@ -20890,7 +21191,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0_AssetIdBundle":Comfly_Doubao_Seedance2_0_AssetIdBundle,
     "Comfly_gpt_image_2_official":Comfly_gpt_image_2_official,
     "Comfly_gpt_image_2_official_ratio":Comfly_gpt_image_2_official_ratio,
-    "Comfly_wan2_6_API": Comfly_wan2_6_API
+    "Comfly_wan2_6_API": Comfly_wan2_6_API,
+    "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal
 }
 
 
@@ -20967,7 +21269,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0_AssetIdBundle": "Zhenzhen Doubao_Seedance2_0_AssetIdBundle",
     "Comfly_gpt_image_2_official":"zhenzhen-gpt-image-2-official",
     "Comfly_gpt_image_2_official_ratio":"zhenzhen-gpt-image-2-official_ratio",
-    "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video"
+    "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video",
+    "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal"
 }
 
 # Aliyun WanX 2.6 API Node
