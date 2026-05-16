@@ -56,6 +56,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 20260517-1
+
+https://ai.t8star.cn即将弃用，baseurl改成https://ai.t8star.org国际域名，请务必注意，预计10天内老域名失效，节点已更新
+
+
 ### 20260515-4
 
 Comfly_veo3_1_fal更新，刚才弄错了
@@ -744,7 +749,7 @@ Veo3.1 Pro模型基准3RMB/8S，模型名字：
 veo3.1-pro  文生视频，图生视频，首尾帧
 高质量模式，价格也高一点
 
-注意模型价格可能根据情况调整，实际价格以https://ai.t8star.cn/register?aff=dP7j 为准
+注意模型价格可能根据情况调整，实际价格以https://ai.t8star.org/register?aff=dP7j 为准
 
 ### 20251020:
 
