@@ -68,13 +68,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 ### 20260517-1
 
-https://ai.t8star.cn即将弃用，baseurl改成https://ai.t8star.org国际域名，请务必注意，预计10天内老域名失效，节点已更新
+https://ai.t8star.cn 即将弃用，baseurl改成https://ai.t8star.or，g国际域名，请务必注意，预计10天内老域名失效，节点已更新
 
 
 ### 20260515-4
 
 Comfly_veo3_1_fal更新，刚才弄错了
-
 
 ### 20260515-3
 
