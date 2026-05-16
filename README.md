@@ -56,6 +56,16 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
+### 海外版自动充值说明(暂时关闭注册，后续再开放)
+
+目前进下面频道机器人会自动私信发您充值方法
+
+手动找机器人和对应教程：
+自动充值视频教程：https://www.youtube.com/watch?v=VLxEZ7Yw_74
+自动充值图文教程：https://my.feishu.cn/wiki/XWszwNJsZiULhbk2nbqcTczSnNb?from=from_copylink
+频道链接：https://discord.gg/FtzeAFw6
+这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
+
 ### 20260517-1
 
 https://ai.t8star.cn即将弃用，baseurl改成https://ai.t8star.org国际域名，请务必注意，预计10天内老域名失效，节点已更新
