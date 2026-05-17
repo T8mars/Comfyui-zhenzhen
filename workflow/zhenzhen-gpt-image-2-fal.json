@@ -5,101 +5,6 @@
   "last_link_id": 6777,
   "nodes": [
     {
-      "id": 3199,
-      "type": "Comfly_gpt_image_2_fal",
-      "pos": [
-        3894.404878271106,
-        3660.486635737878
-      ],
-      "size": [
-        400,
-        504
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image1",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 6775
-        },
-        {
-          "name": "image2",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image3",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "image4",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "mask",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "api_key",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "api_key"
-          },
-          "link": 6776
-        }
-      ],
-      "outputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            6777
-          ]
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "image_urls",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Comfly_gpt_image_2_fal"
-      },
-      "widgets_values": [
-        "做成一张高质感电商图",
-        "edit",
-        "",
-        "auto",
-        "custom",
-        3840,
-        2160,
-        1,
-        "png",
-        "image_url",
-        249818141,
-        "randomize",
-        2,
-        60,
-        false
-      ]
-    },
-    {
       "id": 3197,
       "type": "SaveImage",
       "pos": [
@@ -198,6 +103,101 @@
         "",
         false
       ]
+    },
+    {
+      "id": 3199,
+      "type": "Comfly_gpt_image_2_fal",
+      "pos": [
+        3894.404878271106,
+        3660.486635737878
+      ],
+      "size": [
+        400,
+        504
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 6775
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 6776
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            6777
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_gpt_image_2_fal"
+      },
+      "widgets_values": [
+        "做成一张高质感电商图",
+        "edit",
+        "",
+        "auto",
+        "custom",
+        3840,
+        2160,
+        1,
+        "png",
+        "image_url",
+        249818141,
+        "randomize",
+        10,
+        300,
+        false
+      ]
     }
   ],
   "links": [
@@ -249,10 +249,10 @@
     "VHS_MetadataImage": true,
     "VHS_KeepIntermediate": true,
     "ds": {
-      "scale": 0.7056840497925406,
+      "scale": 1.2501623409345402,
       "offset": [
-        -2397.6922720577068,
-        -2243.887893409679
+        -3347.641153008407,
+        -3431.1589022420303
       ]
     }
   },
