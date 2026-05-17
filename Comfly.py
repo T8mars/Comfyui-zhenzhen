@@ -21045,8 +21045,36 @@ class Comfly_gpt_image_2_fal:
                             timeout=self.timeout
                         )
                         if poll_resp.status_code != 200:
-                            continue
+                            err_body = poll_resp.text[:500]
+                            try:
+                                err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                                poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                                if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                    if attempt % 10 == 0:
+                                        print(f"[gpt_image_2_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                    continue
+                            except (json.JSONDecodeError, Exception):
+                                pass
+                            err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                            print(f"[gpt_image_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                            return (default_image, err, "")
                         poll_data = poll_resp.json()
+
+                        # Check for error responses in poll
+                        if isinstance(poll_data, list):
+                            err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                            print(f"[gpt_image_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                            return (default_image, err, "")
+                        if isinstance(poll_data, dict) and "detail" in poll_data:
+                            err = f"API Error: {poll_data['detail']}"
+                            print(f"[gpt_image_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[gpt_image_2_fal] {err}")
+                            return (default_image, err, "")
 
                         if "images" in poll_data and poll_data["images"]:
                             result_data = poll_data
@@ -21335,8 +21363,36 @@ class Comfly_veo3_1_fal:
                         timeout=self.timeout
                     )
                     if poll_resp.status_code != 200:
-                        continue
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[veo3_1_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[veo3_1_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[veo3_1_fal] {err}")
+                        return ("", "", err)
                     poll_data = poll_resp.json()
+
+                    # Check for error responses in poll
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[veo3_1_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[veo3_1_fal] {err}")
+                        return ("", "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data:
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[veo3_1_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[veo3_1_fal] {err}")
+                        return ("", "", err)
 
                     if "video" in poll_data and poll_data["video"]:
                         result_data = poll_data
@@ -21413,6 +21469,12 @@ class Comfly_seedance2_fal:
                 "image7": ("IMAGE",),
                 "image8": ("IMAGE",),
                 "image9": ("IMAGE",),
+                "video_url1": ("STRING", {"default": "", "tooltip": "Reference video URL 1 (MP4/MOV). Use @Video1 in prompt."}),
+                "video_url2": ("STRING", {"default": "", "tooltip": "Reference video URL 2 (MP4/MOV). Use @Video2 in prompt."}),
+                "video_url3": ("STRING", {"default": "", "tooltip": "Reference video URL 3 (MP4/MOV). Use @Video3 in prompt."}),
+                "audio_url1": ("STRING", {"default": "", "tooltip": "Reference audio URL 1 (MP3/WAV). Use @Audio1 in prompt."}),
+                "audio_url2": ("STRING", {"default": "", "tooltip": "Reference audio URL 2 (MP3/WAV). Use @Audio2 in prompt."}),
+                "audio_url3": ("STRING", {"default": "", "tooltip": "Reference audio URL 3 (MP3/WAV). Use @Audio3 in prompt."}),
                 "api_key": ("STRING", {"default": ""}),
                 "resolution": (["480p", "720p", "1080p"], {"default": "720p"}),
                 "duration": (["auto", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"], {"default": "auto"}),
@@ -21480,6 +21542,8 @@ class Comfly_seedance2_fal:
     def process(self, prompt, image1=None, image2=None, image3=None,
                 image4=None, image5=None, image6=None, image7=None,
                 image8=None, image9=None,
+                video_url1="", video_url2="", video_url3="",
+                audio_url1="", audio_url2="", audio_url3="",
                 api_key="", resolution="720p", duration="auto",
                 aspect_ratio="auto", generate_audio=True, seed=0,
                 image_way="image_url",
@@ -21536,8 +21600,18 @@ class Comfly_seedance2_fal:
             if image_urls:
                 payload["image_urls"] = image_urls
 
+            # Process video URLs (up to 3)
+            video_urls = [v.strip() for v in [video_url1, video_url2, video_url3] if v and v.strip()]
+            if video_urls:
+                payload["video_urls"] = video_urls
+
+            # Process audio URLs (up to 3)
+            audio_urls = [a.strip() for a in [audio_url1, audio_url2, audio_url3] if a and a.strip()]
+            if audio_urls:
+                payload["audio_urls"] = audio_urls
+
             pbar.update_absolute(25)
-            print(f"[seedance2_fal] Submitting to {api_url} (ratio={aspect_ratio}, duration={duration}, resolution={resolution}, images={len(image_urls)})")
+            print(f"[seedance2_fal] Submitting to {api_url} (ratio={aspect_ratio}, duration={duration}, resolution={resolution}, images={len(image_urls)}, videos={len(video_urls)}, audios={len(audio_urls)})")
 
             # Submit request
             response = requests.post(
@@ -21576,7 +21650,7 @@ class Comfly_seedance2_fal:
             if "video" in result and result["video"]:
                 video_url = result["video"].get("url", "")
                 result_seed = result.get("seed", "")
-                info = f"Model: seedance-2.0 (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nSeed: {result_seed}\nImages: {len(image_urls)}\nVideo: {video_url}"
+                info = f"Model: seedance-2.0 (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nSeed: {result_seed}\nImages: {len(image_urls)}\nVideos: {len(video_urls)}\nAudios: {len(audio_urls)}\nVideo: {video_url}"
                 pbar.update_absolute(100)
                 video_adapter = ComflyVideoAdapter(video_url)
                 return (video_adapter, video_url, info)
@@ -21612,8 +21686,36 @@ class Comfly_seedance2_fal:
                         timeout=self.timeout
                     )
                     if poll_resp.status_code != 200:
-                        continue
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[seedance2_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[seedance2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedance2_fal] {err}")
+                        return ("", "", err)
                     poll_data = poll_resp.json()
+
+                    # Check for error responses in poll
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[seedance2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedance2_fal] {err}")
+                        return ("", "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data:
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[seedance2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedance2_fal] {err}")
+                        return ("", "", err)
 
                     if "video" in poll_data and poll_data["video"]:
                         result_data = poll_data
@@ -21651,7 +21753,7 @@ class Comfly_seedance2_fal:
 
             result_seed = result_data.get("seed", "")
             pbar.update_absolute(100)
-            info = f"Model: seedance-2.0 (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nSeed: {result_seed}\nImages: {len(image_urls)}\nVideo: {video_url}"
+            info = f"Model: seedance-2.0 (fal)\nResolution: {resolution}\nDuration: {duration}\nAspect: {aspect_ratio}\nSeed: {result_seed}\nImages: {len(image_urls)}\nVideos: {len(video_urls)}\nAudios: {len(audio_urls)}\nVideo: {video_url}"
             print(f"[seedance2_fal] Done! Video: {video_url}")
             video_adapter = ComflyVideoAdapter(video_url)
             return (video_adapter, video_url, info)
@@ -21664,6 +21766,1269 @@ class Comfly_seedance2_fal:
             if not skip_error:
                 raise
             return ("", "", error_message)
+
+
+class Comfly_nano_banana_pro_fal:
+    """Nano Banana Pro Edit via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Image editing with up to 8 reference images.
+    Endpoint: fal-ai/nano-banana-pro/edit
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
+                "aspect_ratio": (["auto", "21:9", "16:9", "3:2", "4:3", "5:4", "1:1", "4:5", "3:4", "2:3", "9:16"], {"default": "auto"}),
+                "resolution": (["1K", "2K", "4K"], {"default": "1K"}),
+                "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
+                "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4"}),
+                "system_prompt": ("STRING", {"multiline": True, "default": "", "tooltip": "Optional system instruction to steer model persona and output style."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647, "tooltip": "0 = random seed."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 3, "min": 1, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*3s = 1 hour timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "image_urls", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Google"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[nano_banana_pro_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[nano_banana_pro_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image1=None, image2=None, image3=None, image4=None,
+                image5=None, image6=None, image7=None, image8=None,
+                api_key="", num_images=1, aspect_ratio="auto", resolution="1K",
+                output_format="png", safety_tolerance="4", system_prompt="",
+                seed=0, image_way="image_url",
+                poll_interval=3, max_poll_attempts=1200, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        # Default blank image for error returns
+        blank_image = Image.new('RGB', (512, 512), color='white')
+        default_image = pil2tensor(blank_image)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                return (default_image, "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "fal-ai/nano-banana-pro/edit"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Process input images
+            all_images = [image1, image2, image3, image4, image5, image6, image7, image8]
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[nano_banana_pro_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "num_images": num_images,
+                "aspect_ratio": aspect_ratio,
+                "resolution": resolution,
+                "output_format": output_format,
+                "safety_tolerance": safety_tolerance,
+            }
+
+            if image_urls:
+                payload["image_urls"] = image_urls
+
+            if system_prompt.strip():
+                payload["system_prompt"] = system_prompt.strip()
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            pbar.update_absolute(25)
+            print(f"[nano_banana_pro_fal] Submitting to {api_url} (ratio={aspect_ratio}, resolution={resolution}, images={len(image_urls)}, n={num_images})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[nano_banana_pro_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                return (default_image, "", err)
+
+            result = response.json()
+
+            # Check for validation/error in response body
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[nano_banana_pro_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                return (default_image, "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[nano_banana_pro_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                return (default_image, "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync)
+            if "images" in result and result["images"]:
+                pass  # handled below after polling
+            else:
+                # Queue mode: poll for result
+                request_id = result.get("request_id")
+                response_url = result.get("response_url", "")
+
+                if not request_id:
+                    err = f"No request_id in response: {str(result)[:300]}"
+                    if not skip_error:
+                        raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                    return (default_image, "", err)
+
+                # Fix response_url to use our proxy
+                if "queue.fal.run" in response_url:
+                    response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+                if not response_url:
+                    response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+                print(f"[nano_banana_pro_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+                result = None
+                for attempt in range(max_poll_attempts):
+                    progress = 30 + min(60, int((attempt + 1) / max_poll_attempts * 60))
+                    pbar.update_absolute(progress)
+                    time.sleep(poll_interval)
+
+                    try:
+                        poll_resp = requests.get(
+                            response_url,
+                            headers=self.get_headers(),
+                            timeout=self.timeout
+                        )
+                        if poll_resp.status_code != 200:
+                            err_body = poll_resp.text[:500]
+                            try:
+                                err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                                poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                                if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                    if attempt % 10 == 0:
+                                        print(f"[nano_banana_pro_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                    continue
+                            except (json.JSONDecodeError, Exception):
+                                pass
+                            err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                            print(f"[nano_banana_pro_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                            return (default_image, "", err)
+                        poll_data = poll_resp.json()
+
+                        # Check for error responses in poll
+                        if isinstance(poll_data, list):
+                            err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                            print(f"[nano_banana_pro_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                            return (default_image, "", err)
+                        if isinstance(poll_data, dict) and "detail" in poll_data:
+                            err = f"API Error: {poll_data['detail']}"
+                            print(f"[nano_banana_pro_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                            return (default_image, "", err)
+
+                        if "images" in poll_data and poll_data["images"]:
+                            result = poll_data
+                            break
+
+                        status = poll_data.get("status", "")
+                        if status in ("FAILED", "CANCELLED"):
+                            err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                            return (default_image, "", err)
+
+                        if attempt % 10 == 0:
+                            print(f"[nano_banana_pro_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                    except requests.exceptions.RequestException as e:
+                        print(f"[nano_banana_pro_fal] Poll error: {e}")
+                        continue
+
+                if result is None:
+                    err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                    if not skip_error:
+                        raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                    return (default_image, "", err)
+
+            pbar.update_absolute(92)
+
+            # Download images
+            generated_images = []
+            result_urls = []
+            for img_data in result["images"]:
+                if "url" in img_data:
+                    img_url = img_data["url"]
+                    if "queue.fal.run" in img_url:
+                        img_url = img_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+                    result_urls.append(img_url)
+                    try:
+                        img_response = requests.get(img_url, timeout=self.timeout)
+                        if img_response.status_code == 200:
+                            generated_image = Image.open(BytesIO(img_response.content))
+                            generated_tensor = pil2tensor(generated_image)
+                            generated_images.append(generated_tensor)
+                    except Exception as e:
+                        print(f"[nano_banana_pro_fal] Error downloading image: {e}")
+
+            if not generated_images:
+                err = "No images downloaded from result"
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_pro_fal] {err}")
+                return (default_image, "", err)
+
+            combined_tensor = torch.cat(generated_images, dim=0)
+            urls_str = "\n".join(result_urls)
+            description = result.get("description", "")
+            info = f"Model: nano-banana-pro/edit (fal)\nResolution: {resolution}\nAspect: {aspect_ratio}\nFormat: {output_format}\nImages: {len(generated_images)}\nDescription: {description}"
+            pbar.update_absolute(100)
+            print(f"[nano_banana_pro_fal] Done! Generated {len(generated_images)} images")
+            return (combined_tensor, urls_str, info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[nano_banana_pro_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return (default_image, "", error_message)
+
+
+class Comfly_nano_banana_2_fal:
+    """Nano Banana 2 Edit via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Image editing with up to 8 reference images.
+    Endpoint: fal-ai/nano-banana-pro/edit
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
+                "aspect_ratio": (["auto", "21:9", "16:9", "3:2", "4:3", "5:4", "1:1", "4:5", "3:4", "2:3", "9:16"], {"default": "auto"}),
+                "resolution": (["1K", "2K", "4K"], {"default": "1K"}),
+                "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
+                "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4"}),
+                "system_prompt": ("STRING", {"multiline": True, "default": "", "tooltip": "Optional system instruction to steer model persona and output style."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647, "tooltip": "0 = random seed."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 3, "min": 1, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*3s = 1 hour timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "image_urls", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Google"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[nano_banana_2_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[nano_banana_2_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image1=None, image2=None, image3=None, image4=None,
+                image5=None, image6=None, image7=None, image8=None,
+                api_key="", num_images=1, aspect_ratio="auto", resolution="1K",
+                output_format="png", safety_tolerance="4", system_prompt="",
+                seed=0, image_way="image_url",
+                poll_interval=3, max_poll_attempts=1200, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        blank_image = Image.new('RGB', (512, 512), color='white')
+        default_image = pil2tensor(blank_image)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                return (default_image, "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "fal-ai/nano-banana-pro/edit"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Process input images
+            all_images = [image1, image2, image3, image4, image5, image6, image7, image8]
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[nano_banana_2_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "num_images": num_images,
+                "aspect_ratio": aspect_ratio,
+                "resolution": resolution,
+                "output_format": output_format,
+                "safety_tolerance": safety_tolerance,
+            }
+
+            if image_urls:
+                payload["image_urls"] = image_urls
+
+            if system_prompt.strip():
+                payload["system_prompt"] = system_prompt.strip()
+
+            if seed > 0:
+                payload["seed"] = seed
+
+            pbar.update_absolute(25)
+            print(f"[nano_banana_2_fal] Submitting to {api_url} (ratio={aspect_ratio}, resolution={resolution}, images={len(image_urls)}, n={num_images})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[nano_banana_2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                return (default_image, "", err)
+
+            result = response.json()
+
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[nano_banana_2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                return (default_image, "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[nano_banana_2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                return (default_image, "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync)
+            if "images" in result and result["images"]:
+                pass
+            else:
+                # Queue mode: poll for result
+                request_id = result.get("request_id")
+                response_url = result.get("response_url", "")
+
+                if not request_id:
+                    err = f"No request_id in response: {str(result)[:300]}"
+                    if not skip_error:
+                        raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                    return (default_image, "", err)
+
+                if "queue.fal.run" in response_url:
+                    response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+                if not response_url:
+                    response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+                print(f"[nano_banana_2_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+                result = None
+                for attempt in range(max_poll_attempts):
+                    progress = 30 + min(60, int((attempt + 1) / max_poll_attempts * 60))
+                    pbar.update_absolute(progress)
+                    time.sleep(poll_interval)
+
+                    try:
+                        poll_resp = requests.get(
+                            response_url,
+                            headers=self.get_headers(),
+                            timeout=self.timeout
+                        )
+                        if poll_resp.status_code != 200:
+                            err_body = poll_resp.text[:500]
+                            try:
+                                err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                                poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                                if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                    if attempt % 10 == 0:
+                                        print(f"[nano_banana_2_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                    continue
+                            except (json.JSONDecodeError, Exception):
+                                pass
+                            err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                            print(f"[nano_banana_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                            return (default_image, "", err)
+                        poll_data = poll_resp.json()
+
+                        # Check for error responses in poll
+                        if isinstance(poll_data, list):
+                            err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                            print(f"[nano_banana_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                            return (default_image, "", err)
+                        if isinstance(poll_data, dict) and "detail" in poll_data:
+                            err = f"API Error: {poll_data['detail']}"
+                            print(f"[nano_banana_2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                            return (default_image, "", err)
+
+                        if "images" in poll_data and poll_data["images"]:
+                            result = poll_data
+                            break
+
+                        status = poll_data.get("status", "")
+                        if status in ("FAILED", "CANCELLED"):
+                            err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                            if not skip_error:
+                                raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                            return (default_image, "", err)
+
+                        if attempt % 10 == 0:
+                            print(f"[nano_banana_2_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                    except requests.exceptions.RequestException as e:
+                        print(f"[nano_banana_2_fal] Poll error: {e}")
+                        continue
+
+                if result is None:
+                    err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                    if not skip_error:
+                        raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                    return (default_image, "", err)
+
+            pbar.update_absolute(92)
+
+            # Download images
+            generated_images = []
+            result_urls = []
+            for img_data in result["images"]:
+                if "url" in img_data:
+                    img_url = img_data["url"]
+                    if "queue.fal.run" in img_url:
+                        img_url = img_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+                    result_urls.append(img_url)
+                    try:
+                        img_response = requests.get(img_url, timeout=self.timeout)
+                        if img_response.status_code == 200:
+                            generated_image = Image.open(BytesIO(img_response.content))
+                            generated_tensor = pil2tensor(generated_image)
+                            generated_images.append(generated_tensor)
+                    except Exception as e:
+                        print(f"[nano_banana_2_fal] Error downloading image: {e}")
+
+            if not generated_images:
+                err = "No images downloaded from result"
+                if not skip_error:
+                    raise RuntimeError(f"[nano_banana_2_fal] {err}")
+                return (default_image, "", err)
+
+            combined_tensor = torch.cat(generated_images, dim=0)
+            urls_str = "\n".join(result_urls)
+            description = result.get("description", "")
+            info = f"Model: nano-banana-2/edit (fal)\nResolution: {resolution}\nAspect: {aspect_ratio}\nFormat: {output_format}\nImages: {len(generated_images)}\nDescription: {description}"
+            pbar.update_absolute(100)
+            print(f"[nano_banana_2_fal] Done! Generated {len(generated_images)} images")
+            return (combined_tensor, urls_str, info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[nano_banana_2_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return (default_image, "", error_message)
+
+
+class Comfly_grok_video_fal:
+    """Grok Imagine Video via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Supports both text-to-video and image-to-video modes.
+    Text-to-Video endpoint: xai/grok-imagine-video/text-to-video
+    Image-to-Video endpoint: xai/grok-imagine-video/image-to-video
+    If image is provided, uses image-to-video; otherwise uses text-to-video.
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "duration": ("INT", {"default": 6, "min": 1, "max": 30, "step": 1, "tooltip": "Video duration in seconds."}),
+                "aspect_ratio": (["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", "auto"], {"default": "16:9", "tooltip": "auto is only available for image-to-video."}),
+                "resolution": (["720p", "480p"], {"default": "720p"}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 1 hour timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[grok_video_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[grok_video_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image=None, api_key="",
+                duration=6, aspect_ratio="16:9", resolution="720p",
+                image_way="image_url", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            # Determine endpoint based on whether image is provided
+            has_image = image is not None
+            if has_image:
+                endpoint = "xai/grok-imagine-video/image-to-video"
+            else:
+                endpoint = "xai/grok-imagine-video/text-to-video"
+
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "duration": duration,
+                "aspect_ratio": aspect_ratio,
+                "resolution": resolution,
+            }
+
+            # Process input image for image-to-video mode
+            if has_image:
+                pbar.update_absolute(10)
+                if image_way == "base64":
+                    img_data = self.image_to_base64(image)
+                else:
+                    img_data = self.upload_image_to_get_url(image)
+
+                if not img_data:
+                    err = "Failed to process input image."
+                    if not skip_error:
+                        raise RuntimeError(f"[grok_video_fal] {err}")
+                    return ("", "", err)
+
+                payload["image_url"] = img_data
+                print(f"[grok_video_fal] Image prepared for image-to-video mode")
+
+            pbar.update_absolute(25)
+            mode_str = "image-to-video" if has_image else "text-to-video"
+            print(f"[grok_video_fal] Submitting to {api_url} (mode={mode_str}, ratio={aspect_ratio}, duration={duration}s, resolution={resolution})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[grok_video_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            result = response.json()
+
+            # Check for validation/error in response body
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[grok_video_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[grok_video_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync)
+            if "video" in result and result["video"]:
+                video_url = result["video"].get("url", "")
+                info = f"Model: grok-imagine-video (fal)\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {aspect_ratio}\nVideo: {video_url}"
+                pbar.update_absolute(100)
+                video_adapter = ComflyVideoAdapter(video_url)
+                return (video_adapter, video_url, info)
+
+            # Queue mode: poll for result
+            request_id = result.get("request_id")
+            response_url = result.get("response_url", "")
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            # Fix response_url to use our proxy
+            if "queue.fal.run" in response_url:
+                response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+            print(f"[grok_video_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[grok_video_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[grok_video_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_fal] {err}")
+                        return ("", "", err)
+                    poll_data = poll_resp.json()
+
+                    # Check for error responses in poll
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[grok_video_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_fal] {err}")
+                        return ("", "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data:
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[grok_video_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_fal] {err}")
+                        return ("", "", err)
+
+                    if "video" in poll_data and poll_data["video"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("FAILED", "CANCELLED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_fal] {err}")
+                        return ("", "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[grok_video_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[grok_video_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(98)
+
+            # Extract video URL
+            video_url = result_data["video"].get("url", "")
+            if not video_url:
+                err = "No video URL in result"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(100)
+            info = f"Model: grok-imagine-video (fal)\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {aspect_ratio}\nVideo: {video_url}"
+            print(f"[grok_video_fal] Done! Video: {video_url}")
+            video_adapter = ComflyVideoAdapter(video_url)
+            return (video_adapter, video_url, info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[grok_video_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_seedream_v5_fal:
+    """Seedream 5.0 Lite Edit via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Image editing with up to 10 reference images.
+    Endpoint: fal-ai/bytedance/seedream/v5/lite/edit
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image10": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
+                "max_images": ("INT", {"default": 1, "min": 1, "max": 4, "tooltip": "Max images per generation. Total output = num_images * max_images."}),
+                "image_size": (["auto_2K", "auto_3K", "auto_4K", "square_hd", "square", "portrait_4_3", "portrait_16_9", "landscape_4_3", "landscape_16_9"], {"default": "auto_2K"}),
+                "enable_safety_checker": ("BOOLEAN", {"default": True}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 3, "min": 1, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*3s = 1 hour timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "image_urls", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Google"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[seedream_v5_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[seedream_v5_fal] Error uploading image: {str(e)}")
+            return None
+
+    def process(self, prompt, image1=None, image2=None, image3=None, image4=None,
+                image5=None, image6=None, image7=None, image8=None,
+                image9=None, image10=None,
+                api_key="", num_images=1, max_images=1, image_size="auto_2K",
+                enable_safety_checker=True, image_way="image_url",
+                poll_interval=3, max_poll_attempts=1200, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        # Default blank image for error returns
+        blank_image = Image.new('RGB', (512, 512), color='white')
+        default_image = pil2tensor(blank_image)
+
+        try:
+            if not self.api_key:
+                err = "API key not provided. Please set your API key."
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "fal-ai/bytedance/seedream/v5/lite/edit"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            # Process input images (up to 10)
+            all_images = [image1, image2, image3, image4, image5, image6, image7, image8, image9, image10]
+            image_urls = []
+            input_images = [img for img in all_images if img is not None]
+
+            if input_images:
+                pbar.update_absolute(10)
+                for idx, img in enumerate(input_images):
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(img)
+                    else:
+                        img_data = self.upload_image_to_get_url(img)
+                    if img_data:
+                        image_urls.append(img_data)
+                        print(f"[seedream_v5_fal] Image {idx+1}/{len(input_images)} prepared")
+                    pbar.update_absolute(10 + int((idx + 1) / len(input_images) * 10))
+
+            if not image_urls:
+                err = "At least one image is required for editing."
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            # Build payload
+            payload = {
+                "prompt": prompt,
+                "image_urls": image_urls,
+                "num_images": num_images,
+                "max_images": max_images,
+                "image_size": image_size,
+                "enable_safety_checker": enable_safety_checker,
+            }
+
+            pbar.update_absolute(25)
+            print(f"[seedream_v5_fal] Submitting to {api_url} (size={image_size}, num={num_images}, max={max_images}, imgs={len(image_urls)})")
+
+            # Submit request
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[seedream_v5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            result = response.json()
+
+            # Check for validation/error in response body
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[seedream_v5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[seedream_v5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            pbar.update_absolute(30)
+
+            # Check if result is immediate (sync mode)
+            if "images" in result and result["images"]:
+                img_list = result["images"]
+                urls = [img.get("url", "") for img in img_list if img.get("url")]
+                if urls:
+                    first_url = urls[0]
+                    img_resp = requests.get(first_url, timeout=self.timeout)
+                    img_resp.raise_for_status()
+                    pil_img = Image.open(BytesIO(img_resp.content)).convert("RGB")
+                    output_tensor = pil2tensor(pil_img)
+                    info = f"Model: seedream-v5-lite-edit (fal)\nSize: {image_size}\nImages: {len(urls)}\nSeed: {result.get('seed', 'N/A')}\nURLs: {', '.join(urls)}"
+                    pbar.update_absolute(100)
+                    return (output_tensor, ", ".join(urls), info)
+
+            # Queue mode: poll for result
+            request_id = result.get("request_id")
+            response_url = result.get("response_url", "")
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            # Fix response_url to use our proxy
+            if "queue.fal.run" in response_url:
+                response_url = response_url.replace("https://queue.fal.run", f"{baseurl}/fal")
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+
+            print(f"[seedream_v5_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[seedream_v5_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[seedream_v5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedream_v5_fal] {err}")
+                        return (default_image, "", err)
+                    poll_data = poll_resp.json()
+
+                    # Check for error responses in poll
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[seedream_v5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedream_v5_fal] {err}")
+                        return (default_image, "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data:
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[seedream_v5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[seedream_v5_fal] {err}")
+                        return (default_image, "", err)
+
+                    if "images" in poll_data and poll_data["images"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("FAILED", "CANCELLED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[seedream_v5_fal] {err}")
+                        return (default_image, "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[seedream_v5_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[seedream_v5_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            pbar.update_absolute(98)
+
+            # Extract images
+            img_list = result_data["images"]
+            urls = [img.get("url", "") for img in img_list if img.get("url")]
+            if not urls:
+                err = "No image URLs in result"
+                if not skip_error:
+                    raise RuntimeError(f"[seedream_v5_fal] {err}")
+                return (default_image, "", err)
+
+            # Download first image as tensor
+            first_url = urls[0]
+            img_resp = requests.get(first_url, timeout=self.timeout)
+            img_resp.raise_for_status()
+            pil_img = Image.open(BytesIO(img_resp.content)).convert("RGB")
+            output_tensor = pil2tensor(pil_img)
+
+            pbar.update_absolute(100)
+            info = f"Model: seedream-v5-lite-edit (fal)\nSize: {image_size}\nImages: {len(urls)}\nSeed: {result_data.get('seed', 'N/A')}\nURLs: {', '.join(urls)}"
+            print(f"[seedream_v5_fal] Done! {len(urls)} image(s): {urls[0]}")
+            return (output_tensor, ", ".join(urls), info)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[seedream_v5_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return (default_image, "", error_message)
 
 
 NODE_CLASS_MAPPINGS = {
@@ -21741,7 +23106,11 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_wan2_6_API": Comfly_wan2_6_API,
     "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal,
     "Comfly_veo3_1_fal": Comfly_veo3_1_fal,
-    "Comfly_seedance2_fal": Comfly_seedance2_fal
+    "Comfly_seedance2_fal": Comfly_seedance2_fal,
+    "Comfly_nano_banana_pro_fal": Comfly_nano_banana_pro_fal,
+    "Comfly_nano_banana_2_fal": Comfly_nano_banana_2_fal,
+    "Comfly_grok_video_fal": Comfly_grok_video_fal,
+    "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal
 }
 
 
@@ -21821,10 +23190,14 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video",
     "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal",
     "Comfly_veo3_1_fal": "Zhenzhen Veo 3.1 Fast Ref2Video Fal",
-    "Comfly_seedance2_fal": "Zhenzhen Seedance 2.0 Ref2Video Fal"
+    "Comfly_seedance2_fal": "Zhenzhen Seedance 2.0 Ref2Video Fal",
+    "Comfly_nano_banana_pro_fal": "Zhenzhen Nano Banana Pro Edit Fal",
+    "Comfly_nano_banana_2_fal": "Zhenzhen Nano Banana 2 Edit Fal",
+    "Comfly_grok_video_fal": "Zhenzhen Grok Video Fal",
+    "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal"
 }
 
 # Aliyun WanX 2.6 API Node
 # BASEURL is fixed to Aliyun official API
 
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']

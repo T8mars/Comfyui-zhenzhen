@@ -1,0 +1,377 @@
+{
+  "id": "f1da9b5d-739a-4f8b-8df0-fd27e8414cd4",
+  "revision": 0,
+  "last_node_id": 3206,
+  "last_link_id": 6791,
+  "nodes": [
+    {
+      "id": 3196,
+      "type": "LoadImage",
+      "pos": [
+        3542.4319596810005,
+        3640.410961421077
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6787
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 3201,
+      "type": "SaveImage",
+      "pos": [
+        4521.835682751024,
+        3651.223795605898
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6788
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 3205,
+      "type": "easy showAnything",
+      "pos": [
+        4505.614140450327,
+        4016.25646993125
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6789
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9a882e/awTzyA-BZQw-r88eNFa99_f2a4bfce741e4b859de7e35cc3488e16.png"
+      ]
+    },
+    {
+      "id": 3206,
+      "type": "easy showAnything",
+      "pos": [
+        4520.19609601543,
+        4147.951215736503
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6790
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Model: seedream-v5-lite-edit (fal)\nSize: auto_2K\nImages: 1\nSeed: 303061153\nURLs: https://v3b.fal.media/files/b/0a9a882e/awTzyA-BZQw-r88eNFa99_f2a4bfce741e4b859de7e35cc3488e16.png"
+      ]
+    },
+    {
+      "id": 3198,
+      "type": "Comfly_api_set",
+      "pos": [
+        3550.8351037730727,
+        4023.5504397391524
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            6791
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-NG68WAOSQH057aO4vIphL8SBuYS6MldfFR1nXFZre4oxiWVN",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3204,
+      "type": "Comfly_seedream_v5_fal",
+      "pos": [
+        3933.779522726127,
+        3747.9617141083604
+      ],
+      "size": [
+        400,
+        484
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 6787
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 6791
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            6788
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            6789
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            6790
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_seedream_v5_fal"
+      },
+      "widgets_values": [
+        "女人拿着包展示",
+        "",
+        1,
+        1,
+        "auto_2K",
+        true,
+        "image_url",
+        3,
+        1200,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      6787,
+      3196,
+      0,
+      3204,
+      0,
+      "IMAGE"
+    ],
+    [
+      6788,
+      3204,
+      0,
+      3201,
+      0,
+      "IMAGE"
+    ],
+    [
+      6789,
+      3204,
+      1,
+      3205,
+      0,
+      "STRING"
+    ],
+    [
+      6790,
+      3204,
+      2,
+      3206,
+      0,
+      "STRING"
+    ],
+    [
+      6791,
+      3198,
+      0,
+      3204,
+      10,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        2796.2160501110034,
+        3068.6896405100842,
+        2988.309086879267,
+        393.4698426281134
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ds": {
+      "scale": 0.9392654702738762,
+      "offset": [
+        -3371.199594429011,
+        -3408.8912106397893
+      ]
+    }
+  },
+  "version": 0.4
+}

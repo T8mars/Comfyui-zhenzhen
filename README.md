@@ -66,6 +66,31 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 频道链接：https://discord.gg/FtzeAFw6
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
 
+
+### 20260517-2
+
+
+重写Fal相关模型节点的轮询逻辑，修正之前后端报错，前端还在运行的问题
+
+增加：Comfly_grok_video_fal节点
+
+增加：Comfly_nano_banana_2_fal节点
+
+增加：Comfly_nano_banana_pro_fal节点
+
+增加：Comfly_seedance2_fal节点
+
+增加：zhenzhen-seedream-v5(即梦V5)-fal.json工作流
+
+增加：zhenzhen-grok-video-fal.json工作流
+
+增加：zhenzhen-nanobanana-2-fal.json工作流
+
+增加：zhenzhen-nano-banana-pro-fal.json工作流
+
+增加：zhenzhen-seedance2.0多参-fal.json工作流
+
+
 ### 20260517-1
 
 https://ai.t8star.cn 即将弃用，baseurl改成国际域名https://ai.t8star.org

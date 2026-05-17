@@ -1,0 +1,324 @@
+{
+  "id": "f1da9b5d-739a-4f8b-8df0-fd27e8414cd4",
+  "revision": 0,
+  "last_node_id": 3218,
+  "last_link_id": 6821,
+  "nodes": [
+    {
+      "id": 3210,
+      "type": "easy showAnything",
+      "pos": [
+        4643.488501774019,
+        4197.880909467969
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6818
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9a84db/DrPSYgIDrgMQEPnyJsHeK_video.mp4"
+      ]
+    },
+    {
+      "id": 3211,
+      "type": "easy showAnything",
+      "pos": [
+        4649.719705332659,
+        4322.304002637776
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6819
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "Model: seedance-2.0 (fal)\nResolution: 720p\nDuration: 4\nAspect: 16:9\nSeed: 903768387\nImages: 1\nVideo: https://v3b.fal.media/files/b/0a9a84db/DrPSYgIDrgMQEPnyJsHeK_video.mp4"
+      ]
+    },
+    {
+      "id": 3201,
+      "type": "LoadImage",
+      "pos": [
+        3573.039587695923,
+        3836.814991672314
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6816
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 3218,
+      "type": "SaveVideo",
+      "pos": [
+        4544.644193740135,
+        3861.9250152649765
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 6817
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 3204,
+      "type": "Comfly_api_set",
+      "pos": [
+        3498.230897303518,
+        4278.406881253164
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            6821
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-LnbOEi7FoFuM0TN8obugjGAMx1RrbtZcYYTdsb3c75SeLXYm",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3217,
+      "type": "Comfly_grok_video_fal",
+      "pos": [
+        3984.1612001425638,
+        3909.8056258557403
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 6816
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 6821
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            6817
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            6818
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            6819
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_grok_video_fal"
+      },
+      "widgets_values": [
+        "美丽的女人拿着包说：好漂亮啊",
+        "",
+        6,
+        "16:9",
+        "720p",
+        "image_url",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      6816,
+      3201,
+      0,
+      3217,
+      0,
+      "IMAGE"
+    ],
+    [
+      6817,
+      3217,
+      0,
+      3218,
+      0,
+      "VIDEO"
+    ],
+    [
+      6818,
+      3217,
+      1,
+      3210,
+      0,
+      "STRING"
+    ],
+    [
+      6819,
+      3217,
+      2,
+      3211,
+      0,
+      "STRING"
+    ],
+    [
+      6821,
+      3204,
+      0,
+      3217,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        2796.2160501110034,
+        3068.6896405100842,
+        2988.309086879267,
+        393.4698426281134
+      ],
+      "color": "#3f789e",
+      "font_size": 240,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.42.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ds": {
+      "scale": 1.120746656060995,
+      "offset": [
+        -3025.985957718572,
+        -3451.971276533613
+      ]
+    }
+  },
+  "version": 0.4
+}
