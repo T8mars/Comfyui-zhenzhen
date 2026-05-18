@@ -58,6 +58,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 ### 海外版自动充值说明(暂时关闭注册，后续再开放)
 
+方法1：
+
+下载右侧release的本地贞贞整合包，版本号大于v4.4D即可在线充值
+
+方法2：
+
 目前进下面频道机器人会自动私信发您充值方法
 
 手动找机器人和对应教程：
