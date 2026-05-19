@@ -23031,6 +23031,7 @@ class Comfly_seedream_v5_fal:
             return (default_image, "", error_message)
 
 
+
 class Comfly_gpt_image_2_official_ratio_stable:
     """GPT-Image-2 official ratio stable: simplified ratio choices matching RhartImageG2ImageToImage style."""
 
@@ -23046,6 +23047,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
         "16:9",
         "9:16",
         "21:9",
+        "custom",
     ]
 
     _RESOLUTION_CHOICES = ["1k", "2k", "4k"]
@@ -23085,10 +23087,12 @@ class Comfly_gpt_image_2_official_ratio_stable:
     }
 
     @classmethod
-    def _get_size(cls, aspect_ratio, resolution):
+    def _get_size(cls, aspect_ratio, resolution, custom_width=2560, custom_height=1280):
         """Map aspect_ratio + resolution to actual pixel size for API."""
         if aspect_ratio == "empty":
             return "auto"
+        if aspect_ratio == "custom":
+            return f"{int(custom_width)}x{int(custom_height)}"
         size = cls._SIZE_MAP.get((aspect_ratio, resolution))
         if size is None:
             return "auto"
@@ -23136,7 +23140,9 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 "max_retries": ("INT", {"default": 5, "min": 1, "max": 10}),
                 "initial_timeout": ("INT", {"default": 900, "min": 60, "max": 1200}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"}),
+                "custom_width": ("INT", {"default": 2560, "min": 64, "max": 8192, "step": 64, "tooltip": "aspect_ratio选择custom时生效，自定义宽度"}),
+                "custom_height": ("INT", {"default": 1280, "min": 64, "max": 8192, "step": 64, "tooltip": "aspect_ratio选择custom时生效，自定义高度"})
             }
         }
 
@@ -23222,7 +23228,8 @@ class Comfly_gpt_image_2_official_ratio_stable:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, aspect_ratio, resolution, background,
-        output_format, output_compression, moderation, response_format="url", model="gpt-image-2"
+        output_format, output_compression, moderation, response_format="url", model="gpt-image-2",
+        custom_width=2560, custom_height=1280
     ):
 
         input_images = []
@@ -23279,7 +23286,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
             files["mask"] = ("mask.png", mask_byte_arr, "image/png")
 
         # Map aspectRatio + resolution to actual pixel size
-        size = self._get_size(aspect_ratio, resolution)
+        size = self._get_size(aspect_ratio, resolution, custom_width, custom_height)
 
         data = {
             "prompt": prompt,
@@ -23350,6 +23357,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
         n, quality, aspect_ratio, resolution, background,
         output_format, output_compression, moderation, response_format, model,
         max_retries, initial_timeout,
+        custom_width=2560, custom_height=1280,
     ):
         data, request_files = self._build_official_edits_multipart(
             prompt, image1, image2, image3, image4, image5,
@@ -23357,6 +23365,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, aspect_ratio, resolution, background,
             output_format, output_compression, moderation, response_format, model,
+            custom_width=custom_width, custom_height=custom_height,
         )
         url = f"{baseurl}/v1/images/edits?async=true"
         if webhook.strip():
@@ -23472,7 +23481,8 @@ class Comfly_gpt_image_2_official_ratio_stable:
         image6, image7, image8, image9, image10,
         image11, image12, image13, image14, image15, image16,
         mask, n, quality, aspect_ratio, resolution, background,
-        output_format, output_compression, moderation, response_format, model, max_retries, initial_timeout, pbar
+        output_format, output_compression, moderation, response_format, model, max_retries, initial_timeout, pbar,
+        custom_width=2560, custom_height=1280
     ):
         data, request_files = self._build_official_edits_multipart(
             prompt, image1, image2, image3, image4, image5,
@@ -23480,6 +23490,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
             image11, image12, image13, image14, image15, image16,
             mask, n, quality, aspect_ratio, resolution, background,
             output_format, output_compression, moderation, response_format, model,
+            custom_width=custom_width, custom_height=custom_height,
         )
         pbar.update_absolute(20)
         response = self.make_request_with_retry(
@@ -23502,7 +23513,8 @@ class Comfly_gpt_image_2_official_ratio_stable:
         output_format="png", output_compression=100, moderation="auto",
         response_format="url",
         async_mode=True, webhook="", max_poll_attempts=300, poll_interval=5,
-        max_retries=5, initial_timeout=900, seed=0, skip_error=False
+        max_retries=5, initial_timeout=900, seed=0, skip_error=False,
+        custom_width=2560, custom_height=1280
     ):
         if api_key.strip():
             self.api_key = api_key
@@ -23550,6 +23562,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                     n, quality, aspect_ratio, resolution, background,
                     output_format, output_compression, moderation, response_format, model,
                     max_retries, initial_timeout,
+                    custom_width, custom_height,
                 )
                 mode = "async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}"
                 info = _info_common(mode)
@@ -23573,7 +23586,8 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 image11, image12, image13, image14, image15, image16,
                 mask, n, quality, aspect_ratio, resolution, background,
                 output_format, output_compression, moderation, response_format, model,
-                max_retries, initial_timeout, pbar
+                max_retries, initial_timeout, pbar,
+                custom_width, custom_height
             )
             mode = "sync: /v1/images/edits (multipart" + (
                 ", blank ref" if num_input_images == 0 else f", {num_input_images} images"

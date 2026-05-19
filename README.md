@@ -72,6 +72,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 频道链接：https://discord.gg/FtzeAFw6
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
 
+### 20260520-1
+
+升级Comfly_gpt_image_2_official_ratio_stable节点，支持自定义尺寸（单边需要被32整除）
+新增工作流：zhenzhen-gpt-image-2-official_ratio_stable-自定义尺寸.json
 
 ### 20260519-1
 
