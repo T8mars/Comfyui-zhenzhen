@@ -18879,6 +18879,355 @@ def encode_video_b64(video):
             pass
 
 
+class Comfly_grok_image:
+    """Grok Image generation via OpenAI Dall-e compatible endpoint."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True}),
+            },
+            "optional": {
+                "api_key": ("STRING", {"default": ""}),
+                "model": (["grok-4.2-image"], {"default": "grok-4.2-image"}),
+                "aspect_ratio": ("STRING", {"default": "1:1", "multiline": False}),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional reference image URLs, separated by newline or comma."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "async_mode": ("BOOLEAN", {"default": True, "tooltip": "Use async task submission and poll until the result is ready."}),
+                "task_id": ("STRING", {"default": "", "tooltip": "Optional existing async task id to query instead of submitting a new request."}),
+                "poll_interval": ("INT", {"default": 5, "min": 2, "max": 60, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 180, "min": 10, "max": 1200, "step": 10}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_urls", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Grok"
+    OUTPUT_NODE = True
+
+    _SUCCESS_STATUSES = {"SUCCESS", "COMPLETED", "COMPLETE", "DONE", "FINISHED"}
+    _FAILED_STATUSES = {"FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"}
+    _WAIT_STATUSES = {"NOT_START", "PENDING", "QUEUED", "IN_QUEUE", "IN_PROGRESS", "RUNNING", "PROCESSING"}
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def _blank_image(self, color="white"):
+        return pil2tensor(Image.new('RGB', (1024, 1024), color=color))
+
+    def _tensor_to_data_uri(self, image_tensor):
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        b64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{b64}"
+
+    def _upload_image(self, image_tensor):
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        buffered.seek(0)
+        response = requests.post(
+            f"{baseurl}/v1/files",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            files={'file': ('image.png', buffered.getvalue(), 'image/png')},
+            timeout=self.timeout
+        )
+        response.raise_for_status()
+        result = response.json()
+        image_url = result.get("url")
+        if not image_url:
+            raise RuntimeError(f"Unexpected upload response: {result}")
+        return image_url
+
+    def _split_image_urls(self, image_urls):
+        if not image_urls or not str(image_urls).strip():
+            return []
+        return [u.strip() for u in re.split(r"[\n,]+", str(image_urls)) if u.strip()]
+
+    def _extract_task_id(self, result):
+        if not isinstance(result, dict):
+            return ""
+        for key in ("task_id", "id", "request_id"):
+            value = result.get(key)
+            if value:
+                return str(value)
+        data = result.get("data")
+        if isinstance(data, str) and data.strip() and not data.startswith(("http://", "https://", "data:image")):
+            return data.strip()
+        if isinstance(data, dict):
+            for key in ("task_id", "id", "request_id"):
+                value = data.get(key)
+                if value:
+                    return str(value)
+        return ""
+
+    def _extract_status(self, result):
+        if not isinstance(result, dict):
+            return ""
+        for key in ("status", "task_status", "state"):
+            value = result.get(key)
+            if value:
+                return str(value).upper()
+        data = result.get("data")
+        if isinstance(data, dict):
+            for key in ("status", "task_status", "state"):
+                value = data.get(key)
+                if value:
+                    return str(value).upper()
+        return ""
+
+    def _raise_api_body_error(self, result, prefix):
+        if isinstance(result, list):
+            raise RuntimeError(f"[Comfly_grok_image] {prefix}: {json.dumps(result[:3], ensure_ascii=False)}")
+        if isinstance(result, dict) and "detail" in result:
+            raise RuntimeError(f"[Comfly_grok_image] {prefix}: {result['detail']}")
+
+    def _extract_result_items(self, result):
+        if isinstance(result, list):
+            return result
+        if isinstance(result, str):
+            return [result] if result.strip() else []
+        if not isinstance(result, dict):
+            return []
+
+        if any(result.get(k) for k in ("url", "image_url", "b64_json", "base64", "image_base64")):
+            return [result]
+
+        for key in ("data", "images", "result", "output", "image", "url"):
+            value = result.get(key)
+            if not value:
+                continue
+            if isinstance(value, list):
+                return value
+            if isinstance(value, dict):
+                nested = self._extract_result_items(value)
+                if nested:
+                    return nested
+                continue
+            if isinstance(value, str):
+                return [value]
+        return []
+
+    def _item_to_tensor(self, item):
+        image_url = ""
+        b64_data = ""
+
+        if isinstance(item, str):
+            if item.startswith("http://") or item.startswith("https://"):
+                image_url = item
+            else:
+                b64_data = item
+        elif isinstance(item, dict):
+            image_url = item.get("url") or item.get("image_url") or ""
+            b64_data = item.get("b64_json") or item.get("base64") or item.get("image_base64") or ""
+            nested_image = item.get("image")
+            if not image_url and isinstance(nested_image, str) and nested_image.startswith(("http://", "https://")):
+                image_url = nested_image
+            elif not b64_data and isinstance(nested_image, str):
+                b64_data = nested_image
+
+        if b64_data:
+            if b64_data.startswith("data:image"):
+                b64_data = b64_data.split(",", 1)[-1]
+            image_data = base64.b64decode(b64_data)
+            pil_image = Image.open(BytesIO(image_data))
+            return pil2tensor(pil_image), ""
+
+        if image_url:
+            response = requests.get(image_url, timeout=self.timeout)
+            response.raise_for_status()
+            pil_image = Image.open(BytesIO(response.content))
+            return pil2tensor(pil_image), image_url
+
+        return None, ""
+
+    def _poll_task(self, task_id, pbar, poll_interval, max_poll_attempts):
+        query_url = f"{baseurl}/v1/images/tasks/{task_id}"
+        print(f"[Comfly_grok_image] Queued, task_id={task_id}, polling {query_url}")
+
+        for attempt in range(max_poll_attempts):
+            time.sleep(poll_interval)
+            pbar.update_absolute(35 + min(55, int((attempt + 1) / max_poll_attempts * 55)))
+
+            response = requests.get(query_url, headers=self.get_headers(), timeout=self.timeout)
+            if response.status_code != 200:
+                err_body = response.text[:500]
+                try:
+                    err_json = json.loads(err_body) if err_body.strip().startswith("{") else None
+                    poll_status = self._extract_status(err_json) if isinstance(err_json, dict) else ""
+                    if poll_status in self._WAIT_STATUSES:
+                        if attempt % 10 == 0:
+                            print(f"[Comfly_grok_image] Poll #{attempt+1}: HTTP {response.status_code}, status={poll_status} (waiting)")
+                        continue
+                except (json.JSONDecodeError, Exception):
+                    pass
+                raise RuntimeError(f"[Comfly_grok_image] Poll error HTTP {response.status_code}: {err_body[:300]}")
+
+            poll_result = response.json()
+            self._raise_api_body_error(poll_result, "Poll API error")
+
+            status = self._extract_status(poll_result)
+            items = self._extract_result_items(poll_result)
+            if items:
+                print(f"[Comfly_grok_image] Async task completed, task_id={task_id}")
+                return poll_result
+
+            if status in self._FAILED_STATUSES:
+                fail_reason = (
+                    poll_result.get("fail_reason")
+                    or poll_result.get("error")
+                    or poll_result.get("message")
+                    or "unknown error"
+                )
+                raise RuntimeError(f"[Comfly_grok_image] Task {status}: {fail_reason}")
+
+            if status in self._SUCCESS_STATUSES:
+                raise RuntimeError(f"[Comfly_grok_image] Task {status} but no image data returned: {str(poll_result)[:300]}")
+
+            if attempt % 10 == 0:
+                print(f"[Comfly_grok_image] Polling... attempt {attempt+1}/{max_poll_attempts}, status={status or 'UNKNOWN'}")
+
+        raise RuntimeError(f"[Comfly_grok_image] Timeout: no result after {max_poll_attempts * poll_interval}s, task_id={task_id}")
+
+    def _process_images(self, result, pbar):
+        items = self._extract_result_items(result)
+        if not items:
+            raise RuntimeError(f"[Comfly_grok_image] No generated image found in response: {str(result)[:500]}")
+
+        generated_tensors = []
+        result_urls = []
+        for i, item in enumerate(items):
+            try:
+                tensor, image_url = self._item_to_tensor(item)
+                if tensor is not None:
+                    generated_tensors.append(tensor)
+                if image_url:
+                    result_urls.append(image_url)
+            except Exception as e:
+                print(f"[Comfly_grok_image] Error processing image item {i}: {str(e)}")
+            pbar.update_absolute(90 + int((i + 1) / len(items) * 8))
+
+        if not generated_tensors:
+            raise RuntimeError("[Comfly_grok_image] No images were successfully processed")
+
+        return torch.cat(generated_tensors, dim=0), result_urls
+
+    def generate_image(self, prompt, api_key="", model="grok-4.2-image", aspect_ratio="1:1",
+                       image1=None, image2=None, image3=None, image4=None,
+                       image_urls="", image_way="image_url", async_mode=True,
+                       task_id="", poll_interval=5, max_poll_attempts=180, skip_error=False):
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        default_image = self._blank_image()
+
+        try:
+            if not self.api_key:
+                err = "API key not found in Comflyapi.json"
+                print(f"[Comfly_grok_image] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[Comfly_grok_image] {err}")
+                return (default_image, "", err)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            active_task_id = task_id.strip()
+            image_refs = self._split_image_urls(image_urls)
+            input_images = [img for img in (image1, image2, image3, image4) if img is not None]
+
+            result = None
+            if active_task_id:
+                result = self._poll_task(active_task_id, pbar, poll_interval, max_poll_attempts)
+            else:
+                for index, image_tensor in enumerate(input_images):
+                    if image_way == "base64":
+                        image_refs.append(self._tensor_to_data_uri(image_tensor))
+                    else:
+                        image_refs.append(self._upload_image(image_tensor))
+                    pbar.update_absolute(10 + int((index + 1) / max(len(input_images), 1) * 20))
+
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "aspect_ratio": aspect_ratio.strip() or "1:1",
+                }
+                if image_refs:
+                    payload["image"] = image_refs
+
+                pbar.update_absolute(35)
+                params = {"async": "true"} if async_mode else None
+                mode_label = "async" if async_mode else "sync"
+                print(f"[Comfly_grok_image] Submitting {mode_label} request to {baseurl}/v1/images/generations (model={model}, aspect_ratio={payload['aspect_ratio']}, refs={len(image_refs)})")
+
+                response = requests.post(
+                    f"{baseurl}/v1/images/generations",
+                    headers=self.get_headers(),
+                    params=params,
+                    json=payload,
+                    timeout=self.timeout
+                )
+
+                if response.status_code != 200:
+                    err = f"API Error: {response.status_code} - {response.text[:500]}"
+                    print(f"[Comfly_grok_image] {err}")
+                    if not skip_error:
+                        raise RuntimeError(f"[Comfly_grok_image] {err}")
+                    return (default_image, "", err)
+
+                result = response.json()
+                self._raise_api_body_error(result, "API error")
+
+                returned_task_id = self._extract_task_id(result)
+                if returned_task_id:
+                    active_task_id = returned_task_id
+                    result = self._poll_task(active_task_id, pbar, poll_interval, max_poll_attempts)
+
+            pbar.update_absolute(90)
+            output_tensor, result_urls = self._process_images(result, pbar)
+
+            response_info = {
+                "status": "success",
+                "model": model,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio.strip() or "1:1",
+                "async_mode": bool(async_mode or active_task_id),
+                "task_id": active_task_id,
+                "input_images": len(image_refs),
+                "images_count": int(output_tensor.shape[0]),
+                "image_urls": result_urls,
+            }
+            pbar.update_absolute(100)
+            return (output_tensor, ", ".join(result_urls), json.dumps(response_info, ensure_ascii=False, indent=2))
+
+        except Exception as e:
+            error_message = f"Error generating Grok image: {str(e)}"
+            print(f"[Comfly_grok_image] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return (default_image, "", error_message)
+
+
 class Comfly_LLm_API:
 
     def __init__(self):
@@ -22420,10 +22769,10 @@ class Comfly_nano_banana_2_fal:
 class Comfly_grok_video_fal:
     """Grok Imagine Video via fal.ai Queue API.
     Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
-    Supports both text-to-video and image-to-video modes.
+    Supports text-to-video, image-to-video, and reference-to-video modes.
     Text-to-Video endpoint: xai/grok-imagine-video/text-to-video
     Image-to-Video endpoint: xai/grok-imagine-video/image-to-video
-    If image is provided, uses image-to-video; otherwise uses text-to-video.
+    Reference-to-Video endpoint: xai/grok-imagine-video/reference-to-video
     """
 
     FAL_BASE = f"{baseurl}/fal"
@@ -22436,6 +22785,12 @@ class Comfly_grok_video_fal:
             },
             "optional": {
                 "image": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
                 "api_key": ("STRING", {"default": ""}),
                 "duration": ("INT", {"default": 6, "min": 1, "max": 30, "step": 1, "tooltip": "Video duration in seconds."}),
                 "aspect_ratio": (["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", "auto"], {"default": "16:9", "tooltip": "auto is only available for image-to-video."}),
@@ -22444,6 +22799,8 @@ class Comfly_grok_video_fal:
                 "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
                 "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 1 hour timeout."}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+                "mode": (["auto", "text_to_video", "image_to_video", "reference_to_video"], {"default": "auto", "tooltip": "auto keeps the old behavior: image input -> image-to-video, otherwise text-to-video."}),
+                "reference_image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional public reference image URLs for reference_to_video, separated by newline or comma. These are appended after image inputs."}),
             }
         }
 
@@ -22498,7 +22855,14 @@ class Comfly_grok_video_fal:
             print(f"[grok_video_fal] Error uploading image: {str(e)}")
             return None
 
-    def process(self, prompt, image=None, api_key="",
+    def _split_reference_urls(self, urls):
+        if not urls or not str(urls).strip():
+            return []
+        return [u.strip() for u in re.split(r"[\n,]+", str(urls)) if u.strip()]
+
+    def process(self, prompt, mode="auto", image=None,
+                image2=None, image3=None, image4=None, image5=None, image6=None, image7=None,
+                reference_image_urls="", api_key="",
                 duration=6, aspect_ratio="16:9", resolution="720p",
                 image_way="image_url", poll_interval=6,
                 max_poll_attempts=600, skip_error=False):
@@ -22519,30 +22883,53 @@ class Comfly_grok_video_fal:
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(5)
 
-            # Determine endpoint based on whether image is provided
-            has_image = image is not None
-            if has_image:
+            input_images = [img for img in [image, image2, image3, image4, image5, image6, image7] if img is not None]
+            mode = mode or "auto"
+            if mode == "auto":
+                if len(input_images) > 1 or self._split_reference_urls(reference_image_urls):
+                    mode = "reference_to_video"
+                elif len(input_images) == 1:
+                    mode = "image_to_video"
+                else:
+                    mode = "text_to_video"
+
+            if mode == "reference_to_video":
+                endpoint = "xai/grok-imagine-video/reference-to-video"
+            elif mode == "image_to_video":
                 endpoint = "xai/grok-imagine-video/image-to-video"
-            else:
+            elif mode == "text_to_video":
                 endpoint = "xai/grok-imagine-video/text-to-video"
+            else:
+                err = f"Unknown mode: {mode}"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_fal] {err}")
+                return ("", "", err)
 
             api_url = f"{self.FAL_BASE}/{endpoint}"
+            effective_aspect_ratio = aspect_ratio
+            if mode in ("text_to_video", "reference_to_video") and effective_aspect_ratio == "auto":
+                effective_aspect_ratio = "16:9"
 
             # Build payload
             payload = {
                 "prompt": prompt,
                 "duration": duration,
-                "aspect_ratio": aspect_ratio,
+                "aspect_ratio": effective_aspect_ratio,
                 "resolution": resolution,
             }
 
-            # Process input image for image-to-video mode
-            if has_image:
+            # Process input images
+            if mode == "image_to_video":
+                if not input_images:
+                    err = "image_to_video mode requires one input image."
+                    if not skip_error:
+                        raise RuntimeError(f"[grok_video_fal] {err}")
+                    return ("", "", err)
                 pbar.update_absolute(10)
                 if image_way == "base64":
-                    img_data = self.image_to_base64(image)
+                    img_data = self.image_to_base64(input_images[0])
                 else:
-                    img_data = self.upload_image_to_get_url(image)
+                    img_data = self.upload_image_to_get_url(input_images[0])
 
                 if not img_data:
                     err = "Failed to process input image."
@@ -22552,10 +22939,34 @@ class Comfly_grok_video_fal:
 
                 payload["image_url"] = img_data
                 print(f"[grok_video_fal] Image prepared for image-to-video mode")
+            elif mode == "reference_to_video":
+                reference_urls = self._split_reference_urls(reference_image_urls)
+                if len(input_images) + len(reference_urls) == 0:
+                    err = "reference_to_video mode requires at least one reference image or URL."
+                    if not skip_error:
+                        raise RuntimeError(f"[grok_video_fal] {err}")
+                    return ("", "", err)
+
+                for idx, ref_image in enumerate(input_images[:7]):
+                    pbar.update_absolute(10 + int((idx + 1) / max(len(input_images[:7]), 1) * 10))
+                    if image_way == "base64":
+                        img_data = self.image_to_base64(ref_image)
+                    else:
+                        img_data = self.upload_image_to_get_url(ref_image)
+                    if not img_data:
+                        err = f"Failed to process reference image {idx + 1}."
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_fal] {err}")
+                        return ("", "", err)
+                    reference_urls.append(img_data)
+
+                reference_urls = reference_urls[:7]
+                payload["reference_image_urls"] = reference_urls
+                print(f"[grok_video_fal] Prepared {len(reference_urls)} reference image(s) for reference-to-video mode")
 
             pbar.update_absolute(25)
-            mode_str = "image-to-video" if has_image else "text-to-video"
-            print(f"[grok_video_fal] Submitting to {api_url} (mode={mode_str}, ratio={aspect_ratio}, duration={duration}s, resolution={resolution})")
+            mode_str = mode.replace("_", "-")
+            print(f"[grok_video_fal] Submitting to {api_url} (mode={mode_str}, ratio={effective_aspect_ratio}, duration={duration}s, resolution={resolution})")
 
             # Submit request
             response = requests.post(
@@ -22593,7 +23004,7 @@ class Comfly_grok_video_fal:
             # Check if result is immediate (sync)
             if "video" in result and result["video"]:
                 video_url = result["video"].get("url", "")
-                info = f"Model: grok-imagine-video (fal)\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {aspect_ratio}\nVideo: {video_url}"
+                info = f"Model: grok-imagine-video (fal)\nEndpoint: {endpoint}\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {effective_aspect_ratio}\nVideo: {video_url}"
                 pbar.update_absolute(100)
                 video_adapter = ComflyVideoAdapter(video_url)
                 return (video_adapter, video_url, info)
@@ -22695,7 +23106,7 @@ class Comfly_grok_video_fal:
                 return ("", "", err)
 
             pbar.update_absolute(100)
-            info = f"Model: grok-imagine-video (fal)\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {aspect_ratio}\nVideo: {video_url}"
+            info = f"Model: grok-imagine-video (fal)\nEndpoint: {endpoint}\nMode: {mode_str}\nResolution: {resolution}\nDuration: {duration}s\nAspect: {effective_aspect_ratio}\nVideo: {video_url}"
             print(f"[grok_video_fal] Done! Video: {video_url}")
             video_adapter = ComflyVideoAdapter(video_url)
             return (video_adapter, video_url, info)
@@ -22703,6 +23114,367 @@ class Comfly_grok_video_fal:
         except Exception as e:
             error_message = f"Error: {str(e)}"
             print(f"[grok_video_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_sora2_fal:
+    """Sora 2 Text/Image-to-Video via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Text-to-Video endpoint: fal-ai/sora-2/text-to-video
+    Image-to-Video endpoint: fal-ai/sora-2/image-to-video
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "mode": (["auto", "text_to_video", "image_to_video"], {"default": "auto", "tooltip": "auto: image/image_url -> image-to-video, otherwise text-to-video."}),
+                "image": ("IMAGE",),
+                "image_url": ("STRING", {"default": "", "multiline": False, "tooltip": "Optional public image URL for image-to-video. If image is connected, this is ignored."}),
+                "api_key": ("STRING", {"default": ""}),
+                "model": (["sora-2", "sora-2-2025-12-08", "sora-2-2025-10-06"], {"default": "sora-2"}),
+                "duration": ([4, 8, 12, 16, 20], {"default": 4}),
+                "aspect_ratio": (["auto", "16:9", "9:16"], {"default": "16:9", "tooltip": "auto is only available for image-to-video; text-to-video auto is sent as 16:9."}),
+                "resolution": (["auto", "720p"], {"default": "720p", "tooltip": "text-to-video auto is sent as 720p."}),
+                "delete_video": ("BOOLEAN", {"default": True}),
+                "detect_and_block_ip": ("BOOLEAN", {"default": False}),
+                "character_ids": ("STRING", {"default": "", "multiline": False, "tooltip": "Optional character IDs, up to 2, separated by comma or newline."}),
+                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[sora2_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[sora2_fal] Error uploading image: {str(e)}")
+            return None
+
+    def _split_character_ids(self, character_ids):
+        if not character_ids or not str(character_ids).strip():
+            return []
+        return [p.strip() for p in re.split(r"[\n,]+", str(character_ids)) if p.strip()][:2]
+
+    def _fix_fal_url(self, url):
+        if not url:
+            return url
+        return (url
+                .replace("https://queue.fal.run", self.FAL_BASE)
+                .replace("https://fal.run", self.FAL_BASE))
+
+    def _handle_error(self, skip_error, message):
+        print(f"[sora2_fal] {message}")
+        if not skip_error:
+            raise RuntimeError(f"[sora2_fal] {message}")
+        return ("", "", message)
+
+    def _video_result(self, result_data, endpoint, mode_str, prompt, model, duration, aspect_ratio, resolution):
+        video_obj = result_data.get("video") or {}
+        video_url = video_obj.get("url", "") if isinstance(video_obj, dict) else ""
+        if not video_url:
+            raise RuntimeError("[sora2_fal] No video URL in result")
+
+        video_id = result_data.get("video_id", "")
+        thumbnail = result_data.get("thumbnail", {})
+        thumbnail_url = thumbnail.get("url", "") if isinstance(thumbnail, dict) else ""
+        info = {
+            "model": model,
+            "endpoint": endpoint,
+            "mode": mode_str,
+            "duration": duration,
+            "aspect_ratio": aspect_ratio,
+            "resolution": resolution,
+            "video_url": video_url,
+            "video_id": video_id,
+            "thumbnail_url": thumbnail_url,
+            "prompt": prompt,
+        }
+        print(f"[sora2_fal] Done! Video: {video_url}")
+        video_adapter = ComflyVideoAdapter(video_url)
+        return (video_adapter, video_url, json.dumps(info, ensure_ascii=False, indent=2))
+
+    def process(self, prompt, mode="auto", image=None, image_url="", api_key="",
+                model="sora-2", duration=4, aspect_ratio="16:9", resolution="720p",
+                delete_video=True, detect_and_block_ip=False, character_ids="",
+                image_way="image_url", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            if not self.api_key:
+                return self._handle_error(skip_error, "API key not provided. Please set your API key.")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            mode = mode or "auto"
+            has_image = image is not None
+            has_image_url = bool(image_url and image_url.strip())
+            if mode == "auto":
+                mode = "image_to_video" if (has_image or has_image_url) else "text_to_video"
+
+            if mode == "image_to_video":
+                endpoint = "fal-ai/sora-2/image-to-video"
+            elif mode == "text_to_video":
+                endpoint = "fal-ai/sora-2/text-to-video"
+            else:
+                return self._handle_error(skip_error, f"Unknown mode: {mode}")
+
+            effective_aspect_ratio = aspect_ratio
+            effective_resolution = resolution
+            if mode == "text_to_video":
+                if effective_aspect_ratio == "auto":
+                    effective_aspect_ratio = "16:9"
+                if effective_resolution == "auto":
+                    effective_resolution = "720p"
+
+            payload = {
+                "prompt": prompt,
+                "resolution": effective_resolution,
+                "aspect_ratio": effective_aspect_ratio,
+                "duration": duration,
+                "delete_video": delete_video,
+                "model": model,
+                "detect_and_block_ip": detect_and_block_ip,
+            }
+
+            ids = self._split_character_ids(character_ids)
+            if ids:
+                payload["character_ids"] = ids
+
+            if mode == "image_to_video":
+                if has_image:
+                    pbar.update_absolute(10)
+                    if image_way == "base64":
+                        prepared_image_url = self.image_to_base64(image)
+                    else:
+                        prepared_image_url = self.upload_image_to_get_url(image)
+                else:
+                    prepared_image_url = image_url.strip()
+
+                if not prepared_image_url:
+                    return self._handle_error(skip_error, "image_to_video mode requires an input image or image_url.")
+
+                payload["image_url"] = prepared_image_url
+
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+            mode_str = mode.replace("_", "-")
+            pbar.update_absolute(25)
+            print(f"[sora2_fal] Submitting to {api_url} (mode={mode_str}, duration={duration}s, ratio={effective_aspect_ratio}, resolution={effective_resolution})")
+
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[sora2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[sora2_fal] {err}")
+                return ("", "", err)
+
+            result = response.json()
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[sora2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[sora2_fal] {err}")
+                return ("", "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[sora2_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[sora2_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(30)
+
+            if "video" in result and result["video"]:
+                pbar.update_absolute(100)
+                return self._video_result(result, endpoint, mode_str, prompt, model, duration, effective_aspect_ratio, effective_resolution)
+
+            request_id = result.get("request_id")
+            response_url = result.get("response_url", "")
+            status_url = result.get("status_url", "")
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[sora2_fal] {err}")
+                return ("", "", err)
+
+            response_url = self._fix_fal_url(response_url)
+            status_url = self._fix_fal_url(status_url)
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/fal-ai/sora-2/requests/{request_id}"
+            if not status_url:
+                status_url = f"{response_url}/status"
+
+            print(f"[sora2_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        status_url or response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[sora2_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[sora2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[sora2_fal] {err}")
+                        return ("", "", err)
+
+                    poll_data = poll_resp.json()
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[sora2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[sora2_fal] {err}")
+                        return ("", "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data:
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[sora2_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[sora2_fal] {err}")
+                        return ("", "", err)
+
+                    if "video" in poll_data and poll_data["video"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("COMPLETED", "COMPLETE", "DONE"):
+                        result_resp = requests.get(
+                            response_url,
+                            headers=self.get_headers(),
+                            timeout=self.timeout
+                        )
+                        if result_resp.status_code != 200:
+                            err_body = result_resp.text[:500]
+                            try:
+                                err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                                result_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                                if result_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                    continue
+                            except (json.JSONDecodeError, Exception):
+                                pass
+                            err = f"API error (HTTP {result_resp.status_code}): {err_body[:300]}"
+                            print(f"[sora2_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[sora2_fal] {err}")
+                            return ("", "", err)
+
+                        result_payload = result_resp.json()
+                        if "video" in result_payload and result_payload["video"]:
+                            result_data = result_payload
+                            break
+
+                    if status in ("FAILED", "CANCELLED", "CANCELED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[sora2_fal] {err}")
+                        return ("", "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[sora2_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[sora2_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[sora2_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(100)
+            return self._video_result(result_data, endpoint, mode_str, prompt, model, duration, effective_aspect_ratio, effective_resolution)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[sora2_fal] {error_message}")
             import traceback
             traceback.print_exc()
             if not skip_error:
@@ -23699,6 +24471,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
     "ComflyGrok3VideoApi": ComflyGrok3VideoApi,
     "ComflyGrok3VideoApi30S": ComflyGrok3VideoApi30S,
+    "Comfly_grok_image": Comfly_grok_image,
     "Comfly_LLm_API": Comfly_LLm_API,
     "Comfly_Doubao_Seedance2_0": Comfly_Doubao_Seedance2_0,
     "Comfly_Doubao_Seedance2_0_Asset":Comfly_Doubao_Seedance2_0_Asset,
@@ -23712,6 +24485,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": Comfly_nano_banana_pro_fal,
     "Comfly_nano_banana_2_fal": Comfly_nano_banana_2_fal,
     "Comfly_grok_video_fal": Comfly_grok_video_fal,
+    "Comfly_sora2_fal": Comfly_sora2_fal,
     "Comfly_gpt_image_2_official_ratio_stable":Comfly_gpt_image_2_official_ratio_stable,
     "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal
 }
@@ -23783,6 +24557,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_gemini_3_1_flash_image_edit_S2A": "Zhenzhen Gemini 3.1 Flash Image Edit S2A",
     "ComflyGrok3VideoApi": "Zhenzhen Grok3 Video",
     "ComflyGrok3VideoApi30S": "Zhenzhen Grok3 Video 30S",
+    "Comfly_grok_image": "zhenzhen-grok-image",
     "Comfly_Z_image_turbo": "Zhenzhen_Z_Image_Turbo",
     "Comfly_LLm_API": "Zhenzhen LLM API",
     "Comfly_Doubao_Seedance2_0": "Zhenzhen Doubao Seedance 2.0",
@@ -23797,6 +24572,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": "Zhenzhen Nano Banana Pro Edit Fal",
     "Comfly_nano_banana_2_fal": "Zhenzhen Nano Banana 2 Edit Fal",
     "Comfly_grok_video_fal": "Zhenzhen Grok Video Fal",
+    "Comfly_sora2_fal": "zhenzhen-sora2-fal",
     "Comfly_gpt_image_2_official_ratio_stable":"zhenzhen-gpt-image-2-official_ratio_stable",
     "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal"
 }
