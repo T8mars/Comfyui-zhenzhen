@@ -23148,7 +23148,7 @@ class Comfly_sora2_fal:
                 "delete_video": ("BOOLEAN", {"default": True}),
                 "detect_and_block_ip": ("BOOLEAN", {"default": False}),
                 "character_ids": ("STRING", {"default": "", "multiline": False, "tooltip": "Optional character IDs, up to 2, separated by comma or newline."}),
-                "image_way": (["image_url", "base64"], {"default": "image_url"}),
+                "image_way": (["image_url", "base64"], {"default": "base64"}),
                 "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
                 "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
@@ -23252,7 +23252,7 @@ class Comfly_sora2_fal:
     def process(self, prompt, mode="auto", image=None, image_url="", api_key="",
                 model="sora-2", duration=4, aspect_ratio="16:9", resolution="720p",
                 delete_video=True, detect_and_block_ip=False, character_ids="",
-                image_way="image_url", poll_interval=6,
+                image_way="base64", poll_interval=6,
                 max_poll_attempts=600, skip_error=False):
 
         if api_key.strip():
