@@ -23121,6 +23121,318 @@ class Comfly_grok_video_fal:
             return ("", "", error_message)
 
 
+class Comfly_grok_video_1_5_fal:
+    """Grok Imagine Video 1.5 Image-to-Video via fal.ai Queue API.
+    Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
+    Endpoint: xai/grok-imagine-video/v1.5/image-to-video
+    Supports both ComfyUI IMAGE input and public image_url input.
+    """
+
+    FAL_BASE = f"{baseurl}/fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "image_url": ("STRING", {"default": "", "multiline": False, "tooltip": "Optional public image URL. If image is connected, this is ignored."}),
+                "api_key": ("STRING", {"default": ""}),
+                "duration": ("INT", {"default": 5, "min": 5, "max": 30, "step": 1, "tooltip": "Video duration in seconds. 5s is the lowest-cost test duration."}),
+                "resolution": (["720p", "480p"], {"default": "720p"}),
+                "image_way": (["image_url", "base64"], {"default": "base64"}),
+                "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+    OUTPUT_NODE = True
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 300
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def image_to_base64(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{base64_str}"
+
+    def upload_image_to_get_url(self, image_tensor):
+        if image_tensor is None:
+            return None
+        try:
+            pil_image = tensor2pil(image_tensor)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            file_content = buffered.getvalue()
+            files = {'file': ('image.png', file_content, 'image/png')}
+            headers = {"Authorization": f"Bearer {self.api_key}"}
+            response = requests.post(
+                f"{baseurl}/v1/files",
+                headers=headers,
+                files=files,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            result = response.json()
+            if 'url' in result:
+                return result['url']
+            print(f"[grok_video_1_5_fal] Unexpected file upload response: {result}")
+            return None
+        except Exception as e:
+            print(f"[grok_video_1_5_fal] Error uploading image: {str(e)}")
+            return None
+
+    def _fix_fal_url(self, url):
+        if not url:
+            return url
+        return (url
+                .replace("https://queue.fal.run", self.FAL_BASE)
+                .replace("https://fal.run", self.FAL_BASE))
+
+    def _handle_error(self, skip_error, message):
+        print(f"[grok_video_1_5_fal] {message}")
+        if not skip_error:
+            raise RuntimeError(f"[grok_video_1_5_fal] {message}")
+        return ("", "", message)
+
+    def _video_result(self, result_data, endpoint, prompt, duration, resolution):
+        video_obj = result_data.get("video") or {}
+        video_url = video_obj.get("url", "") if isinstance(video_obj, dict) else ""
+        if not video_url:
+            raise RuntimeError("[grok_video_1_5_fal] No video URL in result")
+
+        info = {
+            "model": "grok-imagine-video-1.5-preview",
+            "endpoint": endpoint,
+            "duration": duration,
+            "resolution": resolution,
+            "video_url": video_url,
+            "prompt": prompt,
+            "video": video_obj,
+        }
+        print(f"[grok_video_1_5_fal] Done! Video: {video_url}")
+        video_adapter = ComflyVideoAdapter(video_url)
+        return (video_adapter, video_url, json.dumps(info, ensure_ascii=False, indent=2))
+
+    def process(self, prompt, image=None, image_url="", api_key="",
+                duration=5, resolution="720p", image_way="base64",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+
+        if api_key.strip():
+            self.api_key = api_key
+            config = get_config()
+            config['api_key'] = api_key
+            save_config(config)
+
+        try:
+            if not self.api_key:
+                return self._handle_error(skip_error, "API key not provided. Please set your API key.")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(5)
+
+            endpoint = "xai/grok-imagine-video/v1.5/image-to-video"
+            api_url = f"{self.FAL_BASE}/{endpoint}"
+
+            has_image = image is not None
+            has_image_url = bool(image_url and image_url.strip())
+            if has_image:
+                pbar.update_absolute(10)
+                if image_way == "base64":
+                    prepared_image_url = self.image_to_base64(image)
+                else:
+                    prepared_image_url = self.upload_image_to_get_url(image)
+            else:
+                prepared_image_url = image_url.strip()
+
+            if not prepared_image_url:
+                return self._handle_error(skip_error, "grok-video-1.5 image-to-video requires an input image or image_url.")
+
+            payload = {
+                "prompt": prompt,
+                "duration": duration,
+                "resolution": resolution,
+                "image_url": prepared_image_url,
+            }
+
+            pbar.update_absolute(25)
+            print(f"[grok_video_1_5_fal] Submitting to {api_url} (duration={duration}s, resolution={resolution})")
+
+            response = requests.post(
+                api_url,
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+
+            if response.status_code != 200:
+                err = f"API Error: {response.status_code} - {response.text[:500]}"
+                print(f"[grok_video_1_5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                return ("", "", err)
+
+            result = response.json()
+            if isinstance(result, list):
+                err = f"API validation error: {json.dumps(result[:3])}"
+                print(f"[grok_video_1_5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                return ("", "", err)
+            if isinstance(result, dict) and "detail" in result:
+                err = f"API Error: {result['detail']}"
+                print(f"[grok_video_1_5_fal] {err}")
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(30)
+
+            if "video" in result and result["video"]:
+                pbar.update_absolute(100)
+                return self._video_result(result, endpoint, prompt, duration, resolution)
+
+            request_id = result.get("request_id")
+            response_url = self._fix_fal_url(result.get("response_url", ""))
+            status_url = self._fix_fal_url(result.get("status_url", ""))
+
+            if not request_id:
+                err = f"No request_id in response: {str(result)[:300]}"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                return ("", "", err)
+
+            if not response_url:
+                response_url = f"{self.FAL_BASE}/{endpoint}/requests/{request_id}"
+            if not status_url:
+                status_url = f"{response_url}/status"
+
+            print(f"[grok_video_1_5_fal] Queued, request_id={request_id}, polling (timeout={poll_interval*max_poll_attempts}s)...")
+
+            result_data = None
+            for attempt in range(max_poll_attempts):
+                progress = 30 + min(65, int((attempt + 1) / max_poll_attempts * 65))
+                pbar.update_absolute(progress)
+                time.sleep(poll_interval)
+
+                try:
+                    poll_resp = requests.get(
+                        status_url or response_url,
+                        headers=self.get_headers(),
+                        timeout=self.timeout
+                    )
+                    if poll_resp.status_code != 200:
+                        err_body = poll_resp.text[:500]
+                        try:
+                            err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                            poll_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                            if poll_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                if attempt % 10 == 0:
+                                    print(f"[grok_video_1_5_fal] Poll #{attempt+1}: HTTP {poll_resp.status_code}, status={poll_st} (waiting)")
+                                continue
+                        except (json.JSONDecodeError, Exception):
+                            pass
+                        err = f"API error (HTTP {poll_resp.status_code}): {err_body[:300]}"
+                        print(f"[grok_video_1_5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                        return ("", "", err)
+
+                    poll_data = poll_resp.json()
+                    if isinstance(poll_data, list):
+                        err = f"API error: {json.dumps(poll_data[:1])[:300]}"
+                        print(f"[grok_video_1_5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                        return ("", "", err)
+                    if isinstance(poll_data, dict) and "detail" in poll_data and poll_data.get("status") not in ("IN_QUEUE", "IN_PROGRESS"):
+                        err = f"API Error: {poll_data['detail']}"
+                        print(f"[grok_video_1_5_fal] {err}")
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                        return ("", "", err)
+
+                    if "video" in poll_data and poll_data["video"]:
+                        result_data = poll_data
+                        break
+
+                    status = poll_data.get("status", "")
+                    if status in ("COMPLETED", "COMPLETE", "DONE"):
+                        result_resp = requests.get(
+                            response_url,
+                            headers=self.get_headers(),
+                            timeout=self.timeout
+                        )
+                        if result_resp.status_code != 200:
+                            err_body = result_resp.text[:500]
+                            try:
+                                err_json = json.loads(err_body) if err_body.strip().startswith('{') else None
+                                result_st = err_json.get('status', '') if isinstance(err_json, dict) else ''
+                                if result_st in ('IN_QUEUE', 'IN_PROGRESS'):
+                                    continue
+                            except (json.JSONDecodeError, Exception):
+                                pass
+                            err = f"API error (HTTP {result_resp.status_code}): {err_body[:300]}"
+                            print(f"[grok_video_1_5_fal] {err}")
+                            if not skip_error:
+                                raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                            return ("", "", err)
+
+                        result_payload = result_resp.json()
+                        if "video" in result_payload and result_payload["video"]:
+                            result_data = result_payload
+                            break
+
+                    if status in ("FAILED", "CANCELLED", "CANCELED"):
+                        err = f"Task {status}: {poll_data.get('error', 'unknown')}"
+                        if not skip_error:
+                            raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                        return ("", "", err)
+
+                    if attempt % 10 == 0:
+                        print(f"[grok_video_1_5_fal] Polling... attempt {attempt+1}/{max_poll_attempts}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"[grok_video_1_5_fal] Poll error: {e}")
+                    continue
+
+            if result_data is None:
+                err = f"Timeout: no result after {max_poll_attempts * poll_interval}s"
+                if not skip_error:
+                    raise RuntimeError(f"[grok_video_1_5_fal] {err}")
+                return ("", "", err)
+
+            pbar.update_absolute(100)
+            return self._video_result(result_data, endpoint, prompt, duration, resolution)
+
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            print(f"[grok_video_1_5_fal] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
 class Comfly_sora2_fal:
     """Sora 2 Text/Image-to-Video via fal.ai Queue API.
     Uses https://ai.t8star.org/fal as proxy for https://queue.fal.run.
@@ -24485,6 +24797,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": Comfly_nano_banana_pro_fal,
     "Comfly_nano_banana_2_fal": Comfly_nano_banana_2_fal,
     "Comfly_grok_video_fal": Comfly_grok_video_fal,
+    "Comfly_grok_video_1_5_fal": Comfly_grok_video_1_5_fal,
     "Comfly_sora2_fal": Comfly_sora2_fal,
     "Comfly_gpt_image_2_official_ratio_stable":Comfly_gpt_image_2_official_ratio_stable,
     "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal
@@ -24572,6 +24885,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": "Zhenzhen Nano Banana Pro Edit Fal",
     "Comfly_nano_banana_2_fal": "Zhenzhen Nano Banana 2 Edit Fal",
     "Comfly_grok_video_fal": "Zhenzhen Grok Video Fal",
+    "Comfly_grok_video_1_5_fal": "zhenzhen-grok-video-1.5",
     "Comfly_sora2_fal": "zhenzhen-sora2-fal",
     "Comfly_gpt_image_2_official_ratio_stable":"zhenzhen-gpt-image-2-official_ratio_stable",
     "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal"

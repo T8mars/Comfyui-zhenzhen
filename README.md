@@ -73,6 +73,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
 
 
+### 20260601-1
+
+更新zhenzhen-grok-vieo-1.5节点以及工作流（用default分组，这是FAL模型）
+15秒只要0.36积分，最佳SD2.0平替！
+
 ### 20260530-2
 
 更新zhenzhen-sora2-fal节点

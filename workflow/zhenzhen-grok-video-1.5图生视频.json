@@ -1,0 +1,695 @@
+{
+  "id": "a152d05d-f72c-439f-b351-2b56e2f0e6ee",
+  "revision": 0,
+  "last_node_id": 28,
+  "last_link_id": 27,
+  "nodes": [
+    {
+      "id": 20,
+      "type": "LoadImage",
+      "pos": [
+        344.85025980760065,
+        2558.66889726477
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "489ea6ec-fc46-4a65-a810-297fde1f4783.png",
+        "image"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        375.85025980760065,
+        2164.66889726477
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            16
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "960a820eb04bee8c0a447f21ff5d2419279b4db2b5d9b7e736921543abdd0f57.png",
+        "image"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "SaveImage",
+      "pos": [
+        1351.9824912125594,
+        2308.768070818489
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "easy showAnything",
+      "pos": [
+        1355.5362102208237,
+        2488.189558421795
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "130c1b5796d9876a5f853fa0bea88e808cfda4ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/32a1f559-4786-4894-8368-c6005b80e69e"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "easy showAnything",
+      "pos": [
+        1356.403978815865,
+        2631.2060873474156
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "130c1b5796d9876a5f853fa0bea88e808cfda4ad",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"status\": \"success\",\n  \"model\": \"grok-4.2-image\",\n  \"prompt\": \"图1的女人改成图2的动作，保持人脸一致性\",\n  \"aspect_ratio\": \"1:1\",\n  \"async_mode\": true,\n  \"task_id\": \"f1890f8a2ace4f08a1a4a7baa4efe940\",\n  \"input_images\": 2,\n  \"images_count\": 1,\n  \"image_urls\": [\n    \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/32a1f559-4786-4894-8368-c6005b80e69e\"\n  ]\n}"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "Comfly_grok_image",
+      "pos": [
+        844.8502598076007,
+        2405.66889726477
+      ],
+      "size": [
+        400,
+        418
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 17
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            18
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            20
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "3d8fe6018c8c45fd9995621e0dfb108aa9384b90",
+        "Node name for S&R": "Comfly_grok_image"
+      },
+      "widgets_values": [
+        "图1的女人改成图2的动作，保持人脸一致性",
+        "",
+        "grok-4.2-image",
+        "1:1",
+        "",
+        "image_url",
+        true,
+        "",
+        5,
+        180,
+        false
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Comfly_api_set",
+      "pos": [
+        371.8787521236996,
+        2980.436123820332
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "3d8fe6018c8c45fd9995621e0dfb108aa9384b90",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 11,
+      "type": "LoadImage",
+      "pos": [
+        -322.646062508946,
+        632.7536921514151
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "960a820eb04bee8c0a447f21ff5d2419279b4db2b5d9b7e736921543abdd0f57.png",
+        "image"
+      ]
+    },
+    {
+      "id": 27,
+      "type": "easy showAnything",
+      "pos": [
+        714.3544031546849,
+        1132.2264170567503
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9c7011/-cIdwid-vEtG-sLHKYXvO_62H6DlDO.mp4"
+      ]
+    },
+    {
+      "id": 28,
+      "type": "easy showAnything",
+      "pos": [
+        752.991902901313,
+        1253.612166180083
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"model\": \"grok-imagine-video-1.5-preview\",\n  \"endpoint\": \"xai/grok-imagine-video/v1.5/image-to-video\",\n  \"duration\": 5,\n  \"resolution\": \"720p\",\n  \"video_url\": \"https://v3b.fal.media/files/b/0a9c7011/-cIdwid-vEtG-sLHKYXvO_62H6DlDO.mp4\",\n  \"prompt\": \"女人在跳舞\",\n  \"video\": {\n    \"content_type\": \"video/mp4\",\n    \"duration\": 5.041667,\n    \"file_name\": \"-cIdwid-vEtG-sLHKYXvO_62H6DlDO.mp4\",\n    \"file_size\": 2725370,\n    \"fps\": 24,\n    \"height\": 1264,\n    \"num_frames\": 121,\n    \"url\": \"https://v3b.fal.media/files/b/0a9c7011/-cIdwid-vEtG-sLHKYXvO_62H6DlDO.mp4\",\n    \"width\": 720\n  }\n}"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "Comfly_grok_video_1_5_fal",
+      "pos": [
+        159.93459560159621,
+        946.5575097052874
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 22
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            25
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "1684d708e82134a6a9836a5b63fdc6bd06497f73",
+        "Node name for S&R": "Comfly_grok_video_1_5_fal"
+      },
+      "widgets_values": [
+        "女人在跳舞",
+        "",
+        "",
+        5,
+        "720p",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 26,
+      "type": "SaveVideo",
+      "pos": [
+        899.663752286125,
+        814.5778443740909
+      ],
+      "size": [
+        270,
+        572
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 24
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "Comfly_api_set",
+      "pos": [
+        -323.61817888528583,
+        1141.524152710675
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "3d8fe6018c8c45fd9995621e0dfb108aa9384b90",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      16,
+      19,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      20,
+      0,
+      18,
+      1,
+      "IMAGE"
+    ],
+    [
+      18,
+      18,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      19,
+      18,
+      1,
+      22,
+      0,
+      "STRING"
+    ],
+    [
+      20,
+      18,
+      2,
+      23,
+      0,
+      "STRING"
+    ],
+    [
+      21,
+      24,
+      0,
+      18,
+      4,
+      "STRING"
+    ],
+    [
+      22,
+      11,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      23,
+      16,
+      0,
+      25,
+      1,
+      "STRING"
+    ],
+    [
+      24,
+      25,
+      0,
+      26,
+      0,
+      "VIDEO"
+    ],
+    [
+      25,
+      25,
+      1,
+      27,
+      0,
+      "STRING"
+    ],
+    [
+      26,
+      25,
+      2,
+      28,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube:T8star-Aix",
+      "bounding": [
+        -316.54162320986393,
+        477.47889106489737,
+        433.6638698895981,
+        80
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7627768444385483,
+      "offset": [
+        1081.2814392878006,
+        160.8322588181681
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
