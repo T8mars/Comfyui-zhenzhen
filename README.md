@@ -76,18 +76,31 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 ### 20260604-1
 
 新增以下节点和工作流
+
 zhenzhen-sonilo-video-to-music-fal视频配音
+
 zhenzhen-mai-image-2.5-edit-fal图像编辑
+
 zhenzhen-hyper3d-rodin-v2.5-fal-GBL模型3D模型生成
+
 zhenzhen-mai-image-2.5-fal文生图
+
 zhenzhen-cosmos-3-super-fal图生视频
+
 zhenzhen-cosmos-3-super-fal文生图 
+
 zhenzhen-recraft-v4.1-文生图
+
 zhenzhen-flux2-pro-vto专业换装
+
 zhenzhen-ideogram-v4-文生图
+
 zhenzhen-topaz-image-高清放大
+
 zhenzhen-topaz-video-视频放大
+
 zhenzhen-sora2-fal视频生成
+
 zhenzhen-krea-v2-多风格融合
 
 ### 20260601-1
