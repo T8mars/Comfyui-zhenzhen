@@ -1,0 +1,347 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 140,
+  "last_link_id": 186,
+  "nodes": [
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        985.311143841795,
+        -52.67253569571022
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            183
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 139,
+      "type": "LoadImage",
+      "pos": [
+        997.2250360043902,
+        -428.00078378063114
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            182
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 140,
+      "type": "SaveImage",
+      "pos": [
+        1810.8047163612023,
+        -456.55824783504113
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 184
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 134,
+      "type": "easy showAnything",
+      "pos": [
+        1820.1072029675536,
+        122.95297503502222
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 186
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9ced6d/QVwi9mLhfPGF5fG41NuMq_0sjbyoCV.png"
+      ]
+    },
+    {
+      "id": 135,
+      "type": "easy showAnything",
+      "pos": [
+        2156.027690858348,
+        -348.1346164370175
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 185
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"description\": \"\",\n  \"images\": [\n    {\n      \"content_type\": \"image/png\",\n      \"file_name\": \"QVwi9mLhfPGF5fG41NuMq_0sjbyoCV.png\",\n      \"file_size\": null,\n      \"height\": null,\n      \"url\": \"https://v3b.fal.media/files/b/0a9ced6d/QVwi9mLhfPGF5fG41NuMq_0sjbyoCV.png\",\n      \"width\": null\n    }\n  ]\n}"
+      ]
+    },
+    {
+      "id": 138,
+      "type": "Comfly_mai_image_2_5_edit_fal",
+      "pos": [
+        1318.0855553867846,
+        -410.826762642486
+      ],
+      "size": [
+        400,
+        418
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 182
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 183
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            184
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            185
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            186
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_mai_image_2_5_edit_fal"
+      },
+      "widgets_values": [
+        "把包设计成一张奢侈品海报",
+        "",
+        "",
+        1,
+        "auto",
+        "png",
+        false,
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      182,
+      139,
+      0,
+      138,
+      0,
+      "IMAGE"
+    ],
+    [
+      183,
+      100,
+      0,
+      138,
+      4,
+      "STRING"
+    ],
+    [
+      184,
+      138,
+      0,
+      140,
+      0,
+      "IMAGE"
+    ],
+    [
+      185,
+      138,
+      1,
+      135,
+      0,
+      "STRING"
+    ],
+    [
+      186,
+      138,
+      2,
+      134,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.5535220464769788,
+      "offset": [
+        -642.2022803568766,
+        718.0864069864664
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

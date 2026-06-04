@@ -37,6 +37,19 @@ from comfy_api.input_impl import VideoFromFile
 from comfy_api.util import VideoComponents
 from comfy_api.input_impl import VideoFromComponents
 from fractions import Fraction
+from .fal_batch_nodes import (
+    Comfly_ideogram_v4_fal,
+    Comfly_mai_image_2_5_fal,
+    Comfly_cosmos_3_super_fal,
+    Comfly_hyper3d_rodin_v2_5_fal,
+    Comfly_krea_v2_fal,
+    Comfly_flux_pro_vto_fal,
+    Comfly_heygen_avatar5_fal,
+    Comfly_recraft_v4_1_fal,
+    Comfly_topaz_upscale_fal,
+    Comfly_sonilo_video_to_music_fal,
+    Comfly_mai_image_2_5_edit_fal,
+)
 
 # For LLM API functionality
 try:
@@ -45,6 +58,16 @@ except ImportError:
     OpenAI = None
 
 baseurl = "https://ai.t8star.org"
+FAL_SEED_MAX = 65535
+
+def _normalize_fal_seed(seed):
+    try:
+        seed_value = int(seed)
+    except (TypeError, ValueError):
+        return 0
+    if seed_value <= 0:
+        return 0
+    return min(seed_value, FAL_SEED_MAX)
 
 def get_config():
     try:
@@ -5008,15 +5031,15 @@ class ComflyJimengApi:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_image(self, prompt, scale=2.5, seed=-1, width=1328, height=1328, use_pre_llm=False, 
-                      add_logo=False, logo_position="右下角", logo_language="中文", 
+    def generate_image(self, prompt, scale=2.5, seed=-1, width=1328, height=1328, use_pre_llm=False,
+                      add_logo=False, logo_position="右下角", logo_language="中文",
                       logo_text="", logo_opacity=0.3, api_key="", image=None, image_url="", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
-            
+
         try:
             if not self.api_key:
                 error_message = "API key not found in Comflyapi.json"
@@ -12106,7 +12129,7 @@ class Comfly_nano_banana:
         except Exception as e:
             raise Exception(f"Error in streaming response: {str(e)}")
 
-    def process(self, text, model="gemini-2.5-flash-image-preview", 
+    def process(self, text, model="gemini-2.5-flash-image-preview",
                 image1=None, image2=None, image3=None, image4=None,
                 temperature=1.0, top_p=0.95, apikey="", seed=0, max_tokens=32768, skip_error=False):
         if apikey.strip():
@@ -12244,7 +12267,7 @@ class Comfly_nano_banana_fal:
                 "prompt": ("STRING", {"multiline": True}),
                 "model": (["nano-banana", "nano-banana/edit"], {"default": "nano-banana/edit"}),
                 "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
                 "image_way": (["image", "image_url"], {"default": "image_url"})
             },
             "optional": {
@@ -12324,6 +12347,7 @@ class Comfly_nano_banana_fal:
             config = get_config()
             config['api_key'] = apikey
             save_config(config)
+        seed = _normalize_fal_seed(seed)
 
         default_image = None
         for img in [image1, image2, image3, image4]:
@@ -12435,7 +12459,7 @@ class Comfly_nano_banana_fal:
             
             pbar.update_absolute(50)
 
-            max_retries = 30
+            max_retries = 3600
             retry_count = 0
             result_data = None 
             
@@ -13236,14 +13260,14 @@ class Comfly_qwen_image:
         }
  
     def generate_image(self, prompt, size, Custom_size, model, num_images=1,
-                       api_key="", num_inference_steps=30, seed=0, guidance_scale=2.5, 
+                       api_key="", num_inference_steps=30, seed=0, guidance_scale=2.5,
                        enable_safety_checker=True, negative_prompt="", output_format="png", skip_error=False):
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
-            
+
         try:
             if not self.api_key:
                 error_message = "API key not found in Comflyapi.json"
@@ -21196,9 +21220,9 @@ class Comfly_gpt_image_2_fal:
                 "num_images": ("INT", {"default": 1, "min": 1, "max": 4}),
                 "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
                 "image_way": (["image_url", "base64"], {"default": "image_url"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
-                "poll_interval": ("INT", {"default": 2, "min": 1, "max": 10, "step": 1}),
-                "max_poll_attempts": ("INT", {"default": 60, "min": 10, "max": 300, "step": 10}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+                "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\uff1b\u5173\u95ed\u65f6\uff08\u9ed8\u8ba4\uff09\u5931\u8d25\u76f4\u63a5\u629b\u51fa\u9519\u8bef\u3002"}),
             }
         }
@@ -21259,13 +21283,14 @@ class Comfly_gpt_image_2_fal:
                 mask=None, api_key="", quality="high", image_size="auto",
                 custom_width=1024, custom_height=1024, num_images=1,
                 output_format="png", image_way="image_url", seed=0,
-                poll_interval=2, max_poll_attempts=60, skip_error=False):
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
 
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
+        seed = _normalize_fal_seed(seed)
 
         # Default fallback image
         all_images = [image1, image2, image3, image4]
@@ -21430,7 +21455,7 @@ class Comfly_gpt_image_2_fal:
                             break
 
                         status = poll_data.get("status", "")
-                        if status in ("FAILED", "CANCELLED"):
+                        if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                             err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                             if not skip_error:
                                 raise RuntimeError(f"[gpt_image_2_fal] {err}")
@@ -21523,7 +21548,7 @@ class Comfly_veo3_1_fal:
                 "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4", "tooltip": "1=most strict, 6=least strict."}),
                 "image_way": (["image_url", "base64"], {"default": "image_url"}),
                 "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
-                "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*6s = 2 hours timeout."}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "\u5f00\u542f\u540e\uff0c\u8282\u70b9\u5931\u8d25\u65f6\u4e0d\u62a5\u9519\u3001\u8fd4\u56de\u9ed8\u8ba4\u7a7a\u7ed3\u679c\u3002"}),
             }
         }
@@ -21748,7 +21773,7 @@ class Comfly_veo3_1_fal:
                         break
 
                     status = poll_data.get("status", "")
-                    if status in ("FAILED", "CANCELLED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[veo3_1_fal] {err}")
@@ -21829,7 +21854,7 @@ class Comfly_seedance2_fal:
                 "duration": (["auto", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"], {"default": "auto"}),
                 "aspect_ratio": (["auto", "21:9", "16:9", "4:3", "1:1", "3:4", "9:16"], {"default": "auto"}),
                 "generate_audio": ("BOOLEAN", {"default": True, "tooltip": "Generate synchronized audio (sound effects, ambient, lip-sync)."}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647, "tooltip": "0 = random seed."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
                 "image_way": (["image_url", "base64"], {"default": "image_url"}),
                 "poll_interval": ("INT", {"default": 6, "min": 2, "max": 30, "step": 1}),
                 "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 1 hour timeout."}),
@@ -21903,6 +21928,8 @@ class Comfly_seedance2_fal:
             config = get_config()
             config['api_key'] = api_key
             save_config(config)
+
+        seed = _normalize_fal_seed(seed)
 
         try:
             if not self.api_key:
@@ -22071,7 +22098,7 @@ class Comfly_seedance2_fal:
                         break
 
                     status = poll_data.get("status", "")
-                    if status in ("FAILED", "CANCELLED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[seedance2_fal] {err}")
@@ -22148,7 +22175,7 @@ class Comfly_nano_banana_pro_fal:
                 "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
                 "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4"}),
                 "system_prompt": ("STRING", {"multiline": True, "default": "", "tooltip": "Optional system instruction to steer model persona and output style."}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647, "tooltip": "0 = random seed."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
                 "image_way": (["image_url", "base64"], {"default": "image_url"}),
                 "poll_interval": ("INT", {"default": 3, "min": 1, "max": 30, "step": 1}),
                 "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*3s = 1 hour timeout."}),
@@ -22270,6 +22297,7 @@ class Comfly_nano_banana_pro_fal:
             if system_prompt.strip():
                 payload["system_prompt"] = system_prompt.strip()
 
+            seed = _normalize_fal_seed(seed)
             if seed > 0:
                 payload["seed"] = seed
 
@@ -22380,7 +22408,7 @@ class Comfly_nano_banana_pro_fal:
                             break
 
                         status = poll_data.get("status", "")
-                        if status in ("FAILED", "CANCELLED"):
+                        if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                             err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                             if not skip_error:
                                 raise RuntimeError(f"[nano_banana_pro_fal] {err}")
@@ -22474,7 +22502,7 @@ class Comfly_nano_banana_2_fal:
                 "output_format": (["png", "jpeg", "webp"], {"default": "png"}),
                 "safety_tolerance": (["1", "2", "3", "4", "5", "6"], {"default": "4"}),
                 "system_prompt": ("STRING", {"multiline": True, "default": "", "tooltip": "Optional system instruction to steer model persona and output style."}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647, "tooltip": "0 = random seed."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
                 "image_way": (["image_url", "base64"], {"default": "image_url"}),
                 "poll_interval": ("INT", {"default": 3, "min": 1, "max": 30, "step": 1}),
                 "max_poll_attempts": ("INT", {"default": 1200, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 1200*3s = 1 hour timeout."}),
@@ -22595,6 +22623,7 @@ class Comfly_nano_banana_2_fal:
             if system_prompt.strip():
                 payload["system_prompt"] = system_prompt.strip()
 
+            seed = _normalize_fal_seed(seed)
             if seed > 0:
                 payload["seed"] = seed
 
@@ -22703,7 +22732,7 @@ class Comfly_nano_banana_2_fal:
                             break
 
                         status = poll_data.get("status", "")
-                        if status in ("FAILED", "CANCELLED"):
+                        if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                             err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                             if not skip_error:
                                 raise RuntimeError(f"[nano_banana_2_fal] {err}")
@@ -23076,7 +23105,7 @@ class Comfly_grok_video_fal:
                         break
 
                     status = poll_data.get("status", "")
-                    if status in ("FAILED", "CANCELLED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[grok_video_fal] {err}")
@@ -23401,7 +23430,7 @@ class Comfly_grok_video_1_5_fal:
                             result_data = result_payload
                             break
 
-                    if status in ("FAILED", "CANCELLED", "CANCELED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[grok_video_1_5_fal] {err}")
@@ -23762,7 +23791,7 @@ class Comfly_sora2_fal:
                             result_data = result_payload
                             break
 
-                    if status in ("FAILED", "CANCELLED", "CANCELED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[sora2_fal] {err}")
@@ -24063,7 +24092,7 @@ class Comfly_seedream_v5_fal:
                         break
 
                     status = poll_data.get("status", "")
-                    if status in ("FAILED", "CANCELLED"):
+                    if status in ("FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"):
                         err = f"Task {status}: {poll_data.get('error', 'unknown')}"
                         if not skip_error:
                             raise RuntimeError(f"[seedream_v5_fal] {err}")
@@ -24800,7 +24829,18 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_grok_video_1_5_fal": Comfly_grok_video_1_5_fal,
     "Comfly_sora2_fal": Comfly_sora2_fal,
     "Comfly_gpt_image_2_official_ratio_stable":Comfly_gpt_image_2_official_ratio_stable,
-    "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal
+    "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal,
+    "Comfly_ideogram_v4_fal": Comfly_ideogram_v4_fal,
+    "Comfly_mai_image_2_5_fal": Comfly_mai_image_2_5_fal,
+    "Comfly_cosmos_3_super_fal": Comfly_cosmos_3_super_fal,
+    "Comfly_hyper3d_rodin_v2_5_fal": Comfly_hyper3d_rodin_v2_5_fal,
+    "Comfly_krea_v2_fal": Comfly_krea_v2_fal,
+    "Comfly_flux_pro_vto_fal": Comfly_flux_pro_vto_fal,
+    "Comfly_heygen_avatar5_fal": Comfly_heygen_avatar5_fal,
+    "Comfly_recraft_v4_1_fal": Comfly_recraft_v4_1_fal,
+    "Comfly_topaz_upscale_fal": Comfly_topaz_upscale_fal,
+    "Comfly_sonilo_video_to_music_fal": Comfly_sonilo_video_to_music_fal,
+    "Comfly_mai_image_2_5_edit_fal": Comfly_mai_image_2_5_edit_fal
 }
 
 
@@ -24888,7 +24928,18 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_grok_video_1_5_fal": "zhenzhen-grok-video-1.5",
     "Comfly_sora2_fal": "zhenzhen-sora2-fal",
     "Comfly_gpt_image_2_official_ratio_stable":"zhenzhen-gpt-image-2-official_ratio_stable",
-    "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal"
+    "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal",
+    "Comfly_ideogram_v4_fal": "zhenzhen-ideogram-v4-fal",
+    "Comfly_mai_image_2_5_fal": "zhenzhen-mai-image-2.5-fal",
+    "Comfly_cosmos_3_super_fal": "zhenzhen-cosmos-3-super-fal",
+    "Comfly_hyper3d_rodin_v2_5_fal": "zhenzhen-hyper3d-rodin-v2.5-fal",
+    "Comfly_krea_v2_fal": "zhenzhen-krea-v2-fal",
+    "Comfly_flux_pro_vto_fal": "zhenzhen-flux-pro-vto-fal",
+    "Comfly_heygen_avatar5_fal": "zhenzhen-heygen-avatar5-fal",
+    "Comfly_recraft_v4_1_fal": "zhenzhen-recraft-v4.1-fal",
+    "Comfly_topaz_upscale_fal": "zhenzhen-topaz-upscale-fal",
+    "Comfly_sonilo_video_to_music_fal": "zhenzhen-sonilo-video-to-music-fal",
+    "Comfly_mai_image_2_5_edit_fal": "zhenzhen-mai-image-2.5-edit-fal"
 }
 
 # Aliyun WanX 2.6 API Node

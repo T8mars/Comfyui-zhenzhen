@@ -1,0 +1,335 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 118,
+  "last_link_id": 137,
+  "nodes": [
+    {
+      "id": 110,
+      "type": "easy showAnything",
+      "pos": [
+        4226.369771171434,
+        -119.68768619760942
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 129
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9ce4f1/o9pLsNPg6V4YEKCqpfVRD_FayAhQRU.mp4"
+      ]
+    },
+    {
+      "id": 108,
+      "type": "LoadImage",
+      "pos": [
+        3348.0608754329205,
+        -306.41642057419745
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            126
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 107,
+      "type": "Comfly_sora2_fal",
+      "pos": [
+        3679.9298161211887,
+        -318.7620604793183
+      ],
+      "size": [
+        400,
+        464
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 126
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 127
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            128
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            129
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            130
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_sora2_fal"
+      },
+      "widgets_values": [
+        "一个女人拿着这个包",
+        "auto",
+        "",
+        "",
+        "sora-2",
+        4,
+        "16:9",
+        "720p",
+        true,
+        false,
+        "",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 111,
+      "type": "easy showAnything",
+      "pos": [
+        4203.740311194378,
+        78.44488193024706
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 130
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"model\": \"sora-2\",\n  \"endpoint\": \"fal-ai/sora-2/image-to-video\",\n  \"mode\": \"image-to-video\",\n  \"duration\": 4,\n  \"aspect_ratio\": \"16:9\",\n  \"resolution\": \"720p\",\n  \"video_url\": \"https://v3b.fal.media/files/b/0a9ce4f1/o9pLsNPg6V4YEKCqpfVRD_FayAhQRU.mp4\",\n  \"video_id\": \"video_6a20f11b22548190abdfcc6bda19fb070738166a9743a5cf\",\n  \"thumbnail_url\": \"https://v3b.fal.media/files/b/0a9ce4f1/wJW6XjAnO5jn3cd6nDqso_urhmaLmt.webp\",\n  \"prompt\": \"一个女人拿着这个包\"\n}"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        3260.360190450033,
+        95.22507065572302
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            127
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 109,
+      "type": "SaveVideo",
+      "pos": [
+        4215.398921555705,
+        -491.27662616398527
+      ],
+      "size": [
+        270,
+        249.875
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 128
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      126,
+      108,
+      0,
+      107,
+      0,
+      "IMAGE"
+    ],
+    [
+      127,
+      100,
+      0,
+      107,
+      1,
+      "STRING"
+    ],
+    [
+      128,
+      107,
+      0,
+      109,
+      0,
+      "VIDEO"
+    ],
+    [
+      129,
+      107,
+      1,
+      110,
+      0,
+      "STRING"
+    ],
+    [
+      130,
+      107,
+      2,
+      111,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.2839025177495593,
+      "offset": [
+        -3335.386740275144,
+        705.9795157086685
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

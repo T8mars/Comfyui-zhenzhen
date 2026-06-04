@@ -1,0 +1,299 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 127,
+  "last_link_id": 164,
+  "nodes": [
+    {
+      "id": 101,
+      "type": "SaveImage",
+      "pos": [
+        2091.535674805065,
+        -334.45140200017977
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 160
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        1189.872789480692,
+        -70.87022343050614
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            164
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 126,
+      "type": "Comfly_cosmos_3_super_fal",
+      "pos": [
+        1556.1034574434864,
+        -188.43409178934692
+      ],
+      "size": [
+        400,
+        658
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 164
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            160
+          ]
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            162
+          ]
+        },
+        {
+          "name": "url",
+          "type": "STRING",
+          "links": [
+            163
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_cosmos_3_super_fal"
+      },
+      "widgets_values": [
+        "一个美丽的女人",
+        "text_to_image",
+        "",
+        "",
+        "",
+        "square_hd",
+        1,
+        49,
+        24,
+        28,
+        4,
+        false,
+        false,
+        true,
+        700925457,
+        "randomize",
+        "jpeg",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 127,
+      "type": "easy showAnything",
+      "pos": [
+        2303.5867632222803,
+        37.49235347972788
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 163
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9cea8b/WKwxsvFMH4YXb5X7x6-OM_p2VrnyjL.jpg"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        2331.2995271738732,
+        194.4984225733411
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 162
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"has_nsfw_concepts\": [\n    false\n  ],\n  \"images\": [\n    {\n      \"content_type\": \"image/jpeg\",\n      \"file_name\": \"WKwxsvFMH4YXb5X7x6-OM_p2VrnyjL.jpg\",\n      \"file_size\": null,\n      \"height\": 1024,\n      \"url\": \"https://v3b.fal.media/files/b/0a9cea8b/WKwxsvFMH4YXb5X7x6-OM_p2VrnyjL.jpg\",\n      \"width\": 1024\n    }\n  ],\n  \"seed\": 519200066\n}"
+      ]
+    }
+  ],
+  "links": [
+    [
+      160,
+      126,
+      0,
+      101,
+      0,
+      "IMAGE"
+    ],
+    [
+      162,
+      126,
+      2,
+      104,
+      0,
+      "STRING"
+    ],
+    [
+      163,
+      126,
+      3,
+      127,
+      0,
+      "STRING"
+    ],
+    [
+      164,
+      100,
+      0,
+      126,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.283902517749567,
+      "offset": [
+        -891.6816922335183,
+        512.7073969452008
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

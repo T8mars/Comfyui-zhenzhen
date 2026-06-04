@@ -1,0 +1,385 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 118,
+  "last_link_id": 137,
+  "nodes": [
+    {
+      "id": 113,
+      "type": "LoadImage",
+      "pos": [
+        4691.936220194453,
+        -630.9463910278855
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            131
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "https---gen-krea-ai-images-4b35f06d-6629-5e6b-9ebf-b13e4336b192-png-1024.webp",
+        "image"
+      ]
+    },
+    {
+      "id": 116,
+      "type": "easy showAnything",
+      "pos": [
+        5785.035259630449,
+        -273.8125983514532
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 135
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"images\": [\n    {\n      \"content_type\": \"image/png\",\n      \"file_name\": \"ec700cdd548b4a2da7bb8c5fcd7303c2.png\",\n      \"file_size\": 1306069,\n      \"height\": null,\n      \"url\": \"https://v3b.fal.media/files/b/0a9ce50d/HrbIvFNUpOKwV8HC1rlU8_ec700cdd548b4a2da7bb8c5fcd7303c2.png\",\n      \"width\": null\n    }\n  ],\n  \"seed\": 2054784437\n}"
+      ]
+    },
+    {
+      "id": 117,
+      "type": "easy showAnything",
+      "pos": [
+        5819.645396225755,
+        -145.2224629971383
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 136
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9ce50d/HrbIvFNUpOKwV8HC1rlU8_ec700cdd548b4a2da7bb8c5fcd7303c2.png"
+      ]
+    },
+    {
+      "id": 112,
+      "type": "Comfly_krea_v2_fal",
+      "pos": [
+        5289.234095612223,
+        -375.7959876250065
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "style_image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 131
+        },
+        {
+          "name": "style_image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 132
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 137
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            134
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            135
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            136
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_krea_v2_fal"
+      },
+      "widgets_values": [
+        "合并两个图片的风格， 画一个高允贞",
+        "medium",
+        "",
+        "",
+        "",
+        "16:9",
+        "medium",
+        1,
+        1880402116,
+        "randomize",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 114,
+      "type": "LoadImage",
+      "pos": [
+        4827.869044887155,
+        81.52351083804447
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            132
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "u=3256714106,676291604&fm=253&app=120&f=JPEG.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 118,
+      "type": "Comfly_api_set",
+      "pos": [
+        4820.378588367334,
+        -163.90650323668328
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            137
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 115,
+      "type": "SaveImage",
+      "pos": [
+        5799.754872593292,
+        -699.2386951123973
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 134
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    }
+  ],
+  "links": [
+    [
+      131,
+      113,
+      0,
+      112,
+      0,
+      "IMAGE"
+    ],
+    [
+      132,
+      114,
+      0,
+      112,
+      1,
+      "IMAGE"
+    ],
+    [
+      134,
+      112,
+      0,
+      115,
+      0,
+      "IMAGE"
+    ],
+    [
+      135,
+      112,
+      1,
+      116,
+      0,
+      "STRING"
+    ],
+    [
+      136,
+      112,
+      2,
+      117,
+      0,
+      "STRING"
+    ],
+    [
+      137,
+      118,
+      0,
+      112,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.061076460950048,
+      "offset": [
+        -4274.647663645598,
+        977.5624436158286
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

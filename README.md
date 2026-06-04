@@ -73,10 +73,26 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
 
 
+### 20260604-1
+
+新增以下节点和工作流
+zhenzhen-sonilo-video-to-music-fal视频配音
+zhenzhen-mai-image-2.5-edit-fal图像编辑
+zhenzhen-hyper3d-rodin-v2.5-fal-GBL模型3D模型生成
+zhenzhen-mai-image-2.5-fal文生图
+zhenzhen-cosmos-3-super-fal图生视频
+zhenzhen-cosmos-3-super-fal文生图 
+zhenzhen-recraft-v4.1-文生图
+zhenzhen-flux2-pro-vto专业换装
+zhenzhen-ideogram-v4-文生图
+zhenzhen-topaz-image-高清放大
+zhenzhen-topaz-video-视频放大
+zhenzhen-sora2-fal视频生成
+zhenzhen-krea-v2-多风格融合
+
 ### 20260601-1
 
 更新zhenzhen-grok-vieo-1.5节点以及工作流（用default分组，这是FAL模型）
-15秒只要0.36积分，最佳SD2.0平替！
 
 ### 20260530-2
 

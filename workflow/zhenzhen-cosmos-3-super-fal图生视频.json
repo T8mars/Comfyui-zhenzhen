@@ -1,0 +1,395 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 129,
+  "last_link_id": 166,
+  "nodes": [
+    {
+      "id": 103,
+      "type": "easy showAnything",
+      "pos": [
+        2056.530067928272,
+        232.0143925068669
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 161
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "<F:\\AI-T8-video-onekey\\ComfyUI\\custom_nodes\\Comfyui-zhenzhen.fal_batch_nodes.FalVideoAdapter object at 0x000001DD21EF3340>"
+      ]
+    },
+    {
+      "id": 128,
+      "type": "LoadImage",
+      "pos": [
+        773.513649013992,
+        -208.760158195387
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            164
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00001_jzcoh_1780487385.png",
+        "image"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        1162.3693029198364,
+        32.706736596546534
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            165
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        2365.5700417898306,
+        194.4984225733411
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 162
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"seed\": 238169471,\n  \"video\": {\n    \"content_type\": \"video/mp4\",\n    \"duration\": 2.0416666666666665,\n    \"file_name\": \"iPC64giXN2yi9T5QvIh3i_dwP6AANH.mp4\",\n    \"file_size\": 2617258,\n    \"fps\": 24,\n    \"height\": 960,\n    \"num_frames\": 49,\n    \"url\": \"https://v3b.fal.media/files/b/0a9ceaa6/iPC64giXN2yi9T5QvIh3i_dwP6AANH.mp4\",\n    \"width\": 960\n  }\n}"
+      ]
+    },
+    {
+      "id": 129,
+      "type": "SaveVideo",
+      "pos": [
+        2019.9107721559842,
+        -310.99977267440005
+      ],
+      "size": [
+        270,
+        368
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 166
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 127,
+      "type": "easy showAnything",
+      "pos": [
+        2550.2667577459583,
+        -88.87126208970433
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 163
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9ceaa6/iPC64giXN2yi9T5QvIh3i_dwP6AANH.mp4"
+      ]
+    },
+    {
+      "id": 126,
+      "type": "Comfly_cosmos_3_super_fal",
+      "pos": [
+        1556.1034574434864,
+        -188.43409178934692
+      ],
+      "size": [
+        400,
+        658
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 164
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 165
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            161,
+            166
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            162
+          ]
+        },
+        {
+          "name": "url",
+          "type": "STRING",
+          "links": [
+            163
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_cosmos_3_super_fal"
+      },
+      "widgets_values": [
+        "美丽的女人在跳足球舞",
+        "image_to_video",
+        "",
+        "",
+        "",
+        "square_hd",
+        1,
+        49,
+        24,
+        28,
+        4,
+        false,
+        false,
+        true,
+        1710385131,
+        "randomize",
+        "jpeg",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      161,
+      126,
+      1,
+      103,
+      0,
+      "VIDEO"
+    ],
+    [
+      162,
+      126,
+      2,
+      104,
+      0,
+      "STRING"
+    ],
+    [
+      163,
+      126,
+      3,
+      127,
+      0,
+      "STRING"
+    ],
+    [
+      164,
+      128,
+      0,
+      126,
+      0,
+      "IMAGE"
+    ],
+    [
+      165,
+      100,
+      0,
+      126,
+      1,
+      "STRING"
+    ],
+    [
+      166,
+      126,
+      1,
+      129,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.283902517749568,
+      "offset": [
+        -789.5237024297511,
+        463.73272582784205
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

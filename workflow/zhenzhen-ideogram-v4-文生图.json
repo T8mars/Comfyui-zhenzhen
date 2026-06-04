@@ -1,0 +1,279 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 120,
+  "last_link_id": 144,
+  "nodes": [
+    {
+      "id": 103,
+      "type": "easy showAnything",
+      "pos": [
+        2056.530067928272,
+        232.0143925068669
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 142
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"has_nsfw_concepts\": [\n    false\n  ],\n  \"images\": [\n    {\n      \"content_type\": \"image/jpeg\",\n      \"file_name\": \"9gsuqOvBtklrPodo7uoFR_9bivaWHO.jpg\",\n      \"file_size\": null,\n      \"height\": 1024,\n      \"url\": \"https://v3b.fal.media/files/b/0a9cea56/9gsuqOvBtklrPodo7uoFR_9bivaWHO.jpg\",\n      \"width\": 1024\n    }\n  ],\n  \"prompt\": \"{\\\"high_level_description\\\":\\\"A large, vibrant public street mural on a brick wall featuring dimensional bold lettering and organic elements, captured in the style of a high-quality photograph of public art.\\\",\\\"compositional_deconstruction\\\":{\\\"background\\\":\\\"Textured brick exterior wall with weathered mortar joints, painted with a sunset-themed gradient blending deep orange, warm yellow, and magenta, accented by moss-green vine details and splatters of wall paint, under natural, soft daylight.\\\",\\\"elements\\\":[{\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"RISE UP\\\",\\\"desc\\\":\\\"Large-scale dimensional bold lettering with thick white outlines and a vibrant gradient fill shifting from sunset orange to magenta, positioned centrally.\\\"},{\\\"type\\\":\\\"text\\\",\\\"text\\\":\\\"It is a good day!\\\",\\\"desc\\\":\\\"Secondary text in a stylized, bold sans-serif typeface, featuring a clean green gradient fill with subtle depth-creating drop shadows, located in the middle-lower section of the mural.\\\"},{\\\"type\\\":\\\"obj\\\",\\\"desc\\\":\\\"A complex mural composition featuring oversized photorealistic marigolds and wild meadow flowers emerging from the baseline of the text, with swallows and hummingbirds caught in mid-flight patterns woven around the letterforms, painted with weathered, textured acrylic mural paint.\\\"}]}}\",\n  \"seed\": 328134050,\n  \"timings\": {\n    \"inference\": 2.7936711569782346\n  }\n}"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        2365.5700417898306,
+        194.4984225733411
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 143
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9cea56/9gsuqOvBtklrPodo7uoFR_9bivaWHO.jpg"
+      ]
+    },
+    {
+      "id": 101,
+      "type": "SaveImage",
+      "pos": [
+        2117.0708267377745,
+        -246.14233489955947
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 141
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        1122.826508032777,
+        73.83859281928451
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            144
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 120,
+      "type": "Comfly_ideogram_v4_fal",
+      "pos": [
+        1552.1530000623407,
+        -188.22962889274805
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 144
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            141
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            142
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            143
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_ideogram_v4_fal"
+      },
+      "widgets_values": [
+        "A large street mural, 'RISE UP' in the first \"It is a good day!\" in the second row, in bold dimensional letters with a vibrant gradient fill, integrated with painted flowers and birds bursting from the words, photorealistic wall. Mural lettering tradition. Sunset gradient with green accents, mural paint texture, the uplift of the message, community spirit, public art energy.",
+        "",
+        "square_hd",
+        "BALANCED",
+        "none",
+        1,
+        1746171471,
+        "randomize",
+        "jpeg",
+        true,
+        true,
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      141,
+      120,
+      0,
+      101,
+      0,
+      "IMAGE"
+    ],
+    [
+      142,
+      120,
+      1,
+      103,
+      0,
+      "STRING"
+    ],
+    [
+      143,
+      120,
+      2,
+      104,
+      0,
+      "STRING"
+    ],
+    [
+      144,
+      100,
+      0,
+      120,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.5535220464769721,
+      "offset": [
+        -1078.3143213494589,
+        415.50049555342537
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

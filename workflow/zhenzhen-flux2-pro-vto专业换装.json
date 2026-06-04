@@ -1,0 +1,383 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 124,
+  "last_link_id": 151,
+  "nodes": [
+    {
+      "id": 103,
+      "type": "easy showAnything",
+      "pos": [
+        2056.530067928272,
+        232.0143925068669
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 150
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"has_nsfw_concepts\": [\n    false\n  ],\n  \"images\": [\n    {\n      \"content_type\": \"image/jpeg\",\n      \"height\": 1024,\n      \"url\": \"https://v3b.fal.media/files/b/0a9cea72/0dqc1xjrg4yOk7-3qb7Fd_77b02242426948fcab3589f474b71295.jpg\",\n      \"width\": 576\n    }\n  ],\n  \"prompt\": \"图1的女人换上图2的衣服\",\n  \"seed\": 574973083,\n  \"timings\": {}\n}"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        2365.5700417898306,
+        194.4984225733411
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 151
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9cea72/0dqc1xjrg4yOk7-3qb7Fd_77b02242426948fcab3589f474b71295.jpg"
+      ]
+    },
+    {
+      "id": 101,
+      "type": "SaveImage",
+      "pos": [
+        2117.0708267377745,
+        -246.14233489955947
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 149
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 123,
+      "type": "LoadImage",
+      "pos": [
+        1075.3139409973658,
+        -301.3104880043399
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            146
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00010_avnlr_1780295425.png",
+        "image"
+      ]
+    },
+    {
+      "id": 124,
+      "type": "LoadImage",
+      "pos": [
+        1067.1214130856215,
+        107.4966547917009
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            147
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "006ap5nFgy1hpkgkht15mj30p00xc4qp.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 122,
+      "type": "Comfly_flux_pro_vto_fal",
+      "pos": [
+        1576.3602580166287,
+        -53.72717856375505
+      ],
+      "size": [
+        400,
+        392
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "human_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 146
+        },
+        {
+          "name": "garment_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 147
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 148
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            149
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            150
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            151
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_flux_pro_vto_fal"
+      },
+      "widgets_values": [
+        "图1的女人换上图2的衣服",
+        "",
+        "",
+        "",
+        4,
+        "jpeg",
+        568842925,
+        "randomize",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        1045.0019776950571,
+        518.7384030303841
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            148
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      146,
+      123,
+      0,
+      122,
+      0,
+      "IMAGE"
+    ],
+    [
+      147,
+      124,
+      0,
+      122,
+      1,
+      "IMAGE"
+    ],
+    [
+      148,
+      100,
+      0,
+      122,
+      2,
+      "STRING"
+    ],
+    [
+      149,
+      122,
+      0,
+      101,
+      0,
+      "IMAGE"
+    ],
+    [
+      150,
+      122,
+      1,
+      103,
+      0,
+      "STRING"
+    ],
+    [
+      151,
+      122,
+      2,
+      104,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.1671841070450593,
+      "offset": [
+        -955.5471767930221,
+        427.55386188850497
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

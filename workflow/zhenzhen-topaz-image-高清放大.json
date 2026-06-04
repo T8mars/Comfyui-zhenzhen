@@ -1,0 +1,411 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 119,
+  "last_link_id": 138,
+  "nodes": [
+    {
+      "id": 102,
+      "type": "easy showAnything",
+      "pos": [
+        2113.3251356054293,
+        366.0532947804718
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 121
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9ce4d9/b7Ql6U-uIMfHsroMz2vX3_video.mp4"
+      ]
+    },
+    {
+      "id": 103,
+      "type": "easy showAnything",
+      "pos": [
+        2056.530067928272,
+        232.0143925068669
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 122
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"video\": {\n    \"content_type\": \"video/mp4\",\n    \"file_name\": \"video.mp4\",\n    \"file_size\": 3115436,\n    \"url\": \"https://v3b.fal.media/files/b/0a9ce4d9/b7Ql6U-uIMfHsroMz2vX3_video.mp4\"\n  }\n}"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        2365.5700417898306,
+        194.4984225733411
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 123
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "<F:\\AI-T8-video-onekey\\ComfyUI\\custom_nodes\\Comfyui-zhenzhen.fal_batch_nodes.FalVideoAdapter object at 0x000001DD44B2EEF0>"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        1073.212149372858,
+        660.409605484671
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            119
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 98,
+      "type": "Comfly_topaz_upscale_fal",
+      "pos": [
+        1572.3334786489406,
+        -194.24490116335514
+      ],
+      "size": [
+        400,
+        940
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 138
+        },
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 119
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            120
+          ]
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            123
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            122
+          ]
+        },
+        {
+          "name": "url",
+          "type": "STRING",
+          "links": [
+            121
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_topaz_upscale_fal"
+      },
+      "widgets_values": [
+        "video",
+        "",
+        "",
+        "",
+        "Standard V2",
+        "Proteus",
+        2,
+        "jpeg",
+        "All",
+        false,
+        true,
+        -1,
+        0.8,
+        -1,
+        -1,
+        -1,
+        -1,
+        0,
+        0,
+        "",
+        false,
+        -1,
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        false,
+        "base64",
+        "upload",
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 101,
+      "type": "SaveImage",
+      "pos": [
+        2285.7674349348217,
+        -210.3296471258847
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 120
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 119,
+      "type": "LoadImage",
+      "pos": [
+        1093.325043694086,
+        -190.43873191675902
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            138
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      119,
+      100,
+      0,
+      98,
+      2,
+      "STRING"
+    ],
+    [
+      120,
+      98,
+      0,
+      101,
+      0,
+      "IMAGE"
+    ],
+    [
+      121,
+      98,
+      3,
+      102,
+      0,
+      "STRING"
+    ],
+    [
+      122,
+      98,
+      2,
+      103,
+      0,
+      "STRING"
+    ],
+    [
+      123,
+      98,
+      1,
+      104,
+      0,
+      "VIDEO"
+    ],
+    [
+      138,
+      119,
+      0,
+      98,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 0.7972024500000382,
+      "offset": [
+        -363.4252205403824,
+        943.6087476613831
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

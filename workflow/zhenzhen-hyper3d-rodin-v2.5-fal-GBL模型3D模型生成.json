@@ -1,0 +1,481 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 137,
+  "last_link_id": 180,
+  "nodes": [
+    {
+      "id": 135,
+      "type": "easy showAnything",
+      "pos": [
+        2704.3094214781077,
+        -465.9763305225082
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 177
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9cecac/jkmhYHBzIWe57ntm0nY5O_base_basic_shaded.glb\nhttps://v3b.fal.media/files/b/0a9cecac/e-lENsEfrcCHNxnAP9JPO_preview.webp"
+      ]
+    },
+    {
+      "id": 104,
+      "type": "easy showAnything",
+      "pos": [
+        1523.5745201665093,
+        411.9234597382581
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 175
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9cecb0/8iVTYNKjASaCZ0RK_TTSZ_base_basic_pbr.glb"
+      ]
+    },
+    {
+      "id": 134,
+      "type": "easy showAnything",
+      "pos": [
+        2100.502322552653,
+        140.86710767518133
+      ],
+      "size": [
+        394.3318780142463,
+        353.08679600143984
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 176
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"model_mesh\": {\n    \"content_type\": \"application/octet-stream\",\n    \"file_name\": \"base_basic_pbr.glb\",\n    \"file_size\": 10668436,\n    \"url\": \"https://v3b.fal.media/files/b/0a9cecb0/8iVTYNKjASaCZ0RK_TTSZ_base_basic_pbr.glb\"\n  },\n  \"model_meshes\": [\n    {\n      \"content_type\": \"application/octet-stream\",\n      \"file_name\": \"base_basic_shaded.glb\",\n      \"file_size\": 3744152,\n      \"url\": \"https://v3b.fal.media/files/b/0a9cecac/jkmhYHBzIWe57ntm0nY5O_base_basic_shaded.glb\"\n    }\n  ],\n  \"seed\": 5,\n  \"textures\": [\n    {\n      \"content_type\": \"application/octet-stream\",\n      \"file_name\": \"preview.webp\",\n      \"file_size\": 4852,\n      \"height\": null,\n      \"url\": \"https://v3b.fal.media/files/b/0a9cecac/e-lENsEfrcCHNxnAP9JPO_preview.webp\",\n      \"width\": null\n    }\n  ]\n}"
+      ]
+    },
+    {
+      "id": 136,
+      "type": "SaveGLB",
+      "pos": [
+        2231.309050214778,
+        -449.08628252767954
+      ],
+      "size": [
+        400,
+        550
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESH,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_OBJ,FILE_3D_FBX,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "link": 178
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveGLB",
+        "Camera Config": {
+          "cameraType": "perspective",
+          "fov": 75,
+          "state": {
+            "position": {
+              "x": 1.2711342279747146,
+              "y": 0.19963333032459543,
+              "z": -0.5967520455575912
+            },
+            "target": {
+              "x": -0.01703101396560669,
+              "y": 0.03155401349067688,
+              "z": 0.0007524937391281129
+            },
+            "zoom": 1,
+            "cameraType": "perspective"
+          }
+        },
+        "Scene Config": {
+          "showGrid": true,
+          "backgroundColor": "#282828",
+          "backgroundImage": "",
+          "backgroundRenderMode": "tiled"
+        },
+        "Light Config": {
+          "intensity": 3,
+          "hdri": {
+            "enabled": false,
+            "hdriPath": "",
+            "showAsBackground": false,
+            "intensity": 1
+          }
+        }
+      },
+      "widgets_values": [
+        "3d/ComfyUI",
+        ""
+      ]
+    },
+    {
+      "id": 100,
+      "type": "Comfly_api_set",
+      "pos": [
+        924.1468428809666,
+        -16.38862834606623
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            173
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-qMIGlWSVhExF3QwYY2VrrfqkTN2hDvqgPNamzhq70geslm3M",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 133,
+      "type": "LoadImage",
+      "pos": [
+        881.1803392904153,
+        -475.05037884209906
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            179
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00001_xyddu_1777561324.webp",
+        "image"
+      ]
+    },
+    {
+      "id": 137,
+      "type": "ResizeImagesByLongerEdge",
+      "pos": [
+        1180.158323743962,
+        -362.05660032348584
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 179
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            180
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "ResizeImagesByLongerEdge"
+      },
+      "widgets_values": [
+        1536
+      ]
+    },
+    {
+      "id": 132,
+      "type": "Comfly_hyper3d_rodin_v2_5_fal",
+      "pos": [
+        1550.4063990911304,
+        -432.2990544171655
+      ],
+      "size": [
+        400,
+        676
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 180
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 173
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": [
+            175
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            176
+          ]
+        },
+        {
+          "name": "texture_urls",
+          "type": "STRING",
+          "links": [
+            177
+          ]
+        },
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": [
+            178
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_hyper3d_rodin_v2_5_fal"
+      },
+      "widgets_values": [
+        "做成3D模型",
+        "image_to_3d",
+        "",
+        "",
+        "",
+        "Gen-2.5-Extreme-High",
+        "glb",
+        "All",
+        "4K Quad",
+        "extreme-low",
+        "faithful",
+        "symmetric",
+        false,
+        false,
+        false,
+        false,
+        false,
+        5,
+        "fixed",
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      173,
+      100,
+      0,
+      132,
+      2,
+      "STRING"
+    ],
+    [
+      175,
+      132,
+      0,
+      104,
+      0,
+      "STRING"
+    ],
+    [
+      176,
+      132,
+      1,
+      134,
+      0,
+      "STRING"
+    ],
+    [
+      177,
+      132,
+      2,
+      135,
+      0,
+      "STRING"
+    ],
+    [
+      178,
+      132,
+      3,
+      136,
+      0,
+      "FILE_3D"
+    ],
+    [
+      179,
+      133,
+      0,
+      137,
+      0,
+      "IMAGE"
+    ],
+    [
+      180,
+      137,
+      0,
+      132,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 1.1671841070450624,
+      "offset": [
+        -864.4916848153077,
+        644.6603412613481
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
