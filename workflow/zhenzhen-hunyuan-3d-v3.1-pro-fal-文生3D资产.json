@@ -1,0 +1,388 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 88,
+  "last_link_id": 136,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        713.5709153102499,
+        1331.077243796512
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 128
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        601.730868123993,
+        1495.919914563516
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 130
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        -42.70295385086321,
+        1158.4440853566375
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 82,
+      "type": "Preview3D",
+      "pos": [
+        598.1798257855002,
+        1639.883483814401
+      ],
+      "size": [
+        400,
+        550
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "camera_info",
+          "shape": 7,
+          "type": "LOAD3D_CAMERA",
+          "link": null
+        },
+        {
+          "name": "bg_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "model_file",
+          "type": "STRING,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "widget": {
+            "name": "model_file"
+          },
+          "link": 127
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "Preview3D"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 83,
+      "type": "easy showAnything",
+      "pos": [
+        445.5184115202791,
+        1211.5049033577689
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 129
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -502.28508304700824,
+        1806.1739166825125
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            131
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6OkQfefOqxjhMGbRhO2BEsRzJggZzle3p2ehlt65RT2f2OI8",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 81,
+      "type": "Comfly_hunyuan_3d_v3_1_pro_fal",
+      "pos": [
+        -95.77619191113078,
+        1441.071061700042
+      ],
+      "size": [
+        400,
+        460
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "front_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "back_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "left_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "right_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 131
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": [
+            128
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            129
+          ]
+        },
+        {
+          "name": "asset_urls",
+          "type": "STRING",
+          "links": [
+            130
+          ]
+        },
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": [
+            127
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_hunyuan_3d_v3_1_pro_fal"
+      },
+      "widgets_values": [
+        "A small stylized spaceship",
+        "text_to_3d",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Normal",
+        false,
+        500000,
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      127,
+      81,
+      3,
+      82,
+      2,
+      "FILE_3D"
+    ],
+    [
+      128,
+      81,
+      0,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      129,
+      81,
+      1,
+      83,
+      0,
+      "STRING"
+    ],
+    [
+      130,
+      81,
+      2,
+      66,
+      0,
+      "STRING"
+    ],
+    [
+      131,
+      61,
+      0,
+      81,
+      4,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.085607476635518,
+      "offset": [
+        1273.18570944491,
+        -939.6875375086682
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

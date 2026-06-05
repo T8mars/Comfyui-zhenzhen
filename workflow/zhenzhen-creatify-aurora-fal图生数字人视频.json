@@ -1,0 +1,354 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 73,
+  "last_link_id": 107,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        713.5709153102499,
+        1331.077243796512
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 105
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        44.749345750072195,
+        1159.7023918257157
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 67,
+      "type": "LoadImage",
+      "pos": [
+        -358.63378410494704,
+        1198.895717366659
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            103
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00001_iegoo_1780410473.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -327.1917378747755,
+        1622.9141625259629
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6OkQfefOqxjhMGbRhO2BEsRzJggZzle3p2ehlt65RT2f2OI8",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        661.3179709671915,
+        1525.9556899804124
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 106
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb"
+      ]
+    },
+    {
+      "id": 73,
+      "type": "SaveVideo",
+      "pos": [
+        628.3426846874343,
+        1133.1224565211112
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 107
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 72,
+      "type": "Comfly_creatify_aurora_fal",
+      "pos": [
+        124.77624902231646,
+        1360.4697329249902
+      ],
+      "size": [
+        400,
+        392
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 103
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 104
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            107
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            105
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            106
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_creatify_aurora_fal"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "",
+        "",
+        1,
+        2,
+        "480p",
+        "base64",
+        "upload",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      103,
+      67,
+      0,
+      72,
+      0,
+      "IMAGE"
+    ],
+    [
+      104,
+      61,
+      0,
+      72,
+      2,
+      "STRING"
+    ],
+    [
+      105,
+      72,
+      1,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      106,
+      72,
+      2,
+      66,
+      0,
+      "STRING"
+    ],
+    [
+      107,
+      72,
+      0,
+      73,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.4449435514018742,
+      "offset": [
+        492.1163107032559,
+        -845.9140049540102
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

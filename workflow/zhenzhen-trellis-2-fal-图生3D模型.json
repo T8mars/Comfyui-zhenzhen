@@ -1,0 +1,464 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 67,
+  "last_link_id": 95,
+  "nodes": [
+    {
+      "id": 65,
+      "type": "Preview3D",
+      "pos": [
+        1091.0714287929786,
+        1251.3477689518597
+      ],
+      "size": [
+        400,
+        550
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "camera_info",
+          "shape": 7,
+          "type": "LOAD3D_CAMERA",
+          "link": null
+        },
+        {
+          "name": "bg_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "model_file",
+          "type": "STRING,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "widget": {
+            "name": "model_file"
+          },
+          "link": 90
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "Preview3D",
+        "Last Time Model File": "preview3d_1785ad0db34240689c2a3d6b26de826c.glb",
+        "Scene Config": {
+          "showGrid": true,
+          "backgroundColor": "#282828",
+          "backgroundImage": "",
+          "backgroundRenderMode": "tiled"
+        },
+        "Camera Config": {
+          "cameraType": "perspective",
+          "fov": 35,
+          "state": {
+            "position": {
+              "x": 2.6458005477250417,
+              "y": 1.316156933759703,
+              "z": -0.522538254261971
+            },
+            "target": {
+              "x": 0.0011099725961685178,
+              "y": -0.0015186667442321777,
+              "z": -0.00026962161064147944
+            },
+            "zoom": 1,
+            "cameraType": "perspective"
+          }
+        },
+        "Light Config": {
+          "intensity": 3,
+          "hdri": {
+            "enabled": false,
+            "hdriPath": "",
+            "showAsBackground": false,
+            "intensity": 1
+          }
+        }
+      },
+      "widgets_values": [
+        "preview3d_1785ad0db34240689c2a3d6b26de826c.glb",
+        ""
+      ]
+    },
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        713.5709153102499,
+        1331.077243796512
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 91
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 60,
+      "type": "easy showAnything",
+      "pos": [
+        714.5734524448475,
+        1415.3120742084745
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 92
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"model_glb\": {\n    \"content_type\": \"application/octet-stream\",\n    \"file_name\": \"trellis2_79cf4d65efe444b78c43019a1ee23244.glb\",\n    \"file_size\": 21873776,\n    \"url\": \"https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb\"\n  }\n}"
+      ]
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        716.6834556066326,
+        1202.067604839682
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        -170.46321372901568,
+        1035.7667544603273
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 67,
+      "type": "LoadImage",
+      "pos": [
+        -468.73560014929024,
+        1197.0082576630416
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            95
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -75.42222970279302,
+        1398.4725542494207
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            94
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6OkQfefOqxjhMGbRhO2BEsRzJggZzle3p2ehlt65RT2f2OI8",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 64,
+      "type": "Comfly_trellis_2_fal",
+      "pos": [
+        304.9336053083314,
+        1231.9698493280566
+      ],
+      "size": [
+        316.84765625,
+        454
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 95
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 94
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": [
+            93
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            92
+          ]
+        },
+        {
+          "name": "asset_urls",
+          "type": "STRING",
+          "links": [
+            91
+          ]
+        },
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": [
+            90
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_trellis_2_fal"
+      },
+      "widgets_values": [
+        "",
+        "",
+        36,
+        "randomize",
+        "1024",
+        12,
+        12,
+        12,
+        500000,
+        "2048",
+        true,
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      90,
+      64,
+      3,
+      65,
+      2,
+      "FILE_3D"
+    ],
+    [
+      91,
+      64,
+      2,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      92,
+      64,
+      1,
+      60,
+      0,
+      "STRING"
+    ],
+    [
+      93,
+      64,
+      0,
+      66,
+      0,
+      "STRING"
+    ],
+    [
+      94,
+      61,
+      0,
+      64,
+      3,
+      "STRING"
+    ],
+    [
+      95,
+      67,
+      0,
+      64,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0856074766355166,
+      "offset": [
+        774.3111618568695,
+        -744.7663449873156
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

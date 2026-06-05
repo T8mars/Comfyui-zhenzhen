@@ -1,0 +1,298 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 79,
+  "last_link_id": 124,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        713.5709153102499,
+        1331.077243796512
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 123
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        601.730868123993,
+        1495.919914563516
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 124
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb"
+      ]
+    },
+    {
+      "id": 78,
+      "type": "SaveAudio",
+      "pos": [
+        394.0821386883515,
+        1312.1874104165058
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 122
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        -42.70295385086321,
+        1158.4440853566375
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -456.60855821946933,
+        1583.327841008762
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            121
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6OkQfefOqxjhMGbRhO2BEsRzJggZzle3p2ehlt65RT2f2OI8",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 79,
+      "type": "Comfly_minimax_speech_2_8_fal",
+      "pos": [
+        -81.94740381596142,
+        1317.8702753125958
+      ],
+      "size": [
+        400,
+        512
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 121
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            122
+          ]
+        },
+        {
+          "name": "audio_url",
+          "type": "STRING",
+          "links": [
+            123
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            124
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_minimax_speech_2_8_fal"
+      },
+      "widgets_values": [
+        "Hello world! Welcome to MiniMax speech.",
+        "turbo",
+        "",
+        "Wise_Woman",
+        1,
+        1,
+        0,
+        "none",
+        false,
+        "32000",
+        "128000",
+        "mp3",
+        "auto",
+        "url",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      121,
+      61,
+      0,
+      79,
+      0,
+      "STRING"
+    ],
+    [
+      122,
+      79,
+      0,
+      78,
+      0,
+      "AUDIO"
+    ],
+    [
+      123,
+      79,
+      1,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      124,
+      79,
+      2,
+      66,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.5894379065420623,
+      "offset": [
+        599.1695081258487,
+        -905.7281108598918
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

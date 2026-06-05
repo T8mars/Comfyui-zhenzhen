@@ -1,0 +1,285 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 62,
+  "last_link_id": 88,
+  "nodes": [
+    {
+      "id": 58,
+      "type": "SaveAudio",
+      "pos": [
+        783.4471645087448,
+        1209.2314773813869
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 85
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        784.1619082255372,
+        1379.8995347967461
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 86
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 60,
+      "type": "easy showAnything",
+      "pos": [
+        805.8006714530176,
+        1497.7311479330976
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 87
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -75.42222970279302,
+        1398.4725542494207
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            88
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        -188.45699623683404,
+        1231.6221563723511
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 57,
+      "type": "Comfly_lyria2_fal",
+      "pos": [
+        251.76381879593893,
+        1293.5339544191047
+      ],
+      "size": [
+        400,
+        326
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 88
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            85
+          ]
+        },
+        {
+          "name": "audio_url",
+          "type": "STRING",
+          "links": [
+            86
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            87
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_lyria2_fal"
+      },
+      "widgets_values": [
+        "A short ambient piano melody with soft warm strings.",
+        "",
+        "low quality",
+        31113,
+        "randomize",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      85,
+      57,
+      0,
+      58,
+      0,
+      "AUDIO"
+    ],
+    [
+      86,
+      57,
+      1,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      87,
+      57,
+      2,
+      60,
+      0,
+      "STRING"
+    ],
+    [
+      88,
+      61,
+      0,
+      57,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.444943551401871,
+      "offset": [
+        327.67692835268576,
+        -835.103525409961
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

@@ -23,6 +23,30 @@ from .utils import pil2tensor, tensor2pil
 
 baseurl = "https://ai.t8star.org"
 FAL_SEED_MAX = 65535
+HEYGEN_AVATAR5_OPENAPI_URL = "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/heygen/avatar5/digital-twin"
+HEYGEN_AVATAR5_SERVER_DEFAULT = "server_default"
+HEYGEN_AVATAR4_I2V_OPENAPI_URL = "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/heygen/avatar4/image-to-video"
+HEYGEN_AVATAR4_SERVER_DEFAULT = HEYGEN_AVATAR5_SERVER_DEFAULT
+HEYGEN_AVATAR4_FALLBACK_VOICES = [
+    "Melissa",
+    "Warm Pro Narrator",
+    "Ann - IA",
+    "Chill Brian",
+]
+HEYGEN_AVATAR5_FALLBACK_AVATARS = [
+    "Abigail Sofa Front",
+    "Abigail Office Front",
+    "Ann Doctor Standing",
+    "Ann Doctor Sitting",
+]
+HEYGEN_AVATAR5_FALLBACK_VOICES = [
+    "Warm Pro Narrator",
+    "Ann - IA",
+    "Chill Brian",
+    "Ivy",
+]
+_HEYGEN_AVATAR5_CATALOG = None
+_HEYGEN_AVATAR4_VOICE_CATALOG = None
 
 
 def get_config():
@@ -38,6 +62,84 @@ def save_config(config):
     config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Comflyapi.json")
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
+
+
+def _dedupe_preserve_order(values):
+    seen = set()
+    result = []
+    for value in values or []:
+        if not isinstance(value, str):
+            continue
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def _heygen_avatar5_catalog():
+    global _HEYGEN_AVATAR5_CATALOG
+    if _HEYGEN_AVATAR5_CATALOG is not None:
+        return _HEYGEN_AVATAR5_CATALOG
+
+    avatars = list(HEYGEN_AVATAR5_FALLBACK_AVATARS)
+    voices = list(HEYGEN_AVATAR5_FALLBACK_VOICES)
+    try:
+        response = requests.get(HEYGEN_AVATAR5_OPENAPI_URL, timeout=5)
+        response.raise_for_status()
+        schema = response.json()
+        properties = (
+            schema.get("components", {})
+            .get("schemas", {})
+            .get("HeygenAvatar5DigitalTwinInput", {})
+            .get("properties", {})
+        )
+        avatars = properties.get("avatar", {}).get("enum") or properties.get("avatar", {}).get("examples") or avatars
+        voices = properties.get("voice", {}).get("enum") or properties.get("voice", {}).get("examples") or voices
+    except Exception as e:
+        print(f"[heygen_avatar5_fal] Could not load avatar/voice catalog, using fallback list: {e}")
+
+    avatar_choices = [HEYGEN_AVATAR5_SERVER_DEFAULT] + _dedupe_preserve_order(avatars)
+    voice_choices = [HEYGEN_AVATAR5_SERVER_DEFAULT] + _dedupe_preserve_order(voices)
+    _HEYGEN_AVATAR5_CATALOG = (avatar_choices, voice_choices)
+    return _HEYGEN_AVATAR5_CATALOG
+
+
+def _heygen_avatar4_i2v_voice_catalog():
+    global _HEYGEN_AVATAR4_VOICE_CATALOG
+    if _HEYGEN_AVATAR4_VOICE_CATALOG is not None:
+        return _HEYGEN_AVATAR4_VOICE_CATALOG
+
+    voices = list(HEYGEN_AVATAR4_FALLBACK_VOICES)
+    try:
+        response = requests.get(HEYGEN_AVATAR4_I2V_OPENAPI_URL, timeout=5)
+        response.raise_for_status()
+        schema = response.json()
+        voice_property = (
+            schema.get("components", {})
+            .get("schemas", {})
+            .get("HeygenAvatar4ImageToVideoInput", {})
+            .get("properties", {})
+            .get("voice", {})
+        )
+        voices = (voice_property.get("examples") or []) + (voice_property.get("enum") or voices)
+    except Exception as e:
+        print(f"[heygen_avatar4_i2v_fal] Could not load voice catalog, using fallback list: {e}")
+
+    _HEYGEN_AVATAR4_VOICE_CATALOG = [HEYGEN_AVATAR4_SERVER_DEFAULT] + _dedupe_preserve_order(voices)
+    return _HEYGEN_AVATAR4_VOICE_CATALOG
+
+
+def _optional_catalog_value(selected_value, custom_value=""):
+    custom_value = str(custom_value).strip() if custom_value is not None else ""
+    if custom_value:
+        return custom_value
+    if selected_value is None:
+        return ""
+    selected_value = str(selected_value)
+    if not selected_value or selected_value == HEYGEN_AVATAR5_SERVER_DEFAULT:
+        return ""
+    return selected_value
 
 
 class FalVideoAdapter:
@@ -282,6 +384,43 @@ class ComflyFalBase:
             return explicit_url
         return ""
 
+    def audio_to_wav_bytes(self, audio_input):
+        if not isinstance(audio_input, dict):
+            return None, None
+        waveform = audio_input.get("waveform")
+        sample_rate = int(audio_input.get("sample_rate") or 44100)
+        if waveform is None:
+            return None, None
+        try:
+            import torchaudio
+            if len(waveform.shape) == 3:
+                waveform = waveform[0]
+            if len(waveform.shape) == 1:
+                waveform = waveform.unsqueeze(0)
+            buffer = BytesIO()
+            torchaudio.save(buffer, waveform.cpu(), sample_rate, format="wav")
+            return buffer.getvalue(), "audio.wav"
+        except Exception as e:
+            self._log(f"Error encoding AUDIO input: {e}")
+            return None, None
+
+    def prepare_audio(self, audio_input=None, audio_url="", audio_way="upload"):
+        explicit_url = str(audio_url or "").strip()
+        if audio_way == "audio_url" and explicit_url:
+            return explicit_url
+        direct_url = self._direct_url_from_media(audio_input)
+        if direct_url:
+            return direct_url
+        wav_bytes, wav_name = self.audio_to_wav_bytes(audio_input)
+        if wav_bytes:
+            return self.upload_bytes_to_get_url(wav_bytes, wav_name or "audio.wav", "audio/wav")
+        file_bytes, filename = self.media_to_bytes(audio_input, ".wav", "audio")
+        if file_bytes:
+            return self.upload_bytes_to_get_url(file_bytes, filename or "audio.wav", mimetypes.guess_type(filename or "")[0] or "audio/wav")
+        if explicit_url:
+            return explicit_url
+        return ""
+
     def blank_audio(self, sample_rate=44100, duration_seconds=1):
         return {
             "waveform": torch.zeros((1, 1, int(sample_rate * duration_seconds))),
@@ -409,6 +548,10 @@ class ComflyFalBase:
             return
         if status in self.FAILED_STATUSES:
             raise RuntimeError(f"Task {status}: {self._extract_error_message(data)}")
+
+        code = str(data.get("code", "")).strip().lower()
+        if code and any(token in code for token in ("fail", "error", "unauthorized", "forbidden")):
+            raise RuntimeError(f"{context}: {self._extract_error_message(data)}")
 
         for key in ("failure_details", "detail", "error", "errors"):
             if data.get(key) not in (None, "", [], {}):
@@ -593,8 +736,10 @@ class ComflyFalBase:
     def extract_model_urls(self, result):
         urls = []
         if isinstance(result, dict):
-            for key in ("model_mesh", "model_meshes", "textures", "files", "output"):
+            for key in ("model_glb", "model_urls", "model_mesh", "model_meshes", "model", "mesh", "meshes", "textures", "files", "output", "outputs"):
                 urls.extend(self.collect_file_urls(result.get(key)))
+            if isinstance(result.get("data"), dict):
+                urls.extend(self.extract_model_urls(result["data"]))
         return list(dict.fromkeys([u for u in urls if u]))
 
     def choose_model_url(self, urls, preferred_format=""):
@@ -905,7 +1050,7 @@ class Comfly_krea_v2_fal(ComflyFalBase):
     @classmethod
     def INPUT_TYPES(cls):
         return {"required": {"prompt": ("STRING", {"multiline": True, "default": ""})}, "optional": {
-            "model_size": (["medium", "large"], {"default": "medium"}),
+            "model_size": (["medium", "medium_turbo", "large"], {"default": "medium"}),
             "style_image1": ("IMAGE",),
             "style_image2": ("IMAGE",),
             "style_image_url1": ("STRING", {"default": ""}),
@@ -946,7 +1091,8 @@ class Comfly_krea_v2_fal(ComflyFalBase):
                     refs.append({"image_url": prepared, "strength": style_strength})
             if refs:
                 payload["image_style_references"] = refs
-            endpoint = f"krea/v2/{model_size}/text-to-image"
+            endpoint_model = "medium/turbo" if model_size == "medium_turbo" else model_size
+            endpoint = f"krea/v2/{endpoint_model}/text-to-image"
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
             result = self.submit_and_poll(endpoint, payload, ["images"], pbar, poll_interval, max_poll_attempts)
@@ -1029,10 +1175,13 @@ class Comfly_heygen_avatar5_fal(ComflyFalBase):
 
     @classmethod
     def INPUT_TYPES(cls):
+        avatar_choices, voice_choices = _heygen_avatar5_catalog()
         return {"required": {"prompt": ("STRING", {"multiline": True, "default": ""})}, "optional": {
             "api_key": ("STRING", {"default": ""}),
-            "avatar": ("STRING", {"default": "Abigail Sofa Front"}),
-            "voice": ("STRING", {"default": "Warm Pro Narrator"}),
+            "avatar": (avatar_choices, {"default": HEYGEN_AVATAR5_SERVER_DEFAULT, "tooltip": "server_default leaves avatar unset and lets FAL use its default. Use custom_avatar for an exact custom name."}),
+            "custom_avatar": ("STRING", {"default": "", "tooltip": "Overrides avatar dropdown when filled."}),
+            "voice": (voice_choices, {"default": HEYGEN_AVATAR5_SERVER_DEFAULT, "tooltip": "server_default leaves voice unset and lets FAL use its default. Ignored when audio_url is provided."}),
+            "custom_voice": ("STRING", {"default": "", "tooltip": "Overrides voice dropdown when filled."}),
             "audio_url": ("STRING", {"default": ""}),
             "fit": (["contain", "cover"], {"default": "cover"}),
             "remove_background": ("BOOLEAN", {"default": False}),
@@ -1051,18 +1200,19 @@ class Comfly_heygen_avatar5_fal(ComflyFalBase):
     CATEGORY = "zhenzhen/FAL"
     OUTPUT_NODE = True
 
-    def process(self, prompt, api_key="", avatar="Abigail Sofa Front", voice="Warm Pro Narrator",
-                audio_url="", fit="cover", remove_background=False, caption=False,
+    def process(self, prompt, api_key="", avatar=HEYGEN_AVATAR5_SERVER_DEFAULT, custom_avatar="",
+                voice=HEYGEN_AVATAR5_SERVER_DEFAULT, custom_voice="", audio_url="",
+                fit="cover", remove_background=False, caption=False,
                 output_format="mp4", resolution="720p", aspect_ratio="16:9",
                 poll_interval=6, max_poll_attempts=600, skip_error=False):
         self.set_api_key(api_key)
         try:
             if not self.api_key:
                 raise RuntimeError("API key not provided. Please set your API key.")
+            selected_avatar = _optional_catalog_value(avatar, custom_avatar)
+            selected_voice = _optional_catalog_value(voice, custom_voice)
+            audio_url = str(audio_url).strip() if audio_url else ""
             payload = {
-                "avatar": avatar,
-                "prompt": prompt,
-                "voice": voice,
                 "fit": fit,
                 "remove_background": remove_background,
                 "caption": caption,
@@ -1070,11 +1220,110 @@ class Comfly_heygen_avatar5_fal(ComflyFalBase):
                 "resolution": resolution,
                 "aspect_ratio": aspect_ratio,
             }
-            if audio_url.strip():
-                payload["audio_url"] = audio_url.strip()
+            if selected_avatar:
+                payload["avatar"] = selected_avatar
+            if audio_url:
+                payload["audio_url"] = audio_url
+            else:
+                if str(prompt).strip():
+                    payload["prompt"] = prompt
+                if selected_voice:
+                    payload["voice"] = selected_voice
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
             result = self.submit_and_poll("fal-ai/heygen/avatar5/digital-twin", payload, ["video", "video_url"], pbar, poll_interval, max_poll_attempts)
+            video_url = self.extract_video_url(result)
+            if not video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(video_url), video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_heygen_avatar4_i2v_fal(ComflyFalBase):
+    LOG_PREFIX = "heygen_avatar4_i2v_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        voice_choices = _heygen_avatar4_i2v_voice_catalog()
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "Hi."})}, "optional": {
+            "image": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "audio": ("AUDIO",),
+            "audio_url": ("STRING", {"default": ""}),
+            "voice": (voice_choices, {"default": HEYGEN_AVATAR4_SERVER_DEFAULT, "tooltip": "server_default leaves voice unset and lets FAL use its default. Ignored when audio is provided."}),
+            "custom_voice": ("STRING", {"default": "", "tooltip": "Overrides voice dropdown when filled."}),
+            "talking_style": (["stable", "expressive"], {"default": "stable"}),
+            "expression": (["none", "happy"], {"default": "none"}),
+            "background_type": (["none", "color", "image", "video"], {"default": "none"}),
+            "background_value": ("STRING", {"default": "#FFFFFF", "tooltip": "Hex color for color background, or URL for image/video background."}),
+            "resolution": (["360p", "480p", "540p", "720p", "1080p"], {"default": "720p"}),
+            "aspect_ratio": (["16:9", "9:16", "4:5", "5:4", "1:1", "auto"], {"default": "16:9"}),
+            "caption": ("BOOLEAN", {"default": False}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "audio_way": (["upload", "audio_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, image=None, image_url="", api_key="", audio=None, audio_url="",
+                voice=HEYGEN_AVATAR4_SERVER_DEFAULT, custom_voice="", talking_style="stable",
+                expression="none", background_type="none", background_value="#FFFFFF",
+                resolution="720p", aspect_ratio="16:9", caption=False, image_way="base64",
+                audio_way="upload", poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            if not prepared_image:
+                raise RuntimeError("Heygen Avatar4 image-to-video requires an IMAGE input or image_url.")
+
+            prepared_audio = self.prepare_audio(audio, audio_url, audio_way)
+            selected_voice = _optional_catalog_value(voice, custom_voice)
+
+            payload = {
+                "image_url": prepared_image,
+                "talking_style": talking_style,
+                "resolution": resolution,
+                "aspect_ratio": aspect_ratio,
+                "caption": bool(caption),
+            }
+            if prepared_audio:
+                payload["audio_url"] = prepared_audio
+            else:
+                if str(prompt or "").strip():
+                    payload["prompt"] = str(prompt).strip()
+                if selected_voice:
+                    payload["voice"] = selected_voice
+            if expression != "none":
+                payload["expression"] = expression
+            if background_type != "none":
+                value = str(background_value or "").strip()
+                if background_type == "color":
+                    payload["background"] = {"type": "color", "value": value or "#FFFFFF"}
+                elif value:
+                    payload["background"] = {"type": background_type, "value": value}
+                else:
+                    raise RuntimeError(f"background_value is required when background_type is {background_type}.")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/heygen/avatar4/image-to-video", payload, ["video", "video_url"], pbar, poll_interval, max_poll_attempts)
             video_url = self.extract_video_url(result)
             if not video_url:
                 raise RuntimeError("No video URL in result")
@@ -1422,6 +1671,676 @@ class Comfly_mai_image_2_5_edit_fal(ComflyFalBase):
             if not skip_error:
                 raise
             return (default_image, error_message, "")
+
+
+class Comfly_seed_speech_tts_v2_fal(ComflyFalBase):
+    LOG_PREFIX = "seed_speech_tts_v2_fal"
+
+    VOICES = [
+        "stokie_en", "vivi_mixed_en_zh_ja_es_id", "mindy_en_es_id_pt_zh", "dacey_en",
+        "tim_en", "kian_en_zh", "cedric_en_zh", "sophie_en_zh", "jean_en_zh",
+        "magnus_en_zh", "mabel_en_zh", "nadia_en_zh", "opal_en_zh", "pearl_en_zh",
+        "quentin_en_zh", "vienna_mixed_en_zh", "alina_mixed_en_zh", "bonnie_zh",
+        "felix_zh", "celeste_zh", "monkey_king_zh",
+    ]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"text": ("STRING", {"multiline": True, "default": "Hello, this is a short text to speech test."})}, "optional": {
+            "api_key": ("STRING", {"default": ""}),
+            "voice": (cls.VOICES, {"default": "stokie_en"}),
+            "output_format": (["mp3", "opus"], {"default": "mp3"}),
+            "sample_rate": (["8000", "16000", "22050", "24000", "32000", "44100", "48000"], {"default": "24000"}),
+            "speed": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05}),
+            "volume": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.05}),
+            "pitch": ("INT", {"default": 0, "min": -12, "max": 12, "step": 1}),
+            "language": (["auto", "zh", "en", "ja", "es-mx", "id", "pt-br", "ko", "it", "de", "fr"], {"default": "auto"}),
+            "voice_instruction": ("STRING", {"default": "", "multiline": True}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("AUDIO", "STRING", "STRING")
+    RETURN_NAMES = ("audio", "audio_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, text, api_key="", voice="stokie_en", output_format="mp3", sample_rate="24000",
+                speed=1.0, volume=1.0, pitch=0, language="auto", voice_instruction="",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            payload = {
+                "text": text,
+                "voice": voice,
+                "output_format": output_format,
+                "sample_rate": int(sample_rate),
+                "speed": float(speed),
+                "volume": float(volume),
+                "pitch": int(pitch),
+            }
+            if language != "auto":
+                payload["language"] = language
+            if str(voice_instruction or "").strip():
+                payload["voice_instruction"] = str(voice_instruction).strip()
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/bytedance/seed-speech/tts/v2", payload, ["audio"], pbar, poll_interval, max_poll_attempts)
+            audio_urls = self.extract_audio_urls(result)
+            if not audio_urls:
+                raise RuntimeError("No audio URL in result")
+            audio_url = audio_urls[0]
+            audio = self.audio_url_to_audio_object(audio_url)
+            pbar.update_absolute(100)
+            return (audio, audio_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (self.blank_audio(), "", error_message)
+
+
+class Comfly_minimax_speech_2_8_fal(ComflyFalBase):
+    LOG_PREFIX = "minimax_speech_2_8_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "Hello world! Welcome to MiniMax speech."})}, "optional": {
+            "model_quality": (["turbo", "hd"], {"default": "turbo"}),
+            "api_key": ("STRING", {"default": ""}),
+            "voice_id": ("STRING", {"default": "Wise_Woman"}),
+            "speed": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05}),
+            "vol": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.05}),
+            "pitch": ("INT", {"default": 0, "min": -12, "max": 12, "step": 1}),
+            "emotion": (["none", "happy", "sad", "angry", "fearful", "disgusted", "surprised", "neutral"], {"default": "none"}),
+            "english_normalization": ("BOOLEAN", {"default": False}),
+            "sample_rate": (["8000", "16000", "22050", "24000", "32000", "44100"], {"default": "32000"}),
+            "bitrate": (["32000", "64000", "128000", "256000"], {"default": "128000"}),
+            "format": (["mp3", "wav", "flac"], {"default": "mp3"}),
+            "language_boost": (["auto", "English", "Chinese", "Chinese,Yue", "Japanese", "Korean", "Spanish", "French", "Portuguese", "German", "Italian", "Indonesian", "Vietnamese", "Thai"], {"default": "auto"}),
+            "output_format": (["url", "hex"], {"default": "url"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("AUDIO", "STRING", "STRING")
+    RETURN_NAMES = ("audio", "audio_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, model_quality="turbo", api_key="", voice_id="Wise_Woman",
+                speed=1.0, vol=1.0, pitch=0, emotion="none", english_normalization=False,
+                sample_rate="32000", bitrate="128000", format="mp3", language_boost="auto",
+                output_format="url", poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            voice_setting = {
+                "voice_id": voice_id,
+                "speed": float(speed),
+                "vol": float(vol),
+                "pitch": int(pitch),
+                "english_normalization": bool(english_normalization),
+            }
+            if emotion != "none":
+                voice_setting["emotion"] = emotion
+            payload = {
+                "prompt": prompt,
+                "voice_setting": voice_setting,
+                "audio_setting": {
+                    "sample_rate": int(sample_rate),
+                    "bitrate": int(bitrate),
+                    "format": format,
+                },
+                "output_format": output_format,
+            }
+            if language_boost != "auto":
+                payload["language_boost"] = language_boost
+            endpoint = f"fal-ai/minimax/speech-2.8-{model_quality}"
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["audio"], pbar, poll_interval, max_poll_attempts)
+            audio_urls = self.extract_audio_urls(result)
+            if not audio_urls:
+                raise RuntimeError("No audio URL in result")
+            audio_url = audio_urls[0]
+            audio = self.audio_url_to_audio_object(audio_url)
+            pbar.update_absolute(100)
+            return (audio, audio_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (self.blank_audio(), "", error_message)
+
+
+class Comfly_lyria2_fal(ComflyFalBase):
+    LOG_PREFIX = "lyria2_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A short ambient piano melody with soft warm strings."})}, "optional": {
+            "api_key": ("STRING", {"default": ""}),
+            "negative_prompt": ("STRING", {"default": "low quality", "multiline": True}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("AUDIO", "STRING", "STRING")
+    RETURN_NAMES = ("audio", "audio_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, api_key="", negative_prompt="low quality", seed=0,
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            payload = {"prompt": prompt}
+            if str(negative_prompt or "").strip():
+                payload["negative_prompt"] = str(negative_prompt).strip()
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/lyria2", payload, ["audio"], pbar, poll_interval, max_poll_attempts)
+            audio_urls = self.extract_audio_urls(result)
+            if not audio_urls:
+                raise RuntimeError("No audio URL in result")
+            audio_url = audio_urls[0]
+            audio = self.audio_url_to_audio_object(audio_url)
+            pbar.update_absolute(100)
+            return (audio, audio_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (self.blank_audio(), "", error_message)
+
+
+class Comfly_bria_fibo_edit_fal(ComflyFalBase):
+    LOG_PREFIX = "bria_fibo_edit_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"instruction": ("STRING", {"multiline": True, "default": "change lighting to starlight nighttime"})}, "optional": {
+            "image": ("IMAGE",),
+            "mask": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "mask_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "seed": ("INT", {"default": 5555, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "steps_num": ("INT", {"default": 30, "min": 20, "max": 100, "step": 1}),
+            "negative_prompt": ("STRING", {"default": "", "multiline": True}),
+            "guidance_scale": ("FLOAT", {"default": 5.0, "min": 0.0, "max": 30.0, "step": 0.1}),
+            "sync_mode": ("BOOLEAN", {"default": False}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, instruction, image=None, mask=None, image_url="", mask_url="", api_key="",
+                seed=5555, steps_num=30, negative_prompt="", guidance_scale=5.0, sync_mode=False,
+                image_way="base64", poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        default_image = image if image is not None else self.blank_image()
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            if not prepared_image:
+                raise RuntimeError("Bria Fibo Edit requires image or image_url.")
+            payload = {
+                "image_url": prepared_image,
+                "instruction": instruction,
+                "steps_num": int(steps_num),
+                "guidance_scale": float(guidance_scale),
+                "sync_mode": sync_mode,
+            }
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            prepared_mask = self.prepare_image(mask, mask_url, image_way)
+            if prepared_mask:
+                payload["mask_url"] = prepared_mask
+            if str(negative_prompt or "").strip():
+                payload["negative_prompt"] = str(negative_prompt).strip()
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("bria/fibo-edit/edit", payload, ["image", "images"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_image_urls(result)
+            images = self.download_images(urls)
+            pbar.update_absolute(100)
+            return (images, self.info(result), "\n".join(urls))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
+class Comfly_grok_video_tools_fal(ComflyFalBase):
+    LOG_PREFIX = "grok_video_tools_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "Colorize the video"})}, "optional": {
+            "mode": (["extend_video", "edit_video"], {"default": "edit_video"}),
+            "video": (IO.VIDEO,),
+            "video_url": ("STRING", {"default": "", "tooltip": "Public video URL. Ignored when video input is connected."}),
+            "api_key": ("STRING", {"default": ""}),
+            "duration": ("INT", {"default": 6, "min": 1, "max": 15, "step": 1, "tooltip": "Used by extend_video mode."}),
+            "resolution": (["auto", "480p", "720p"], {"default": "auto", "tooltip": "Used by edit_video mode."}),
+            "video_way": (["upload", "video_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, mode="edit_video", video=None, video_url="", api_key="",
+                duration=6, resolution="auto", video_way="upload",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_video = self.prepare_video(video, video_url, video_way)
+            if not prepared_video:
+                raise RuntimeError("Grok video tools require a video input or video_url.")
+            payload = {"prompt": prompt, "video_url": prepared_video}
+            endpoint = "xai/grok-imagine-video/edit-video"
+            if mode == "extend_video":
+                endpoint = "xai/grok-imagine-video/extend-video"
+                payload["duration"] = int(duration)
+            else:
+                payload["resolution"] = resolution
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_pixverse_v6_fal(ComflyFalBase):
+    LOG_PREFIX = "pixverse_v6_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A cinematic camera move with subtle motion."})}, "optional": {
+            "image": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "resolution": (["360p", "540p", "720p", "1080p"], {"default": "720p"}),
+            "duration": ("INT", {"default": 5, "min": 1, "max": 15, "step": 1}),
+            "negative_prompt": ("STRING", {"default": "blurry, low quality, low resolution, pixelated, noisy, grainy", "multiline": True}),
+            "style": (["none", "anime", "3d_animation", "clay", "comic", "cyberpunk"], {"default": "none"}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "generate_audio_switch": ("BOOLEAN", {"default": False}),
+            "generate_multi_clip_switch": ("BOOLEAN", {"default": False}),
+            "thinking_type": (["auto", "enabled", "disabled"], {"default": "auto"}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, image=None, image_url="", api_key="", resolution="720p",
+                duration=5, negative_prompt="blurry, low quality, low resolution, pixelated, noisy, grainy",
+                style="none", seed=0, generate_audio_switch=False, generate_multi_clip_switch=False,
+                thinking_type="auto", image_way="base64", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            if not prepared_image:
+                raise RuntimeError("PixVerse V6 requires image or image_url.")
+            payload = {
+                "prompt": prompt,
+                "image_url": prepared_image,
+                "resolution": resolution,
+                "duration": int(duration),
+                "generate_audio_switch": generate_audio_switch,
+                "generate_multi_clip_switch": generate_multi_clip_switch,
+                "thinking_type": thinking_type,
+            }
+            if str(negative_prompt or "").strip():
+                payload["negative_prompt"] = str(negative_prompt).strip()
+            if style != "none":
+                payload["style"] = style
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/pixverse/v6/image-to-video", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_creatify_aurora_fal(ComflyFalBase):
+    LOG_PREFIX = "creatify_aurora_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"image_url": ("STRING", {"default": ""}), "audio_url": ("STRING", {"default": ""})}, "optional": {
+            "image": ("IMAGE",),
+            "audio": ("AUDIO",),
+            "api_key": ("STRING", {"default": ""}),
+            "prompt": ("STRING", {"default": "", "multiline": True}),
+            "guidance_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.1}),
+            "audio_guidance_scale": ("FLOAT", {"default": 2.0, "min": 0.0, "max": 10.0, "step": 0.1}),
+            "resolution": (["480p", "720p"], {"default": "480p"}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "audio_way": (["upload", "audio_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, image_url="", audio_url="", image=None, audio=None, api_key="",
+                prompt="", guidance_scale=1.0, audio_guidance_scale=2.0, resolution="480p",
+                image_way="base64", audio_way="upload", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            prepared_audio = self.prepare_audio(audio, audio_url, audio_way)
+            if not prepared_image or not prepared_audio:
+                raise RuntimeError("Creatify Aurora requires image/audio inputs or URLs.")
+            payload = {
+                "image_url": prepared_image,
+                "audio_url": prepared_audio,
+                "guidance_scale": float(guidance_scale),
+                "audio_guidance_scale": float(audio_guidance_scale),
+                "resolution": resolution,
+            }
+            if str(prompt or "").strip():
+                payload["prompt"] = str(prompt).strip()
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/creatify/aurora", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_veed_fabric_1_0_fal(ComflyFalBase):
+    LOG_PREFIX = "veed_fabric_1_0_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"image_url": ("STRING", {"default": ""}), "audio_url": ("STRING", {"default": ""})}, "optional": {
+            "image": ("IMAGE",),
+            "audio": ("AUDIO",),
+            "api_key": ("STRING", {"default": ""}),
+            "resolution": (["480p", "720p"], {"default": "480p"}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "audio_way": (["upload", "audio_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, image_url="", audio_url="", image=None, audio=None, api_key="",
+                resolution="480p", image_way="base64", audio_way="upload",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            prepared_audio = self.prepare_audio(audio, audio_url, audio_way)
+            if not prepared_image or not prepared_audio:
+                raise RuntimeError("Veed Fabric requires image/audio inputs or URLs.")
+            payload = {"image_url": prepared_image, "audio_url": prepared_audio, "resolution": resolution}
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("veed/fabric-1.0", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_hunyuan_3d_v3_1_pro_fal(ComflyFalBase):
+    LOG_PREFIX = "hunyuan_3d_v3_1_pro_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A small stylized spaceship"})}, "optional": {
+            "mode": (["text_to_3d", "image_to_3d"], {"default": "text_to_3d"}),
+            "front_image": ("IMAGE",),
+            "back_image": ("IMAGE",),
+            "left_image": ("IMAGE",),
+            "right_image": ("IMAGE",),
+            "front_image_url": ("STRING", {"default": ""}),
+            "back_image_url": ("STRING", {"default": ""}),
+            "left_image_url": ("STRING", {"default": ""}),
+            "right_image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "generate_type": (["Normal", "Geometry"], {"default": "Normal"}),
+            "enable_pbr": ("BOOLEAN", {"default": False}),
+            "face_count": ("INT", {"default": 500000, "min": 40000, "max": 1500000, "step": 10000}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FILE_3D")
+    RETURN_NAMES = ("model_url", "response", "asset_urls", "model_3d")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, prompt, mode="text_to_3d", front_image=None, back_image=None, left_image=None,
+                right_image=None, front_image_url="", back_image_url="", left_image_url="",
+                right_image_url="", api_key="", generate_type="Normal", enable_pbr=False,
+                face_count=500000, image_way="base64", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            payload = {"generate_type": generate_type, "enable_pbr": enable_pbr, "face_count": int(face_count)}
+            endpoint = "fal-ai/hunyuan-3d/v3.1/pro/text-to-3d"
+            if mode == "image_to_3d":
+                front = self.prepare_image(front_image, front_image_url, image_way)
+                if not front:
+                    raise RuntimeError("Hunyuan image_to_3d requires front_image or front_image_url.")
+                payload["input_image_url"] = front
+                for key, img, url in (
+                    ("back_image_url", back_image, back_image_url),
+                    ("left_image_url", left_image, left_image_url),
+                    ("right_image_url", right_image, right_image_url),
+                ):
+                    prepared = self.prepare_image(img, url, image_way)
+                    if prepared:
+                        payload[key] = prepared
+                endpoint = "fal-ai/hunyuan-3d/v3.1/pro/image-to-3d"
+            else:
+                payload["prompt"] = prompt
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["model_glb", "model_urls"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_model_urls(result)
+            model_url = self.choose_model_url(urls, "glb")
+            if not model_url:
+                raise RuntimeError("No model URL in result")
+            model_3d = self.url_to_file_3d(model_url, "glb")
+            pbar.update_absolute(100)
+            return (model_url, self.info(result), "\n".join([u for u in urls if u != model_url]), model_3d)
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", error_message, "", None)
+
+
+class Comfly_trellis_2_fal(ComflyFalBase):
+    LOG_PREFIX = "trellis_2_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"image_url": ("STRING", {"default": ""})}, "optional": {
+            "image1": ("IMAGE",),
+            "image2": ("IMAGE",),
+            "image3": ("IMAGE",),
+            "api_key": ("STRING", {"default": ""}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "resolution": (["512", "1024", "1536"], {"default": "1024"}),
+            "ss_sampling_steps": ("INT", {"default": 12, "min": 1, "max": 50, "step": 1}),
+            "shape_slat_sampling_steps": ("INT", {"default": 12, "min": 1, "max": 50, "step": 1}),
+            "tex_slat_sampling_steps": ("INT", {"default": 12, "min": 1, "max": 50, "step": 1}),
+            "decimation_target": ("INT", {"default": 500000, "min": 20000, "max": 1000000, "step": 10000}),
+            "texture_size": (["1024", "2048", "4096"], {"default": "2048"}),
+            "remesh": ("BOOLEAN", {"default": True}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FILE_3D")
+    RETURN_NAMES = ("model_url", "response", "asset_urls", "model_3d")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, image_url="", image1=None, image2=None, image3=None, api_key="",
+                seed=0, resolution="1024", ss_sampling_steps=12, shape_slat_sampling_steps=12,
+                tex_slat_sampling_steps=12, decimation_target=500000, texture_size="2048",
+                remesh=True, image_way="base64", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_images = []
+            first_external = str(image_url or "").strip()
+            if first_external:
+                prepared_images.append(first_external)
+            for img in (image1, image2, image3):
+                prepared = self.prepare_image(img, "", image_way)
+                if prepared:
+                    prepared_images.append(prepared)
+            prepared_images = list(dict.fromkeys([u for u in prepared_images if u]))
+            if not prepared_images:
+                raise RuntimeError("Trellis 2 requires image or image_url.")
+            payload = {
+                "resolution": int(resolution),
+                "ss_sampling_steps": int(ss_sampling_steps),
+                "shape_slat_sampling_steps": int(shape_slat_sampling_steps),
+                "tex_slat_sampling_steps": int(tex_slat_sampling_steps),
+                "decimation_target": int(decimation_target),
+                "texture_size": int(texture_size),
+                "remesh": remesh,
+            }
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            if len(prepared_images) > 1:
+                payload["image_urls"] = prepared_images
+            else:
+                payload["image_url"] = prepared_images[0]
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/trellis-2", payload, ["model_glb", "model_urls"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_model_urls(result)
+            model_url = self.choose_model_url(urls, "glb")
+            if not model_url:
+                raise RuntimeError("No model URL in result")
+            model_3d = self.url_to_file_3d(model_url, "glb")
+            pbar.update_absolute(100)
+            return (model_url, self.info(result), "\n".join([u for u in urls if u != model_url]), model_3d)
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", error_message, "", None)
 
 
 def _run_image_node(node, endpoint, prompt, api_key, skip_error, extra_payload, poll_interval, max_poll_attempts):

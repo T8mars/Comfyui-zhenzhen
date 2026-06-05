@@ -1,0 +1,403 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 93,
+  "last_link_id": 149,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        713.5709153102499,
+        1331.077243796512
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 149
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Note",
+      "pos": [
+        -42.70295385086321,
+        1158.4440853566375
+      ],
+      "size": [
+        377.19076942124286,
+        88
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型都是先预扣3.4币，然后多退少补（任务完成或者失败后），可以在日志里查看"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        657.0963527634341,
+        1525.490116586854
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 148
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://v3b.fal.media/files/b/0a9d0696/aaSVBSMiRDrndzUdQFX6G_trellis2_79cf4d65efe444b78c43019a1ee23244.glb"
+      ]
+    },
+    {
+      "id": 90,
+      "type": "SaveVideo",
+      "pos": [
+        480.5804418006046,
+        1682.6388633450324
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 147
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 92,
+      "type": "LoadImage",
+      "pos": [
+        -565.8272178848326,
+        1263.2453172012658
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            144
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00380_.png",
+        "image"
+      ]
+    },
+    {
+      "id": 93,
+      "type": "LoadAudio",
+      "pos": [
+        -765.1429625868209,
+        1726.2391824985925
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            145
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "0.6.mp4",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -502.28508304700824,
+        1806.1739166825125
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            146
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "sk-6OkQfefOqxjhMGbRhO2BEsRzJggZzle3p2ehlt65RT2f2OI8",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 91,
+      "type": "Comfly_heygen_avatar4_i2v_fal",
+      "pos": [
+        -88.29209960967187,
+        1521.6979295207582
+      ],
+      "size": [
+        400,
+        536
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 144
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 145
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 146
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            147
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            148
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            149
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_heygen_avatar4_i2v_fal"
+      },
+      "widgets_values": [
+        "Hi.",
+        "",
+        "",
+        "",
+        "server_default",
+        "",
+        "stable",
+        "none",
+        "none",
+        "#FFFFFF",
+        "720p",
+        "16:9",
+        false,
+        "base64",
+        "upload",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      144,
+      92,
+      0,
+      91,
+      0,
+      "IMAGE"
+    ],
+    [
+      145,
+      93,
+      0,
+      91,
+      1,
+      "AUDIO"
+    ],
+    [
+      146,
+      61,
+      0,
+      91,
+      2,
+      "STRING"
+    ],
+    [
+      147,
+      91,
+      0,
+      90,
+      0,
+      "VIDEO"
+    ],
+    [
+      148,
+      91,
+      1,
+      66,
+      0,
+      "STRING"
+    ],
+    [
+      149,
+      91,
+      2,
+      59,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.085607476635518,
+      "offset": [
+        820.283317324347,
+        -957.3225705506204
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

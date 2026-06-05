@@ -45,10 +45,21 @@ from .fal_batch_nodes import (
     Comfly_krea_v2_fal,
     Comfly_flux_pro_vto_fal,
     Comfly_heygen_avatar5_fal,
+    Comfly_heygen_avatar4_i2v_fal,
     Comfly_recraft_v4_1_fal,
     Comfly_topaz_upscale_fal,
     Comfly_sonilo_video_to_music_fal,
     Comfly_mai_image_2_5_edit_fal,
+    Comfly_seed_speech_tts_v2_fal,
+    Comfly_minimax_speech_2_8_fal,
+    Comfly_lyria2_fal,
+    Comfly_bria_fibo_edit_fal,
+    Comfly_grok_video_tools_fal,
+    Comfly_pixverse_v6_fal,
+    Comfly_creatify_aurora_fal,
+    Comfly_veed_fabric_1_0_fal,
+    Comfly_hunyuan_3d_v3_1_pro_fal,
+    Comfly_trellis_2_fal,
 )
 
 # For LLM API functionality
@@ -24837,10 +24848,21 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_krea_v2_fal": Comfly_krea_v2_fal,
     "Comfly_flux_pro_vto_fal": Comfly_flux_pro_vto_fal,
     "Comfly_heygen_avatar5_fal": Comfly_heygen_avatar5_fal,
+    "Comfly_heygen_avatar4_i2v_fal": Comfly_heygen_avatar4_i2v_fal,
     "Comfly_recraft_v4_1_fal": Comfly_recraft_v4_1_fal,
     "Comfly_topaz_upscale_fal": Comfly_topaz_upscale_fal,
     "Comfly_sonilo_video_to_music_fal": Comfly_sonilo_video_to_music_fal,
-    "Comfly_mai_image_2_5_edit_fal": Comfly_mai_image_2_5_edit_fal
+    "Comfly_mai_image_2_5_edit_fal": Comfly_mai_image_2_5_edit_fal,
+    "Comfly_seed_speech_tts_v2_fal": Comfly_seed_speech_tts_v2_fal,
+    "Comfly_minimax_speech_2_8_fal": Comfly_minimax_speech_2_8_fal,
+    "Comfly_lyria2_fal": Comfly_lyria2_fal,
+    "Comfly_bria_fibo_edit_fal": Comfly_bria_fibo_edit_fal,
+    "Comfly_grok_video_tools_fal": Comfly_grok_video_tools_fal,
+    "Comfly_pixverse_v6_fal": Comfly_pixverse_v6_fal,
+    "Comfly_creatify_aurora_fal": Comfly_creatify_aurora_fal,
+    "Comfly_veed_fabric_1_0_fal": Comfly_veed_fabric_1_0_fal,
+    "Comfly_hunyuan_3d_v3_1_pro_fal": Comfly_hunyuan_3d_v3_1_pro_fal,
+    "Comfly_trellis_2_fal": Comfly_trellis_2_fal
 }
 
 
@@ -24936,10 +24958,21 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_krea_v2_fal": "zhenzhen-krea-v2-fal",
     "Comfly_flux_pro_vto_fal": "zhenzhen-flux-pro-vto-fal",
     "Comfly_heygen_avatar5_fal": "zhenzhen-heygen-avatar5-fal",
+    "Comfly_heygen_avatar4_i2v_fal": "zhenzhen-heygen-avatar4-i2v-fal",
     "Comfly_recraft_v4_1_fal": "zhenzhen-recraft-v4.1-fal",
     "Comfly_topaz_upscale_fal": "zhenzhen-topaz-upscale-fal",
     "Comfly_sonilo_video_to_music_fal": "zhenzhen-sonilo-video-to-music-fal",
-    "Comfly_mai_image_2_5_edit_fal": "zhenzhen-mai-image-2.5-edit-fal"
+    "Comfly_mai_image_2_5_edit_fal": "zhenzhen-mai-image-2.5-edit-fal",
+    "Comfly_seed_speech_tts_v2_fal": "zhenzhen-seed-speech-tts-v2-fal",
+    "Comfly_minimax_speech_2_8_fal": "zhenzhen-minimax-speech-2.8-fal",
+    "Comfly_lyria2_fal": "zhenzhen-lyria2-fal",
+    "Comfly_bria_fibo_edit_fal": "zhenzhen-bria-fibo-edit-fal",
+    "Comfly_grok_video_tools_fal": "zhenzhen-grok-video-tools-fal",
+    "Comfly_pixverse_v6_fal": "zhenzhen-pixverse-v6-fal",
+    "Comfly_creatify_aurora_fal": "zhenzhen-creatify-aurora-fal",
+    "Comfly_veed_fabric_1_0_fal": "zhenzhen-veed-fabric-1.0-fal",
+    "Comfly_hunyuan_3d_v3_1_pro_fal": "zhenzhen-hunyuan-3d-v3.1-pro-fal",
+    "Comfly_trellis_2_fal": "zhenzhen-trellis-2-fal"
 }
 
 # Aliyun WanX 2.6 API Node
