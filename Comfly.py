@@ -9135,6 +9135,248 @@ class Comfly_sora2_openai:
 
 
 
+class Comfly_veo_omini:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": "基于这张图片生成视频"}),
+                "image": ("IMAGE",),
+                "model": (["omni_flash-10s"], {"default": "omni_flash-10s"}),
+                "size": (["1280x720", "720x1280"], {"default": "1280x720"}),
+                "seconds": (["4", "5", "6", "8", "10"], {"default": "10"}),
+            },
+            "optional": {
+                "apikey": ("STRING", {"default": ""}),
+                "watermark": ("BOOLEAN", {"default": False}),
+                "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 1, "max": 10000}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、返回空视频；关闭时（默认）失败直接抛出错误。"})
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "response", "video_url", "task_id")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 900
+
+    def _headers(self):
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def _empty_result(self, response_data=None, video_url="", task_id=""):
+        response_data = response_data or {}
+        return (
+            ComflyVideoAdapter(video_url or ""),
+            json.dumps(response_data, ensure_ascii=False),
+            video_url or "",
+            task_id or ""
+        )
+
+    def _decode_response(self, response):
+        try:
+            return response.json()
+        except Exception:
+            return {"message": response.text}
+
+    def _extract_error_message(self, payload):
+        if payload is None:
+            return ""
+        if isinstance(payload, str):
+            return payload.strip()
+        if isinstance(payload, list):
+            parts = [self._extract_error_message(item) for item in payload]
+            return "; ".join(part for part in parts if part)
+        if not isinstance(payload, dict):
+            return str(payload)
+
+        status = str(payload.get("status", "")).strip().lower()
+        code = str(payload.get("code", "")).strip().lower()
+        if status in {"queued", "pending", "processing", "running", "in_progress", "in-progress"}:
+            return ""
+        if status in {"failed", "failure", "error", "cancelled", "canceled"}:
+            for key in ("fail_reason", "failure_details", "message", "error", "detail"):
+                if payload.get(key):
+                    return self._extract_error_message(payload.get(key))
+            return status
+        if code and any(token in code for token in ("fail", "error", "unauthorized", "forbidden", "not_found", "not-found", "invalid")):
+            msg = self._extract_error_message(payload.get("message") or payload.get("data") or payload.get("detail"))
+            return f"{code}: {msg}" if msg else code
+
+        for key in ("failure_details", "fail_reason", "error", "errors"):
+            value = payload.get(key)
+            if value:
+                return self._extract_error_message(value)
+        if not status and payload.get("detail"):
+            return self._extract_error_message(payload.get("detail"))
+        return ""
+
+    def _extract_video_url(self, payload):
+        if payload is None:
+            return ""
+        if isinstance(payload, str):
+            text = payload.strip()
+            return text if text.startswith(("http://", "https://")) else ""
+        if isinstance(payload, list):
+            for item in payload:
+                found = self._extract_video_url(item)
+                if found:
+                    return found
+            return ""
+        if not isinstance(payload, dict):
+            return ""
+
+        for key in ("video_url", "url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip().startswith(("http://", "https://")):
+                return value.strip()
+
+        for key in ("video", "videos", "output", "outputs", "result", "data"):
+            found = self._extract_video_url(payload.get(key))
+            if found:
+                return found
+        return ""
+
+    def _submit_task(self, prompt, image, model, size, seconds, watermark):
+        data = {
+            "model": model,
+            "prompt": prompt,
+            "size": size,
+            "seconds": str(seconds),
+            "watermark": str(bool(watermark)).lower()
+        }
+
+        pil_image = tensor2pil(image)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        buffered.seek(0)
+        files = {"input_reference": ("input_reference.png", buffered, "image/png")}
+
+        submit_url = f"{baseurl.rstrip('/')}/v1/videos"
+        response = requests.post(
+            submit_url,
+            headers=self._headers(),
+            data=data,
+            files=files,
+            timeout=self.timeout
+        )
+        result = self._decode_response(response)
+        if response.status_code != 200:
+            message = self._extract_error_message(result) or response.text
+            raise RuntimeError(f"API Error: {response.status_code} - {message}")
+
+        error_message = self._extract_error_message(result)
+        if error_message:
+            raise RuntimeError(f"API Error: {error_message}")
+
+        task_id = result.get("task_id") or result.get("id")
+        if not task_id:
+            raise RuntimeError(f"No task_id in API response: {json.dumps(result, ensure_ascii=False)}")
+        return str(task_id), result
+
+    def _poll_task(self, task_id, poll_interval, max_poll_attempts, pbar):
+        poll_url = f"{baseurl.rstrip('/')}/v1/videos/{task_id}"
+        last_status_data = {}
+
+        for attempt in range(1, max_poll_attempts + 1):
+            time.sleep(max(1, int(poll_interval)))
+            response = requests.get(
+                poll_url,
+                headers=self._headers(),
+                timeout=self.timeout
+            )
+            status_data = self._decode_response(response)
+            last_status_data = status_data if isinstance(status_data, dict) else {"response": status_data}
+
+            if response.status_code != 200:
+                message = self._extract_error_message(status_data) or response.text
+                raise RuntimeError(f"Status API Error: {response.status_code} - {message}")
+
+            error_message = self._extract_error_message(status_data)
+            if error_message:
+                raise RuntimeError(f"Video generation failed: {error_message}")
+
+            progress = status_data.get("progress", 0) if isinstance(status_data, dict) else 0
+            try:
+                pbar.update_absolute(min(95, 30 + int(float(progress) * 0.6)))
+            except (TypeError, ValueError):
+                pbar.update_absolute(min(90, 30 + (attempt * 60 // max_poll_attempts)))
+
+            status = str(status_data.get("status", "")).strip().lower() if isinstance(status_data, dict) else ""
+            if status in {"completed", "complete", "succeeded", "success", "done"}:
+                video_url = self._extract_video_url(status_data)
+                if not video_url:
+                    raise RuntimeError(f"Task completed but no video URL found: {json.dumps(status_data, ensure_ascii=False)}")
+                return video_url, status_data
+
+        raise RuntimeError(
+            f"Video generation timed out after {max_poll_attempts} attempts. "
+            f"Last response: {json.dumps(last_status_data, ensure_ascii=False)}"
+        )
+
+    def process(
+        self,
+        prompt,
+        image,
+        model="omni_flash-10s",
+        size="1280x720",
+        seconds="10",
+        apikey="",
+        watermark=False,
+        poll_interval=6,
+        max_poll_attempts=600,
+        skip_error=False
+    ):
+        if apikey.strip():
+            self.api_key = apikey.strip()
+            config = get_config()
+            config['api_key'] = self.api_key
+            save_config(config)
+
+        if not self.api_key:
+            error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_veo_omini] {json.dumps(error_response, ensure_ascii=False)}")
+            return self._empty_result(error_response)
+
+        pbar = comfy.utils.ProgressBar(100)
+        pbar.update_absolute(10)
+
+        try:
+            task_id, submit_response = self._submit_task(prompt, image, model, size, seconds, watermark)
+            print(f"[Comfly_veo_omini] Task ID: {task_id}")
+            pbar.update_absolute(30)
+
+            video_url, status_response = self._poll_task(task_id, poll_interval, max_poll_attempts, pbar)
+            pbar.update_absolute(100)
+
+            response_data = {
+                "status": "success",
+                "task_id": task_id,
+                "model": model,
+                "prompt": prompt,
+                "size": size,
+                "seconds": str(seconds),
+                "watermark": bool(watermark),
+                "video_url": video_url,
+                "submit_response": submit_response,
+                "status_response": status_response
+            }
+            return (ComflyVideoAdapter(video_url), json.dumps(response_data, ensure_ascii=False), video_url, task_id)
+
+        except Exception as e:
+            error_message = f"Error in veo omini video generation: {str(e)}"
+            print(f"[Comfly_veo_omini] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return self._empty_result({"status": "error", "message": error_message})
+
+
 class Comfly_sora2_new:
     @classmethod
     def INPUT_TYPES(cls):
@@ -24776,6 +25018,7 @@ NODE_CLASS_MAPPINGS = {
     "ComflySeededit": ComflySeededit,
     "ComflyChatGPTApi": ComflyChatGPTApi,
     "Comfly_sora2_openai": Comfly_sora2_openai, 
+    "Comfly_veo_omini": Comfly_veo_omini,
     "Comfly_sora2": Comfly_sora2, 
     "Comfly_sora2_chat": Comfly_sora2_chat, 
     "Comfly_sora2_character": Comfly_sora2_character, 
@@ -24886,6 +25129,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ComflySeededit": "Zhenzhen Doubao SeedEdit2.0",
     "ComflyChatGPTApi": "Zhenzhen ChatGPT Api",
     "Comfly_sora2_openai": "Zhenzhen_sora2_openai", 
+    "Comfly_veo_omini": "zhenzhen-veo-omini",
     "Comfly_sora2": "Zhenzhen_sora2", 
     "Comfly_sora2_chat": "Zhenzhen_sora2_chat", 
     "Comfly_sora2_character": "Zhenzhen Sora2 Character",  

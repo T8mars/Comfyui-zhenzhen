@@ -1,0 +1,381 @@
+{
+  "id": "53e92ed8-e206-4dd1-ab6f-8cd3cf40823b",
+  "revision": 0,
+  "last_node_id": 156,
+  "last_link_id": 204,
+  "nodes": [
+    {
+      "id": 152,
+      "type": "LoadImage",
+      "pos": [
+        1865.9774215318791,
+        -842.5527922203132
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            200
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00001_klien_1780763527 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 154,
+      "type": "easy showAnything",
+      "pos": [
+        2790.7843822436794,
+        -534.6958845718977
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 202
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://oss-us.file-download.life/2026/06/06/e49b7506e0a118203a79058271d86fa1.mp4"
+      ]
+    },
+    {
+      "id": 155,
+      "type": "easy showAnything",
+      "pos": [
+        2953.197954262194,
+        -542.5698570046387
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 204
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"task_PpSffgIdrRq3s3L0Co3vIsHzTN2Bpmxu\", \"model\": \"omni_flash-10s\", \"prompt\": \"基于这张图片生成视频\", \"size\": \"1280x720\", \"seconds\": \"10\", \"watermark\": false, \"video_url\": \"https://oss-us.file-download.life/2026/06/06/e49b7506e0a118203a79058271d86fa1.mp4\", \"submit_response\": {\"id\": \"task_PpSffgIdrRq3s3L0Co3vIsHzTN2Bpmxu\", \"task_id\": \"task_PpSffgIdrRq3s3L0Co3vIsHzTN2Bpmxu\", \"object\": \"video\", \"model\": \"omni_flash-10s\", \"status\": \"queued\", \"progress\": 0, \"created_at\": 1780768292, \"size\": \"1280x720\"}, \"status_response\": {\"id\": \"task_PpSffgIdrRq3s3L0Co3vIsHzTN2Bpmxu\", \"size\": \"1280x720\", \"model\": \"omni_flash-10s\", \"object\": \"video\", \"status\": \"completed\", \"progress\": 100, \"video_url\": \"https://oss-us.file-download.life/2026/06/06/e49b7506e0a118203a79058271d86fa1.mp4\", \"created_at\": 1780768293, \"completed_at\": 1780768404}}"
+      ]
+    },
+    {
+      "id": 156,
+      "type": "easy showAnything",
+      "pos": [
+        2795.199201678555,
+        -427.8744662402193
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 203
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "task_PpSffgIdrRq3s3L0Co3vIsHzTN2Bpmxu"
+      ]
+    },
+    {
+      "id": 150,
+      "type": "Comfly_veo_omini",
+      "pos": [
+        2230.839557478224,
+        -646.2115708826616
+      ],
+      "size": [
+        400,
+        340
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 200
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 199
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            201
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            204
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            202
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            203
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_veo_omini"
+      },
+      "widgets_values": [
+        "基于这张图片生成视频",
+        "omni_flash-10s",
+        "1280x720",
+        "10",
+        "",
+        false,
+        6,
+        600,
+        false
+      ]
+    },
+    {
+      "id": 153,
+      "type": "SaveVideo",
+      "pos": [
+        2851.7938808340386,
+        -880.2171413210598
+      ],
+      "size": [
+        270,
+        249.875
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 201
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 151,
+      "type": "Comfly_api_set",
+      "pos": [
+        1817.8923176990024,
+        -431.7047773421895
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            199
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      199,
+      151,
+      0,
+      150,
+      1,
+      "STRING"
+    ],
+    [
+      200,
+      152,
+      0,
+      150,
+      0,
+      "IMAGE"
+    ],
+    [
+      201,
+      150,
+      0,
+      153,
+      0,
+      "VIDEO"
+    ],
+    [
+      202,
+      150,
+      2,
+      154,
+      0,
+      "STRING"
+    ],
+    [
+      203,
+      150,
+      3,
+      156,
+      0,
+      "STRING"
+    ],
+    [
+      204,
+      150,
+      1,
+      155,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "links_added_by_ue": [],
+    "ue_links": [],
+    "0246.VERSION": [
+      0,
+      0,
+      4
+    ],
+    "ds": {
+      "scale": 0.7972024500000453,
+      "offset": [
+        -830.1497520851519,
+        1642.5006097367782
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
