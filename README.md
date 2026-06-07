@@ -48,30 +48,40 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 ### 通知
 
 我们是海外服务器，如果打不开贞贞的AI工坊或者连通不上，报443错误，请求API都需要开启魔法，望周知
+
 部分人完全是因为用的Vpn软件问题，请用常规软件！开Tun模式
+
 开源免费版仓库：https://github.com/2dust/v2rayN/releases
+
 下载Windows版本！
+
 另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！
 
 目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定
+
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
 ### 海外版自动充值说明(暂时关闭注册，后续再开放)
 
-方法1：
+目前充值 方案2种
 
-下载右侧release的本地贞贞整合包，版本号大于v4.4D即可在线充值
+第一种，下载最新的批量本地整合包：https://pan.quark.cn/s/fa2d15404655 或者免费的无限画布：https://pan.quark.cn/s/e8c19b5c9d2b
 
-方法2：
+启动后，右上方就有小额充值
+
+第二种，大额充值以及Discord机器人充值
 
 目前进下面频道机器人会自动私信发您充值方法
 
 手动找机器人和对应教程：
-自动充值视频教程：https://www.youtube.com/watch?v=VLxEZ7Yw_74
-自动充值图文教程：https://my.feishu.cn/wiki/XWszwNJsZiULhbk2nbqcTczSnNb?from=from_copylink
-频道链接：https://discord.gg/FtzeAFw6
-这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。
 
+自动充值视频教程：https://www.youtube.com/watch?v=VLxEZ7Yw_74
+
+自动充值图文教程：https://my.feishu.cn/wiki/XWszwNJsZiULhbk2nbqcTczSnNb?from=from_copylink
+
+频道链接：https://discord.gg/sAK2THPWhZ
+
+这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
 ### 20260604-1
 
