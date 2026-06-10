@@ -1,0 +1,428 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 95,
+  "last_link_id": 156,
+  "nodes": [
+    {
+      "id": 66,
+      "type": "easy showAnything",
+      "pos": [
+        660.7744777634341,
+        1608.8609499201868
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 153
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**Comfly gpt-image-2 (official)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2-2K\nPrompt: 动漫海报\nAspect Ratio: 9:16\nResolution: 2k\nActual Size: 1440x2560\nQuality: medium\nInput Images: 1\nOutput: png\nTask ID: 0c32d69e07504ff3aaa486c62d82eb53\nImage URL: https://webstatic.aiproxy.vip/output/20260610/34884/ec13e25a-9216-48d4-bfd5-b8d428d83ce4.png\nTotal Tokens: 0\n"
+      ]
+    },
+    {
+      "id": 92,
+      "type": "LoadImage",
+      "pos": [
+        -565.8272178848326,
+        1263.2453172012658
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            151
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00002_pjoxu_1780997336.png",
+        "image"
+      ]
+    },
+    {
+      "id": 95,
+      "type": "SaveImage",
+      "pos": [
+        425.79828243738297,
+        1117.371963958983
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 156
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        792.1117573239235,
+        1347.5149275350313
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 155
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260610/34884/ec13e25a-9216-48d4-bfd5-b8d428d83ce4.png"
+      ]
+    },
+    {
+      "id": 94,
+      "type": "Comfly_gpt_image_2_official_ratio",
+      "pos": [
+        -42.11323487523049,
+        1161.9018982909806
+      ],
+      "size": [
+        400,
+        888
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 151
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image15",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image16",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 152
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            156
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            155
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            153
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_gpt_image_2_official_ratio"
+      },
+      "widgets_values": [
+        "动漫海报",
+        "9:16",
+        "4k",
+        "",
+        "gpt-image-2-2K",
+        1,
+        "medium",
+        "auto",
+        "png",
+        100,
+        "auto",
+        "url",
+        true,
+        "",
+        300,
+        5,
+        5,
+        900,
+        971956406338312,
+        "randomize",
+        false
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -684.9477896585779,
+        1774.3023602086837
+      ],
+      "size": [
+        529.2111326301107,
+        175.92818612135443
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            152
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      151,
+      92,
+      0,
+      94,
+      0,
+      "IMAGE"
+    ],
+    [
+      152,
+      61,
+      0,
+      94,
+      17,
+      "STRING"
+    ],
+    [
+      153,
+      94,
+      2,
+      66,
+      0,
+      "STRING"
+    ],
+    [
+      155,
+      94,
+      1,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      156,
+      94,
+      0,
+      95,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9869158878504722,
+      "offset": [
+        878.7550207963686,
+        -1022.1419770688972
+      ]
+    },
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

@@ -6500,7 +6500,7 @@ class Comfly_gpt_image_2_official:
                 "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all", "gpt-image-2-2K", "gpt-image-2-4K"], {"default": "gpt-image-2"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "size": (cls._GPT_IMAGE2_SIZE_CHOICES, {"default": "auto"}),
@@ -7166,7 +7166,7 @@ class Comfly_gpt_image_2_official_ratio:
                 "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all", "gpt-image-2-2K", "gpt-image-2-4K"], {"default": "gpt-image-2"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "background": (["auto", "opaque"], {"default": "auto"}),
@@ -7738,7 +7738,7 @@ class Comfly_gpt_image_2:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all", "gpt-image-2-2K", "gpt-image-2-4K"], {"default": "gpt-image-2"}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
@@ -8002,7 +8002,7 @@ class Comfly_gpt_image_2_S2A:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all", "gpt-image-2-2K", "gpt-image-2-4K"], {"default": "gpt-image-2"}),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
@@ -9131,7 +9131,7 @@ class Comfly_sora2_openai:
             if not skip_error:
                 raise
             return ("", json.dumps({"status": "error", "message": error_message}), "", "0")
-           
+
 
 
 
@@ -9141,12 +9141,17 @@ class Comfly_veo_omini:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True, "default": "基于这张图片生成视频"}),
-                "image": ("IMAGE",),
+                "mode": (["img2video", "video_edit"], {"default": "img2video"}),
                 "model": (["omni_flash-10s"], {"default": "omni_flash-10s"}),
                 "size": (["1280x720", "720x1280"], {"default": "1280x720"}),
                 "seconds": (["4", "5", "6", "8", "10"], {"default": "10"}),
             },
             "optional": {
+                "image": ("IMAGE",),
+                "image_url": ("STRING", {"default": "", "tooltip": "Optional image reference URL for img2video. Ignored when image input is connected."}),
+                "video": (IO.VIDEO, {"tooltip": "Reference video input for video_edit mode."}),
+                "video_url": ("STRING", {"default": "", "tooltip": "Optional video reference URL for video_edit mode. Ignored when video input already provides a URL."}),
+                "video_way": (["upload", "video_url"], {"default": "upload", "tooltip": "upload: upload connected IO.VIDEO to /v1/files and submit its URL; video_url: prefer video_url when provided."}),
                 "apikey": ("STRING", {"default": ""}),
                 "watermark": ("BOOLEAN", {"default": False}),
                 "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60}),
@@ -9240,7 +9245,93 @@ class Comfly_veo_omini:
                 return found
         return ""
 
-    def _submit_task(self, prompt, image, model, size, seconds, watermark):
+    def _extract_file_url(self, payload):
+        if payload is None:
+            return ""
+        if isinstance(payload, str):
+            text = payload.strip()
+            return text if text.startswith(("http://", "https://")) else ""
+        if isinstance(payload, list):
+            for item in payload:
+                found = self._extract_file_url(item)
+                if found:
+                    return found
+            return ""
+        if not isinstance(payload, dict):
+            return ""
+
+        for key in ("url", "download_url", "file_url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip().startswith(("http://", "https://")):
+                return value.strip()
+
+        for key in ("file", "data", "result", "output"):
+            found = self._extract_file_url(payload.get(key))
+            if found:
+                return found
+        return ""
+
+    def _upload_file_to_get_url(self, file_bytes, filename, content_type):
+        if not file_bytes:
+            return ""
+        files = {"file": (filename, file_bytes, content_type)}
+        response = requests.post(
+            f"{baseurl.rstrip('/')}/v1/files",
+            headers=self._headers(),
+            files=files,
+            timeout=self.timeout
+        )
+        result = self._decode_response(response)
+        if response.status_code != 200:
+            message = self._extract_error_message(result) or response.text
+            raise RuntimeError(f"File upload API Error: {response.status_code} - {message}")
+
+        error_message = self._extract_error_message(result)
+        if error_message:
+            raise RuntimeError(f"File upload API Error: {error_message}")
+
+        file_url = self._extract_file_url(result)
+        if not file_url:
+            raise RuntimeError(f"No file URL in upload response: {json.dumps(result, ensure_ascii=False)}")
+        return file_url
+
+    def _direct_video_url(self, video_input):
+        if video_input is None:
+            return ""
+        if isinstance(video_input, str) and video_input.strip().startswith(("http://", "https://")):
+            return video_input.strip()
+        for attr in ("video_url", "url"):
+            value = getattr(video_input, attr, "")
+            if isinstance(value, str) and value.strip().startswith(("http://", "https://")):
+                return value.strip()
+        if isinstance(video_input, dict):
+            for key in ("video_url", "url"):
+                value = video_input.get(key)
+                if isinstance(value, str) and value.strip().startswith(("http://", "https://")):
+                    return value.strip()
+        return ""
+
+    def _prepare_video_reference_url(self, video=None, video_url="", video_way="upload"):
+        explicit_url = str(video_url or "").strip()
+        if video_way == "video_url" and explicit_url:
+            return explicit_url
+
+        direct_url = self._direct_video_url(video)
+        if direct_url:
+            return direct_url
+
+        file_bytes, filename = _doubao_seedance_video_input_to_bytes(video)
+        if file_bytes:
+            if not filename:
+                filename = f"reference_video_{abs(hash(file_bytes)) % 10**10}.mp4"
+            content_type = mimetypes.guess_type(filename)[0] or "video/mp4"
+            return self._upload_file_to_get_url(file_bytes, filename, content_type)
+
+        if explicit_url:
+            return explicit_url
+        return ""
+
+    def _submit_task(self, prompt, mode, image, image_url, video, video_url, video_way, model, size, seconds, watermark):
         data = {
             "model": model,
             "prompt": prompt,
@@ -9249,11 +9340,24 @@ class Comfly_veo_omini:
             "watermark": str(bool(watermark)).lower()
         }
 
-        pil_image = tensor2pil(image)[0]
-        buffered = BytesIO()
-        pil_image.save(buffered, format="PNG")
-        buffered.seek(0)
-        files = {"input_reference": ("input_reference.png", buffered, "image/png")}
+        files = []
+        mode = str(mode or "img2video").strip().lower()
+        if mode == "video_edit":
+            reference_url = self._prepare_video_reference_url(video, video_url, video_way)
+            if not reference_url:
+                raise RuntimeError("video_edit mode requires a video input or video_url.")
+            files.append(("input_reference", (None, reference_url)))
+        else:
+            if image is not None:
+                pil_image = tensor2pil(image)[0]
+                buffered = BytesIO()
+                pil_image.save(buffered, format="PNG")
+                buffered.seek(0)
+                files.append(("input_reference", ("input_reference.png", buffered, "image/png")))
+            elif image_url and str(image_url).strip():
+                files.append(("input_reference", (None, str(image_url).strip())))
+            else:
+                raise RuntimeError("img2video mode requires an image input or image_url.")
 
         submit_url = f"{baseurl.rstrip('/')}/v1/videos"
         response = requests.post(
@@ -9320,10 +9424,15 @@ class Comfly_veo_omini:
     def process(
         self,
         prompt,
-        image,
+        mode="img2video",
         model="omni_flash-10s",
         size="1280x720",
         seconds="10",
+        image=None,
+        image_url="",
+        video=None,
+        video_url="",
+        video_way="upload",
         apikey="",
         watermark=False,
         poll_interval=6,
@@ -9346,7 +9455,7 @@ class Comfly_veo_omini:
         pbar.update_absolute(10)
 
         try:
-            task_id, submit_response = self._submit_task(prompt, image, model, size, seconds, watermark)
+            task_id, submit_response = self._submit_task(prompt, mode, image, image_url, video, video_url, video_way, model, size, seconds, watermark)
             print(f"[Comfly_veo_omini] Task ID: {task_id}")
             pbar.update_absolute(30)
 
@@ -9356,6 +9465,7 @@ class Comfly_veo_omini:
             response_data = {
                 "status": "success",
                 "task_id": task_id,
+                "mode": mode,
                 "model": model,
                 "prompt": prompt,
                 "size": size,
@@ -24491,7 +24601,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 "image16": ("IMAGE",),
                 "mask": ("MASK",),
                 "api_key": ("STRING", {"default": ""}),
-                "model": (["gpt-image-2", "gpt-image-2-all"], {"default": "gpt-image-2"}),
+                "model": (["gpt-image-2", "gpt-image-2-all", "gpt-image-2-2K", "gpt-image-2-4K"], {"default": "gpt-image-2"}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10}),
                 "quality": (["auto", "high", "medium", "low"], {"default": "auto"}),
                 "background": (["auto", "opaque"], {"default": "auto"}),
@@ -25017,11 +25127,11 @@ NODE_CLASS_MAPPINGS = {
     "ComflyGeminiAPI": ComflyGeminiAPI,
     "ComflySeededit": ComflySeededit,
     "ComflyChatGPTApi": ComflyChatGPTApi,
-    "Comfly_sora2_openai": Comfly_sora2_openai, 
+    "Comfly_sora2_openai": Comfly_sora2_openai,
     "Comfly_veo_omini": Comfly_veo_omini,
-    "Comfly_sora2": Comfly_sora2, 
-    "Comfly_sora2_chat": Comfly_sora2_chat, 
-    "Comfly_sora2_character": Comfly_sora2_character, 
+    "Comfly_sora2": Comfly_sora2,
+    "Comfly_sora2_chat": Comfly_sora2_chat,
+    "Comfly_sora2_character": Comfly_sora2_character,
     "Comfly_sora2_new": Comfly_sora2_new,
     "ComflyJimengApi": ComflyJimengApi, 
     "Comfly_gpt_image_1_edit": Comfly_gpt_image_1_edit,
@@ -25128,11 +25238,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ComflyGeminiAPI": "Zhenzhen Gemini API",
     "ComflySeededit": "Zhenzhen Doubao SeedEdit2.0",
     "ComflyChatGPTApi": "Zhenzhen ChatGPT Api",
-    "Comfly_sora2_openai": "Zhenzhen_sora2_openai", 
-    "Comfly_veo_omini": "zhenzhen-veo-omini",
-    "Comfly_sora2": "Zhenzhen_sora2", 
-    "Comfly_sora2_chat": "Zhenzhen_sora2_chat", 
-    "Comfly_sora2_character": "Zhenzhen Sora2 Character",  
+    "Comfly_sora2_openai": "Zhenzhen_sora2_openai",
+    "Comfly_veo_omini": "zhenzhen-veo-omni",
+    "Comfly_sora2": "Zhenzhen_sora2",
+    "Comfly_sora2_chat": "Zhenzhen_sora2_chat",
+    "Comfly_sora2_character": "Zhenzhen Sora2 Character",
     "Comfly_sora2_new": "Zhenhen Sora2 New",
     "ComflyJimengApi": "Zhenzhen Jimeng API", 
     "Comfly_gpt_image_1_edit": "Zhenzhen_gpt_image_1_edit",
