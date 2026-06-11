@@ -83,6 +83,27 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+
+### 20260611-1
+
+更新grok-video-3模型支持grok imagine 1.5模型，default分组 10S 0.5积分
+工作流同步更新
+
+
+### 20260610-1
+
+除了Fal节点外的gpt-image-2新增gpt-image-2-2k模型-gpt-image-2-4k模型
+这两个模型使用default分组，0.1积分，作为低价备用模型
+这两个模型并非之前gpt-image-2的分支模型
+新增工作流：zhenzhen-gpt-image-2-4k-备用渠道默认分组0.1积分.json
+新增工作流：zhenzhen-gpt-image-2-2k-备用渠道默认分组0.1积分.json
+
+### 20260607-1
+
+新增模型omni_flash-10s（谷歌最新视频模型）
+更新zhenzhen-veo-omini节点
+1积分10秒
+
 ### 20260604-1
 
 新增以下节点和工作流

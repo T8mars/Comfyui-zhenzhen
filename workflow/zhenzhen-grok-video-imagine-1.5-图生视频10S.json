@@ -1,0 +1,447 @@
+{
+  "id": "f1da9b5d-739a-4f8b-8df0-fd27e8414cd4",
+  "revision": 0,
+  "last_node_id": 3244,
+  "last_link_id": 6841,
+  "nodes": [
+    {
+      "id": 3240,
+      "type": "easy showAnything",
+      "pos": [
+        4584.11587281333,
+        4381.828153811541
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6840
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "**Comfly gpt-image-2 (official stable)** async: POST /v1/images/edits?async=true, GET /v1/images/tasks/{task_id}\nModel: gpt-image-2\nPrompt: 女人在跳舞\nAspect Ratio: custom\nResolution: 2k\nQuality: auto\nInput Images: 1\nOutput: png\nTask ID: 909bd1c00ef845689c611e67bf68c1e2\nImage URL: https://webstatic.aiproxy.vip/output/20260520/9208/7476a716-dfdc-4f55-95a0-8a19cb6ffa98/14a8010f-7dfa-4647-9755-855dc96b5560.png\nTotal Tokens: 6649\n"
+      ]
+    },
+    {
+      "id": 3218,
+      "type": "LoadImage",
+      "pos": [
+        3666.610593025056,
+        3811.8559293126277
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6836
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00001_opmdc_1778928986.png",
+        "image"
+      ]
+    },
+    {
+      "id": 3242,
+      "type": "SaveVideo",
+      "pos": [
+        4706.0975205555815,
+        3990.2668054304386
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 6837
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 3220,
+      "type": "Comfly_api_set",
+      "pos": [
+        3612.5924134401266,
+        4254.783420712505
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            6838
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3239,
+      "type": "easy showAnything",
+      "pos": [
+        4587.392215681359,
+        4229.896885819641
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6839
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260520/9208/7476a716-dfdc-4f55-95a0-8a19cb6ffa98/14a8010f-7dfa-4647-9755-855dc96b5560.png"
+      ]
+    },
+    {
+      "id": 3243,
+      "type": "easy showAnything",
+      "pos": [
+        4264.931947997083,
+        4404.426724675261
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 6841
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260520/9208/7476a716-dfdc-4f55-95a0-8a19cb6ffa98/14a8010f-7dfa-4647-9755-855dc96b5560.png"
+      ]
+    },
+    {
+      "id": 3241,
+      "type": "ComflyGrok3VideoApi",
+      "pos": [
+        4053.720529504006,
+        3861.0738851068772
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 6836
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 6838
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            6837
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            6839
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            6840
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            6841
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "ComflyGrok3VideoApi"
+      },
+      "widgets_values": [
+        "",
+        "grok-video-3",
+        "1:1",
+        "15",
+        "1080P",
+        "",
+        0,
+        "randomize",
+        false
+      ]
+    },
+    {
+      "id": 3244,
+      "type": "Note",
+      "pos": [
+        3299.6950175780635,
+        3988.417075268206
+      ],
+      "size": [
+        352.52065923527425,
+        194.65049401929537
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "模型名字不变，default分组，直接就是imagine 1.5最新模型，10S 0.5积分"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      6836,
+      3218,
+      0,
+      3241,
+      0,
+      "IMAGE"
+    ],
+    [
+      6837,
+      3241,
+      0,
+      3242,
+      0,
+      "VIDEO"
+    ],
+    [
+      6838,
+      3220,
+      0,
+      3241,
+      7,
+      "STRING"
+    ],
+    [
+      6839,
+      3241,
+      1,
+      3239,
+      0,
+      "STRING"
+    ],
+    [
+      6840,
+      3241,
+      2,
+      3240,
+      0,
+      "STRING"
+    ],
+    [
+      6841,
+      3241,
+      3,
+      3243,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "B站，Youtube：T8star-Aix",
+      "bounding": [
+        2796.2160501110034,
+        3068.6896405100842,
+        2988.309086879267,
+        393.4698426281134
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.44.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ds": {
+      "scale": 1.232821321667126,
+      "offset": [
+        -2556.925168136288,
+        -3425.214443213027
+      ]
+    }
+  },
+  "version": 0.4
+}
