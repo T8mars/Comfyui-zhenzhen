@@ -9401,7 +9401,10 @@ class Comfly_veo_omini:
 
             error_message = self._extract_error_message(status_data)
             if error_message:
-                raise RuntimeError(f"Video generation failed: {error_message}")
+                raise RuntimeError(
+                    f"Video generation failed for task_id={task_id}: {error_message}. "
+                    f"Last response: {json.dumps(status_data, ensure_ascii=False)}"
+                )
 
             progress = status_data.get("progress", 0) if isinstance(status_data, dict) else 0
             try:
@@ -9480,6 +9483,129 @@ class Comfly_veo_omini:
         except Exception as e:
             error_message = f"Error in veo omini video generation: {str(e)}"
             print(f"[Comfly_veo_omini] {error_message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return self._empty_result({"status": "error", "message": error_message})
+
+
+class Comfly_grok_video_1_5(Comfly_veo_omini):
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": "基于这张图片生成视频"}),
+                "model": ([
+                    "grok-1.5-video-6s",
+                    "grok-1.5-video-10s",
+                    "grok-1.5-video-15s"
+                ], {"default": "grok-1.5-video-6s"}),
+                "size": (["1280x720", "720x1280"], {"default": "1280x720"}),
+            },
+            "optional": {
+                "image": ("IMAGE",),
+                "image_url": ("STRING", {"default": "", "tooltip": "Optional image reference URL. Ignored when image input is connected."}),
+                "apikey": ("STRING", {"default": ""}),
+                "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60}),
+                "max_poll_attempts": ("INT", {"default": 600, "min": 1, "max": 10000}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、返回空视频；关闭时（默认）失败直接抛出错误。"})
+            }
+        }
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "response", "video_url", "task_id")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/Video"
+
+    def _submit_grok_task(self, prompt, model, size, image, image_url):
+        files = [
+            ("model", (None, str(model))),
+            ("prompt", (None, str(prompt))),
+            ("size", (None, str(size)))
+        ]
+
+        if image is not None:
+            pil_image = tensor2pil(image)[0]
+            buffered = BytesIO()
+            pil_image.save(buffered, format="PNG")
+            buffered.seek(0)
+            files.append(("input_reference", ("input_reference.png", buffered, "image/png")))
+        elif image_url and str(image_url).strip():
+            files.append(("input_reference", (None, str(image_url).strip())))
+        else:
+            raise RuntimeError("grok-video-1.5 requires an image input or image_url as input_reference.")
+
+        response = requests.post(
+            f"{baseurl.rstrip('/')}/v1/videos",
+            headers=self._headers(),
+            files=files,
+            timeout=self.timeout
+        )
+        result = self._decode_response(response)
+        if response.status_code != 200:
+            message = self._extract_error_message(result) or response.text
+            raise RuntimeError(f"API Error: {response.status_code} - {message}")
+
+        error_message = self._extract_error_message(result)
+        if error_message:
+            raise RuntimeError(f"API Error: {error_message}")
+
+        task_id = result.get("task_id") or result.get("id")
+        if not task_id:
+            raise RuntimeError(f"No task_id in API response: {json.dumps(result, ensure_ascii=False)}")
+        return str(task_id), result
+
+    def process(
+        self,
+        prompt,
+        model="grok-1.5-video-6s",
+        size="1280x720",
+        image=None,
+        image_url="",
+        apikey="",
+        poll_interval=6,
+        max_poll_attempts=600,
+        skip_error=False
+    ):
+        if apikey.strip():
+            self.api_key = apikey.strip()
+            config = get_config()
+            config['api_key'] = self.api_key
+            save_config(config)
+
+        if not self.api_key:
+            error_response = {"status": "error", "message": "API key not provided or not found in config"}
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_grok_video_1_5] {json.dumps(error_response, ensure_ascii=False)}")
+            return self._empty_result(error_response)
+
+        pbar = comfy.utils.ProgressBar(100)
+        pbar.update_absolute(10)
+
+        try:
+            task_id, submit_response = self._submit_grok_task(prompt, model, size, image, image_url)
+            print(f"[Comfly_grok_video_1_5] Task ID: {task_id}")
+            pbar.update_absolute(30)
+
+            video_url, status_response = self._poll_task(task_id, poll_interval, max_poll_attempts, pbar)
+            pbar.update_absolute(100)
+
+            response_data = {
+                "status": "success",
+                "task_id": task_id,
+                "model": model,
+                "prompt": prompt,
+                "size": size,
+                "video_url": video_url,
+                "submit_response": submit_response,
+                "status_response": status_response
+            }
+            return (ComflyVideoAdapter(video_url), json.dumps(response_data, ensure_ascii=False), video_url, task_id)
+
+        except Exception as e:
+            error_message = f"Error in grok video 1.5 generation: {str(e)}"
+            print(f"[Comfly_grok_video_1_5] {error_message}")
             import traceback
             traceback.print_exc()
             if not skip_error:
@@ -25190,6 +25316,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": Comfly_nano_banana_pro_fal,
     "Comfly_nano_banana_2_fal": Comfly_nano_banana_2_fal,
     "Comfly_grok_video_fal": Comfly_grok_video_fal,
+    "Comfly_grok_video_1_5": Comfly_grok_video_1_5,
     "Comfly_grok_video_1_5_fal": Comfly_grok_video_1_5_fal,
     "Comfly_sora2_fal": Comfly_sora2_fal,
     "Comfly_gpt_image_2_official_ratio_stable":Comfly_gpt_image_2_official_ratio_stable,
@@ -25301,7 +25428,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nano_banana_pro_fal": "Zhenzhen Nano Banana Pro Edit Fal",
     "Comfly_nano_banana_2_fal": "Zhenzhen Nano Banana 2 Edit Fal",
     "Comfly_grok_video_fal": "Zhenzhen Grok Video Fal",
-    "Comfly_grok_video_1_5_fal": "zhenzhen-grok-video-1.5",
+    "Comfly_grok_video_1_5": "zhenzhen-grok-video-1.5-new",
+    "Comfly_grok_video_1_5_fal": "zhenzhen-grok-video-1.5-fal",
     "Comfly_sora2_fal": "zhenzhen-sora2-fal",
     "Comfly_gpt_image_2_official_ratio_stable":"zhenzhen-gpt-image-2-official_ratio_stable",
     "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal",
