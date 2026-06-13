@@ -60,6 +60,15 @@ from .fal_batch_nodes import (
     Comfly_veed_fabric_1_0_fal,
     Comfly_hunyuan_3d_v3_1_pro_fal,
     Comfly_trellis_2_fal,
+    Comfly_bernini_r_video_fal,
+    Comfly_bernini_r_edit_image_fal,
+    Comfly_luma_ray_v3_2_fal,
+    Comfly_luma_uni_1_v1_fal,
+    Comfly_bria_video_background_removal_v3_fal,
+    Comfly_nemotron_asr_multilingual_fal,
+    Comfly_bria_genfill_v2_fal,
+    Comfly_luma_ray_v3_2_video_to_video_fal,
+    Comfly_pixelcut_video_background_removal_fal,
 )
 
 # For LLM API functionality
@@ -25342,7 +25351,16 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_creatify_aurora_fal": Comfly_creatify_aurora_fal,
     "Comfly_veed_fabric_1_0_fal": Comfly_veed_fabric_1_0_fal,
     "Comfly_hunyuan_3d_v3_1_pro_fal": Comfly_hunyuan_3d_v3_1_pro_fal,
-    "Comfly_trellis_2_fal": Comfly_trellis_2_fal
+    "Comfly_trellis_2_fal": Comfly_trellis_2_fal,
+    "Comfly_bernini_r_video_fal": Comfly_bernini_r_video_fal,
+    "Comfly_bernini_r_edit_image_fal": Comfly_bernini_r_edit_image_fal,
+    "Comfly_luma_ray_v3_2_fal": Comfly_luma_ray_v3_2_fal,
+    "Comfly_luma_uni_1_v1_fal": Comfly_luma_uni_1_v1_fal,
+    "Comfly_bria_video_background_removal_v3_fal": Comfly_bria_video_background_removal_v3_fal,
+    "Comfly_nemotron_asr_multilingual_fal": Comfly_nemotron_asr_multilingual_fal,
+    "Comfly_bria_genfill_v2_fal": Comfly_bria_genfill_v2_fal,
+    "Comfly_luma_ray_v3_2_video_to_video_fal": Comfly_luma_ray_v3_2_video_to_video_fal,
+    "Comfly_pixelcut_video_background_removal_fal": Comfly_pixelcut_video_background_removal_fal
 }
 
 
@@ -25454,7 +25472,16 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_creatify_aurora_fal": "zhenzhen-creatify-aurora-fal",
     "Comfly_veed_fabric_1_0_fal": "zhenzhen-veed-fabric-1.0-fal",
     "Comfly_hunyuan_3d_v3_1_pro_fal": "zhenzhen-hunyuan-3d-v3.1-pro-fal",
-    "Comfly_trellis_2_fal": "zhenzhen-trellis-2-fal"
+    "Comfly_trellis_2_fal": "zhenzhen-trellis-2-fal",
+    "Comfly_bernini_r_video_fal": "zhenzhen-bernini-r-video-fal",
+    "Comfly_bernini_r_edit_image_fal": "zhenzhen-bernini-r-edit-image-fal",
+    "Comfly_luma_ray_v3_2_fal": "zhenzhen-luma-ray-v3.2-fal",
+    "Comfly_luma_uni_1_v1_fal": "zhenzhen-luma-uni-1-v1-fal",
+    "Comfly_bria_video_background_removal_v3_fal": "zhenzhen-bria-video-background-removal-v3-fal",
+    "Comfly_nemotron_asr_multilingual_fal": "zhenzhen-nemotron-asr-multilingual-fal",
+    "Comfly_bria_genfill_v2_fal": "zhenzhen-bria-genfill-v2-fal",
+    "Comfly_luma_ray_v3_2_video_to_video_fal": "zhenzhen-luma-ray-v3.2-video-to-video-fal",
+    "Comfly_pixelcut_video_background_removal_fal": "zhenzhen-pixelcut-video-background-removal-fal"
 }
 
 # Aliyun WanX 2.6 API Node

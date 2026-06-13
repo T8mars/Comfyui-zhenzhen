@@ -292,6 +292,39 @@ class ComflyFalBase:
             return str(image_url).strip()
         return ""
 
+    def parse_url_lines(self, text):
+        urls = []
+        for line in str(text or "").splitlines():
+            value = line.strip()
+            if value:
+                urls.append(value)
+        return _dedupe_preserve_order(urls)
+
+    def parse_json_field(self, text, field_name, expected_type=None):
+        value = str(text or "").strip()
+        if not value:
+            return None
+        try:
+            parsed = json.loads(value)
+        except Exception as e:
+            raise RuntimeError(f"{field_name} must be valid JSON: {e}")
+        if expected_type is not None and not isinstance(parsed, expected_type):
+            expected_name = getattr(expected_type, "__name__", str(expected_type))
+            raise RuntimeError(f"{field_name} must be {expected_name} JSON.")
+        return parsed
+
+    def prepare_image_list(self, image_items=None, image_urls="", image_way="base64", max_count=0):
+        values = []
+        for image_tensor, image_url in image_items or []:
+            prepared = self.prepare_image(image_tensor, image_url, image_way)
+            if prepared:
+                values.append(prepared)
+        values.extend(self.parse_url_lines(image_urls))
+        values = _dedupe_preserve_order(values)
+        if max_count and len(values) > max_count:
+            return values[:max_count]
+        return values
+
     def _direct_url_from_media(self, media_input):
         if media_input is None:
             return ""
@@ -2341,6 +2374,713 @@ class Comfly_trellis_2_fal(ComflyFalBase):
             if not skip_error:
                 raise
             return ("", error_message, "", None)
+
+
+class Comfly_bernini_r_video_fal(ComflyFalBase):
+    LOG_PREFIX = "bernini_r_video_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A cinematic subtle motion shot."})}, "optional": {
+            "mode": (["reference_to_video", "edit_video", "reference_edit_video"], {"default": "reference_to_video"}),
+            "video": (IO.VIDEO,),
+            "video_url": ("STRING", {"default": ""}),
+            "reference_image1": ("IMAGE",),
+            "reference_image2": ("IMAGE",),
+            "reference_image3": ("IMAGE",),
+            "reference_image4": ("IMAGE",),
+            "reference_image5": ("IMAGE",),
+            "reference_image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional reference image URLs, one per line. Up to 5 total."}),
+            "api_key": ("STRING", {"default": ""}),
+            "negative_prompt": ("STRING", {"default": "", "multiline": True}),
+            "max_image_size": ("INT", {"default": 848, "min": 256, "max": 1280, "step": 8}),
+            "num_frames": ("INT", {"default": 81, "min": 5, "max": 121, "step": 4, "tooltip": "Snapped internally to 4k+1. Use 5 for lowest-cost smoke."}),
+            "frames_per_second": ("INT", {"default": 16, "min": 4, "max": 30, "step": 1}),
+            "num_inference_steps": ("INT", {"default": 30, "min": 1, "max": 50, "step": 1}),
+            "acceleration": (["none", "regular"], {"default": "none"}),
+            "aspect_ratio": (["16:9", "9:16", "1:1"], {"default": "16:9", "tooltip": "reference_to_video mode only."}),
+            "enable_prompt_expansion": ("BOOLEAN", {"default": False}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "video_way": (["upload", "video_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, mode="reference_to_video", video=None, video_url="", reference_image1=None,
+                reference_image2=None, reference_image3=None, reference_image4=None, reference_image5=None,
+                reference_image_urls="", api_key="", negative_prompt="", max_image_size=848,
+                num_frames=81, frames_per_second=16, num_inference_steps=30, acceleration="none",
+                aspect_ratio="16:9", enable_prompt_expansion=False, seed=0, image_way="base64",
+                video_way="upload", poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+
+            payload = {
+                "prompt": prompt,
+                "max_image_size": int(max_image_size),
+                "num_frames": int(num_frames),
+                "frames_per_second": int(frames_per_second),
+                "num_inference_steps": int(num_inference_steps),
+                "acceleration": acceleration,
+                "enable_prompt_expansion": bool(enable_prompt_expansion),
+            }
+            if str(negative_prompt or "").strip():
+                payload["negative_prompt"] = str(negative_prompt).strip()
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+
+            endpoint = "fal-ai/bernini-r/reference-to-video"
+            if mode in ("reference_to_video", "reference_edit_video"):
+                references = self.prepare_image_list(
+                    [
+                        (reference_image1, ""),
+                        (reference_image2, ""),
+                        (reference_image3, ""),
+                        (reference_image4, ""),
+                        (reference_image5, ""),
+                    ],
+                    reference_image_urls,
+                    image_way,
+                    max_count=5,
+                )
+                if not references:
+                    raise RuntimeError(f"{mode} mode requires at least one reference image or reference_image_url.")
+                payload["reference_image_urls"] = references
+
+            if mode == "reference_to_video":
+                payload["aspect_ratio"] = aspect_ratio
+            elif mode == "edit_video":
+                endpoint = "fal-ai/bernini-r/edit-video"
+                prepared_video = self.prepare_video(video, video_url, video_way)
+                if not prepared_video:
+                    raise RuntimeError("edit_video mode requires video input or video_url.")
+                payload["video_url"] = prepared_video
+            elif mode == "reference_edit_video":
+                endpoint = "fal-ai/bernini-r/reference-edit-video"
+                prepared_video = self.prepare_video(video, video_url, video_way)
+                if not prepared_video:
+                    raise RuntimeError("reference_edit_video mode requires video input or video_url.")
+                payload["video_url"] = prepared_video
+            else:
+                raise RuntimeError(f"Unsupported mode: {mode}")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_bernini_r_edit_image_fal(ComflyFalBase):
+    LOG_PREFIX = "bernini_r_edit_image_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "Make the image more cinematic."})}, "optional": {
+            "image": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "negative_prompt": ("STRING", {"default": "", "multiline": True}),
+            "max_image_size": ("INT", {"default": 848, "min": 256, "max": 1280, "step": 8}),
+            "num_inference_steps": ("INT", {"default": 30, "min": 1, "max": 50, "step": 1}),
+            "enable_prompt_expansion": ("BOOLEAN", {"default": False}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, prompt, image=None, image_url="", api_key="", negative_prompt="",
+                max_image_size=848, num_inference_steps=30, enable_prompt_expansion=False,
+                seed=0, image_way="base64", poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        self.set_api_key(api_key)
+        default_image = image if image is not None else self.blank_image()
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            if not prepared_image:
+                raise RuntimeError("Bernini R Edit Image requires image or image_url.")
+            payload = {
+                "prompt": prompt,
+                "image_url": prepared_image,
+                "max_image_size": int(max_image_size),
+                "num_inference_steps": int(num_inference_steps),
+                "enable_prompt_expansion": bool(enable_prompt_expansion),
+            }
+            if str(negative_prompt or "").strip():
+                payload["negative_prompt"] = str(negative_prompt).strip()
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/bernini-r/edit-image", payload, ["image", "images"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_image_urls(result)
+            images = self.download_images(urls)
+            pbar.update_absolute(100)
+            return (images, self.info(result), "\n".join(urls))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
+class Comfly_luma_ray_v3_2_fal(ComflyFalBase):
+    LOG_PREFIX = "luma_ray_v3_2_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A smooth cinematic camera move."})}, "optional": {
+            "mode": (["text_to_video", "image_to_video"], {"default": "text_to_video"}),
+            "image": ("IMAGE",),
+            "end_image": ("IMAGE",),
+            "reference_image1": ("IMAGE",),
+            "reference_image2": ("IMAGE",),
+            "reference_image3": ("IMAGE",),
+            "reference_image4": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "end_image_url": ("STRING", {"default": ""}),
+            "reference_image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional reference image URLs, one per line. Max 4."}),
+            "api_key": ("STRING", {"default": ""}),
+            "duration": (["5s", "10s"], {"default": "5s"}),
+            "resolution": (["540p", "720p", "1080p"], {"default": "540p"}),
+            "aspect_ratio": (["3:4", "4:3", "1:1", "9:16", "16:9", "21:9"], {"default": "16:9"}),
+            "hdr": ("BOOLEAN", {"default": False}),
+            "exr_export": ("BOOLEAN", {"default": False}),
+            "loop": ("BOOLEAN", {"default": False}),
+            "keyframes_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON array of keyframe image URLs."}),
+            "keyframe_indexes_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON array of integer frame indexes."}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, mode="text_to_video", image=None, end_image=None,
+                reference_image1=None, reference_image2=None, reference_image3=None,
+                reference_image4=None, image_url="", end_image_url="",
+                reference_image_urls="", api_key="", duration="5s", resolution="540p",
+                aspect_ratio="16:9", hdr=False, exr_export=False, loop=False,
+                keyframes_json="", keyframe_indexes_json="", image_way="base64",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            payload = {
+                "prompt": prompt,
+                "duration": duration,
+                "resolution": resolution,
+                "aspect_ratio": aspect_ratio,
+                "hdr": bool(hdr),
+                "exr_export": bool(exr_export),
+                "loop": bool(loop),
+            }
+            references = self.prepare_image_list(
+                [
+                    (reference_image1, ""),
+                    (reference_image2, ""),
+                    (reference_image3, ""),
+                    (reference_image4, ""),
+                ],
+                reference_image_urls,
+                image_way,
+                max_count=4,
+            )
+            if references:
+                payload["reference_image_urls"] = references
+
+            endpoint = "luma/agent/ray/v3.2/text-to-video"
+            if mode == "image_to_video":
+                endpoint = "luma/agent/ray/v3.2/image-to-video"
+                keyframes = self.parse_json_field(keyframes_json, "keyframes_json", list)
+                keyframe_indexes = self.parse_json_field(keyframe_indexes_json, "keyframe_indexes_json", list)
+                if keyframes is not None or keyframe_indexes is not None:
+                    if not keyframes or not keyframe_indexes:
+                        raise RuntimeError("keyframes_json and keyframe_indexes_json must be provided together.")
+                    payload["keyframes"] = keyframes
+                    payload["keyframe_indexes"] = keyframe_indexes
+                else:
+                    if duration == "10s":
+                        raise RuntimeError("Luma image_to_video duration=10s requires keyframes_json and keyframe_indexes_json.")
+                    prepared_image = self.prepare_image(image, image_url, image_way)
+                    if not prepared_image:
+                        raise RuntimeError("image_to_video mode requires image/image_url or keyframes_json.")
+                    payload["image_url"] = prepared_image
+                    prepared_end = self.prepare_image(end_image, end_image_url, image_way)
+                    if prepared_end:
+                        payload["end_image_url"] = prepared_end
+                    if loop and prepared_end:
+                        raise RuntimeError("loop cannot be combined with end_image/end_image_url.")
+            elif mode != "text_to_video":
+                raise RuntimeError(f"Unsupported mode: {mode}")
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_luma_uni_1_v1_fal(ComflyFalBase):
+    LOG_PREFIX = "luma_uni_1_v1_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "A clean editorial image with strong composition."})}, "optional": {
+            "mode": (["text_to_image", "text_to_image_max", "edit", "edit_max"], {"default": "text_to_image"}),
+            "image": ("IMAGE",),
+            "reference_image1": ("IMAGE",),
+            "reference_image2": ("IMAGE",),
+            "reference_image3": ("IMAGE",),
+            "reference_image4": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "reference_image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional reference image URLs, one per line. Max 9."}),
+            "api_key": ("STRING", {"default": ""}),
+            "aspect_ratio": (["auto", "3:1", "2:1", "16:9", "3:2", "1:1", "2:3", "9:16", "1:2", "1:3"], {"default": "16:9"}),
+            "output_format": (["auto", "png", "jpeg"], {"default": "png"}),
+            "style": (["auto", "manga"], {"default": "auto"}),
+            "enable_web_search": ("BOOLEAN", {"default": False, "tooltip": "Text-to-image modes only."}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, prompt, mode="text_to_image", image=None, reference_image1=None,
+                reference_image2=None, reference_image3=None, reference_image4=None,
+                image_url="", reference_image_urls="", api_key="", aspect_ratio="16:9",
+                output_format="png", style="auto", enable_web_search=False,
+                image_way="base64", poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        self.set_api_key(api_key)
+        default_image = image if image is not None else self.blank_image()
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            payload = {"prompt": prompt, "style": style}
+            if output_format != "auto":
+                payload["output_format"] = output_format
+            references = self.prepare_image_list(
+                [
+                    (reference_image1, ""),
+                    (reference_image2, ""),
+                    (reference_image3, ""),
+                    (reference_image4, ""),
+                ],
+                reference_image_urls,
+                image_way,
+                max_count=9,
+            )
+            if references:
+                payload["reference_image_urls"] = references
+
+            endpoint_map = {
+                "text_to_image": "luma/agent/uni-1/v1/text-to-image",
+                "text_to_image_max": "luma/agent/uni-1/v1/max",
+                "edit": "luma/agent/uni-1/v1/edit",
+                "edit_max": "luma/agent/uni-1/v1/max/edit",
+            }
+            endpoint = endpoint_map.get(mode)
+            if not endpoint:
+                raise RuntimeError(f"Unsupported mode: {mode}")
+            if mode.startswith("text_to_image"):
+                if aspect_ratio != "auto":
+                    payload["aspect_ratio"] = aspect_ratio
+                payload["enable_web_search"] = bool(enable_web_search)
+            else:
+                prepared_image = self.prepare_image(image, image_url, image_way)
+                if not prepared_image:
+                    raise RuntimeError(f"{mode} mode requires image or image_url.")
+                payload["image_url"] = prepared_image
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["images"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_image_urls(result)
+            images = self.download_images(urls)
+            pbar.update_absolute(100)
+            return (images, self.info(result), "\n".join(urls))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
+class Comfly_bria_video_background_removal_v3_fal(ComflyFalBase):
+    LOG_PREFIX = "bria_video_background_removal_v3_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"video_url": ("STRING", {"default": "", "tooltip": "Public video URL. Ignored when video input is connected."})}, "optional": {
+            "video": (IO.VIDEO,),
+            "api_key": ("STRING", {"default": ""}),
+            "background_color": (["Transparent", "Black", "White", "Gray", "Red", "Green", "Blue", "Yellow", "Cyan", "Magenta", "Orange"], {"default": "Black"}),
+            "preserve_audio": ("BOOLEAN", {"default": True}),
+            "output_container_and_codec": (["mp4_h265", "mp4_h264", "webm_vp9", "mov_h265", "mov_proresks", "mkv_h265", "mkv_h264", "mkv_vp9", "avi_h264", "gif"], {"default": "webm_vp9"}),
+            "video_way": (["upload", "video_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, video_url="", video=None, api_key="", background_color="Black",
+                preserve_audio=True, output_container_and_codec="webm_vp9", video_way="upload",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_video = self.prepare_video(video, video_url, video_way)
+            if not prepared_video:
+                raise RuntimeError("Bria video background removal requires video input or video_url.")
+            payload = {
+                "video_url": prepared_video,
+                "background_color": background_color,
+                "preserve_audio": bool(preserve_audio),
+                "output_container_and_codec": output_container_and_codec,
+            }
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("bria/video/background-removal/v3", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_nemotron_asr_multilingual_fal(ComflyFalBase):
+    LOG_PREFIX = "nemotron_asr_multilingual_fal"
+
+    LANGUAGES = [
+        "auto", "en-US", "en-GB", "es-US", "es-ES", "de-DE", "fr-FR", "fr-CA",
+        "it-IT", "ar-AR", "ja-JP", "ko-KR", "pt-BR", "pt-PT", "ru-RU", "hi-IN",
+        "zh-CN", "vi-VN", "he-IL", "nl-NL", "cs-CZ", "da-DK", "pl-PL", "nn-NO",
+        "nb-NO", "sv-SE", "th-TH", "tr-TR", "bg-BG", "el-GR", "et-EE", "fi-FI",
+        "hr-HR", "hu-HU", "lt-LT", "lv-LV", "ro-RO", "sk-SK", "uk-UA", "mt-MT",
+        "sl-SI",
+    ]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"audio_url": ("STRING", {"default": "", "tooltip": "Public audio URL. Ignored when AUDIO input is connected."})}, "optional": {
+            "audio": ("AUDIO",),
+            "api_key": ("STRING", {"default": ""}),
+            "language": (cls.LANGUAGES, {"default": "auto"}),
+            "acceleration": (["none", "regular", "high", "full"], {"default": "regular"}),
+            "audio_way": (["upload", "audio_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("transcript", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, audio_url="", audio=None, api_key="", language="auto", acceleration="regular",
+                audio_way="upload", poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_audio = self.prepare_audio(audio, audio_url, audio_way)
+            if not prepared_audio:
+                raise RuntimeError("Nemotron ASR requires AUDIO input or audio_url.")
+            payload = {"audio_url": prepared_audio, "language": language, "acceleration": acceleration}
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("nvidia/nemotron-asr-multilingual/asr", payload, ["output"], pbar, poll_interval, max_poll_attempts)
+            transcript = ""
+            if isinstance(result, dict):
+                transcript = str(result.get("output") or "")
+            pbar.update_absolute(100)
+            return (transcript, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", error_message)
+
+
+class Comfly_bria_genfill_v2_fal(ComflyFalBase):
+    LOG_PREFIX = "bria_genfill_v2_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"instruction": ("STRING", {"multiline": True, "default": "A beautiful colorful butterfly"})}, "optional": {
+            "image": ("IMAGE",),
+            "mask": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "mask_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "seed": ("INT", {"default": 5555, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "steps_num": ("INT", {"default": 30, "min": 20, "max": 50, "step": 1}),
+            "sync_mode": ("BOOLEAN", {"default": False}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, instruction, image=None, mask=None, image_url="", mask_url="", api_key="",
+                seed=5555, steps_num=30, sync_mode=False, image_way="base64",
+                poll_interval=6, max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        default_image = image if image is not None else self.blank_image()
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_image = self.prepare_image(image, image_url, image_way)
+            prepared_mask = self.prepare_image(mask, mask_url, image_way)
+            if not prepared_image or not prepared_mask:
+                raise RuntimeError("Bria GenFill requires image/mask inputs or image_url/mask_url.")
+            payload = {
+                "image_url": prepared_image,
+                "mask_url": prepared_mask,
+                "instruction": instruction,
+                "steps_num": int(steps_num),
+                "sync_mode": bool(sync_mode),
+            }
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("bria/genfill/v2", payload, ["image", "images"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_image_urls(result)
+            images = self.download_images(urls)
+            pbar.update_absolute(100)
+            return (images, self.info(result), "\n".join(urls))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
+class Comfly_luma_ray_v3_2_video_to_video_fal(ComflyFalBase):
+    LOG_PREFIX = "luma_ray_v3_2_video_to_video_fal"
+
+    EDIT_STRENGTHS = ["auto", "adhere_1", "adhere_2", "adhere_3", "flex_1", "flex_2", "flex_3", "reimagine_1", "reimagine_2", "reimagine_3"]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": "Restyle the footage as a hand-painted watercolor animation."})}, "optional": {
+            "video": (IO.VIDEO,),
+            "video_url": ("STRING", {"default": ""}),
+            "start_image": ("IMAGE",),
+            "start_image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "duration": (["5s", "10s"], {"default": "5s"}),
+            "resolution": (["540p", "720p", "1080p"], {"default": "540p"}),
+            "edit_strength": (cls.EDIT_STRENGTHS, {"default": "auto"}),
+            "auto_controls": ("BOOLEAN", {"default": False}),
+            "hdr": ("BOOLEAN", {"default": False}),
+            "exr_export": ("BOOLEAN", {"default": False}),
+            "controls_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON object for Ray edit controls."}),
+            "keyframes_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON array of keyframe image URLs."}),
+            "keyframe_indexes_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON array of integer source frame indexes."}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "video_way": (["upload", "video_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, video=None, video_url="", start_image=None, start_image_url="",
+                api_key="", duration="5s", resolution="540p", edit_strength="auto",
+                auto_controls=False, hdr=False, exr_export=False, controls_json="",
+                keyframes_json="", keyframe_indexes_json="", image_way="base64",
+                video_way="upload", poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_video = self.prepare_video(video, video_url, video_way)
+            if not prepared_video:
+                raise RuntimeError("Luma Ray video-to-video requires video input or video_url.")
+            payload = {
+                "prompt": prompt,
+                "video_url": prepared_video,
+                "duration": duration,
+                "resolution": resolution,
+                "hdr": bool(hdr),
+                "exr_export": bool(exr_export),
+                "auto_controls": bool(auto_controls),
+            }
+            if not auto_controls and edit_strength != "auto":
+                payload["edit_strength"] = edit_strength
+            controls = self.parse_json_field(controls_json, "controls_json", dict)
+            if controls:
+                if auto_controls:
+                    raise RuntimeError("controls_json cannot be combined with auto_controls=True.")
+                payload["controls"] = controls
+            keyframes = self.parse_json_field(keyframes_json, "keyframes_json", list)
+            keyframe_indexes = self.parse_json_field(keyframe_indexes_json, "keyframe_indexes_json", list)
+            if keyframes is not None or keyframe_indexes is not None:
+                if not keyframes or not keyframe_indexes:
+                    raise RuntimeError("keyframes_json and keyframe_indexes_json must be provided together.")
+                payload["keyframes"] = keyframes
+                payload["keyframe_indexes"] = keyframe_indexes
+            else:
+                prepared_start = self.prepare_image(start_image, start_image_url, image_way)
+                if prepared_start:
+                    payload["start_image_url"] = prepared_start
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("luma/agent/ray/v3.2/video-to-video", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_pixelcut_video_background_removal_fal(ComflyFalBase):
+    LOG_PREFIX = "pixelcut_video_background_removal_fal"
+
+    OUTPUT_FORMATS = ["auto", "webm_vp9", "mp4_h264", "mp4_h265", "mov_proresks", "mov_h265", "mkv_h264", "mkv_h265", "mkv_vp9", "gif"]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"video_url": ("STRING", {"default": "", "tooltip": "Public video URL. Ignored when video input is connected."})}, "optional": {
+            "video": (IO.VIDEO,),
+            "api_key": ("STRING", {"default": ""}),
+            "background": (["transparent", "black", "white", "green", "blue", "magenta", "custom"], {"default": "transparent"}),
+            "output_format": (cls.OUTPUT_FORMATS, {"default": "auto"}),
+            "custom_r": ("INT", {"default": 0, "min": 0, "max": 255}),
+            "custom_g": ("INT", {"default": 0, "min": 0, "max": 255}),
+            "custom_b": ("INT", {"default": 0, "min": 0, "max": 255}),
+            "video_way": (["upload", "video_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, video_url="", video=None, api_key="", background="transparent",
+                output_format="auto", custom_r=0, custom_g=0, custom_b=0,
+                video_way="upload", poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_video = self.prepare_video(video, video_url, video_way)
+            if not prepared_video:
+                raise RuntimeError("Pixelcut video background removal requires video input or video_url.")
+            payload = {"video_url": prepared_video, "background": background}
+            if output_format != "auto":
+                payload["output_format"] = output_format
+            if background == "custom":
+                payload["background_color"] = {"r": int(custom_r), "g": int(custom_g), "b": int(custom_b)}
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("pixelcut/video-background-removal", payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            result_video_url = self.extract_video_url(result)
+            if not result_video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(result_video_url), result_video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
 
 
 def _run_image_node(node, endpoint, prompt, api_key, skip_error, extra_payload, poll_interval, max_poll_attempts):

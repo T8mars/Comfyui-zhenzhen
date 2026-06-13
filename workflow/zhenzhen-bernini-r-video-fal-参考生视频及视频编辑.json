@@ -1,0 +1,363 @@
+{
+  "id": "5fa61cc8-29d9-4deb-9f90-02d3c00b63b3",
+  "revision": 0,
+  "last_node_id": 101,
+  "last_link_id": 170,
+  "nodes": [
+    {
+      "id": 59,
+      "type": "easy showAnything",
+      "pos": [
+        792.1117573239235,
+        1347.5149275350313
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 169
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"task_t3O3OP5Xw39QsFZTdggcc25d6xQHs4qZ\", \"model\": \"grok-1.5-video-15s\", \"prompt\": \"女人说我爱你\", \"size\": \"720x1280\", \"video_url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/23029245-224c-4b30-84b2-32a21b30a0f9.mp4\", \"submit_response\": {\"id\": \"task_t3O3OP5Xw39QsFZTdggcc25d6xQHs4qZ\", \"task_id\": \"task_t3O3OP5Xw39QsFZTdggcc25d6xQHs4qZ\", \"object\": \"\", \"model\": \"\", \"status\": \"processing\", \"progress\": 0, \"created_at\": 0}, \"status_response\": {\"id\": \"task_t3O3OP5Xw39QsFZTdggcc25d6xQHs4qZ\", \"object\": \"video\", \"model\": \"grok-1.5-video-15s\", \"status\": \"completed\", \"progress\": 100, \"created_at\": 1781202493, \"completed_at\": 1781202675, \"metadata\": {\"url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/23029245-224c-4b30-84b2-32a21b30a0f9.mp4\"}, \"video_url\": \"https://soruxgpt-saas-yimeng-api.soruxgpt.com/file_download/23029245-224c-4b30-84b2-32a21b30a0f9.mp4\"}}"
+      ]
+    },
+    {
+      "id": 98,
+      "type": "SaveVideo",
+      "pos": [
+        373.0185922594276,
+        1314.0728553310619
+      ],
+      "size": [
+        270,
+        249.875
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 168
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 99,
+      "type": "easy showAnything",
+      "pos": [
+        506.28561585734957,
+        1650.4632168029761
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 170
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "5618a748c14858a6e95a583baa28bb7c8da7976a",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "task_t3O3OP5Xw39QsFZTdggcc25d6xQHs4qZ"
+      ]
+    },
+    {
+      "id": 92,
+      "type": "LoadImage",
+      "pos": [
+        -565.8272178848326,
+        1263.2453172012658
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            166
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.22.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00002_pjoxu_1780997336.png",
+        "image"
+      ]
+    },
+    {
+      "id": 61,
+      "type": "Comfly_api_set",
+      "pos": [
+        -836.5266522290256,
+        1688.8797844407593
+      ],
+      "size": [
+        529.2111326301107,
+        175.92818612135443
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            167
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 101,
+      "type": "Comfly_bernini_r_video_fal",
+      "pos": [
+        -142.64748147773355,
+        1215.2212124213484
+      ],
+      "size": [
+        400,
+        704
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "reference_image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 166
+        },
+        {
+          "name": "reference_image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "reference_image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "reference_image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "reference_image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 167
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            168
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            169
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            170
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_bernini_r_video_fal"
+      },
+      "widgets_values": [
+        "A cinematic subtle motion shot.",
+        "reference_to_video",
+        "",
+        "",
+        "",
+        "",
+        848,
+        81,
+        16,
+        30,
+        "none",
+        "16:9",
+        false,
+        0,
+        "randomize",
+        "base64",
+        "upload",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      166,
+      92,
+      0,
+      101,
+      1,
+      "IMAGE"
+    ],
+    [
+      167,
+      61,
+      0,
+      101,
+      6,
+      "STRING"
+    ],
+    [
+      168,
+      101,
+      0,
+      98,
+      0,
+      "VIDEO"
+    ],
+    [
+      169,
+      101,
+      1,
+      59,
+      0,
+      "STRING"
+    ],
+    [
+      170,
+      101,
+      2,
+      99,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.085607476635521,
+      "offset": [
+        766.5973301998678,
+        -910.1503960153757
+      ]
+    },
+    "frontendVersion": "1.45.15",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
