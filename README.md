@@ -65,6 +65,16 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260618-1
+
+新增4个最新节点及多个新模型  
+
+zhenzhen-sensenova-u1-infographic-fal  
+zhenzhen-kling-video-v3-turbo-fal，合并 Kling v3 Turbo standard/pro 的文生视频和图生视频 4 个端点  
+zhenzhen-zonos2-fal  
+zhenzhen-boogu-image-fal，合并 Boogu 文生图和图片编辑  
+对应4个工作流已更新  
+
 ### 20260615-1
 
 gpt-image-2-vip模型下架，早上导致整个网站堵塞，目前gpt-image-2拥堵已解决，提示未启动的早上那些不用管，这些不会出来了， 也不会扣费，重新跑，正在处理其他的

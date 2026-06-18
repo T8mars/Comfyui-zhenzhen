@@ -69,6 +69,10 @@ from .fal_batch_nodes import (
     Comfly_bria_genfill_v2_fal,
     Comfly_luma_ray_v3_2_video_to_video_fal,
     Comfly_pixelcut_video_background_removal_fal,
+    Comfly_sensenova_u1_infographic_fal,
+    Comfly_kling_video_v3_turbo_fal,
+    Comfly_zonos2_fal,
+    Comfly_boogu_image_fal,
 )
 
 # For LLM API functionality
@@ -25360,7 +25364,11 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nemotron_asr_multilingual_fal": Comfly_nemotron_asr_multilingual_fal,
     "Comfly_bria_genfill_v2_fal": Comfly_bria_genfill_v2_fal,
     "Comfly_luma_ray_v3_2_video_to_video_fal": Comfly_luma_ray_v3_2_video_to_video_fal,
-    "Comfly_pixelcut_video_background_removal_fal": Comfly_pixelcut_video_background_removal_fal
+    "Comfly_pixelcut_video_background_removal_fal": Comfly_pixelcut_video_background_removal_fal,
+    "Comfly_sensenova_u1_infographic_fal": Comfly_sensenova_u1_infographic_fal,
+    "Comfly_kling_video_v3_turbo_fal": Comfly_kling_video_v3_turbo_fal,
+    "Comfly_zonos2_fal": Comfly_zonos2_fal,
+    "Comfly_boogu_image_fal": Comfly_boogu_image_fal
 }
 
 
@@ -25481,7 +25489,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_nemotron_asr_multilingual_fal": "zhenzhen-nemotron-asr-multilingual-fal",
     "Comfly_bria_genfill_v2_fal": "zhenzhen-bria-genfill-v2-fal",
     "Comfly_luma_ray_v3_2_video_to_video_fal": "zhenzhen-luma-ray-v3.2-video-to-video-fal",
-    "Comfly_pixelcut_video_background_removal_fal": "zhenzhen-pixelcut-video-background-removal-fal"
+    "Comfly_pixelcut_video_background_removal_fal": "zhenzhen-pixelcut-video-background-removal-fal",
+    "Comfly_sensenova_u1_infographic_fal": "zhenzhen-sensenova-u1-infographic-fal",
+    "Comfly_kling_video_v3_turbo_fal": "zhenzhen-kling-video-v3-turbo-fal",
+    "Comfly_zonos2_fal": "zhenzhen-zonos2-fal",
+    "Comfly_boogu_image_fal": "zhenzhen-boogu-image-fal"
 }
 
 # Aliyun WanX 2.6 API Node

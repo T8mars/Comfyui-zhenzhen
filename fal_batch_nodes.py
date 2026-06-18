@@ -3083,6 +3083,310 @@ class Comfly_pixelcut_video_background_removal_fal(ComflyFalBase):
             return ("", "", error_message)
 
 
+class Comfly_sensenova_u1_infographic_fal(ComflyFalBase):
+    LOG_PREFIX = "sensenova_u1_infographic_fal"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": ""})}, "optional": {
+            "api_key": ("STRING", {"default": ""}),
+            "aspect_ratio": (["1:1", "16:9", "9:16", "3:2", "2:3", "4:3", "3:4", "1:2", "2:1"], {"default": "16:9"}),
+            "use_thinking": ("BOOLEAN", {"default": False}),
+            "guidance_scale": ("FLOAT", {"default": 4.0, "min": 0.0, "max": 20.0, "step": 0.1}),
+            "num_inference_steps": ("INT", {"default": 50, "min": 1, "max": 100, "step": 1}),
+            "timestep_shift": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 10.0, "step": 0.1}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "output_format": (["jpeg", "png"], {"default": "jpeg"}),
+            "sync_mode": ("BOOLEAN", {"default": False}),
+            "enable_safety_checker": ("BOOLEAN", {"default": True}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def process(self, prompt, api_key="", aspect_ratio="16:9", use_thinking=False,
+                guidance_scale=4.0, num_inference_steps=50, timestep_shift=3.0,
+                seed=0, output_format="jpeg", sync_mode=False,
+                enable_safety_checker=True, poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        seed_value = self.seed_payload_value(seed)
+        return _run_image_node(
+            self, "fal-ai/sensenova-u1-infographic", prompt, api_key, skip_error,
+            {
+                "aspect_ratio": aspect_ratio,
+                "use_thinking": bool(use_thinking),
+                "guidance_scale": float(guidance_scale),
+                "num_inference_steps": int(num_inference_steps),
+                "timestep_shift": float(timestep_shift),
+                "output_format": output_format,
+                "sync_mode": bool(sync_mode),
+                "enable_safety_checker": bool(enable_safety_checker),
+                **({"seed": seed_value} if seed_value is not None else {}),
+            },
+            poll_interval, max_poll_attempts
+        )
+
+
+class Comfly_kling_video_v3_turbo_fal(ComflyFalBase):
+    LOG_PREFIX = "kling_video_v3_turbo_fal"
+
+    ENDPOINTS = {
+        ("standard", "text_to_video"): "fal-ai/kling-video/v3/turbo/standard/text-to-video",
+        ("standard", "image_to_video"): "fal-ai/kling-video/v3/turbo/standard/image-to-video",
+        ("pro", "text_to_video"): "fal-ai/kling-video/v3/turbo/pro/text-to-video",
+        ("pro", "image_to_video"): "fal-ai/kling-video/v3/turbo/pro/image-to-video",
+    }
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": ""})}, "optional": {
+            "mode": (["text_to_video", "image_to_video"], {"default": "text_to_video"}),
+            "quality": (["standard", "pro"], {"default": "standard"}),
+            "image": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "multi_prompt_json": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional JSON array for Kling multi-shot storyboard. When set, prompt is not sent."}),
+            "aspect_ratio": (["16:9", "9:16", "1:1"], {"default": "16:9"}),
+            "duration": (["3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"], {"default": "3"}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = (IO.VIDEO, "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, prompt, mode="text_to_video", quality="standard", image=None,
+                image_url="", api_key="", multi_prompt_json="", aspect_ratio="16:9",
+                duration="3", image_way="base64", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            endpoint = self.ENDPOINTS.get((quality, mode))
+            if not endpoint:
+                raise RuntimeError(f"Unsupported Kling V3 Turbo mode: {quality}/{mode}")
+
+            payload = {"duration": str(duration)}
+            multi_prompt = self.parse_json_field(multi_prompt_json, "multi_prompt_json", list)
+            if multi_prompt:
+                payload["multi_prompt"] = multi_prompt
+            elif str(prompt or "").strip():
+                payload["prompt"] = str(prompt).strip()
+            elif mode == "text_to_video":
+                raise RuntimeError("Kling text_to_video mode requires prompt or multi_prompt_json.")
+
+            if mode == "text_to_video":
+                payload["aspect_ratio"] = aspect_ratio
+            else:
+                prepared_image = self.prepare_image(image, image_url, image_way)
+                if not prepared_image:
+                    raise RuntimeError("Kling image_to_video mode requires image input or image_url.")
+                payload["image_url"] = prepared_image
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["video"], pbar, poll_interval, max_poll_attempts)
+            video_url = self.extract_video_url(result)
+            if not video_url:
+                raise RuntimeError("No video URL in result")
+            pbar.update_absolute(100)
+            return (FalVideoAdapter(video_url), video_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return ("", "", error_message)
+
+
+class Comfly_zonos2_fal(ComflyFalBase):
+    LOG_PREFIX = "zonos2_fal"
+
+    LANGUAGES = ["en_us", "en_gb", "fr_fr", "de", "es", "it", "pt_br", "ja", "cmn", "ko"]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"text": ("STRING", {"multiline": True, "default": "\"Fal\" is the fastest solution for your audio generation."})}, "optional": {
+            "reference_audio": ("AUDIO",),
+            "reference_audio_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "language": (cls.LANGUAGES, {"default": "en_us"}),
+            "accurate_mode": ("BOOLEAN", {"default": True}),
+            "clean_speaker_background": ("BOOLEAN", {"default": False}),
+            "temperature": ("FLOAT", {"default": 1.15, "min": 0.0, "max": 2.0, "step": 0.01}),
+            "top_p": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+            "min_p": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 1.0, "step": 0.01}),
+            "top_k": ("INT", {"default": 106, "min": 0, "max": 1024, "step": 1}),
+            "max_tokens": ("INT", {"default": 0, "min": 0, "max": 6144, "step": 1, "tooltip": "0 = server default."}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "audio_way": (["upload", "audio_url"], {"default": "upload"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("AUDIO", "STRING", "STRING")
+    RETURN_NAMES = ("audio", "audio_url", "response")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+    OUTPUT_NODE = True
+
+    def process(self, text, reference_audio=None, reference_audio_url="", api_key="",
+                language="en_us", accurate_mode=True, clean_speaker_background=False,
+                temperature=1.15, top_p=0.0, min_p=0.18, top_k=106, max_tokens=0,
+                seed=0, audio_way="upload", poll_interval=6, max_poll_attempts=600,
+                skip_error=False):
+        self.set_api_key(api_key)
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            prepared_audio = self.prepare_audio(reference_audio, reference_audio_url, audio_way)
+            if not prepared_audio:
+                raise RuntimeError("Zonos2 requires reference_audio input or reference_audio_url.")
+            payload = {
+                "reference_audio_url": prepared_audio,
+                "text": str(text or ""),
+                "language": language,
+                "accurate_mode": bool(accurate_mode),
+                "clean_speaker_background": bool(clean_speaker_background),
+                "temperature": float(temperature),
+                "top_p": float(top_p),
+                "min_p": float(min_p),
+                "top_k": int(top_k),
+            }
+            if int(max_tokens) > 0:
+                payload["max_tokens"] = int(max_tokens)
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll("fal-ai/zonos2", payload, ["audio"], pbar, poll_interval, max_poll_attempts)
+            audio_urls = self.extract_audio_urls(result)
+            if not audio_urls:
+                raise RuntimeError("No audio URL in result")
+            audio_url = audio_urls[0]
+            audio = self.audio_url_to_audio_object(audio_url)
+            pbar.update_absolute(100)
+            return (audio, audio_url, self.info(result))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (self.blank_audio(), "", error_message)
+
+
+class Comfly_boogu_image_fal(ComflyFalBase):
+    LOG_PREFIX = "boogu_image_fal"
+
+    IMAGE_SIZES = ["auto", "square_hd", "square", "portrait_4_3", "portrait_16_9", "landscape_4_3", "landscape_16_9", "custom"]
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"prompt": ("STRING", {"multiline": True, "default": ""})}, "optional": {
+            "mode": (["text_to_image", "edit"], {"default": "text_to_image"}),
+            "image": ("IMAGE",),
+            "image_url": ("STRING", {"default": ""}),
+            "api_key": ("STRING", {"default": ""}),
+            "negative_prompt": ("STRING", {"default": "", "multiline": True}),
+            "image_size": (cls.IMAGE_SIZES, {"default": "square_hd"}),
+            "custom_width": ("INT", {"default": 1024, "min": 256, "max": 2048, "step": 16}),
+            "custom_height": ("INT", {"default": 1024, "min": 256, "max": 2048, "step": 16}),
+            "num_inference_steps": ("INT", {"default": 30, "min": 20, "max": 100, "step": 1}),
+            "guidance_scale": ("FLOAT", {"default": 4.0, "min": 0.0, "max": 20.0, "step": 0.1}),
+            "image_guidance_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 20.0, "step": 0.1, "tooltip": "Edit mode only."}),
+            "cfg_range_start": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+            "cfg_range_end": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+            "num_images": ("INT", {"default": 1, "min": 1, "max": 4, "step": 1}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": FAL_SEED_MAX, "tooltip": "0 = random seed. FAL seed max is 65535."}),
+            "enable_safety_checker": ("BOOLEAN", {"default": True}),
+            "output_format": (["jpeg", "png"], {"default": "jpeg"}),
+            "sync_mode": ("BOOLEAN", {"default": False}),
+            "image_way": (["base64", "image_url"], {"default": "base64"}),
+            "poll_interval": ("INT", {"default": 6, "min": 1, "max": 60, "step": 1}),
+            "max_poll_attempts": ("INT", {"default": 600, "min": 10, "max": 3600, "step": 10, "tooltip": "Default 600*6s = 3600s timeout."}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }}
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("images", "response", "image_urls")
+    FUNCTION = "process"
+    CATEGORY = "zhenzhen/FAL"
+
+    def _image_size_payload(self, image_size, width, height):
+        if image_size == "custom":
+            return {"width": int(width), "height": int(height)}
+        if image_size == "auto":
+            return None
+        return image_size
+
+    def process(self, prompt, mode="text_to_image", image=None, image_url="", api_key="",
+                negative_prompt="", image_size="square_hd", custom_width=1024,
+                custom_height=1024, num_inference_steps=30, guidance_scale=4.0,
+                image_guidance_scale=1.0, cfg_range_start=0.0, cfg_range_end=1.0,
+                num_images=1, seed=0, enable_safety_checker=True, output_format="jpeg",
+                sync_mode=False, image_way="base64", poll_interval=6,
+                max_poll_attempts=600, skip_error=False):
+        self.set_api_key(api_key)
+        default_image = image if image is not None else self.blank_image()
+        try:
+            if not self.api_key:
+                raise RuntimeError("API key not provided. Please set your API key.")
+            endpoint = "fal-ai/boogu-image"
+            payload = {
+                "prompt": prompt,
+                "negative_prompt": str(negative_prompt or ""),
+                "num_inference_steps": int(num_inference_steps),
+                "guidance_scale": float(guidance_scale),
+                "cfg_range_start": float(cfg_range_start),
+                "cfg_range_end": float(cfg_range_end),
+                "num_images": int(num_images),
+                "enable_safety_checker": bool(enable_safety_checker),
+                "output_format": output_format,
+                "sync_mode": bool(sync_mode),
+            }
+            size_value = self._image_size_payload(image_size, custom_width, custom_height)
+            if size_value is not None:
+                payload["image_size"] = size_value
+            seed_value = self.seed_payload_value(seed)
+            if seed_value is not None:
+                payload["seed"] = seed_value
+
+            if mode == "edit":
+                prepared_image = self.prepare_image(image, image_url, image_way)
+                if not prepared_image:
+                    raise RuntimeError("Boogu edit mode requires image input or image_url.")
+                endpoint = "fal-ai/boogu-image/edit"
+                payload["image_url"] = prepared_image
+                payload["image_guidance_scale"] = float(image_guidance_scale)
+
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            result = self.submit_and_poll(endpoint, payload, ["images"], pbar, poll_interval, max_poll_attempts)
+            urls = self.extract_image_urls(result)
+            images = self.download_images(urls)
+            pbar.update_absolute(100)
+            return (images, self.info(result), "\n".join(urls))
+        except Exception as e:
+            error_message = f"Error: {str(e)}"
+            self._log(error_message)
+            if not skip_error:
+                raise
+            return (default_image, error_message, "")
+
+
 def _run_image_node(node, endpoint, prompt, api_key, skip_error, extra_payload, poll_interval, max_poll_attempts):
     node.set_api_key(api_key)
     default_image = node.blank_image()

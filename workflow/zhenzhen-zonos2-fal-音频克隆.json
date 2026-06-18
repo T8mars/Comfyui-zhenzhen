@@ -1,0 +1,343 @@
+{
+  "id": "cc3b035d-f65e-4f2e-bc54-2e66e87a5536",
+  "revision": 0,
+  "last_node_id": 12,
+  "last_link_id": 16,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "easy showAnything",
+      "pos": [
+        2072.9083165601683,
+        4468.456582710294
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 4,
+      "type": "easy showAnything",
+      "pos": [
+        2103.9389519275187,
+        4592.292091996021
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 5,
+      "type": "Comfly_api_set",
+      "pos": [
+        959.8989492381187,
+        4313.388535914513
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "036878d344c718796b0291af2d6b9f8d89b305c5",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 11,
+      "type": "LoadAudio",
+      "pos": [
+        961.081595939333,
+        4101.647931245199
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "0.6.mp4",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 12,
+      "type": "SaveAudio",
+      "pos": [
+        1786.0553794104785,
+        4314.906460305767
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 14
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        882.0003204103435,
+        4549.996816708187
+      ],
+      "size": [
+        291.0015775643144,
+        91.36186610951154
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型预扣3.4，生成完毕后多退少补，万一节点没有生成，实际成功了，可以去网站的异步任务，TASKID里面找到下载地址直接下载"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 10,
+      "type": "Comfly_zonos2_fal",
+      "pos": [
+        1290.8034757759845,
+        4464.929839869461
+      ],
+      "size": [
+        400,
+        512
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 13
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            14
+          ]
+        },
+        {
+          "name": "audio_url",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "036878d344c718796b0291af2d6b9f8d89b305c5",
+        "Node name for S&R": "Comfly_zonos2_fal"
+      },
+      "widgets_values": [
+        "\"Fal\" is the fastest solution for your audio generation.",
+        "",
+        "",
+        "en_us",
+        true,
+        false,
+        1.15,
+        0,
+        0.18,
+        106,
+        0,
+        0,
+        "randomize",
+        "upload",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      12,
+      5,
+      0,
+      10,
+      1,
+      "STRING"
+    ],
+    [
+      13,
+      11,
+      0,
+      10,
+      0,
+      "AUDIO"
+    ],
+    [
+      14,
+      10,
+      0,
+      12,
+      0,
+      "AUDIO"
+    ],
+    [
+      15,
+      10,
+      1,
+      3,
+      0,
+      "STRING"
+    ],
+    [
+      16,
+      10,
+      2,
+      4,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.176037371657804,
+      "offset": [
+        -429.8384441002868,
+        -3874.4304070067324
+      ]
+    },
+    "frontendVersion": "1.45.15",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

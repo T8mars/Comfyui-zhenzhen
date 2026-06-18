@@ -1,0 +1,353 @@
+{
+  "id": "cc3b035d-f65e-4f2e-bc54-2e66e87a5536",
+  "revision": 0,
+  "last_node_id": 15,
+  "last_link_id": 23,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "easy showAnything",
+      "pos": [
+        2072.9083165601683,
+        4468.456582710294
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 4,
+      "type": "easy showAnything",
+      "pos": [
+        2103.9389519275187,
+        4592.292091996021
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "SaveImage",
+      "pos": [
+        1784.3872351428909,
+        4116.76964457556
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "LoadImage",
+      "pos": [
+        909.3300092408545,
+        4090.409938032986
+      ],
+      "size": [
+        270,
+        314.00000000000045
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Comfly_api_set",
+      "pos": [
+        912.2814148386291,
+        4730.892275024317
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "036878d344c718796b0291af2d6b9f8d89b305c5",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        882.0003204103435,
+        4549.996816708187
+      ],
+      "size": [
+        291.0015775643144,
+        91.36186610951154
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "fal模型预扣3.4，生成完毕后多退少补，万一节点没有生成，实际成功了，可以去网站的异步任务，TASKID里面找到下载地址直接下载，ai.t8star.org"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 13,
+      "type": "Comfly_boogu_image_fal",
+      "pos": [
+        1404.1208549162534,
+        4196.4953199462425
+      ],
+      "size": [
+        400,
+        686
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 22
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            19
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            20
+          ]
+        },
+        {
+          "name": "image_urls",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "036878d344c718796b0291af2d6b9f8d89b305c5",
+        "Node name for S&R": "Comfly_boogu_image_fal"
+      },
+      "widgets_values": [
+        "",
+        "text_to_image",
+        "",
+        "",
+        "",
+        "square_hd",
+        1024,
+        1024,
+        30,
+        4,
+        1,
+        0,
+        1,
+        1,
+        0,
+        "randomize",
+        true,
+        "jpeg",
+        false,
+        "base64",
+        6,
+        600,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      19,
+      13,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      13,
+      1,
+      3,
+      0,
+      "STRING"
+    ],
+    [
+      21,
+      13,
+      2,
+      4,
+      0,
+      "STRING"
+    ],
+    [
+      22,
+      15,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      23,
+      5,
+      0,
+      13,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.4230052197059433,
+      "offset": [
+        -742.6904237240834,
+        -3983.2789184914664
+      ]
+    },
+    "frontendVersion": "1.45.15",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
