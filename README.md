@@ -67,9 +67,9 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 ### 20260624-1
 
-新增支持seedance2.0的mini模型，720P价格是满血版的一半左右，按照TOKEN
-新增seedance2.0的原生4K模式，电影级质感，不排队
-对应工作流已更新
+新增支持seedance2.0的mini模型，720P价格是满血版的一半左右，按照TOKEN  
+新增seedance2.0的原生4K模式，电影级质感，不排队  
+对应工作流已更新  
 
 ### 20260619-1
 
