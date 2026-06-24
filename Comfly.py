@@ -20829,10 +20829,10 @@ class Comfly_Doubao_Seedance2_0:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128"], {"default": "doubao-seedance-2-0-260128"}),
+                "model": (["doubao-seedance-2-0-260128", "doubao-seedance-2-0-fast-260128","doubao-seedance-2.0-mini"], {"default": "doubao-seedance-2-0-260128"}),
                 "duration": ("INT", {"default": 5, "min": 4, "max": 15, "step": 1}),
                 "ratio": (["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "9:21", "adaptive"], {"default": "16:9"}),
-                "resolution": (["720p", "480p", "native1080p", "1080p", "2k", "4k"], {"default": "720p"}),
+                "resolution": (["720p", "480p", "native1080p", "1080p", "2k", "4k","native4K"], {"default": "720p"}),
             },
             "optional": {
                 "apikey": ("STRING", {"default": ""}),

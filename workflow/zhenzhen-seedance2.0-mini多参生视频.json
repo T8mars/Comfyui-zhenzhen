@@ -1,0 +1,487 @@
+{
+  "id": "f499efdf-62c3-4e1e-9703-1b76057ba7e9",
+  "revision": 0,
+  "last_node_id": 79,
+  "last_link_id": 94,
+  "nodes": [
+    {
+      "id": 73,
+      "type": "LoadImage",
+      "pos": [
+        1888.2678337848815,
+        619.8148387708796
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            89
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 77,
+      "type": "easy showAnything",
+      "pos": [
+        3168.4381245623376,
+        779.5481946643545
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 94
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260624/1ec9cacd-2abe-4e3e-8092-b9bc207856dc.mp4"
+      ]
+    },
+    {
+      "id": 79,
+      "type": "Comfly_Doubao_Seedance2_0",
+      "pos": [
+        2294.3089715335154,
+        579.9828558310376
+      ],
+      "size": [
+        400,
+        750
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "first_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 89
+        },
+        {
+          "name": "last_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video1",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video2",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video3",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio1",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio2",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio3",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 90
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            91
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            92
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            93
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            94
+          ]
+        },
+        {
+          "name": "last_frame_image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_Doubao_Seedance2_0"
+      },
+      "widgets_values": [
+        "女人拿着包",
+        "doubao-seedance-2.0-mini",
+        4,
+        "16:9",
+        "480p",
+        "",
+        true,
+        false,
+        false,
+        false,
+        149424807,
+        "randomize",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 74,
+      "type": "SaveVideo",
+      "pos": [
+        2834.37351148946,
+        469.99147039688654
+      ],
+      "size": [
+        270,
+        249.875
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 91
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 75,
+      "type": "easy showAnything",
+      "pos": [
+        2832.0669750506922,
+        820.1116807650308
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 92
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "2069684818421358593"
+      ]
+    },
+    {
+      "id": 76,
+      "type": "easy showAnything",
+      "pos": [
+        2795.5192665608347,
+        1010.4610421474499
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\n  \"task_id\": \"2069684818421358593\",\n  \"model\": \"doubao-seedance-2.0-mini\",\n  \"status\": \"succeeded\",\n  \"video_url\": \"https://webstatic.aiproxy.vip/output/20260624/1ec9cacd-2abe-4e3e-8092-b9bc207856dc.mp4\",\n  \"duration\": 4,\n  \"ratio\": \"16:9\",\n  \"resolution\": \"480p\",\n  \"generate_audio\": true,\n  \"return_last_frame\": false,\n  \"seed\": 1594121005,\n  \"first_frame\": true,\n  \"last_frame_input\": false,\n  \"reference_images\": 0,\n  \"reference_videos\": 0,\n  \"reference_audios\": 0,\n  \"usage\": {\n    \"completion_tokens\": 0,\n    \"input_tokens\": 0,\n    \"output_tokens\": 0,\n    \"prompt_tokens\": 0,\n    \"total_tokens\": 0\n  },\n  \"actual_duration\": \"1.008000\"\n}"
+      ]
+    },
+    {
+      "id": 78,
+      "type": "Comfly_api_set",
+      "pos": [
+        1916.9338195422652,
+        1098.032996594208
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            90
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      89,
+      73,
+      0,
+      79,
+      0,
+      "IMAGE"
+    ],
+    [
+      90,
+      78,
+      0,
+      79,
+      17,
+      "STRING"
+    ],
+    [
+      91,
+      79,
+      0,
+      74,
+      0,
+      "VIDEO"
+    ],
+    [
+      92,
+      79,
+      1,
+      75,
+      0,
+      "STRING"
+    ],
+    [
+      93,
+      79,
+      2,
+      76,
+      0,
+      "STRING"
+    ],
+    [
+      94,
+      79,
+      3,
+      77,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.1000000000000005,
+      "offset": [
+        -1454.2978418231344,
+        -360.29454675054535
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
