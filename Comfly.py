@@ -13043,7 +13043,7 @@ class Comfly_nano_banana2_edit:
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
                 "model": (["nano-banana-2", "nano-banana-pro","nano-banana-pro-2k", "nano-banana-pro-4k"], {"default": "nano-banana-pro"}),
-                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "auto"}),
+                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9", "9:21"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
             "optional": {
@@ -13281,7 +13281,7 @@ class Comfly_nano_banana_edit:
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
                 "model": (["nano-banana", "nano-banana-hd"], {"default": "nano-banana"}),
-                "aspect_ratio": (["16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "1:1"}),
+                "aspect_ratio": (["16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9", "9:21"], {"default": "1:1"}),
             },
             "optional": {
                 "image1": ("IMAGE",),
@@ -13481,7 +13481,7 @@ class Comfly_nano_banana2_edit:
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
                 "model": (["nano-banana-2","nano-banana-pro", "nano-banana-pro-2k", "nano-banana-pro-4k"], {"default": "nano-banana-pro"}),
-                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9"], {"default": "auto"}),
+                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9", "9:21"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
             "optional": {
@@ -20218,7 +20218,7 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
                 "model": (["gemini-3.1-flash-image"], {"default": "gemini-3.1-flash-image"}),
-                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9", "1:4", "4:1", "1:8", "8:1"], {"default": "auto"}),
+                "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9","9:21", "1:4", "4:1", "1:8", "8:1"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
             "optional": {
