@@ -65,6 +65,25 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260625-1
+
+谷歌香蕉模型从preview模型升级为正式版
+
+模型名字需要修改，如之前是 gemini-3-pro-image-preview ，需要改为 gemini-3-pro-image，请求的模型名字之前带preview 的都去掉preview
+
+以下是新名字
+
+gemini-3-pro-image  
+gemini-3-pro-image-2k  
+gemini-3-pro-image-4k
+
+gemini-3.1-flash-image  
+gemini-3.1-flash-image-512px  
+gemini-3.1-flash-image-2k  
+gemini-3.1-flash-image-4k
+
+特殊的nano-banana-pro模型不需要修改
+
 ### 20260624-1
 
 新增支持seedance2.0的mini模型，720P价格是满血版的一半左右，按照TOKEN  
