@@ -1,0 +1,459 @@
+{
+  "id": "8aa7444a-5e91-42e4-a8b0-d4c0e210a63a",
+  "revision": 0,
+  "last_node_id": 80,
+  "last_link_id": 94,
+  "nodes": [
+    {
+      "id": 74,
+      "type": "LoadImage",
+      "pos": [
+        -412.7983085181812,
+        443.25726940000027
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            89
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "0 (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 75,
+      "type": "SaveImage",
+      "pos": [
+        437.9092934215769,
+        476.2802869534462
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 91
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 76,
+      "type": "easy showAnything",
+      "pos": [
+        397.96188545764005,
+        623.5659914818256
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 92
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "https://webstatic.aiproxy.vip/output/20260702/9208/40b5c143-6075-4a41-ac4b-bf233fa2177e.jpg"
+      ]
+    },
+    {
+      "id": 77,
+      "type": "easy showAnything",
+      "pos": [
+        401.59585854691,
+        731.0180097865863
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "e91be17535764533b1e754ec7247bafd"
+      ]
+    },
+    {
+      "id": 78,
+      "type": "easy showAnything",
+      "pos": [
+        439.3805044044334,
+        834.3719473591565
+      ],
+      "size": [
+        140,
+        76
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 94
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "{\"status\": \"success\", \"task_id\": \"e91be17535764533b1e754ec7247bafd\", \"model\": \"gemini-3.1-flash-lite-image\", \"mode\": \"img2img\", \"prompt\": \"\\u7535\\u5546\\u6d77\\u62a5\\uff0c\\u6697\\u8c03\\u6444\\u5f71\", \"aspect_ratio\": \"auto\", \"image_size\": null, \"seed\": null, \"images_count\": 1, \"image_url\": \"https://webstatic.aiproxy.vip/output/20260702/9208/40b5c143-6075-4a41-ac4b-bf233fa2177e.jpg\", \"all_urls\": [\"https://webstatic.aiproxy.vip/output/20260702/9208/40b5c143-6075-4a41-ac4b-bf233fa2177e.jpg\"]}"
+      ]
+    },
+    {
+      "id": 80,
+      "type": "Comfly_gemini_3_1_flash_image_edit_S2A",
+      "pos": [
+        -108.25285397272668,
+        431.43908758181834
+      ],
+      "size": [
+        400,
+        588
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 89
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image11",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image12",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image13",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image14",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "apikey",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "apikey"
+          },
+          "link": 90
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            91
+          ]
+        },
+        {
+          "name": "image_url",
+          "type": "STRING",
+          "links": [
+            92
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            93
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            94
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_gemini_3_1_flash_image_edit_S2A"
+      },
+      "widgets_values": [
+        "电商海报，暗调摄影",
+        "img2img",
+        "gemini-3.1-flash-lite-image",
+        "auto",
+        "1K",
+        "",
+        "",
+        "url",
+        1777395624,
+        "randomize",
+        false
+      ]
+    },
+    {
+      "id": 79,
+      "type": "Comfly_api_set",
+      "pos": [
+        -415.6208616224773,
+        811.3946917072197
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            90
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "unknown",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      89,
+      74,
+      0,
+      80,
+      0,
+      "IMAGE"
+    ],
+    [
+      90,
+      79,
+      0,
+      80,
+      14,
+      "STRING"
+    ],
+    [
+      91,
+      80,
+      0,
+      75,
+      0,
+      "IMAGE"
+    ],
+    [
+      92,
+      80,
+      1,
+      76,
+      0,
+      "STRING"
+    ],
+    [
+      93,
+      80,
+      2,
+      77,
+      0,
+      "STRING"
+    ],
+    [
+      94,
+      80,
+      3,
+      78,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.6105100000000012,
+      "offset": [
+        535.3217722882688,
+        -385.5519970441514
+      ]
+    },
+    "frontendVersion": "1.45.20",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
