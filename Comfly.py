@@ -20217,7 +20217,7 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
                 "mode": (["text2img", "img2img"], {"default": "text2img"}),
-                "model": (["gemini-3.1-flash-image"], {"default": "gemini-3.1-flash-image"}),
+                "model": (["gemini-3.1-flash-image,gemini-3.1-flash-lite-image"], {"default": "gemini-3.1-flash-image"}),
                 "aspect_ratio": (["auto", "16:9", "4:3", "4:5", "3:2", "1:1", "2:3", "3:4", "5:4", "9:16", "21:9","9:21", "1:4", "4:1", "1:8", "8:1"], {"default": "auto"}),
                 "image_size": (["1K", "2K", "4K"], {"default": "2K"}),
             },
