@@ -9344,6 +9344,27 @@ class Comfly_veo_omini:
             return explicit_url
         return ""
 
+    def _submit_json_task(self, data):
+        response = requests.post(
+            f"{baseurl.rstrip('/')}/v1/videos",
+            headers=self._headers(),
+            json=data,
+            timeout=self.timeout
+        )
+        result = self._decode_response(response)
+        if response.status_code != 200:
+            message = self._extract_error_message(result) or response.text
+            raise RuntimeError(f"API Error: {response.status_code} - {message}")
+
+        error_message = self._extract_error_message(result)
+        if error_message:
+            raise RuntimeError(f"API Error: {error_message}")
+
+        task_id = result.get("task_id") or result.get("id")
+        if not task_id:
+            raise RuntimeError(f"No task_id in API response: {json.dumps(result, ensure_ascii=False)}")
+        return str(task_id), result
+
     def _submit_task(self, prompt, mode, image, image_url, video, video_url, video_way, model, size, seconds, watermark):
         data = {
             "model": model,
@@ -9356,10 +9377,32 @@ class Comfly_veo_omini:
         files = []
         mode = str(mode or "img2video").strip().lower()
         if mode == "video_edit":
-            reference_url = self._prepare_video_reference_url(video, video_url, video_way)
-            if not reference_url:
+            explicit_url = str(video_url or "").strip()
+            direct_url = self._direct_video_url(video)
+            file_bytes = b""
+            filename = ""
+            if video_way != "video_url":
+                file_bytes, filename = _doubao_seedance_video_input_to_bytes(video)
+
+            if video_way == "video_url" and explicit_url:
+                json_data = dict(data)
+                json_data["images"] = [explicit_url]
+                return self._submit_json_task(json_data)
+            elif direct_url:
+                json_data = dict(data)
+                json_data["images"] = [direct_url]
+                return self._submit_json_task(json_data)
+            elif file_bytes:
+                if not filename:
+                    filename = f"reference_video_{abs(hash(file_bytes)) % 10**10}.mp4"
+                content_type = mimetypes.guess_type(filename)[0] or "video/mp4"
+                files.append(("input_reference", (filename, BytesIO(file_bytes), content_type)))
+            elif explicit_url:
+                json_data = dict(data)
+                json_data["images"] = [explicit_url]
+                return self._submit_json_task(json_data)
+            else:
                 raise RuntimeError("video_edit mode requires a video input or video_url.")
-            files.append(("input_reference", (None, reference_url)))
         else:
             if image is not None:
                 pil_image = tensor2pil(image)[0]
@@ -24646,6 +24689,264 @@ class Comfly_seedream_v5_fal:
             return (default_image, "", error_message)
 
 
+class Comfly_seedream_v5_pro:
+    """Seedream V5 Pro via OpenAI Dall-e compatible /v1/images/generations."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "model": ("STRING", {"default": "seedream-v5-pro"}),
+                "size": (["1024x1024", "1536x1024", "1024x1536", "2048x2048", "4096x4096", "custom"], {"default": "2048x2048"}),
+                "response_format": (["url", "b64_json"], {"default": "url"}),
+                "output_format": (["png", "jpeg"], {"default": "png"}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "image3": ("IMAGE",),
+                "image4": ("IMAGE",),
+                "image5": ("IMAGE",),
+                "image6": ("IMAGE",),
+                "image7": ("IMAGE",),
+                "image8": ("IMAGE",),
+                "image9": ("IMAGE",),
+                "image10": ("IMAGE",),
+                "image_urls": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional reference image URLs, one per line or comma-separated."}),
+                "custom_size": ("STRING", {"default": "2048x2048", "tooltip": "Used when size is custom, e.g. 2048x1536."}),
+                "apikey": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、返回空白图；关闭时（默认）失败直接抛出错误。"})
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "response", "image_url")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Doubao"
+
+    def __init__(self):
+        self.api_key = get_config().get('api_key', '')
+        self.timeout = 900
+
+    def get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    def _blank_result(self, message):
+        blank_image = Image.new('RGB', (1024, 1024), color='white')
+        return (pil2tensor(blank_image), json.dumps({"status": "error", "message": message}, ensure_ascii=False), "")
+
+    def _image_to_data_uri(self, image_tensor):
+        if image_tensor is None:
+            return None
+        pil_image = tensor2pil(image_tensor)[0]
+        buffered = BytesIO()
+        pil_image.save(buffered, format="PNG")
+        image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        return f"data:image/png;base64,{image_base64}"
+
+    def _collect_reference_images(self, image_urls="", *images):
+        refs = []
+        for img in images:
+            if img is None:
+                continue
+            batch_size = img.shape[0] if hasattr(img, "shape") and len(img.shape) > 0 else 1
+            for i in range(batch_size):
+                single_image = img[i:i+1] if batch_size > 1 else img
+                data_uri = self._image_to_data_uri(single_image)
+                if data_uri:
+                    refs.append(data_uri)
+
+        if image_urls and str(image_urls).strip():
+            for item in re.split(r"[\n,]+", str(image_urls)):
+                value = item.strip()
+                if value:
+                    refs.append(value)
+        return refs
+
+    def _extract_image_items(self, payload):
+        if payload is None:
+            return []
+        if isinstance(payload, list):
+            items = []
+            for item in payload:
+                items.extend(self._extract_image_items(item))
+            return items
+        if not isinstance(payload, dict):
+            return []
+
+        if isinstance(payload.get("data"), list):
+            return payload.get("data")
+        if isinstance(payload.get("images"), list):
+            return payload.get("images")
+        if isinstance(payload.get("output"), list):
+            return payload.get("output")
+        if isinstance(payload.get("result"), list):
+            return payload.get("result")
+        if isinstance(payload.get("data"), dict):
+            return self._extract_image_items(payload.get("data"))
+        if any(key in payload for key in ("url", "b64_json", "image_url")):
+            return [payload]
+        return []
+
+    def _decode_error_message(self, payload):
+        if isinstance(payload, dict):
+            for key in ("message", "error", "detail"):
+                value = payload.get(key)
+                if value:
+                    if isinstance(value, dict):
+                        return self._decode_error_message(value)
+                    return str(value)
+        if isinstance(payload, list):
+            return json.dumps(payload[:3], ensure_ascii=False)
+        return str(payload) if payload else ""
+
+    @staticmethod
+    def _decode_base64_image(b64_data):
+        if not isinstance(b64_data, str):
+            raise ValueError("b64_json must be a string")
+
+        encoded = b64_data.strip()
+        if encoded.lower().startswith("data:"):
+            header, separator, encoded = encoded.partition(",")
+            if not separator or ";base64" not in header.lower():
+                raise ValueError("Invalid base64 image data URI")
+
+        encoded = re.sub(r"\s+", "", encoded)
+        if not encoded:
+            raise ValueError("Empty b64_json image data")
+
+        encoded += "=" * (-len(encoded) % 4)
+        return base64.b64decode(encoded.encode("ascii"), altchars=b"-_", validate=True)
+
+    def _items_to_tensor(self, items):
+        generated_images = []
+        urls = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            image_url = item.get("url") or item.get("image_url")
+            b64_data = item.get("b64_json")
+            try:
+                image_stream = None
+                if image_url:
+                    urls.append(image_url)
+                    try:
+                        img_response = requests.get(image_url, timeout=self.timeout)
+                        img_response.raise_for_status()
+                        image_stream = BytesIO(img_response.content)
+                    except Exception as url_exc:
+                        if not b64_data:
+                            raise
+                        print(f"[seedream_v5_pro] URL download failed, using b64_json: {url_exc}")
+
+                if image_stream is None and b64_data:
+                    image_stream = BytesIO(self._decode_base64_image(b64_data))
+                if image_stream is None:
+                    continue
+
+                pil_image = Image.open(image_stream).convert("RGB")
+                generated_images.append(pil2tensor(pil_image))
+            except Exception as exc:
+                print(f"[seedream_v5_pro] Failed to process image item: {exc}")
+
+        if not generated_images:
+            return None, urls
+        return torch.cat(generated_images, dim=0), urls
+
+    def generate_image(self, prompt, model="seedream-v5-pro", size="2048x2048",
+                       response_format="url", output_format="png",
+                       image1=None, image2=None, image3=None, image4=None, image5=None,
+                       image6=None, image7=None, image8=None, image9=None, image10=None,
+                       image_urls="", custom_size="2048x2048", apikey="", skip_error=False):
+        if apikey.strip():
+            self.api_key = apikey.strip()
+            config = get_config()
+            config['api_key'] = self.api_key
+            save_config(config)
+
+        if not self.api_key:
+            message = "API key not found in Comflyapi.json"
+            if not skip_error:
+                raise RuntimeError(f"[seedream_v5_pro] {message}")
+            return self._blank_result(message)
+
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+
+            final_size = custom_size.strip() if size == "custom" else size
+            if not re.match(r"^\d+x\d+$", final_size):
+                raise ValueError(f"Invalid size format: {final_size}. Expected WIDTHxHEIGHT.")
+
+            refs = self._collect_reference_images(
+                image_urls,
+                image1, image2, image3, image4, image5,
+                image6, image7, image8, image9, image10
+            )
+
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "size": final_size,
+                "response_format": response_format,
+                "output_format": output_format,
+            }
+            if refs:
+                payload["image"] = refs
+
+            pbar.update_absolute(25)
+            response = requests.post(
+                f"{baseurl.rstrip('/')}/v1/images/generations",
+                headers=self.get_headers(),
+                json=payload,
+                timeout=self.timeout
+            )
+            result = response.json() if response.text else {}
+
+            if response.status_code != 200:
+                message = self._decode_error_message(result) or response.text
+                raise RuntimeError(f"API Error: {response.status_code} - {message}")
+
+            error_message = self._decode_error_message(result.get("error") if isinstance(result, dict) else None)
+            if error_message:
+                raise RuntimeError(f"API Error: {error_message}")
+
+            pbar.update_absolute(50)
+            items = self._extract_image_items(result)
+            output_tensor, urls = self._items_to_tensor(items)
+            if output_tensor is None:
+                raise RuntimeError(f"No image data in response: {json.dumps(result, ensure_ascii=False)[:500]}")
+
+            response_info = {
+                "status": "success",
+                "model": model,
+                "prompt": prompt,
+                "size": final_size,
+                "response_format": response_format,
+                "output_format": output_format,
+                "reference_images": len(refs),
+                "images_count": int(output_tensor.shape[0]),
+                "urls": urls,
+                "raw_response": result,
+            }
+
+            pbar.update_absolute(100)
+            return (output_tensor, json.dumps(response_info, ensure_ascii=False), urls[0] if urls else "")
+
+        except Exception as exc:
+            message = f"Error generating image: {exc}"
+            print(f"[seedream_v5_pro] {message}")
+            import traceback
+            traceback.print_exc()
+            if not skip_error:
+                raise
+            return self._blank_result(message)
+
+
 
 class Comfly_gpt_image_2_official_ratio_stable:
     """GPT-Image-2 official ratio stable: simplified ratio choices matching RhartImageG2ImageToImage style."""
@@ -25334,6 +25635,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_sora2_fal": Comfly_sora2_fal,
     "Comfly_gpt_image_2_official_ratio_stable":Comfly_gpt_image_2_official_ratio_stable,
     "Comfly_seedream_v5_fal": Comfly_seedream_v5_fal,
+    "Comfly_seedream_v5_pro": Comfly_seedream_v5_pro,
     "Comfly_ideogram_v4_fal": Comfly_ideogram_v4_fal,
     "Comfly_mai_image_2_5_fal": Comfly_mai_image_2_5_fal,
     "Comfly_cosmos_3_super_fal": Comfly_cosmos_3_super_fal,
@@ -25459,6 +25761,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_sora2_fal": "zhenzhen-sora2-fal",
     "Comfly_gpt_image_2_official_ratio_stable":"zhenzhen-gpt-image-2-official_ratio_stable",
     "Comfly_seedream_v5_fal": "Zhenzhen Seedream V5 Lite Edit Fal",
+    "Comfly_seedream_v5_pro": "zhenzhen-seedream-v5-pro",
     "Comfly_ideogram_v4_fal": "zhenzhen-ideogram-v4-fal",
     "Comfly_mai_image_2_5_fal": "zhenzhen-mai-image-2.5-fal",
     "Comfly_cosmos_3_super_fal": "zhenzhen-cosmos-3-super-fal",

@@ -65,6 +65,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260710-1
+
+更新模型seedream-v5-pro，新增节点：zhenzhen-seedream-v5-pro  
+新增对应的文生图和图像编辑工作流  
+即将发布新网站，贞贞的sd2，平价官方渠道包含seedance2/seedance2.5等，是贞贞的AI工坊的国内站，只有国内模型，价格约为目前的7.5-8折，仅保留基本维护费用，非营利性站点，仅方便大家学习使用，预计在2天内上线，我还在做最后完善  
+
 ### 20260702-1
 
 更新模型gemini-3.1-flash-lite-image，配套节点也更新了，只能1K，谷歌官方定的
