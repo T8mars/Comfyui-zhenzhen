@@ -74,6 +74,11 @@ from .fal_batch_nodes import (
     Comfly_zonos2_fal,
     Comfly_boogu_image_fal,
 )
+from .seedance_low_price_nodes import (
+    Comfly_seedance2_low_price_settings,
+    Comfly_seedance2_low_price,
+    Comfly_sd2_seedream_v5_pro_lowprice,
+)
 
 # For LLM API functionality
 try:
@@ -261,7 +266,7 @@ class Comfly_api_set:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "api_base": (["zhenzhen", "ip"], {"default": "zhenzhen"}),
+                "api_base": (["zhenzhen", "seedance_low_price", "ip"], {"default": "zhenzhen"}),
                 "apikey": ("STRING", {"default": ""}),
             },
             "optional": {
@@ -280,14 +285,17 @@ class Comfly_api_set:
         
         base_url_mapping = {
             "zhenzhen": "https://ai.t8star.org",
+            "seedance_low_price": "https://api.seedance.nz",
             "ip": custom_ip
         }
         
         if api_base == "ip" and not custom_ip.strip():
             raise ValueError("When selecting 'ip' option, you must provide a custom IP address in the 'custom_ip' field")
         
-        if api_base in base_url_mapping:
-            baseurl = base_url_mapping[api_base]
+        if api_base not in base_url_mapping:
+            raise ValueError(f"Unsupported API service: {api_base}")
+
+        baseurl = base_url_mapping[api_base]
             
         if apikey.strip():
             config = get_config()
@@ -25551,6 +25559,9 @@ class Comfly_gpt_image_2_official_ratio_stable:
 
 NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
+    "Comfly_seedance2_low_price_settings": Comfly_seedance2_low_price_settings,
+    "Comfly_seedance2_low_price": Comfly_seedance2_low_price,
+    "Comfly_sd2_seedream_v5_pro_lowprice": Comfly_sd2_seedream_v5_pro_lowprice,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
     "OpenAI_Sora_API": OpenAISoraAPI,
     "Comfly_Mj": Comfly_Mj,
@@ -25677,6 +25688,9 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_api_set": "Zhenzhen API Settings",
+    "Comfly_seedance2_low_price_settings": "zhenzhen-seedance2-low-price-api-settings",
+    "Comfly_seedance2_low_price": "zhenzhen-seedance2-low-price",
+    "Comfly_sd2_seedream_v5_pro_lowprice": "zhenzhen-sd2-seedream-v5-pro-lowprice",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
     "Comfly_Mj": "Zhenzhen_Mj", 

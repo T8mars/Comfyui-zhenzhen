@@ -71,6 +71,18 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260712-1
+
+贞贞的平价AI小屋（国内版）：https://api.seedance.nz/sign-up?aff=5f4w
+支持新网站的seedance2.0(75折，支持宽审核)
+支持seedream v5 pro(75折)
+新增节点：zhenzhen-sd2-seedream-v5-pro-lowprice
+新增节点：zhenzhen-seedance2-low-price
+新增节点：zhenzhen-seedance2-low-price-api-settings
+新增对应3个工作流
+ZHENZHEN API SETTING节点新增贞贞的平价AI小屋的Baseurl
+所有节点增加对应的APIKEY获取方式
+
 ### 20260710-1
 
 更新模型seedream-v5-pro，新增节点：zhenzhen-seedream-v5-pro  
