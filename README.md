@@ -1,8 +1,14 @@
-# 网站：[https://ai.t8star.org](https://ai.t8star.org/register?aff=cbff0534884)
-# Online workflow overseas：
-https://www.runninghub.ai/?inviteCode=rh-v1121  
-# 在线工作流国内版：  
-https://www.runninghub.cn/?inviteCode=rh-v1121  
+# ComfyUI_zhenzhen
+
+## 入口导航
+
+| 入口 | 适合用户 | 说明 | 打开 |
+| --- | --- | --- | --- |
+| 贞贞的平价AI小铺（国内版） | 国内用户、国内模型优先 | 主要调用国内模型，非盈利站点，仅保留 5-10% 网站维护费用；国内模型价格约为海外版的 7.5-8 折。 | <a href="https://api.seedance.nz/sign-up?aff=5f4w"><kbd>进入国内版平价AI小铺</kbd></a> |
+| 贞贞的AI工坊（海外版） | 海外用户、海外模型优先 | 主要调用海外模型，也包含国内模型；整体成本更高，国内模型价格没有国内版优势。 | <a href="https://ai.t8star.org/register?aff=dP7j"><kbd>进入海外版AI工坊</kbd></a> |
+| RunningHub APIKEY（国内版） | 需要适配更多 AI 应用的国内用户 | 适配更多 AI 应用，并可体验最新模型。 | <a href="https://www.runninghub.cn/user-center/1819214514410942465/webapp?inviteCode=rh-v1121"><kbd>获取国内版 APIKEY</kbd></a> |
+| RunningHub APIKEY（海外版） | 海外模型、更宽松审核场景 | 审核更宽松，支持海外模型。 | <a href="https://www.runninghub.ai/user-center/1907375370302308353/webapp?inviteCode=rh-v1121"><kbd>获取海外版 APIKEY</kbd></a> |
+
 # 👋🏻 Welcome to Zhenzhen
 
 <img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/1.png" width="30%" alt="My favorite girl">
