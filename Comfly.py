@@ -78,6 +78,8 @@ from .seedance_low_price_nodes import (
     Comfly_seedance2_low_price_settings,
     Comfly_seedance2_low_price,
     Comfly_sd2_seedream_v5_pro_lowprice,
+    Comfly_happyhorse_1_1_lowprice,
+    Comfly_doubao_seed_audio_1_0_lowprice,
 )
 
 # For LLM API functionality
@@ -311,7 +313,7 @@ class Comfly_api_set:
         message = f"API Base URL set to: {baseurl}"
         if apikey.strip():
             message += "\nAPI key has been updated"
-            
+
         print(message)
         return (apikey, api_config)
 
@@ -25568,6 +25570,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_seedance2_low_price_settings": Comfly_seedance2_low_price_settings,
     "Comfly_seedance2_low_price": Comfly_seedance2_low_price,
     "Comfly_sd2_seedream_v5_pro_lowprice": Comfly_sd2_seedream_v5_pro_lowprice,
+    "Comfly_happyhorse_1_1_lowprice": Comfly_happyhorse_1_1_lowprice,
+    "Comfly_doubao_seed_audio_1_0_lowprice": Comfly_doubao_seed_audio_1_0_lowprice,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
     "OpenAI_Sora_API": OpenAISoraAPI,
     "Comfly_Mj": Comfly_Mj,
@@ -25697,6 +25701,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_seedance2_low_price_settings": "zhenzhen-seedance2-low-price-api-settings",
     "Comfly_seedance2_low_price": "zhenzhen-seedance2-low-price",
     "Comfly_sd2_seedream_v5_pro_lowprice": "zhenzhen-sd2-seedream-v5-pro-lowprice",
+    "Comfly_happyhorse_1_1_lowprice": "zhenzhen-happyhorse-1.1-lowprice",
+    "Comfly_doubao_seed_audio_1_0_lowprice": "zhenzhen-doubao-seed-audio-1.0-lowprice",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
     "Comfly_Mj": "Zhenzhen_Mj", 

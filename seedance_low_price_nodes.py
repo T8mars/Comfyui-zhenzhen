@@ -35,6 +35,9 @@ except ImportError:
 
 DEFAULT_BASE_URL = "https://api.seedance.nz"
 CONFIG_TYPE = "ZHENZHEN_SEEDANCE2_CONFIG"
+BUNDLED_ROOT_YR_CERT = (
+    Path(__file__).resolve().parent / "certs" / "root-yr-by-x1.pem"
+)
 PROMPT_MAX_LENGTH = 20480
 IMAGE_MAX_BYTES = 30 * 1024 * 1024
 MEDIA_MAX_BYTES = 50 * 1024 * 1024
@@ -192,7 +195,7 @@ class Comfly_seedance2_low_price_settings:
         return ({"base_url": normalized_base, "api_key": normalized_key},)
 
 
-class _TruststoreAdapter(requests.adapters.HTTPAdapter):
+class _SSLContextAdapter(requests.adapters.HTTPAdapter):
     def __init__(self, context: ssl.SSLContext):
         self._context = context
         super().__init__()
@@ -214,21 +217,19 @@ def _get_session() -> requests.Session:
     if _SESSION is not None:
         return _SESSION
 
-    session = requests.Session()
-    verify_value = os.environ.get("SEEDANCE_SSL_VERIFY", "1").strip().lower()
-    if verify_value in ("0", "false", "no"):
-        session.verify = False
-        print("[Seedance Low Price] WARNING: SSL verification is disabled")
-    else:
-        try:
-            import truststore
+    if not BUNDLED_ROOT_YR_CERT.is_file():
+        raise RuntimeError(
+            f"Bundled TLS certificate is missing: {BUNDLED_ROOT_YR_CERT.name}"
+        )
 
-            context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            session.mount("https://", _TruststoreAdapter(context))
-        except ImportError:
-            pass
-        except Exception as exc:
-            print(f"[Seedance Low Price] truststore unavailable, using requests CA: {exc}")
+    context = ssl.create_default_context(cafile=requests.certs.where())
+    context.load_verify_locations(cafile=str(BUNDLED_ROOT_YR_CERT))
+
+    session = requests.Session()
+    session.mount(
+        f"{DEFAULT_BASE_URL}/",
+        _SSLContextAdapter(context),
+    )
     _SESSION = session
     return session
 
@@ -1333,8 +1334,865 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
             return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
 
 
+HAPPYHORSE_MODES = ["text_to_video", "image_to_video", "reference_to_video"]
+HAPPYHORSE_MODELS = {
+    "text_to_video": "happyhorse-1.1-t2v",
+    "image_to_video": "happyhorse-1.1-i2v",
+    "reference_to_video": "happyhorse-1.1-r2v",
+}
+HAPPYHORSE_MODE_BY_MODEL = {
+    model: mode for mode, model in HAPPYHORSE_MODELS.items()
+}
+HAPPYHORSE_SECONDS = [str(value) for value in range(3, 16)]
+HAPPYHORSE_RESOLUTIONS = ["720p", "1080p"]
+
+
+def validate_happyhorse_settings(
+    mode: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+) -> None:
+    if mode not in HAPPYHORSE_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported HappyHorse mode: {mode}")
+    if str(seconds) not in HAPPYHORSE_SECONDS:
+        raise SeedanceLowPriceError("HappyHorse seconds must be an integer from 3 to 15")
+    if resolution not in HAPPYHORSE_RESOLUTIONS:
+        raise SeedanceLowPriceError("HappyHorse resolution must be 720p or 1080p")
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported HappyHorse ratio: {ratio}")
+    text = str(prompt or "").strip()
+    if len(text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"HappyHorse prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if mode in ("text_to_video", "reference_to_video") and not text:
+        raise SeedanceLowPriceError(f"HappyHorse {mode} requires a prompt")
+
+
+def build_happyhorse_payload(
+    mode: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_happyhorse_settings(mode, prompt, seconds, resolution, ratio)
+    urls = list(image_urls or [])
+    if mode == "text_to_video" and urls:
+        raise SeedanceLowPriceError("HappyHorse text_to_video does not accept images")
+    if mode == "image_to_video" and len(urls) != 1:
+        raise SeedanceLowPriceError("HappyHorse image_to_video requires exactly one image")
+    if mode == "reference_to_video" and not 1 <= len(urls) <= 9:
+        raise SeedanceLowPriceError("HappyHorse reference_to_video requires 1-9 images")
+
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    if ratio != "adaptive" and mode != "image_to_video":
+        metadata["ratio"] = ratio
+    payload: Dict[str, Any] = {
+        "model": HAPPYHORSE_MODELS[mode],
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+    text = str(prompt or "").strip()
+    if text:
+        payload["prompt"] = text
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class Comfly_happyhorse_1_1_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
+        for index in range(1, 10):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    list(HAPPYHORSE_MODE_BY_MODEL),
+                    {"default": HAPPYHORSE_MODELS["text_to_video"]},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (HAPPYHORSE_SECONDS, {"default": "4"}),
+                "resolution": (HAPPYHORSE_RESOLUTIONS, {"default": "720p"}),
+                "ratio": (RATIOS, {"default": "adaptive"}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="4",
+        resolution="720p",
+        ratio="adaptive",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        mode = HAPPYHORSE_MODE_BY_MODEL.get(model)
+        if mode is None:
+            return f"Unsupported HappyHorse model: {model}"
+        try:
+            validate_happyhorse_settings(mode, prompt, seconds, resolution, ratio)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _connected_images(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        return [
+            (index, kwargs[f"image{index}"])
+            for index in range(1, 10)
+            if kwargs.get(f"image{index}") is not None
+        ]
+
+    def _upload_images(
+        self,
+        mode: str,
+        config: Dict[str, Any],
+        kwargs: Dict[str, Any],
+        on_progress: Optional[Callable[[int], None]] = None,
+    ) -> List[str]:
+        images = self._connected_images(kwargs)
+        if mode == "text_to_video":
+            if images:
+                raise SeedanceLowPriceError(
+                    "HappyHorse text_to_video does not accept connected images"
+                )
+            return []
+        if mode == "image_to_video" and len(images) != 1:
+            raise SeedanceLowPriceError(
+                "HappyHorse image_to_video requires exactly one connected image"
+            )
+        if mode == "reference_to_video" and not 1 <= len(images) <= 9:
+            raise SeedanceLowPriceError(
+                "HappyHorse reference_to_video requires 1-9 connected images"
+            )
+
+        urls = []
+        for position, (slot, image) in enumerate(images, start=1):
+            data = image_to_png_bytes(image)
+            urls.append(upload_media(data, f"image{slot}.png", "image/png", config))
+            if on_progress:
+                on_progress(int(position / len(images) * 20))
+        return urls
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        mode = HAPPYHORSE_MODE_BY_MODEL.get(model, "")
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            if not mode:
+                raise SeedanceLowPriceError(f"Unsupported HappyHorse model: {model}")
+            validate_happyhorse_settings(mode, prompt, seconds, resolution, ratio)
+            config = resolve_config(api_config)
+            image_urls = self._upload_images(
+                mode, config, kwargs, on_progress=update_progress
+            )
+            payload = build_happyhorse_payload(
+                mode, prompt, seconds, resolution, ratio, image_urls
+            )
+            update_progress(25)
+            print(f"[HappyHorse Low Price] Submitting model={model}, mode={mode}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id, config, on_progress=on_poll_progress
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "mode": mode,
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "mode": mode,
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+SEED_AUDIO_MODEL = "doubao-seed-audio-1.0"
+SEED_AUDIO_REFERENCE_MODES = [
+    "none",
+    "speaker",
+    "reference_audio",
+    "reference_image",
+]
+SEED_AUDIO_FORMATS = ["wav", "mp3", "ogg_opus"]
+SEED_AUDIO_SAMPLE_RATES = ["8000", "16000", "24000", "32000", "44100"]
+
+
+def _parse_http_urls(value: str, label: str) -> List[str]:
+    urls = []
+    for line in str(value or "").replace(",", "\n").splitlines():
+        url = line.strip()
+        if not url:
+            continue
+        parsed = urlsplit(url)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise SeedanceLowPriceError(f"{label} must contain http(s) direct URLs")
+        urls.append(url)
+    return urls
+
+
+def validate_seed_audio_settings(
+    reference_mode: str,
+    prompt: str,
+    speaker: str,
+    output_format: str,
+    sample_rate: str,
+    speech_rate: int,
+    loudness_rate: int,
+    pitch_rate: int,
+) -> None:
+    if reference_mode not in SEED_AUDIO_REFERENCE_MODES:
+        raise SeedanceLowPriceError(
+            f"Unsupported Seed Audio reference_mode: {reference_mode}"
+        )
+    prompt_length = len(str(prompt or "").strip())
+    if not 5 <= prompt_length <= 2048:
+        raise SeedanceLowPriceError("Seed Audio prompt length must be 5-2048 characters")
+    if output_format not in SEED_AUDIO_FORMATS:
+        raise SeedanceLowPriceError(
+            "Seed Audio output_format must be wav, mp3, or ogg_opus"
+        )
+    if str(sample_rate) not in SEED_AUDIO_SAMPLE_RATES:
+        raise SeedanceLowPriceError(f"Unsupported Seed Audio sample_rate: {sample_rate}")
+    if not -50 <= int(speech_rate) <= 100:
+        raise SeedanceLowPriceError("Seed Audio speech_rate must be -50 to 100")
+    if not -50 <= int(loudness_rate) <= 100:
+        raise SeedanceLowPriceError("Seed Audio loudness_rate must be -50 to 100")
+    if not -12 <= int(pitch_rate) <= 12:
+        raise SeedanceLowPriceError("Seed Audio pitch_rate must be -12 to 12")
+    if reference_mode == "speaker" and not str(speaker or "").strip():
+        raise SeedanceLowPriceError("Seed Audio speaker mode requires a speaker ID")
+
+
+def build_seed_audio_payload(
+    reference_mode: str,
+    prompt: str,
+    speaker: str,
+    output_format: str,
+    sample_rate: str,
+    speech_rate: int,
+    loudness_rate: int,
+    pitch_rate: int,
+    audio_urls: Optional[List[str]] = None,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_seed_audio_settings(
+        reference_mode,
+        prompt,
+        speaker,
+        output_format,
+        sample_rate,
+        speech_rate,
+        loudness_rate,
+        pitch_rate,
+    )
+    audios = list(audio_urls or [])
+    images = list(image_urls or [])
+    if reference_mode in ("none", "speaker") and (audios or images):
+        raise SeedanceLowPriceError(
+            f"Seed Audio {reference_mode} mode does not accept reference media"
+        )
+    if reference_mode == "reference_audio":
+        if not 1 <= len(audios) <= 3 or images:
+            raise SeedanceLowPriceError(
+                "Seed Audio reference_audio mode requires 1-3 audios and no image"
+            )
+    if reference_mode == "reference_image":
+        if len(images) != 1 or audios:
+            raise SeedanceLowPriceError(
+                "Seed Audio reference_image mode requires exactly one image and no audio"
+            )
+
+    metadata: Dict[str, Any] = {
+        "format": output_format,
+        "sample_rate": str(sample_rate),
+        "speech_rate": int(speech_rate),
+        "loudness_rate": int(loudness_rate),
+        "pitch_rate": int(pitch_rate),
+    }
+    if reference_mode == "speaker":
+        metadata["speaker"] = str(speaker).strip()
+    elif reference_mode == "reference_audio":
+        metadata["audio_urls"] = audios
+
+    payload: Dict[str, Any] = {
+        "model": SEED_AUDIO_MODEL,
+        "prompt": str(prompt).strip(),
+        "metadata": metadata,
+    }
+    if reference_mode == "reference_image":
+        payload["images"] = images
+    return payload
+
+
+def submit_audio_task(
+    payload: Dict[str, Any],
+    config: Dict[str, Any],
+    sleep: Callable[[float], None] = time.sleep,
+) -> Tuple[str, Dict[str, Any]]:
+    url = f"{config['base_url']}/v1/audio/generations"
+    last_error = "unknown error"
+    for attempt in range(3):
+        if attempt:
+            sleep(min(2 ** attempt + 1, 15))
+        try:
+            response = _get_session().post(
+                url,
+                headers=_headers(config["api_key"]),
+                json=payload,
+                timeout=config.get("timeout", 60),
+            )
+        except requests.ConnectTimeout as exc:
+            last_error = f"network error: {type(exc).__name__}: {exc}"
+            continue
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                "Seed Audio submit transport failed after the request may have reached "
+                "the server; it was not retried to avoid a duplicate paid task. "
+                f"Check the provider console before retrying manually: {type(exc).__name__}: {exc}"
+            ) from exc
+
+        data = _response_json(response)
+        message = extract_error_message(data, response.text[:300])
+        if response.status_code == 429 or response.status_code >= 500:
+            last_error = f"HTTP {response.status_code}: {message}"
+            continue
+        if not 200 <= response.status_code < 300:
+            if response.status_code == 404 and "invalid url" in message.lower():
+                raise SeedanceLowPriceError(
+                    "Seed Audio provider route is not enabled yet: the documented "
+                    f"POST /v1/audio/generations returned HTTP 404 ({message})"
+                )
+            raise SeedanceLowPriceError(
+                f"Seed Audio submit rejected (HTTP {response.status_code}): {message}"
+            )
+        task_id = None
+        if isinstance(data, dict):
+            task_id = data.get("task_id") or data.get("id")
+            if not task_id and isinstance(data.get("data"), dict):
+                task_id = data["data"].get("task_id") or data["data"].get("id")
+        if not task_id:
+            raise SeedanceLowPriceError(
+                "Seed Audio submit response did not contain task_id/id"
+            )
+        return str(task_id), data
+    raise RuntimeError(f"Seed Audio submit failed after 3 attempts: {last_error}")
+
+
+def poll_audio_task(
+    task_id: str,
+    config: Dict[str, Any],
+    on_progress: Optional[Callable[[int], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> Dict[str, Any]:
+    url = f"{config['base_url']}/v1/audio/generations/{task_id}"
+    start = clock()
+    failures = 0
+    while True:
+        if clock() - start > config.get("max_poll_time", 1800):
+            raise RuntimeError(f"Seed Audio polling timed out [task_id: {task_id}]")
+        sleep(config.get("poll_interval", 4))
+        try:
+            response = _get_session().get(
+                url,
+                headers=_headers(config["api_key"], json_content=False),
+                timeout=30,
+            )
+        except requests.RequestException:
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    f"Seed Audio polling failed after repeated network errors [task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        data = _response_json(response)
+        message = extract_error_message(data, response.text[:300])
+        if response.status_code != 200:
+            if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
+                raise SeedanceLowPriceError(
+                    f"Seed Audio polling rejected (HTTP {response.status_code}): {message} "
+                    f"[task_id: {task_id}]"
+                )
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    f"Seed Audio polling repeatedly returned HTTP {response.status_code}: "
+                    f"{message} [task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        failures = 0
+        record = data.get("data") if isinstance(data, dict) else None
+        if not isinstance(record, dict):
+            record = data if isinstance(data, dict) else {}
+        status = str(record.get("status") or "").strip().upper()
+        progress = _coerce_progress(record.get("progress"))
+        if on_progress and progress is not None:
+            on_progress(progress)
+        if status == "SUCCESS":
+            return data
+        if status == "FAILURE":
+            reason = record.get("fail_reason") or message or "audio generation failed"
+            raise SeedanceLowPriceError(
+                f"Seed Audio task failed: {reason} [task_id: {task_id}]"
+            )
+
+
+def extract_audio_url(response: Dict[str, Any]) -> str:
+    candidates: List[Any] = []
+    if isinstance(response, dict):
+        candidates.extend(
+            [response.get("result_url"), response.get("audio_url"), response.get("url")]
+        )
+        data = response.get("data")
+        if isinstance(data, dict):
+            candidates.extend(
+                [data.get("result_url"), data.get("audio_url"), data.get("url")]
+            )
+            nested = data.get("data")
+            if isinstance(nested, dict):
+                candidates.extend(
+                    [nested.get("result_url"), nested.get("audio_url"), nested.get("url")]
+                )
+                content = nested.get("content")
+                if isinstance(content, dict):
+                    candidates.extend([content.get("audio_url"), content.get("url")])
+    for candidate in candidates:
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+    raise SeedanceLowPriceError(
+        "Seed Audio completed response did not contain an audio URL"
+    )
+
+
+def audio_bytes_to_comfy(
+    data: bytes, output_format: str, expected_sample_rate: int
+) -> Dict[str, Any]:
+    if not data:
+        raise SeedanceLowPriceError("Downloaded Seed Audio result is empty")
+
+    if output_format == "wav":
+        try:
+            with wave.open(io.BytesIO(data), "rb") as handle:
+                channels = handle.getnchannels()
+                sample_width = handle.getsampwidth()
+                sample_rate = handle.getframerate() or int(expected_sample_rate)
+                frame_count = handle.getnframes()
+                frames = handle.readframes(frame_count)
+        except (EOFError, wave.Error) as exc:
+            raise SeedanceLowPriceError(f"Invalid WAV result: {exc}") from exc
+
+        if channels <= 0 or sample_width not in (1, 2, 3, 4):
+            raise SeedanceLowPriceError(
+                f"Unsupported WAV layout: channels={channels}, sample_width={sample_width}"
+            )
+        if sample_width == 1:
+            samples = (np.frombuffer(frames, dtype=np.uint8).astype(np.float32) - 128.0) / 128.0
+        elif sample_width == 2:
+            samples = np.frombuffer(frames, dtype="<i2").astype(np.float32) / 32768.0
+        elif sample_width == 3:
+            raw = np.frombuffer(frames, dtype=np.uint8).reshape(-1, 3)
+            samples_24 = (
+                raw[:, 0].astype(np.int32)
+                | (raw[:, 1].astype(np.int32) << 8)
+                | (raw[:, 2].astype(np.int32) << 16)
+            )
+            samples_24 = (samples_24 ^ 0x800000) - 0x800000
+            samples = samples_24.astype(np.float32) / 8388608.0
+        else:
+            samples = np.frombuffer(frames, dtype="<i4").astype(np.float32) / 2147483648.0
+
+        if samples.size % channels:
+            raise SeedanceLowPriceError("WAV sample count is not divisible by channel count")
+        waveform = torch.from_numpy(samples.reshape(-1, channels).T.copy()).unsqueeze(0)
+        return {"waveform": waveform, "sample_rate": int(sample_rate)}
+
+    try:
+        import torchaudio
+    except ImportError as exc:
+        raise SeedanceLowPriceError(
+            "MP3/Opus decoding requires ComfyUI's built-in torchaudio; use wav output "
+            "or repair the ComfyUI Python environment"
+        ) from exc
+
+    format_hint = "ogg" if output_format == "ogg_opus" else output_format
+    try:
+        waveform, sample_rate = torchaudio.load(
+            io.BytesIO(data), format=format_hint
+        )
+    except Exception:
+        waveform, sample_rate = torchaudio.load(io.BytesIO(data))
+    if waveform.ndim == 1:
+        waveform = waveform.unsqueeze(0)
+    if waveform.ndim != 2:
+        raise SeedanceLowPriceError(
+            f"Unexpected downloaded audio shape: {tuple(waveform.shape)}"
+        )
+    if int(sample_rate) <= 0:
+        sample_rate = int(expected_sample_rate)
+    return {
+        "waveform": waveform.float().unsqueeze(0),
+        "sample_rate": int(sample_rate),
+    }
+
+
+def download_audio(
+    url: str,
+    output_format: str,
+    expected_sample_rate: int,
+    max_retries: int = 3,
+) -> Dict[str, Any]:
+    last_error: Optional[Exception] = None
+    for attempt in range(max_retries):
+        if attempt:
+            time.sleep(2 ** attempt)
+        try:
+            response = _get_session().get(url, timeout=300)
+            response.raise_for_status()
+            return audio_bytes_to_comfy(
+                response.content, output_format, expected_sample_rate
+            )
+        except Exception as exc:
+            last_error = exc
+    raise RuntimeError(
+        f"Seed Audio download failed after {max_retries} attempts: {last_error}"
+    )
+
+
+def make_error_audio(sample_rate: int = 24000) -> Dict[str, Any]:
+    return {
+        "waveform": torch.zeros((1, 1, int(sample_rate)), dtype=torch.float32),
+        "sample_rate": int(sample_rate),
+    }
+
+
+class Comfly_doubao_seed_audio_1_0_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "reference_mode": (
+                    SEED_AUDIO_REFERENCE_MODES,
+                    {"default": "none"},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "speaker": ("STRING", {"default": ""}),
+                "output_format": (SEED_AUDIO_FORMATS, {"default": "wav"}),
+                "sample_rate": (SEED_AUDIO_SAMPLE_RATES, {"default": "24000"}),
+                "speech_rate": (
+                    "INT",
+                    {"default": 0, "min": -50, "max": 100, "step": 1},
+                ),
+                "loudness_rate": (
+                    "INT",
+                    {"default": 0, "min": -50, "max": 100, "step": 1},
+                ),
+                "pitch_rate": (
+                    "INT",
+                    {"default": 0, "min": -12, "max": 12, "step": 1},
+                ),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "reference_image": ("IMAGE",),
+                "reference_image_url": ("STRING", {"default": ""}),
+                "audio1": ("AUDIO",),
+                "audio2": ("AUDIO",),
+                "audio3": ("AUDIO",),
+                "reference_audio_urls": (
+                    "STRING",
+                    {"multiline": True, "default": ""},
+                ),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (AUDIO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("audio", "audio_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        reference_mode=None,
+        prompt="",
+        speaker="",
+        output_format="wav",
+        sample_rate="24000",
+        speech_rate=0,
+        loudness_rate=0,
+        pitch_rate=0,
+        **kwargs,
+    ):
+        if reference_mode is None:
+            return True
+        try:
+            validate_seed_audio_settings(
+                reference_mode,
+                prompt,
+                speaker,
+                output_format,
+                sample_rate,
+                speech_rate,
+                loudness_rate,
+                pitch_rate,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _collect_references(
+        reference_mode: str,
+        config: Dict[str, Any],
+        reference_image: Any,
+        reference_image_url: str,
+        reference_audio_urls: str,
+        audios: List[Any],
+    ) -> Tuple[List[str], List[str]]:
+        external_audios = _parse_http_urls(
+            reference_audio_urls, "reference_audio_urls"
+        )
+        external_images = _parse_http_urls(
+            reference_image_url, "reference_image_url"
+        )
+        connected_audios = [audio for audio in audios if audio is not None]
+
+        if reference_mode in ("none", "speaker"):
+            if reference_image is not None or external_images or connected_audios or external_audios:
+                raise SeedanceLowPriceError(
+                    f"Seed Audio {reference_mode} mode does not accept reference media"
+                )
+            return [], []
+
+        if reference_mode == "reference_image":
+            if connected_audios or external_audios:
+                raise SeedanceLowPriceError(
+                    "Seed Audio reference_image mode cannot use reference audio"
+                )
+            image_urls = list(external_images)
+            if reference_image is not None:
+                image_urls.insert(
+                    0,
+                    upload_media(
+                        image_to_png_bytes(reference_image),
+                        "reference_image.png",
+                        "image/png",
+                        config,
+                    ),
+                )
+            if len(image_urls) != 1:
+                raise SeedanceLowPriceError(
+                    "Seed Audio reference_image mode requires exactly one image or image URL"
+                )
+            return [], image_urls
+
+        if reference_image is not None or external_images:
+            raise SeedanceLowPriceError(
+                "Seed Audio reference_audio mode cannot use a reference image"
+            )
+        audio_urls = []
+        for index, audio in enumerate(connected_audios, start=1):
+            audio_urls.append(
+                upload_media(
+                    audio_to_wav_bytes(audio),
+                    f"reference_audio{index}.wav",
+                    "audio/wav",
+                    config,
+                )
+            )
+        audio_urls.extend(external_audios)
+        if not 1 <= len(audio_urls) <= 3:
+            raise SeedanceLowPriceError(
+                "Seed Audio reference_audio mode requires 1-3 audios or audio URLs"
+            )
+        return audio_urls, []
+
+    def generate(
+        self,
+        reference_mode: str,
+        prompt: str,
+        speaker: str,
+        output_format: str,
+        sample_rate: str,
+        speech_rate: int,
+        loudness_rate: int,
+        pitch_rate: int,
+        api_config: Any = None,
+        reference_image: Any = None,
+        reference_image_url: str = "",
+        audio1: Any = None,
+        audio2: Any = None,
+        audio3: Any = None,
+        reference_audio_urls: str = "",
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_seed_audio_settings(
+                reference_mode,
+                prompt,
+                speaker,
+                output_format,
+                sample_rate,
+                speech_rate,
+                loudness_rate,
+                pitch_rate,
+            )
+            config = resolve_config(api_config)
+            audio_urls, image_urls = self._collect_references(
+                reference_mode,
+                config,
+                reference_image,
+                reference_image_url,
+                reference_audio_urls,
+                [audio1, audio2, audio3],
+            )
+            payload = build_seed_audio_payload(
+                reference_mode,
+                prompt,
+                speaker,
+                output_format,
+                sample_rate,
+                speech_rate,
+                loudness_rate,
+                pitch_rate,
+                audio_urls,
+                image_urls,
+            )
+            update_progress(25)
+            print(
+                f"[Seed Audio Low Price] Submitting model={SEED_AUDIO_MODEL}, "
+                f"reference_mode={reference_mode}"
+            )
+            task_id, submit_response = submit_audio_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_audio_task(
+                task_id, config, on_progress=on_poll_progress
+            )
+            audio_url = extract_audio_url(final_response)
+            audio = download_audio(audio_url, output_format, int(sample_rate))
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": SEED_AUDIO_MODEL,
+                "reference_mode": reference_mode,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                audio,
+                audio_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": SEED_AUDIO_MODEL,
+                "reference_mode": reference_mode,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_audio(int(sample_rate)),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 __all__ = [
     "Comfly_seedance2_low_price_settings",
     "Comfly_seedance2_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
+    "Comfly_happyhorse_1_1_lowprice",
+    "Comfly_doubao_seed_audio_1_0_lowprice",
 ]
