@@ -275,8 +275,8 @@ class Comfly_api_set:
             }
         }
 
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("apikey",)
+    RETURN_TYPES = ("STRING", "ZHENZHEN_SEEDANCE2_CONFIG")
+    RETURN_NAMES = ("apikey", "api_config")
     FUNCTION = "set_api_base"
     CATEGORY = "zhenzhen"
 
@@ -297,17 +297,23 @@ class Comfly_api_set:
 
         baseurl = base_url_mapping[api_base]
             
+        config = get_config()
         if apikey.strip():
-            config = get_config()
             config['api_key'] = apikey
             save_config(config)
+
+        effective_api_key = apikey.strip() or str(config.get('api_key', '')).strip()
+        api_config = {
+            "base_url": baseurl,
+            "api_key": effective_api_key,
+        }
             
         message = f"API Base URL set to: {baseurl}"
         if apikey.strip():
             message += "\nAPI key has been updated"
             
         print(message)
-        return (apikey,)
+        return (apikey, api_config)
 
 
 class ComflyVideoAdapter:
