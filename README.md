@@ -71,6 +71,17 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260715-2
+
+新增节点：zhenzhen-upscaler-lowprice
+更新对应工作流（贞贞的平价AI小屋对应API）
+
+### 20260715-1
+
+新增节点zhenzhen-wan-2.7-spicy-i2v-lowprice，支持宽审核图生视频
+zhenzhen-sd2-seedream-v5-pro-lowprice节点新增宽审核模式，支持文生图和图像编辑，电商出海必备！
+更新对公3个工作流
+
 ### 20260714-1
 
 新增happy horse1.1配套工作流

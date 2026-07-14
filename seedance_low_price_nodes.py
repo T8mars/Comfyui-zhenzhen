@@ -936,10 +936,20 @@ class Comfly_seedance2_low_price:
 
 
 SEEDREAM_MODES = ["text_to_image", "image_edit"]
-SEEDREAM_MODELS = {
-    "text_to_image": "seedream-v5-pro-t2i",
-    "image_edit": "seedream-v5-pro-i2i",
+SEEDREAM_FAMILY_DOMESTIC = "seedream-v5-pro (domestic)"
+SEEDREAM_FAMILY_DOLA = "dola-seedream-5.0-pro (overseas)"
+SEEDREAM_MODEL_FAMILIES = [SEEDREAM_FAMILY_DOMESTIC, SEEDREAM_FAMILY_DOLA]
+SEEDREAM_MODEL_PAIRS = {
+    SEEDREAM_FAMILY_DOMESTIC: {
+        "text_to_image": "seedream-v5-pro-t2i",
+        "image_edit": "seedream-v5-pro-i2i",
+    },
+    SEEDREAM_FAMILY_DOLA: {
+        "text_to_image": "dola-seedream-5.0-pro-t2i",
+        "image_edit": "dola-seedream-5.0-pro-i2i",
+    },
 }
+SEEDREAM_MODELS = SEEDREAM_MODEL_PAIRS[SEEDREAM_FAMILY_DOMESTIC]
 SEEDREAM_RESOLUTIONS = ["1k", "2k", "custom"]
 SEEDREAM_OUTPUT_FORMATS = ["png", "jpeg"]
 SEEDREAM_PROMPT_MIN_LENGTH = 5
@@ -954,6 +964,7 @@ def validate_seedream_inputs(
     width: int,
     height: int,
     output_format: str,
+    model_family: str = SEEDREAM_FAMILY_DOMESTIC,
 ) -> None:
     if mode not in SEEDREAM_MODELS:
         raise SeedanceLowPriceError(f"Unsupported Seedream mode: {mode}")
@@ -967,6 +978,10 @@ def validate_seedream_inputs(
         raise SeedanceLowPriceError(f"Unsupported Seedream resolution: {resolution}")
     if output_format not in SEEDREAM_OUTPUT_FORMATS:
         raise SeedanceLowPriceError(f"Unsupported Seedream output_format: {output_format}")
+    if model_family not in SEEDREAM_MODEL_PAIRS:
+        raise SeedanceLowPriceError(
+            f"Unsupported Seedream model_family: {model_family}"
+        )
     if resolution == "custom":
         if not 240 <= int(width) <= 8192 or not 240 <= int(height) <= 8192:
             raise SeedanceLowPriceError("Seedream custom width/height must be 240-8192")
@@ -980,8 +995,17 @@ def build_seedream_payload(
     height: int,
     output_format: str,
     image_urls: Optional[List[str]] = None,
+    model_family: str = SEEDREAM_FAMILY_DOMESTIC,
 ) -> Dict[str, Any]:
-    validate_seedream_inputs(mode, prompt, resolution, width, height, output_format)
+    validate_seedream_inputs(
+        mode,
+        prompt,
+        resolution,
+        width,
+        height,
+        output_format,
+        model_family,
+    )
     metadata: Dict[str, Any] = {"output_format": output_format}
     if resolution == "custom":
         metadata["width"] = int(width)
@@ -989,7 +1013,7 @@ def build_seedream_payload(
     else:
         metadata["resolution"] = resolution
     payload: Dict[str, Any] = {
-        "model": SEEDREAM_MODELS[mode],
+        "model": SEEDREAM_MODEL_PAIRS[model_family][mode],
         "prompt": str(prompt).strip(),
         "metadata": metadata,
     }
@@ -1173,6 +1197,10 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
         optional: Dict[str, tuple] = {
             "api_config": (CONFIG_TYPE,),
             "skip_error": ("BOOLEAN", {"default": False}),
+            "model_family": (
+                SEEDREAM_MODEL_FAMILIES,
+                {"default": SEEDREAM_FAMILY_DOMESTIC},
+            ),
         }
         for index in range(1, 11):
             optional[f"image{index}"] = ("IMAGE",)
@@ -1202,13 +1230,20 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
         width=1024,
         height=1024,
         output_format="png",
+        model_family=SEEDREAM_FAMILY_DOMESTIC,
         **kwargs,
     ):
         if None in (mode, resolution):
             return True
         try:
             validate_seedream_inputs(
-                mode, prompt or "", resolution, width, height, output_format
+                mode,
+                prompt or "",
+                resolution,
+                width,
+                height,
+                output_format,
+                model_family,
             )
         except Exception as exc:
             return str(exc)
@@ -1263,10 +1298,11 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
         output_format: str,
         api_config: Any = None,
         skip_error: bool = False,
+        model_family: str = SEEDREAM_FAMILY_DOMESTIC,
         **kwargs,
     ):
         task_id = ""
-        model = SEEDREAM_MODELS.get(mode, "")
+        model = SEEDREAM_MODEL_PAIRS.get(model_family, {}).get(mode, "")
         pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
 
         def update_progress(value: int) -> None:
@@ -1277,7 +1313,15 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
                     pass
 
         try:
-            validate_seedream_inputs(mode, prompt, resolution, width, height, output_format)
+            validate_seedream_inputs(
+                mode,
+                prompt,
+                resolution,
+                width,
+                height,
+                output_format,
+                model_family,
+            )
             config = resolve_config(api_config)
             image_urls = self._upload_reference_images(
                 mode, config, kwargs, on_progress=update_progress
@@ -1290,6 +1334,7 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
                 height,
                 output_format,
                 image_urls,
+                model_family,
             )
             update_progress(25)
             print(f"[Seedream Low Price] Submitting model={model}, mode={mode}")
@@ -1560,6 +1605,426 @@ class Comfly_happyhorse_1_1_lowprice:
                 "status": "error",
                 "mode": mode,
                 "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+WAN27_SPICY_MODEL = "wan-2.7-spicy-i2v"
+WAN27_SPICY_SECONDS = [str(value) for value in range(2, 16)]
+WAN27_SPICY_RESOLUTIONS = ["720p", "1080p"]
+
+
+def validate_wan27_spicy_inputs(
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    negative_prompt: str,
+    audio_url: str,
+    prompt_extend: bool,
+    seed: int,
+) -> None:
+    if str(seconds) not in WAN27_SPICY_SECONDS:
+        raise SeedanceLowPriceError("Wan 2.7 Spicy seconds must be 2-15")
+    if resolution not in WAN27_SPICY_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Wan 2.7 Spicy resolution must be 720p or 1080p"
+        )
+    if len(str(prompt or "")) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Wan 2.7 Spicy prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if len(str(negative_prompt or "")) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Wan 2.7 Spicy negative_prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    audio_url_text = str(audio_url or "").strip()
+    if audio_url_text:
+        parsed = urlsplit(audio_url_text)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise SeedanceLowPriceError("Wan 2.7 Spicy audio_url must be an http(s) URL")
+    try:
+        seed_value = int(seed)
+    except (TypeError, ValueError) as exc:
+        raise SeedanceLowPriceError("Wan 2.7 Spicy seed must be an integer") from exc
+    if not -1 <= seed_value <= 2147483647:
+        raise SeedanceLowPriceError(
+            "Wan 2.7 Spicy seed must be between -1 and 2147483647"
+        )
+
+
+def build_wan27_spicy_payload(
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    negative_prompt: str,
+    audio_url: str,
+    prompt_extend: bool,
+    seed: int,
+    image_url: str,
+) -> Dict[str, Any]:
+    validate_wan27_spicy_inputs(
+        prompt,
+        seconds,
+        resolution,
+        negative_prompt,
+        audio_url,
+        prompt_extend,
+        seed,
+    )
+    image_url_text = str(image_url or "").strip()
+    if not image_url_text:
+        raise SeedanceLowPriceError("Wan 2.7 Spicy requires a first image")
+
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    negative_prompt_text = str(negative_prompt or "").strip()
+    if negative_prompt_text:
+        metadata["negative_prompt"] = negative_prompt_text
+    audio_url_text = str(audio_url or "").strip()
+    if audio_url_text:
+        metadata["audio_url"] = audio_url_text
+    if bool(prompt_extend):
+        metadata["prompt_extend"] = True
+    if int(seed) >= 0:
+        metadata["seed"] = int(seed)
+
+    payload: Dict[str, Any] = {
+        "model": WAN27_SPICY_MODEL,
+        "seconds": str(seconds),
+        "metadata": metadata,
+        "images": [image_url_text],
+    }
+    prompt_text = str(prompt or "").strip()
+    if prompt_text:
+        payload["prompt"] = prompt_text
+    return payload
+
+
+class Comfly_wan_2_7_spicy_i2v_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "first_image": ("IMAGE",),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (WAN27_SPICY_SECONDS, {"default": "2"}),
+                "resolution": (WAN27_SPICY_RESOLUTIONS, {"default": "720p"}),
+                "negative_prompt": (
+                    "STRING",
+                    {"multiline": True, "default": ""},
+                ),
+                "audio_url": ("STRING", {"default": ""}),
+                "prompt_extend": ("BOOLEAN", {"default": False}),
+                "seed": (
+                    "INT",
+                    {"default": -1, "min": -1, "max": 2147483647, "step": 1},
+                ),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        prompt="",
+        seconds="2",
+        resolution="720p",
+        negative_prompt="",
+        audio_url="",
+        prompt_extend=False,
+        seed=-1,
+        **kwargs,
+    ):
+        try:
+            validate_wan27_spicy_inputs(
+                prompt,
+                seconds,
+                resolution,
+                negative_prompt,
+                audio_url,
+                prompt_extend,
+                seed,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        first_image: Any,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        negative_prompt: str,
+        audio_url: str,
+        prompt_extend: bool,
+        seed: int,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_wan27_spicy_inputs(
+                prompt,
+                seconds,
+                resolution,
+                negative_prompt,
+                audio_url,
+                prompt_extend,
+                seed,
+            )
+            config = resolve_config(api_config)
+            image_bytes = image_to_png_bytes(first_image)
+            image_url = upload_media(
+                image_bytes,
+                "wan27_spicy_first_frame.png",
+                "image/png",
+                config,
+            )
+            update_progress(20)
+            payload = build_wan27_spicy_payload(
+                prompt,
+                seconds,
+                resolution,
+                negative_prompt,
+                audio_url,
+                prompt_extend,
+                seed,
+                image_url,
+            )
+            print(
+                f"[Wan 2.7 Spicy Low Price] Submitting model={WAN27_SPICY_MODEL}, "
+                f"seconds={seconds}, resolution={resolution}"
+            )
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": WAN27_SPICY_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": WAN27_SPICY_MODEL,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+ZHENZHEN_UPSCALER_MODEL = "zhenzhen-upscaler"
+ZHENZHEN_UPSCALER_RESOLUTIONS = ["720p", "1080p", "2k", "4k"]
+
+
+def validate_zhenzhen_upscaler_inputs(video_url: str, resolution: str) -> None:
+    if resolution not in ZHENZHEN_UPSCALER_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Zhenzhen Upscaler resolution must be 720p, 1080p, 2k, or 4k"
+        )
+    url = str(video_url or "").strip()
+    if url and not url.startswith(("http://", "https://")):
+        raise SeedanceLowPriceError(
+            "Zhenzhen Upscaler video_url must be an http(s) URL"
+        )
+
+
+def build_zhenzhen_upscaler_payload(
+    video_url: str,
+    resolution: str,
+) -> Dict[str, Any]:
+    validate_zhenzhen_upscaler_inputs(video_url, resolution)
+    url = str(video_url or "").strip()
+    if not url:
+        raise SeedanceLowPriceError(
+            "Zhenzhen Upscaler requires a non-empty video URL"
+        )
+    return {
+        "model": ZHENZHEN_UPSCALER_MODEL,
+        "prompt": "upscale",
+        "metadata": {
+            "resolution": resolution,
+            "content": [
+                {
+                    "type": "video_url",
+                    "video_url": {"url": url},
+                }
+            ],
+        },
+    }
+
+
+class Comfly_zhenzhen_upscaler_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "video_url": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": "Optional public MP4 URL; leave empty when input_video is connected.",
+                    },
+                ),
+                "resolution": (
+                    ZHENZHEN_UPSCALER_RESOLUTIONS,
+                    {"default": "1080p"},
+                ),
+            },
+            "optional": {
+                "input_video": (VIDEO_TYPE,),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        video_url="",
+        resolution="1080p",
+        **kwargs,
+    ):
+        try:
+            validate_zhenzhen_upscaler_inputs(video_url, resolution)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        video_url: str,
+        resolution: str,
+        input_video: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_zhenzhen_upscaler_inputs(video_url, resolution)
+            source_url = str(video_url or "").strip()
+            if not source_url and input_video is None:
+                raise SeedanceLowPriceError(
+                    "Connect input_video or provide video_url for zhenzhen-upscaler"
+                )
+
+            config = resolve_config(api_config)
+            if not source_url:
+                video_bytes = video_to_mp4_bytes(input_video)
+                source_url = upload_media(
+                    video_bytes,
+                    "zhenzhen_upscaler_input.mp4",
+                    "video/mp4",
+                    config,
+                )
+            update_progress(20)
+
+            payload = build_zhenzhen_upscaler_payload(source_url, resolution)
+            print(
+                f"[Zhenzhen Upscaler Low Price] Submitting "
+                f"model={ZHENZHEN_UPSCALER_MODEL}, resolution={resolution}"
+            )
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            result_url = extract_video_url(final_response)
+            video = download_video(result_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": ZHENZHEN_UPSCALER_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                result_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": ZHENZHEN_UPSCALER_MODEL,
                 "task_id": task_id,
                 "message": message,
             }
@@ -2194,5 +2659,7 @@ __all__ = [
     "Comfly_seedance2_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
     "Comfly_happyhorse_1_1_lowprice",
+    "Comfly_wan_2_7_spicy_i2v_lowprice",
+    "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
 ]

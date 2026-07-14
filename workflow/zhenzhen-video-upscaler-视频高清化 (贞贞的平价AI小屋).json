@@ -1,0 +1,366 @@
+{
+  "id": "fdcfc2b2-168f-4f3d-a1d0-6986b802fce5",
+  "revision": 0,
+  "last_node_id": 194,
+  "last_link_id": 271,
+  "nodes": [
+    {
+      "id": 191,
+      "type": "SaveVideo",
+      "pos": [
+        6556.353328584046,
+        1001.6583668590159
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 266
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/ComfyUI",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 186,
+      "type": "easy showAnything",
+      "pos": [
+        6621.873022089708,
+        1207.1880927370923
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 268
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 187,
+      "type": "easy showAnything",
+      "pos": [
+        6620.031470729063,
+        1378.8242503536496
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 269
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 192,
+      "type": "easy showAnything",
+      "pos": [
+        6612.812547195619,
+        1571.840240028039
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 270
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "625efbfa2fc20c31797dfffcbb41a26b6d91ab7b",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 190,
+      "type": "LoadVideo",
+      "pos": [
+        5588.622476575888,
+        958.9365182138727
+      ],
+      "size": [
+        270,
+        344
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            267
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        "0.6.mp4",
+        "image"
+      ]
+    },
+    {
+      "id": 193,
+      "type": "Comfly_zhenzhen_upscaler_lowprice",
+      "pos": [
+        6130.342014972001,
+        1256.7346187466744
+      ],
+      "size": [
+        290.691015625,
+        190
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input_video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 267
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 271
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            266
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": [
+            268
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            269
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": [
+            270
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "4da7973702b5c276bc29adfa5a994655c3928cb6",
+        "Node name for S&R": "Comfly_zhenzhen_upscaler_lowprice"
+      },
+      "widgets_values": [
+        "",
+        "1080p",
+        false
+      ]
+    },
+    {
+      "id": 194,
+      "type": "Comfly_api_set",
+      "pos": [
+        5650.906006109359,
+        1371.6237272716905
+      ],
+      "size": [
+        270,
+        174
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            271
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "4da7973702b5c276bc29adfa5a994655c3928cb6",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      266,
+      193,
+      0,
+      191,
+      0,
+      "VIDEO"
+    ],
+    [
+      267,
+      190,
+      0,
+      193,
+      0,
+      "VIDEO"
+    ],
+    [
+      268,
+      193,
+      1,
+      186,
+      0,
+      "STRING"
+    ],
+    [
+      269,
+      193,
+      2,
+      187,
+      0,
+      "STRING"
+    ],
+    [
+      270,
+      193,
+      3,
+      192,
+      0,
+      "STRING"
+    ],
+    [
+      271,
+      194,
+      1,
+      193,
+      1,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ds": {
+      "scale": 1.6350799082655825,
+      "offset": [
+        -5367.019538224361,
+        -962.5255105524407
+      ]
+    }
+  },
+  "version": 0.4
+}
