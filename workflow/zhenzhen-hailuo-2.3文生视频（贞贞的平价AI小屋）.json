@@ -1,0 +1,187 @@
+{
+  "id": "b5177489-679b-4f28-867a-37e87eb60364",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_api_set",
+      "pos": [
+        40,
+        430
+      ],
+      "size": [
+        330,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（国内版）"
+    },
+    {
+      "id": 2,
+      "type": "Comfly_hailuo_2_3_video_lowprice",
+      "title": "Hailuo 2.3 文生视频（已实测）",
+      "pos": [
+        400,
+        120
+      ],
+      "size": [
+        430,
+        360
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "first_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "Node name for S&R": "Comfly_hailuo_2_3_video_lowprice"
+      },
+      "widgets_values": [
+        "hailuo-2.3-t2v-standard",
+        "雨后的城市街道倒映霓虹灯，一位撑伞的行人从镜头前经过，电影感运镜",
+        "6",
+        "768p",
+        "16:9",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveVideo",
+      "pos": [
+        900,
+        160
+      ],
+      "size": [
+        270,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/hailuo_2_3_t2v",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      1,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20",
+    "ds": {
+      "scale": 1,
+      "offset": [
+        80,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

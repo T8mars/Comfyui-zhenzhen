@@ -1865,6 +1865,1332 @@ class Comfly_wan_2_7_spicy_i2v_lowprice:
             )
 
 
+KLING_T2V_MODELS = [
+    "kling-v3.0-std-t2v",
+    "kling-v3.0-pro-t2v",
+    "kling-v3-turbo-std-t2v",
+    "kling-v3-turbo-pro-t2v",
+    "kling-v3-4k-t2v",
+    "kling-o3-std-t2v",
+    "kling-o3-pro-t2v",
+    "kling-o3-4k-t2v",
+]
+KLING_I2V_MODELS = [
+    "kling-v3.0-std-i2v",
+    "kling-v3.0-pro-i2v",
+    "kling-v3-turbo-std-i2v",
+    "kling-v3-turbo-pro-i2v",
+    "kling-v3-4k-i2v",
+    "kling-o3-std-i2v",
+    "kling-o3-pro-i2v",
+    "kling-o3-4k-i2v",
+]
+KLING_R2V_MODELS = [
+    "kling-o3-std-r2v",
+    "kling-o3-pro-r2v",
+    "kling-o3-4k-r2v",
+]
+KLING_VIDEO_MODELS = KLING_T2V_MODELS + KLING_I2V_MODELS + KLING_R2V_MODELS
+KLING_EDIT_MODELS = ["kling-o3-std-edit", "kling-o3-pro-edit"]
+KLING_SECONDS = ["5", "10"]
+KLING_MAX_REFERENCE_IMAGES = 4
+
+
+def validate_kling_video_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    ratio: str,
+    negative_prompt: str,
+) -> None:
+    if model not in KLING_VIDEO_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Kling model: {model}")
+    if str(seconds) not in KLING_SECONDS:
+        raise SeedanceLowPriceError("Kling seconds must be 5 or 10")
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Kling ratio: {ratio}")
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Kling prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    negative_prompt_text = str(negative_prompt or "").strip()
+    if len(negative_prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Kling negative_prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if model in KLING_T2V_MODELS + KLING_R2V_MODELS and not prompt_text:
+        raise SeedanceLowPriceError(
+            "Kling text/reference-to-video requires a prompt"
+        )
+
+
+def build_kling_video_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    ratio: str,
+    negative_prompt: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_kling_video_inputs(model, prompt, seconds, ratio, negative_prompt)
+    metadata: Dict[str, Any] = {}
+    if ratio != "adaptive":
+        metadata["ratio"] = ratio
+    negative_prompt_text = str(negative_prompt or "").strip()
+    if negative_prompt_text:
+        metadata["negative_prompt"] = negative_prompt_text
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+    prompt_text = str(prompt or "").strip()
+    if prompt_text:
+        payload["prompt"] = prompt_text
+
+    urls = list(image_urls or [])
+    if model in KLING_I2V_MODELS:
+        if not urls:
+            raise SeedanceLowPriceError(
+                "Kling image-to-video requires image1"
+            )
+        payload["images"] = urls[:2]
+    elif model in KLING_R2V_MODELS:
+        if not urls:
+            raise SeedanceLowPriceError(
+                "Kling reference-to-video requires at least one image"
+            )
+        payload["images"] = urls[:KLING_MAX_REFERENCE_IMAGES]
+    return payload
+
+
+class Comfly_kling_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {}
+        for index in range(1, KLING_MAX_REFERENCE_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    KLING_VIDEO_MODELS,
+                    {"default": KLING_T2V_MODELS[0]},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (KLING_SECONDS, {"default": "5"}),
+                "ratio": (RATIOS, {"default": "16:9"}),
+                "negative_prompt": (
+                    "STRING",
+                    {"multiline": True, "default": ""},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        ratio="16:9",
+        negative_prompt="",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_kling_video_inputs(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                negative_prompt,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _connected_images(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        return [
+            (index, kwargs[f"image{index}"])
+            for index in range(1, KLING_MAX_REFERENCE_IMAGES + 1)
+            if kwargs.get(f"image{index}") is not None
+        ]
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        ratio: str,
+        negative_prompt: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_kling_video_inputs(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                negative_prompt,
+            )
+            config = resolve_config(api_config)
+            connected = self._connected_images(kwargs)
+            selected: List[Tuple[int, Any]] = []
+            if model in KLING_I2V_MODELS:
+                if kwargs.get("image1") is None:
+                    raise SeedanceLowPriceError(
+                        "Kling image-to-video requires image1"
+                    )
+                selected = [(1, kwargs["image1"])]
+                if kwargs.get("image2") is not None:
+                    selected.append((2, kwargs["image2"]))
+            elif model in KLING_R2V_MODELS:
+                if not connected:
+                    raise SeedanceLowPriceError(
+                        "Kling reference-to-video requires at least one image"
+                    )
+                selected = connected[:KLING_MAX_REFERENCE_IMAGES]
+                slots = [slot for slot, _ in selected]
+                if slots != list(range(1, len(slots) + 1)):
+                    print(
+                        f"[Kling Low Price] Image slots {slots} have gaps; "
+                        "connected images will be compacted in slot order"
+                    )
+
+            image_urls: List[str] = []
+            for position, (slot, image) in enumerate(selected, start=1):
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image),
+                        f"kling_reference_{slot}.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                update_progress(int(position / len(selected) * 20))
+
+            payload = build_kling_video_payload(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                negative_prompt,
+                image_urls,
+            )
+            print(f"[Kling Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+def validate_kling_edit_inputs(
+    model: str,
+    video_url: str,
+    prompt: str,
+    seconds: str,
+) -> None:
+    if model not in KLING_EDIT_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Kling edit model: {model}")
+    if str(seconds) not in KLING_SECONDS:
+        raise SeedanceLowPriceError("Kling edit seconds must be 5 or 10")
+    url_text = str(video_url or "").strip()
+    if url_text:
+        parsed = urlsplit(url_text)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise SeedanceLowPriceError(
+                "Kling edit video_url must be an http(s) URL"
+            )
+    prompt_text = str(prompt or "").strip()
+    if not prompt_text:
+        raise SeedanceLowPriceError("Kling edit requires a prompt")
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Kling edit prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+
+
+def build_kling_edit_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    video_url: str,
+) -> Dict[str, Any]:
+    validate_kling_edit_inputs(model, video_url, prompt, seconds)
+    url_text = str(video_url or "").strip()
+    if not url_text:
+        raise SeedanceLowPriceError("Kling edit requires a video URL")
+    return {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "seconds": str(seconds),
+        "metadata": {
+            "content": [
+                {
+                    "type": "video_url",
+                    "video_url": {"url": url_text},
+                }
+            ],
+        },
+    }
+
+
+class Comfly_kling_o3_edit_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    KLING_EDIT_MODELS,
+                    {"default": KLING_EDIT_MODELS[0]},
+                ),
+                "video_url": ("STRING", {"default": ""}),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (KLING_SECONDS, {"default": "5"}),
+            },
+            "optional": {
+                "input_video": (VIDEO_TYPE,),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        video_url="",
+        prompt="",
+        seconds="5",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_kling_edit_inputs(model, video_url, prompt, seconds)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        video_url: str,
+        prompt: str,
+        seconds: str,
+        input_video: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_kling_edit_inputs(model, video_url, prompt, seconds)
+            source_url = str(video_url or "").strip()
+            if not source_url and input_video is None:
+                raise SeedanceLowPriceError(
+                    "Kling edit requires input_video or video_url"
+                )
+
+            config = resolve_config(api_config)
+            if not source_url:
+                source_url = upload_media(
+                    video_to_mp4_bytes(input_video),
+                    "kling_o3_edit_input.mp4",
+                    "video/mp4",
+                    config,
+                )
+            update_progress(20)
+
+            payload = build_kling_edit_payload(
+                model,
+                prompt,
+                seconds,
+                source_url,
+            )
+            print(f"[Kling O3 Edit Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            result_url = extract_video_url(final_response)
+            video = download_video(result_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                result_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+HAILUO23_T2V_MODELS = [
+    "hailuo-2.3-t2v-standard",
+    "hailuo-2.3-t2v-pro",
+]
+HAILUO23_I2V_MODELS = [
+    "hailuo-2.3-i2v-standard",
+    "hailuo-2.3-i2v-pro",
+    "hailuo-2.3-fast-i2v",
+    "hailuo-2.3-fast-pro-i2v",
+]
+HAILUO23_MODELS = HAILUO23_T2V_MODELS + HAILUO23_I2V_MODELS
+HAILUO23_SECONDS = ["6", "10"]
+HAILUO23_RESOLUTIONS = ["768p", "1080p"]
+HAILUO23_PROMPT_MAX_LENGTH = 2000
+HAILUO23_MIN_IMAGE_SHORT_EDGE = 301
+HAILUO23_MIN_ASPECT_RATIO = 0.4
+HAILUO23_MAX_ASPECT_RATIO = 2.5
+
+
+def validate_hailuo23_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+) -> None:
+    if model not in HAILUO23_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo 2.3 model: {model}")
+    if str(seconds) not in HAILUO23_SECONDS:
+        raise SeedanceLowPriceError("Hailuo 2.3 seconds must be 6 or 10")
+    if resolution not in HAILUO23_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Hailuo 2.3 resolution must be 768p or 1080p"
+        )
+    if str(seconds) == "10" and resolution == "1080p":
+        raise SeedanceLowPriceError("Hailuo 2.3 1080p only supports 6 seconds")
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo 2.3 ratio: {ratio}")
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > HAILUO23_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Hailuo 2.3 prompt exceeds {HAILUO23_PROMPT_MAX_LENGTH} characters"
+        )
+    if model in HAILUO23_T2V_MODELS and not prompt_text:
+        raise SeedanceLowPriceError("Hailuo 2.3 text-to-video requires a prompt")
+
+
+def validate_hailuo23_first_image(image: Any) -> None:
+    if not isinstance(image, torch.Tensor) or image.ndim not in (3, 4):
+        raise SeedanceLowPriceError("Hailuo first_image must be an IMAGE tensor")
+    shape = tuple(image.shape)
+    height, width = int(shape[-3]), int(shape[-2])
+    if height <= 0 or width <= 0:
+        raise SeedanceLowPriceError(
+            "Hailuo first_image width and height must be positive"
+        )
+    if min(height, width) < HAILUO23_MIN_IMAGE_SHORT_EDGE:
+        raise SeedanceLowPriceError(
+            "Hailuo first_image short edge must be greater than 300px"
+        )
+    aspect_ratio = width / height
+    if not HAILUO23_MIN_ASPECT_RATIO <= aspect_ratio <= HAILUO23_MAX_ASPECT_RATIO:
+        raise SeedanceLowPriceError(
+            "Hailuo first_image aspect ratio must be between 2:5 and 5:2"
+        )
+
+
+def build_hailuo23_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_hailuo23_inputs(model, prompt, seconds, resolution, ratio)
+    prompt_text = str(prompt or "").strip()
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    if model in HAILUO23_T2V_MODELS and ratio != "adaptive":
+        metadata["ratio"] = ratio
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+    if prompt_text:
+        payload["prompt"] = prompt_text
+    if model in HAILUO23_I2V_MODELS:
+        urls = list(image_urls or [])
+        if not urls:
+            raise SeedanceLowPriceError(
+                "Hailuo 2.3 image-to-video requires first_image"
+            )
+        payload["images"] = [urls[0]]
+    return payload
+
+
+class Comfly_hailuo_2_3_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    HAILUO23_MODELS,
+                    {"default": HAILUO23_T2V_MODELS[0]},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (HAILUO23_SECONDS, {"default": "6"}),
+                "resolution": (HAILUO23_RESOLUTIONS, {"default": "768p"}),
+                "ratio": (RATIOS, {"default": "16:9"}),
+            },
+            "optional": {
+                "first_image": ("IMAGE",),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="6",
+        resolution="768p",
+        ratio="16:9",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_hailuo23_inputs(model, prompt, seconds, resolution, ratio)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        first_image: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_hailuo23_inputs(model, prompt, seconds, resolution, ratio)
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            if model in HAILUO23_I2V_MODELS:
+                if first_image is None:
+                    raise SeedanceLowPriceError(
+                        "Hailuo 2.3 image-to-video requires first_image"
+                    )
+                validate_hailuo23_first_image(first_image)
+                image_bytes = image_to_png_bytes(first_image)
+                image_urls.append(
+                    upload_media(
+                        image_bytes,
+                        "hailuo_2_3_first_image.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                update_progress(20)
+
+            payload = build_hailuo23_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                image_urls,
+            )
+            print(f"[Hailuo 2.3 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+VIDU_Q3_T2V_MODELS = [
+    "vidu-q3-pro-t2v",
+    "vidu-q3-turbo-t2v",
+    "vidu-q3-pro-fast-t2v",
+]
+VIDU_Q3_I2V_MODELS = [
+    "vidu-q3-pro-i2v",
+    "vidu-q3-turbo-i2v",
+    "vidu-q3-pro-fast-i2v",
+]
+VIDU_Q3_START_END_MODELS = [
+    "vidu-q3-pro-start-end",
+    "vidu-q3-turbo-start-end",
+    "vidu-q3-pro-fast-start-end",
+]
+VIDU_Q3_R2V_MODELS = [
+    "vidu-q3-r2v",
+    "vidu-q3-mix-r2v",
+    "vidu-q3-ad-r2v",
+    "vidu-q3-drama-r2v",
+]
+VIDU_Q3_VIDEO_MODELS = (
+    VIDU_Q3_T2V_MODELS
+    + VIDU_Q3_I2V_MODELS
+    + VIDU_Q3_START_END_MODELS
+    + VIDU_Q3_R2V_MODELS
+)
+VIDU_Q3_SHORT_PLAY_MODELS = [
+    "vidu-q3-drama-short-play",
+    "vidu-q3-ad-short-play",
+]
+VIDU_Q3_SECONDS = [str(value) for value in range(4, 16)]
+VIDU_Q3_RESOLUTIONS = ["default", "720p", "1080p"]
+VIDU_Q3_MAX_IMAGES = 9
+VIDU_Q3_SHORT_PLAY_DURATIONS = [str(value) for value in range(8, 13)]
+VIDU_Q3_SHORT_PLAY_RATIOS = ["9:16", "16:9"]
+VIDU_Q3_SHORT_PLAY_ASSET_TYPES = ["character", "scene", "prop"]
+VIDU_Q3_MAX_SHORT_PLAY_ASSETS = 14
+
+
+def validate_vidu_q3_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    ratio: str,
+    resolution: str,
+    seed: int,
+) -> None:
+    if model not in VIDU_Q3_VIDEO_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Vidu Q3 model: {model}")
+    if str(seconds) not in VIDU_Q3_SECONDS:
+        raise SeedanceLowPriceError(
+            "Vidu Q3 seconds must be an integer from 4 to 15"
+        )
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Vidu Q3 ratio: {ratio}")
+    if resolution not in VIDU_Q3_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Vidu Q3 resolution must be default, 720p, or 1080p"
+        )
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Vidu Q3 prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if model in VIDU_Q3_T2V_MODELS and not prompt_text:
+        raise SeedanceLowPriceError("Vidu Q3 text-to-video requires a prompt")
+    try:
+        seed_value = int(seed)
+    except (TypeError, ValueError) as exc:
+        raise SeedanceLowPriceError("Vidu Q3 seed must be an integer") from exc
+    if not -1 <= seed_value <= 2147483647:
+        raise SeedanceLowPriceError(
+            "Vidu Q3 seed must be -1 to 2147483647"
+        )
+
+
+def build_vidu_q3_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    ratio: str,
+    resolution: str,
+    seed: int,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_vidu_q3_inputs(model, prompt, seconds, ratio, resolution, seed)
+    urls = list(image_urls or [])
+    metadata: Dict[str, Any] = {}
+    if ratio != "adaptive":
+        metadata["ratio"] = ratio
+    if resolution != "default":
+        metadata["resolution"] = resolution
+    if int(seed) >= 0:
+        metadata["seed"] = int(seed)
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+    prompt_text = str(prompt or "").strip()
+    if prompt_text:
+        payload["prompt"] = prompt_text
+
+    if model in VIDU_Q3_I2V_MODELS:
+        if not urls:
+            raise SeedanceLowPriceError("Vidu Q3 image-to-video requires image1")
+        payload["images"] = urls[:1]
+    elif model in VIDU_Q3_START_END_MODELS:
+        if len(urls) < 2:
+            raise SeedanceLowPriceError(
+                "Vidu Q3 start-end requires image1 and image2"
+            )
+        payload["images"] = urls[:2]
+    elif model in VIDU_Q3_R2V_MODELS:
+        if not urls:
+            raise SeedanceLowPriceError(
+                "Vidu Q3 reference-to-video requires at least one image"
+            )
+        payload["images"] = urls[:VIDU_Q3_MAX_IMAGES]
+    return payload
+
+
+class Comfly_vidu_q3_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {}
+        for index in range(1, VIDU_Q3_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    VIDU_Q3_VIDEO_MODELS,
+                    {"default": "vidu-q3-turbo-t2v"},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (VIDU_Q3_SECONDS, {"default": "4"}),
+                "ratio": (RATIOS, {"default": "16:9"}),
+                "resolution": (VIDU_Q3_RESOLUTIONS, {"default": "default"}),
+                "seed": (
+                    "INT",
+                    {"default": -1, "min": -1, "max": 2147483647, "step": 1},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="4",
+        ratio="16:9",
+        resolution="default",
+        seed=-1,
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_vidu_q3_inputs(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                resolution,
+                seed,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _connected_images(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        return [
+            (index, kwargs[f"image{index}"])
+            for index in range(1, VIDU_Q3_MAX_IMAGES + 1)
+            if kwargs.get(f"image{index}") is not None
+        ]
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        ratio: str,
+        resolution: str,
+        seed: int,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_vidu_q3_inputs(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                resolution,
+                seed,
+            )
+            config = resolve_config(api_config)
+            connected = self._connected_images(kwargs)
+            selected: List[Tuple[int, Any]] = []
+            if model in VIDU_Q3_I2V_MODELS:
+                if kwargs.get("image1") is None:
+                    raise SeedanceLowPriceError(
+                        "Vidu Q3 image-to-video requires image1"
+                    )
+                selected = [(1, kwargs["image1"])]
+            elif model in VIDU_Q3_START_END_MODELS:
+                if kwargs.get("image1") is None or kwargs.get("image2") is None:
+                    raise SeedanceLowPriceError(
+                        "Vidu Q3 start-end requires image1 and image2"
+                    )
+                selected = [(1, kwargs["image1"]), (2, kwargs["image2"])]
+            elif model in VIDU_Q3_R2V_MODELS:
+                if not connected:
+                    raise SeedanceLowPriceError(
+                        "Vidu Q3 reference-to-video requires at least one image"
+                    )
+                selected = connected[:VIDU_Q3_MAX_IMAGES]
+                slots = [slot for slot, _ in selected]
+                if slots != list(range(1, len(slots) + 1)):
+                    print(
+                        f"[Vidu Q3 Low Price] Image slots {slots} have gaps; "
+                        "connected images will be compacted in slot order"
+                    )
+
+            image_urls: List[str] = []
+            for position, (slot, image) in enumerate(selected, start=1):
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image),
+                        f"vidu_q3_reference_{slot}.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                update_progress(int(position / len(selected) * 20))
+
+            payload = build_vidu_q3_payload(
+                model,
+                prompt,
+                seconds,
+                ratio,
+                resolution,
+                seed,
+                image_urls,
+            )
+            print(f"[Vidu Q3 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+def validate_vidu_q3_short_play_inputs(
+    model: str,
+    prompt: str,
+    script_name: str,
+    resolution: str,
+    duration: str,
+    aspect_ratio: str,
+    style: str,
+    asset_type: str,
+    asset_name_prefix: str,
+    asset_description: str,
+) -> None:
+    if model not in VIDU_Q3_SHORT_PLAY_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Vidu short-play model: {model}")
+    prompt_text = str(prompt or "").strip()
+    if not prompt_text:
+        raise SeedanceLowPriceError("Vidu short-play requires script content")
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Vidu short-play prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    script_name_text = str(script_name or "").strip()
+    if not script_name_text:
+        raise SeedanceLowPriceError("Vidu short-play requires script_name")
+    if len(script_name_text) > 20:
+        raise SeedanceLowPriceError(
+            "Vidu short-play script_name must be 20 characters or fewer"
+        )
+    if resolution != "1080p":
+        raise SeedanceLowPriceError("Vidu short-play resolution must be 1080p")
+    if str(duration) not in VIDU_Q3_SHORT_PLAY_DURATIONS:
+        raise SeedanceLowPriceError(
+            "Vidu short-play duration must be 8 to 12 seconds"
+        )
+    if aspect_ratio not in VIDU_Q3_SHORT_PLAY_RATIOS:
+        raise SeedanceLowPriceError(
+            "Vidu short-play aspect_ratio must be 9:16 or 16:9"
+        )
+    if len(str(style or "")) > 30:
+        raise SeedanceLowPriceError(
+            "Vidu short-play style must be 30 characters or fewer"
+        )
+    if asset_type not in VIDU_Q3_SHORT_PLAY_ASSET_TYPES:
+        raise SeedanceLowPriceError(f"Unsupported Vidu asset_type: {asset_type}")
+    if not str(asset_name_prefix or "").strip():
+        raise SeedanceLowPriceError(
+            "Vidu short-play asset_name_prefix is required"
+        )
+    if not str(asset_description or "").strip():
+        raise SeedanceLowPriceError(
+            "Vidu short-play asset_description is required"
+        )
+
+
+def build_vidu_q3_short_play_payload(
+    model: str,
+    prompt: str,
+    script_name: str,
+    resolution: str,
+    duration: str,
+    aspect_ratio: str,
+    style: str,
+    asset_type: str,
+    asset_name_prefix: str,
+    asset_description: str,
+    asset_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_vidu_q3_short_play_inputs(
+        model,
+        prompt,
+        script_name,
+        resolution,
+        duration,
+        aspect_ratio,
+        style,
+        asset_type,
+        asset_name_prefix,
+        asset_description,
+    )
+    urls = list(asset_urls or [])[:VIDU_Q3_MAX_SHORT_PLAY_ASSETS]
+    if not urls:
+        raise SeedanceLowPriceError(
+            "Vidu short-play requires at least one reference asset"
+        )
+    prefix = str(asset_name_prefix).strip()
+    description = str(asset_description).strip()
+    assets = [
+        {
+            "id": str(index),
+            "type": asset_type,
+            "name": f"{prefix} {index}",
+            "image_uri": url,
+            "description": description,
+        }
+        for index, url in enumerate(urls, start=1)
+    ]
+    return {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "metadata": {
+            "script_name": str(script_name).strip(),
+            "resolution": resolution,
+            "duration": int(duration),
+            "aspect_ratio": aspect_ratio,
+            "style": str(style or "").strip(),
+            "assets": assets,
+        },
+    }
+
+
+class Comfly_vidu_q3_short_play_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {}
+        for index in range(1, VIDU_Q3_MAX_SHORT_PLAY_ASSETS + 1):
+            optional[f"asset_image{index}"] = ("IMAGE",)
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    VIDU_Q3_SHORT_PLAY_MODELS,
+                    {"default": VIDU_Q3_SHORT_PLAY_MODELS[0]},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "script_name": ("STRING", {"default": "Vidu short play"}),
+                "resolution": (["1080p"], {"default": "1080p"}),
+                "duration": (VIDU_Q3_SHORT_PLAY_DURATIONS, {"default": "8"}),
+                "aspect_ratio": (
+                    VIDU_Q3_SHORT_PLAY_RATIOS,
+                    {"default": "9:16"},
+                ),
+                "style": ("STRING", {"default": "realistic"}),
+                "asset_type": (
+                    VIDU_Q3_SHORT_PLAY_ASSET_TYPES,
+                    {"default": "character"},
+                ),
+                "asset_name_prefix": ("STRING", {"default": "Asset"}),
+                "asset_description": (
+                    "STRING",
+                    {"default": "Reference asset"},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, **kwargs):
+        try:
+            validate_vidu_q3_short_play_inputs(
+                kwargs.get("model"),
+                kwargs.get("prompt", ""),
+                kwargs.get("script_name", ""),
+                kwargs.get("resolution", "1080p"),
+                kwargs.get("duration", "8"),
+                kwargs.get("aspect_ratio", "9:16"),
+                kwargs.get("style", "realistic"),
+                kwargs.get("asset_type", "character"),
+                kwargs.get("asset_name_prefix", "Asset"),
+                kwargs.get("asset_description", "Reference asset"),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _connected_assets(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        return [
+            (index, kwargs[f"asset_image{index}"])
+            for index in range(1, VIDU_Q3_MAX_SHORT_PLAY_ASSETS + 1)
+            if kwargs.get(f"asset_image{index}") is not None
+        ]
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        script_name: str,
+        resolution: str,
+        duration: str,
+        aspect_ratio: str,
+        style: str,
+        asset_type: str,
+        asset_name_prefix: str,
+        asset_description: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_vidu_q3_short_play_inputs(
+                model,
+                prompt,
+                script_name,
+                resolution,
+                duration,
+                aspect_ratio,
+                style,
+                asset_type,
+                asset_name_prefix,
+                asset_description,
+            )
+            connected = self._connected_assets(kwargs)
+            if not connected:
+                raise SeedanceLowPriceError(
+                    "Vidu short-play requires at least one reference asset"
+                )
+            slots = [slot for slot, _ in connected]
+            if slots != list(range(1, len(slots) + 1)):
+                print(
+                    f"[Vidu Q3 Short Play Low Price] Asset slots {slots} have gaps; "
+                    "connected assets will be compacted in slot order"
+                )
+
+            config = resolve_config(api_config)
+            asset_urls: List[str] = []
+            for position, (slot, image) in enumerate(connected, start=1):
+                asset_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image),
+                        f"vidu_short_play_asset_{slot}.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                update_progress(int(position / len(connected) * 20))
+
+            payload = build_vidu_q3_short_play_payload(
+                model,
+                prompt,
+                script_name,
+                resolution,
+                duration,
+                aspect_ratio,
+                style,
+                asset_type,
+                asset_name_prefix,
+                asset_description,
+                asset_urls,
+            )
+            print(f"[Vidu Q3 Short Play Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 ZHENZHEN_UPSCALER_MODEL = "zhenzhen-upscaler"
 ZHENZHEN_UPSCALER_RESOLUTIONS = ["720p", "1080p", "2k", "4k"]
 
@@ -2660,6 +3986,11 @@ __all__ = [
     "Comfly_sd2_seedream_v5_pro_lowprice",
     "Comfly_happyhorse_1_1_lowprice",
     "Comfly_wan_2_7_spicy_i2v_lowprice",
+    "Comfly_kling_video_lowprice",
+    "Comfly_kling_o3_edit_lowprice",
+    "Comfly_hailuo_2_3_video_lowprice",
+    "Comfly_vidu_q3_video_lowprice",
+    "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
 ]
