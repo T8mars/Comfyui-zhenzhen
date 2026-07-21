@@ -955,6 +955,16 @@ SEEDREAM_OUTPUT_FORMATS = ["png", "jpeg"]
 SEEDREAM_PROMPT_MIN_LENGTH = 5
 SEEDREAM_PROMPT_MAX_LENGTH = 2000
 SEEDREAM_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+ZHENZHEN_IMAGE_G2_T2I_MODEL = "zhenzhen-image-g2-t2i"
+ZHENZHEN_IMAGE_G2_I2I_MODEL = "zhenzhen-image-g2-i2i"
+ZHENZHEN_IMAGE_G2_MODELS = [
+    ZHENZHEN_IMAGE_G2_T2I_MODEL,
+    ZHENZHEN_IMAGE_G2_I2I_MODEL,
+]
+ZHENZHEN_IMAGE_G2_RESOLUTIONS = ["1k"]
+ZHENZHEN_IMAGE_G2_PROMPT_MAX_LENGTH = 20000
+ZHENZHEN_IMAGE_G2_MAX_IMAGES = 10
+ZHENZHEN_IMAGE_G2_IMAGE_MAX_BYTES = 10 * 1024 * 1024
 
 
 def validate_seedream_inputs(
@@ -1371,6 +1381,267 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
             response = {
                 "status": "error",
                 "mode": mode,
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+            return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+def validate_zhenzhen_image_g2_inputs(
+    model: str,
+    prompt: str,
+    resolution: str,
+    ratio: str,
+    strict: bool = True,
+) -> None:
+    if model not in ZHENZHEN_IMAGE_G2_MODELS:
+        raise SeedanceLowPriceError(
+            f"Unsupported Zhenzhen Image G-2 model: {model}"
+        )
+    prompt_text = str(prompt or "").strip()
+    if strict and not prompt_text:
+        raise SeedanceLowPriceError("Zhenzhen Image G-2 prompt is required")
+    if len(prompt_text) > ZHENZHEN_IMAGE_G2_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            "Zhenzhen Image G-2 prompt cannot exceed "
+            f"{ZHENZHEN_IMAGE_G2_PROMPT_MAX_LENGTH} characters"
+        )
+    if resolution not in ZHENZHEN_IMAGE_G2_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Zhenzhen Image G-2 resolution must be 1k"
+        )
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(
+            f"Unsupported Zhenzhen Image G-2 ratio: {ratio}"
+        )
+
+
+def build_zhenzhen_image_g2_payload(
+    model: str,
+    prompt: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_zhenzhen_image_g2_inputs(
+        model,
+        prompt,
+        resolution,
+        ratio,
+        strict=True,
+    )
+    urls = list(image_urls or [])
+    if model == ZHENZHEN_IMAGE_G2_I2I_MODEL:
+        if not urls:
+            raise SeedanceLowPriceError(
+                "zhenzhen-image-g2-i2i requires 1-10 reference images"
+            )
+        if len(urls) > ZHENZHEN_IMAGE_G2_MAX_IMAGES:
+            raise SeedanceLowPriceError(
+                "zhenzhen-image-g2-i2i accepts at most 10 reference images"
+            )
+
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    if ratio != "adaptive":
+        metadata["ratio"] = ratio
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "metadata": metadata,
+    }
+    if model == ZHENZHEN_IMAGE_G2_I2I_MODEL:
+        payload["images"] = urls
+    return payload
+
+
+class Comfly_zhenzhen_image_g2_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            "api_config": (CONFIG_TYPE,),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }
+        for index in range(1, ZHENZHEN_IMAGE_G2_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        return {
+            "required": {
+                "model": (
+                    ZHENZHEN_IMAGE_G2_MODELS,
+                    {"default": ZHENZHEN_IMAGE_G2_T2I_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (
+                    ZHENZHEN_IMAGE_G2_RESOLUTIONS,
+                    {"default": "1k"},
+                ),
+                "ratio": (RATIOS, {"default": "adaptive"}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt=None,
+        resolution=None,
+        ratio=None,
+        strict=False,
+        **kwargs,
+    ):
+        if None in (model, resolution, ratio):
+            return True
+        try:
+            validate_zhenzhen_image_g2_inputs(
+                model,
+                prompt or "",
+                resolution,
+                ratio,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _reference_images(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        references = [
+            (index, kwargs[f"image{index}"])
+            for index in range(1, ZHENZHEN_IMAGE_G2_MAX_IMAGES + 1)
+            if kwargs.get(f"image{index}") is not None
+        ]
+        slots = [slot for slot, _ in references]
+        if slots and slots != list(range(1, len(slots) + 1)):
+            print(
+                "[Zhenzhen Image G-2 Low Price] Reference image slots "
+                f"{slots} contain gaps; compacting them in slot order."
+            )
+        return references
+
+    def _upload_reference_images(
+        self,
+        model: str,
+        config: Dict[str, Any],
+        kwargs: Dict[str, Any],
+        on_progress: Optional[Callable[[int], None]] = None,
+    ) -> List[str]:
+        if model == ZHENZHEN_IMAGE_G2_T2I_MODEL:
+            return []
+
+        references = self._reference_images(kwargs)
+        if not references:
+            raise SeedanceLowPriceError(
+                "zhenzhen-image-g2-i2i requires 1-10 reference images"
+            )
+
+        urls = []
+        for position, (slot, image) in enumerate(references, start=1):
+            image_bytes = image_to_png_bytes(image)
+            if len(image_bytes) > ZHENZHEN_IMAGE_G2_IMAGE_MAX_BYTES:
+                raise SeedanceLowPriceError(
+                    f"Zhenzhen Image G-2 reference image{slot} exceeds the 10MB limit"
+                )
+            print(
+                f"[Zhenzhen Image G-2 Low Price] Uploading image{slot}.png "
+                f"({len(image_bytes) / 1024:.1f}KB)"
+            )
+            urls.append(
+                upload_media(
+                    image_bytes,
+                    f"zhenzhen_image_g2_reference_{slot}.png",
+                    "image/png",
+                    config,
+                )
+            )
+            if on_progress:
+                on_progress(int(position / len(references) * 20))
+        return urls
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_zhenzhen_image_g2_inputs(
+                model,
+                prompt,
+                resolution,
+                ratio,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls = self._upload_reference_images(
+                model,
+                config,
+                kwargs,
+                on_progress=update_progress,
+            )
+            payload = build_zhenzhen_image_g2_payload(
+                model,
+                prompt,
+                resolution,
+                ratio,
+                image_urls,
+            )
+            update_progress(25)
+            print(f"[Zhenzhen Image G-2 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(30)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(30 + int(progress * 0.6))
+
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            image_url = extract_image_url(final_response)
+            output_image = download_image(image_url)
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                output_image,
+                image_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
                 "model": model,
                 "task_id": task_id,
                 "message": message,
@@ -3984,6 +4255,7 @@ __all__ = [
     "Comfly_seedance2_low_price_settings",
     "Comfly_seedance2_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
+    "Comfly_zhenzhen_image_g2_lowprice",
     "Comfly_happyhorse_1_1_lowprice",
     "Comfly_wan_2_7_spicy_i2v_lowprice",
     "Comfly_kling_video_lowprice",
