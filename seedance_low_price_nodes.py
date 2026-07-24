@@ -4251,11 +4251,1132 @@ class Comfly_doubao_seed_audio_1_0_lowprice:
             )
 
 
+ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL = "zhenzhen-image-g-v2-lowprice"
+ZHENZHEN_IMAGE_G_V2_RESOLUTIONS = ["1k", "2k", "4k"]
+ZHENZHEN_IMAGE_G_V2_SIZES = ["1:1", "16:9", "9:16", "3:2", "2:3"]
+ZHENZHEN_IMAGE_G_V2_MAX_IMAGES = 16
+ZHENZHEN_IMAGE_GK_V15_MODEL = "zhenzhen-image-gk-v15"
+ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL = "zhenzhen-image-gk-v15-edit"
+ZHENZHEN_IMAGE_GK_V15_MODELS = [
+    ZHENZHEN_IMAGE_GK_V15_MODEL,
+    ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL,
+]
+ZHENZHEN_IMAGE_GK_V15_SIZES = ["1:1", "16:9", "9:16", "3:2", "2:3"]
+APIMART_IMAGE_PROMPT_MAX_LENGTH = 20000
+
+ZHENZHEN_VIDEO_G_OMNI_FLASH_MODEL = "zhenzhen-video-g-omni-flash"
+ZHENZHEN_VIDEO_GK_V15_MODEL = "zhenzhen-video-gk-v15"
+ZHENZHEN_VIDEO_GK_SECONDS = [str(value) for value in range(6, 31)]
+ZHENZHEN_VIDEO_GK_RESOLUTIONS = ["480p", "720p"]
+ZHENZHEN_VIDEO_GK_RATIOS = ["16:9", "9:16", "1:1", "3:2", "2:3"]
+ZHENZHEN_VIDEO_V31_FAST_MODEL = "zhenzhen-video-v31-fast"
+ZHENZHEN_VIDEO_V31_QUALITY_MODEL = "zhenzhen-video-v31-quality"
+ZHENZHEN_VIDEO_V31_MODELS = [
+    ZHENZHEN_VIDEO_V31_FAST_MODEL,
+    ZHENZHEN_VIDEO_V31_QUALITY_MODEL,
+]
+ZHENZHEN_VIDEO_V31_RESOLUTIONS = ["720p", "1080p", "4k"]
+ZHENZHEN_VIDEO_V31_RATIOS = ["16:9", "9:16"]
+WHISPER_TRANSCRIPTION_MODEL = "whisper-1"
+WHISPER_RESPONSE_FORMATS = ["json", "verbose_json", "srt", "text", "vtt"]
+
+
+def _validate_prompt(
+    prompt: str,
+    label: str,
+    required: bool = True,
+    max_length: int = PROMPT_MAX_LENGTH,
+) -> str:
+    text = str(prompt or "").strip()
+    if required and not text:
+        raise SeedanceLowPriceError(f"{label} prompt is required")
+    if len(text) > max_length:
+        raise SeedanceLowPriceError(
+            f"{label} prompt cannot exceed {max_length} characters"
+        )
+    return text
+
+
+def _is_width_height_size(size: str) -> bool:
+    parts = str(size or "").strip().lower().split("x")
+    return (
+        len(parts) == 2
+        and all(part.isdigit() for part in parts)
+        and all(int(part) > 0 for part in parts)
+    )
+
+
+def _connected_slots(
+    kwargs: Dict[str, Any],
+    prefix: str,
+    count: int,
+    label: str,
+) -> List[Tuple[int, Any]]:
+    slots = [
+        (index, kwargs[f"{prefix}{index}"])
+        for index in range(1, count + 1)
+        if kwargs.get(f"{prefix}{index}") is not None
+    ]
+    indexes = [index for index, _ in slots]
+    if indexes and indexes != list(range(1, len(indexes) + 1)):
+        print(f"[{label}] {prefix} slots {indexes} contain gaps; compacting in slot order.")
+    return slots
+
+
+def _upload_image_slots(
+    slots: List[Tuple[int, Any]],
+    config: Dict[str, Any],
+    filename_prefix: str,
+    on_progress: Optional[Callable[[int], None]] = None,
+) -> List[str]:
+    urls: List[str] = []
+    total = len(slots)
+    for position, (slot, image) in enumerate(slots, start=1):
+        image_bytes = image_to_png_bytes(image)
+        urls.append(
+            upload_media(
+                image_bytes,
+                f"{filename_prefix}_{slot}.png",
+                "image/png",
+                config,
+            )
+        )
+        if on_progress and total:
+            on_progress(int(position / total * 20))
+    return urls
+
+
+def validate_zhenzhen_image_g_v2_inputs(
+    model: str,
+    prompt: str,
+    resolution: str,
+    size: str,
+    n: int,
+    strict: bool = True,
+) -> None:
+    if model != ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL:
+        raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image G V2 model: {model}")
+    _validate_prompt(
+        prompt,
+        "Zhenzhen Image G V2",
+        required=strict,
+        max_length=APIMART_IMAGE_PROMPT_MAX_LENGTH,
+    )
+    if resolution not in ZHENZHEN_IMAGE_G_V2_RESOLUTIONS:
+        raise SeedanceLowPriceError("Image G V2 resolution must be 1k, 2k, or 4k")
+    normalized_size = str(size or "").strip().lower()
+    if (
+        normalized_size not in ZHENZHEN_IMAGE_G_V2_SIZES
+        and not _is_width_height_size(normalized_size)
+    ):
+        raise SeedanceLowPriceError(
+            "Image G V2 size must be 1:1, 16:9, 9:16, 3:2, 2:3, or WxH"
+        )
+    if not 1 <= int(n) <= 10:
+        raise SeedanceLowPriceError("Image G V2 n must be between 1 and 10")
+
+
+def build_zhenzhen_image_g_v2_payload(
+    model: str,
+    prompt: str,
+    resolution: str,
+    size: str,
+    n: int,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_zhenzhen_image_g_v2_inputs(
+        model, prompt, resolution, size, n, strict=True
+    )
+    urls = list(image_urls or [])
+    if len(urls) > ZHENZHEN_IMAGE_G_V2_MAX_IMAGES:
+        raise SeedanceLowPriceError("Image G V2 accepts at most 16 reference images")
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "n": int(n),
+        "size": str(size).strip().lower(),
+        "metadata": {"resolution": resolution},
+    }
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class Comfly_zhenzhen_image_g_v2_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
+        for index in range(1, ZHENZHEN_IMAGE_G_V2_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    [ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL],
+                    {"default": ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (
+                    ZHENZHEN_IMAGE_G_V2_RESOLUTIONS,
+                    {"default": "1k"},
+                ),
+                "size": ("STRING", {"default": "1:1"}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 10, "step": 1}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        resolution=None,
+        size="1:1",
+        n=1,
+        strict=False,
+        **kwargs,
+    ):
+        if None in (model, resolution):
+            return True
+        try:
+            validate_zhenzhen_image_g_v2_inputs(
+                model, prompt, resolution, size, n, strict=bool(strict)
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        resolution: str,
+        size: str,
+        n: int,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_zhenzhen_image_g_v2_inputs(
+                model, prompt, resolution, size, n, strict=True
+            )
+            config = resolve_config(api_config)
+            slots = _connected_slots(
+                kwargs,
+                "image",
+                ZHENZHEN_IMAGE_G_V2_MAX_IMAGES,
+                "Zhenzhen Image G V2 Low Price",
+            )
+            image_urls = _upload_image_slots(
+                slots,
+                config,
+                "zhenzhen_image_g_v2_reference",
+                on_progress=update_progress,
+            )
+            payload = build_zhenzhen_image_g_v2_payload(
+                model, prompt, resolution, size, n, image_urls
+            )
+            update_progress(25)
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(30)
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            image_url = extract_image_url(final_response)
+            image = download_image(image_url)
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                image,
+                image_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": f"{type(exc).__name__}: {exc}",
+            }
+            blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+            return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+def validate_zhenzhen_image_gk_v15_inputs(
+    model: str,
+    prompt: str,
+    size: str,
+    n: int,
+    has_image: bool = False,
+    strict: bool = True,
+) -> None:
+    if model not in ZHENZHEN_IMAGE_GK_V15_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image GK V1.5 model: {model}")
+    _validate_prompt(
+        prompt,
+        "Zhenzhen Image GK V1.5",
+        required=strict,
+        max_length=APIMART_IMAGE_PROMPT_MAX_LENGTH,
+    )
+    if size not in ZHENZHEN_IMAGE_GK_V15_SIZES:
+        raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image GK V1.5 size: {size}")
+    if not 1 <= int(n) <= 10:
+        raise SeedanceLowPriceError("Zhenzhen Image GK V1.5 n must be between 1 and 10")
+    if strict and model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL and not has_image:
+        raise SeedanceLowPriceError(
+            "zhenzhen-image-gk-v15-edit requires image1"
+        )
+    if model == ZHENZHEN_IMAGE_GK_V15_MODEL and has_image:
+        raise SeedanceLowPriceError(
+            "zhenzhen-image-gk-v15 is text-to-image and does not accept image1"
+        )
+
+
+def build_zhenzhen_image_gk_v15_payload(
+    model: str,
+    prompt: str,
+    size: str,
+    n: int,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    urls = list(image_urls or [])
+    validate_zhenzhen_image_gk_v15_inputs(
+        model, prompt, size, n, has_image=bool(urls), strict=True
+    )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "n": int(n),
+        "size": size,
+    }
+    if model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL:
+        payload["images"] = urls[:1]
+    return payload
+
+
+class Comfly_zhenzhen_image_gk_v15_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    ZHENZHEN_IMAGE_GK_V15_MODELS,
+                    {"default": ZHENZHEN_IMAGE_GK_V15_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "size": (ZHENZHEN_IMAGE_GK_V15_SIZES, {"default": "1:1"}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 10, "step": 1}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        size=None,
+        n=1,
+        image1=None,
+        strict=False,
+        **kwargs,
+    ):
+        if None in (model, size):
+            return True
+        try:
+            validate_zhenzhen_image_gk_v15_inputs(
+                model,
+                prompt,
+                size,
+                n,
+                has_image=image1 is not None,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        size: str,
+        n: int,
+        image1: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_zhenzhen_image_gk_v15_inputs(
+                model,
+                prompt,
+                size,
+                n,
+                has_image=image1 is not None,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            if model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL:
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image1),
+                        "zhenzhen_image_gk_v15_reference.png",
+                        "image/png",
+                        config,
+                    )
+                )
+            update_progress(20)
+            payload = build_zhenzhen_image_gk_v15_payload(
+                model, prompt, size, n, image_urls
+            )
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(30)
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            image_url = extract_image_url(final_response)
+            image = download_image(image_url)
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                image,
+                image_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": f"{type(exc).__name__}: {exc}",
+            }
+            blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+            return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+def _validate_ratio(ratio: str, supported: List[str], label: str) -> None:
+    if ratio not in supported:
+        raise SeedanceLowPriceError(
+            f"{label} ratio must be one of {', '.join(supported)}"
+        )
+
+
+def build_zhenzhen_video_gk_v15_payload(
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    text = _validate_prompt(prompt, "Zhenzhen Video GK V1.5")
+    urls = list(image_urls or [])
+    if str(seconds) not in ZHENZHEN_VIDEO_GK_SECONDS:
+        raise SeedanceLowPriceError("Video GK V1.5 seconds must be 6 through 30")
+    if resolution not in ZHENZHEN_VIDEO_GK_RESOLUTIONS:
+        raise SeedanceLowPriceError("Video GK V1.5 resolution must be 480p or 720p")
+    _validate_ratio(ratio, ZHENZHEN_VIDEO_GK_RATIOS, "Video GK V1.5")
+    if len(urls) > 7:
+        raise SeedanceLowPriceError("Video GK V1.5 accepts at most 7 images")
+    payload: Dict[str, Any] = {
+        "model": ZHENZHEN_VIDEO_GK_V15_MODEL,
+        "prompt": text,
+        "seconds": str(seconds),
+        "metadata": {"resolution": resolution, "ratio": ratio},
+    }
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+def build_zhenzhen_video_v31_payload(
+    model: str,
+    prompt: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    if model not in ZHENZHEN_VIDEO_V31_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Video V3.1 model: {model}")
+    text = _validate_prompt(prompt, "Zhenzhen Video V3.1")
+    urls = list(image_urls or [])
+    if resolution not in ZHENZHEN_VIDEO_V31_RESOLUTIONS:
+        raise SeedanceLowPriceError("Video V3.1 resolution must be 720p, 1080p, or 4k")
+    _validate_ratio(ratio, ZHENZHEN_VIDEO_V31_RATIOS, "Video V3.1")
+    if len(urls) > 3:
+        raise SeedanceLowPriceError("Video V3.1 Fast accepts at most 3 images")
+    if model == ZHENZHEN_VIDEO_V31_QUALITY_MODEL and len(urls) == 3:
+        raise SeedanceLowPriceError(
+            "Video V3.1 Quality does not support the 3-image reference mode"
+        )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": text,
+        "seconds": "8",
+        "metadata": {"resolution": resolution, "ratio": ratio},
+    }
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+def _validate_remote_video_url(video_url: str) -> str:
+    value = str(video_url or "").strip()
+    if not value:
+        return ""
+    parsed = urlsplit(value)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        raise SeedanceLowPriceError("Omni video_url must be an http(s) URL")
+    return value
+
+
+def build_zhenzhen_video_g_omni_flash_payload(
+    prompt: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+    video_url: str = "",
+    extend_from_task_id: str = "",
+) -> Dict[str, Any]:
+    text = _validate_prompt(
+        prompt, "Zhenzhen Video G Omni Flash", required=False
+    )
+    urls = list(image_urls or [])
+    if len(urls) > 16:
+        raise SeedanceLowPriceError("Video G Omni Flash accepts at most 16 images")
+    _validate_ratio(ratio, RATIOS, "Video G Omni Flash")
+    normalized_video_url = _validate_remote_video_url(video_url)
+    extend_id = str(extend_from_task_id or "").strip()
+    if normalized_video_url and extend_id:
+        raise SeedanceLowPriceError(
+            "Omni video_url and extend_from_task_id are mutually exclusive"
+        )
+    if not (text or urls or normalized_video_url or extend_id):
+        raise SeedanceLowPriceError(
+            "Omni requires a prompt, image, video, or extend_from_task_id"
+        )
+    metadata: Dict[str, Any] = {"resolution": "720p"}
+    if ratio != "adaptive":
+        metadata["ratio"] = ratio
+    if normalized_video_url:
+        metadata["video_url"] = normalized_video_url
+    if extend_id:
+        metadata["extend_from_task_id"] = extend_id
+    payload: Dict[str, Any] = {
+        "model": ZHENZHEN_VIDEO_G_OMNI_FLASH_MODEL,
+        "metadata": metadata,
+    }
+    if text:
+        payload["prompt"] = text
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class _Comfly_apimart_video_base:
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @staticmethod
+    def _update_progress(pbar: Any, value: int) -> None:
+        if pbar is not None:
+            try:
+                pbar.update_absolute(value, 100)
+            except Exception:
+                pass
+
+    def _finish_video(
+        self,
+        payload: Dict[str, Any],
+        config: Dict[str, Any],
+        task_id: str,
+        pbar: Any,
+    ):
+        task_id, submit_response = submit_task(payload, config)
+        self._update_progress(pbar, 25)
+        final_response = poll_task(
+            task_id,
+            config,
+            on_progress=lambda value: self._update_progress(
+                pbar, 25 + int(value * 0.7)
+            ),
+        )
+        video_url = extract_video_url(final_response)
+        video = download_video(video_url)
+        self._update_progress(pbar, 100)
+        response = {
+            "status": "completed",
+            "model": payload["model"],
+            "task_id": task_id,
+            "submit": submit_response,
+            "result": final_response,
+        }
+        return (
+            video,
+            video_url,
+            task_id,
+            json.dumps(response, ensure_ascii=False, indent=2),
+        )
+
+    @staticmethod
+    def _error_result(model: str, task_id: str, exc: Exception):
+        message = f"{type(exc).__name__}: {exc}"
+        response = {
+            "status": "error",
+            "model": model,
+            "task_id": task_id,
+            "message": message,
+        }
+        return (
+            make_error_video(message),
+            "",
+            task_id,
+            json.dumps(response, ensure_ascii=False, indent=2),
+        )
+
+
+class Comfly_zhenzhen_video_gk_v15_lowprice(_Comfly_apimart_video_base):
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
+        for index in range(1, 8):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (ZHENZHEN_VIDEO_GK_SECONDS, {"default": "6"}),
+                "resolution": (
+                    ZHENZHEN_VIDEO_GK_RESOLUTIONS,
+                    {"default": "480p"},
+                ),
+                "ratio": (ZHENZHEN_VIDEO_GK_RATIOS, {"default": "16:9"}),
+            },
+            "optional": optional,
+        }
+
+    FUNCTION = "generate"
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        prompt="",
+        seconds="6",
+        resolution="480p",
+        ratio="16:9",
+        strict=False,
+        **kwargs,
+    ):
+        try:
+            if strict:
+                build_zhenzhen_video_gk_v15_payload(
+                    prompt, seconds, resolution, ratio
+                )
+            else:
+                _validate_prompt(
+                    prompt,
+                    "Zhenzhen Video GK V1.5",
+                    required=False,
+                )
+                if str(seconds) not in ZHENZHEN_VIDEO_GK_SECONDS:
+                    raise SeedanceLowPriceError(
+                        "Video GK V1.5 seconds must be 6 through 30"
+                    )
+                if resolution not in ZHENZHEN_VIDEO_GK_RESOLUTIONS:
+                    raise SeedanceLowPriceError(
+                        "Video GK V1.5 resolution must be 480p or 720p"
+                    )
+                _validate_ratio(ratio, ZHENZHEN_VIDEO_GK_RATIOS, "Video GK V1.5")
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        try:
+            config = resolve_config(api_config)
+            slots = _connected_slots(
+                kwargs, "image", 7, "Zhenzhen Video GK V1.5 Low Price"
+            )
+            image_urls = _upload_image_slots(
+                slots,
+                config,
+                "zhenzhen_video_gk_v15_reference",
+                on_progress=lambda value: self._update_progress(pbar, value),
+            )
+            payload = build_zhenzhen_video_gk_v15_payload(
+                prompt, seconds, resolution, ratio, image_urls
+            )
+            return self._finish_video(payload, config, task_id, pbar)
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(ZHENZHEN_VIDEO_GK_V15_MODEL, task_id, exc)
+
+
+class Comfly_zhenzhen_video_v31_lowprice(_Comfly_apimart_video_base):
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            "api_config": (CONFIG_TYPE,),
+            "image1": ("IMAGE",),
+            "image2": ("IMAGE",),
+            "image3": ("IMAGE",),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        }
+        return {
+            "required": {
+                "model": (
+                    ZHENZHEN_VIDEO_V31_MODELS,
+                    {"default": ZHENZHEN_VIDEO_V31_FAST_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (["8"], {"default": "8"}),
+                "resolution": (
+                    ZHENZHEN_VIDEO_V31_RESOLUTIONS,
+                    {"default": "720p"},
+                ),
+                "ratio": (ZHENZHEN_VIDEO_V31_RATIOS, {"default": "16:9"}),
+            },
+            "optional": optional,
+        }
+
+    FUNCTION = "generate"
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="8",
+        resolution="720p",
+        ratio="16:9",
+        strict=False,
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            if str(seconds) != "8":
+                raise SeedanceLowPriceError("Video V3.1 duration is fixed at 8 seconds")
+            if strict:
+                build_zhenzhen_video_v31_payload(
+                    model, prompt, resolution, ratio
+                )
+            else:
+                if model not in ZHENZHEN_VIDEO_V31_MODELS:
+                    raise SeedanceLowPriceError(
+                        f"Unsupported Video V3.1 model: {model}"
+                    )
+                _validate_prompt(
+                    prompt, "Zhenzhen Video V3.1", required=False
+                )
+                if resolution not in ZHENZHEN_VIDEO_V31_RESOLUTIONS:
+                    raise SeedanceLowPriceError(
+                        "Video V3.1 resolution must be 720p, 1080p, or 4k"
+                    )
+                _validate_ratio(ratio, ZHENZHEN_VIDEO_V31_RATIOS, "Video V3.1")
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        try:
+            if str(seconds) != "8":
+                raise SeedanceLowPriceError("Video V3.1 duration is fixed at 8 seconds")
+            config = resolve_config(api_config)
+            slots = _connected_slots(
+                kwargs, "image", 3, "Zhenzhen Video V3.1 Low Price"
+            )
+            image_urls = _upload_image_slots(
+                slots,
+                config,
+                "zhenzhen_video_v31_reference",
+                on_progress=lambda value: self._update_progress(pbar, value),
+            )
+            payload = build_zhenzhen_video_v31_payload(
+                model, prompt, resolution, ratio, image_urls
+            )
+            return self._finish_video(payload, config, task_id, pbar)
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(model, task_id, exc)
+
+
+class Comfly_zhenzhen_video_g_omni_flash_lowprice(_Comfly_apimart_video_base):
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            "api_config": (CONFIG_TYPE,),
+            "input_video": (VIDEO_TYPE,),
+            "video_url": ("STRING", {"default": ""}),
+            "extend_from_task_id": ("STRING", {"default": ""}),
+        }
+        for index in range(1, 17):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (["720p"], {"default": "720p"}),
+                "ratio": (RATIOS, {"default": "16:9"}),
+            },
+            "optional": optional,
+        }
+
+    FUNCTION = "generate"
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        prompt="",
+        resolution="720p",
+        ratio="16:9",
+        video_url="",
+        extend_from_task_id="",
+        strict=False,
+        **kwargs,
+    ):
+        try:
+            if resolution != "720p":
+                raise SeedanceLowPriceError(
+                    "Video G Omni Flash resolution is fixed at 720p"
+                )
+            _validate_ratio(ratio, RATIOS, "Video G Omni Flash")
+            normalized_url = _validate_remote_video_url(video_url)
+            if normalized_url and str(extend_from_task_id or "").strip():
+                raise SeedanceLowPriceError(
+                    "Omni video_url and extend_from_task_id are mutually exclusive"
+                )
+            if strict:
+                build_zhenzhen_video_g_omni_flash_payload(
+                    prompt,
+                    ratio,
+                    video_url=normalized_url,
+                    extend_from_task_id=extend_from_task_id,
+                )
+            else:
+                _validate_prompt(
+                    prompt,
+                    "Zhenzhen Video G Omni Flash",
+                    required=False,
+                )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        prompt: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        input_video: Any = None,
+        video_url: str = "",
+        extend_from_task_id: str = "",
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        try:
+            if resolution != "720p":
+                raise SeedanceLowPriceError(
+                    "Video G Omni Flash resolution is fixed at 720p"
+                )
+            normalized_video_url = _validate_remote_video_url(video_url)
+            if input_video is not None and normalized_video_url:
+                raise SeedanceLowPriceError(
+                    "Connect input_video or set video_url, not both"
+                )
+            if input_video is not None and str(extend_from_task_id or "").strip():
+                raise SeedanceLowPriceError(
+                    "Omni input_video and extend_from_task_id are mutually exclusive"
+                )
+            config = resolve_config(api_config)
+            slots = _connected_slots(
+                kwargs, "image", 16, "Zhenzhen Video G Omni Flash Low Price"
+            )
+            image_urls = _upload_image_slots(
+                slots,
+                config,
+                "zhenzhen_video_g_omni_reference",
+                on_progress=lambda value: self._update_progress(pbar, value),
+            )
+            if input_video is not None:
+                normalized_video_url = upload_media(
+                    video_to_mp4_bytes(input_video),
+                    "zhenzhen_video_g_omni_input.mp4",
+                    "video/mp4",
+                    config,
+                )
+                self._update_progress(pbar, 20)
+            payload = build_zhenzhen_video_g_omni_flash_payload(
+                prompt,
+                ratio,
+                image_urls=image_urls,
+                video_url=normalized_video_url,
+                extend_from_task_id=extend_from_task_id,
+            )
+            return self._finish_video(payload, config, task_id, pbar)
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(
+                ZHENZHEN_VIDEO_G_OMNI_FLASH_MODEL, task_id, exc
+            )
+
+
+def _extract_transcription_text(data: Any) -> str:
+    if isinstance(data, dict):
+        for key in ("text", "transcript", "transcription"):
+            value = data.get(key)
+            if value is not None:
+                return str(value)
+        if isinstance(data.get("data"), dict):
+            return _extract_transcription_text(data["data"])
+    return ""
+
+
+def transcribe_audio(
+    file_bytes: bytes,
+    filename: str,
+    mime_type: str,
+    model: str,
+    response_format: str,
+    config: Dict[str, Any],
+    sleep: Callable[[float], None] = time.sleep,
+) -> Tuple[str, str]:
+    if model != WHISPER_TRANSCRIPTION_MODEL:
+        raise SeedanceLowPriceError(f"Unsupported Whisper model: {model}")
+    if response_format not in WHISPER_RESPONSE_FORMATS:
+        raise SeedanceLowPriceError(
+            f"Unsupported Whisper response_format: {response_format}"
+        )
+    url = f"{config['base_url']}/v1/audio/transcriptions"
+    form = {"model": model, "response_format": response_format}
+    files = {"file": (filename, file_bytes, mime_type)}
+    last_error = "unknown error"
+    for attempt in range(3):
+        if attempt:
+            sleep(min(2 ** attempt + 1, 15))
+        try:
+            response = _get_session().post(
+                url,
+                headers=_headers(config["api_key"], json_content=False),
+                data=form,
+                files=files,
+                timeout=config.get("timeout", 60),
+            )
+        except requests.RequestException as exc:
+            last_error = f"network error: {type(exc).__name__}: {exc}"
+            continue
+
+        try:
+            parsed = response.json() if response.text else None
+        except ValueError:
+            parsed = None
+        if response.status_code == 429 or response.status_code >= 500:
+            last_error = (
+                f"HTTP {response.status_code}: "
+                f"{extract_error_message(parsed, response.text[:300])}"
+            )
+            continue
+        if not 200 <= response.status_code < 300:
+            raise SeedanceLowPriceError(
+                f"Transcription rejected (HTTP {response.status_code}): "
+                f"{extract_error_message(parsed, response.text[:300])}"
+            )
+        if response_format in ("json", "verbose_json"):
+            if not isinstance(parsed, dict):
+                raise SeedanceLowPriceError(
+                    f"Transcription returned invalid JSON: {response.text[:300]}"
+                )
+            return (
+                _extract_transcription_text(parsed),
+                json.dumps(parsed, ensure_ascii=False, indent=2),
+            )
+        return (response.text, response.text)
+    raise RuntimeError(f"Transcription failed after 3 attempts: {last_error}")
+
+
+class Comfly_whisper_1_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "audio": (AUDIO_TYPE,),
+                "model": (
+                    [WHISPER_TRANSCRIPTION_MODEL],
+                    {"default": WHISPER_TRANSCRIPTION_MODEL},
+                ),
+                "response_format": (
+                    WHISPER_RESPONSE_FORMATS,
+                    {"default": "json"},
+                ),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("text", "response")
+    FUNCTION = "transcribe"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        audio=None,
+        model=None,
+        response_format=None,
+        strict=False,
+        **kwargs,
+    ):
+        if model not in (None, WHISPER_TRANSCRIPTION_MODEL):
+            return f"Unsupported Whisper model: {model}"
+        if response_format not in (None, *WHISPER_RESPONSE_FORMATS):
+            return f"Unsupported Whisper response_format: {response_format}"
+        if strict and audio is None:
+            return "Whisper transcription requires an audio input"
+        return True
+
+    def transcribe(
+        self,
+        audio: Any,
+        model: str,
+        response_format: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        try:
+            validation = self.VALIDATE_INPUTS(
+                audio=audio,
+                model=model,
+                response_format=response_format,
+                strict=True,
+            )
+            if validation is not True:
+                raise SeedanceLowPriceError(validation)
+            config = resolve_config(api_config)
+            wav_bytes = audio_to_wav_bytes(audio)
+            return transcribe_audio(
+                wav_bytes,
+                "whisper_input.wav",
+                "audio/wav",
+                model,
+                response_format,
+                config,
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = {
+                "status": "error",
+                "model": model,
+                "message": f"{type(exc).__name__}: {exc}",
+            }
+            return ("", json.dumps(response, ensure_ascii=False, indent=2))
+
+
 __all__ = [
     "Comfly_seedance2_low_price_settings",
     "Comfly_seedance2_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
     "Comfly_zhenzhen_image_g2_lowprice",
+    "Comfly_zhenzhen_image_g_v2_lowprice",
+    "Comfly_zhenzhen_video_g_omni_flash_lowprice",
+    "Comfly_zhenzhen_video_gk_v15_lowprice",
+    "Comfly_zhenzhen_video_v31_lowprice",
+    "Comfly_whisper_1_lowprice",
+    "Comfly_zhenzhen_image_gk_v15_lowprice",
     "Comfly_happyhorse_1_1_lowprice",
     "Comfly_wan_2_7_spicy_i2v_lowprice",
     "Comfly_kling_video_lowprice",
