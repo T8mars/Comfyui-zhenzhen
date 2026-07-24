@@ -71,16 +71,34 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260725-1
+
+新增 6 个贞贞的平价AI小屋（国内版）节点：
+
+- `zhenzhen-image-g-v2-lowprice`：支持文生图和最多 16 张参考图的图生图。
+- `zhenzhen-video-g-omni-flash-lowprice`：支持文生视频、图生视频、视频编辑和任务续作。
+- `zhenzhen-video-gk-v15-lowprice`：支持文生视频和最多 7 张参考图的视频生成。
+- `zhenzhen-video-v31-lowprice`：合并 V3.1 Fast 与 Quality 模型。
+- `zhenzhen-whisper-1-lowprice`：同步音频转写，支持 JSON、字幕和纯文本格式。
+- `zhenzhen-image-gk-v15-lowprice`：合并 GK V1.5 文生图与图像编辑模型。
+
+所有节点复用国内版 API Settings，节点底部提供国内版 ApiKey 获取按钮，并补充各支持模式的示例工作流。示例工作流不保存 APIKEY 或历史运行结果。
+
+
 ### 20260721-1
 
-新增zhenzhen-image-g2节点，稳定版，适用于所有出图类型  
-更新对应工作流（贞贞的平价AI小屋对应API）  
+新增独立稳定版节点：`zhenzhen-image-g2-lowprice`，适用于文生图和图像编辑。
+
+- 支持 `zhenzhen-image-g2-t2i` 文生图和 `zhenzhen-image-g2-i2i` 图像编辑。
+- 复用贞贞的平价AI小屋 API Settings，G-2 分辨率固定为 `1k`，可选择画面比例，图像编辑支持 1-10 张参考图。
+- 不修改原有 `zhenzhen-sd2-seedream-v5-pro-lowprice` 节点及其 API 请求。
+- 新增 G-2 文生图和图像编辑示例工作流，示例不保存 APIKEY 或历史运行结果。
+- 已真实验证两个模型均可完成提交、轮询、结果下载，并转换为 ComfyUI `IMAGE` 输出。
 
 ### 20260716-1
 
 新增：可灵，海螺，VIDU相关节点  
 更新对应工作流（贞贞的平价AI小屋对应API）  
-
 
 ### 20260715-2
 
