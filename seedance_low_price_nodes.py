@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import io
 import json
+import mimetypes
 import os
+import shutil
 import ssl
+import subprocess
 import tempfile
 import threading
 import time
 import uuid
 import wave
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlsplit, urlunsplit
 
 import numpy as np
@@ -5366,6 +5369,1339 @@ class Comfly_whisper_1_lowprice:
             return ("", json.dumps(response, ensure_ascii=False, indent=2))
 
 
+SUNO_VERSIONS = ["v3.5", "v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5"]
+SUNO_INSPO_VERSIONS = ["v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5"]
+SUNO_REPLACE_VERSIONS = ["v4", "v4.5+", "v5", "v5.5"]
+SUNO_REMASTER_VERSIONS = ["v4.5+", "v5", "v5.5"]
+SUNO_V5_VERSIONS = ["v5", "v5.5"]
+MAX_SUNO_REFERENCE_AUDIOS = 4
+SUNO_UPLOAD_MIN_SECONDS = 6.0
+SUNO_CREATE_VOICE_MIN_SECONDS = 10.0
+SUNO_CREATE_VOICE_MAX_SECONDS = 240.0
+
+SUNO_ACTION_SPECS: Dict[str, Dict[str, Any]] = {
+    "suno-generation": {
+        "action": "",
+        "sync": False,
+        "reference_type": "none",
+        "required_fields": ("version", "prompt"),
+        "allowed_fields": (
+            "version",
+            "prompt",
+            "custom",
+            "instrumental",
+            "title",
+            "style",
+            "vocal_gender",
+        ),
+        "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-lyrics": {
+        "action": "lyrics",
+        "sync": False,
+        "reference_type": "none",
+        "required_fields": ("prompt",),
+        "allowed_fields": ("prompt",),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-upload": {
+        "action": "upload",
+        "sync": False,
+        "reference_type": "url",
+        "required_fields": ("audioFilePath",),
+        "allowed_fields": ("audioFilePath",),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-extend": {
+        "action": "extend",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "continue_at"),
+        "allowed_fields": ("task_id", "audio_index", "continue_at", "version"),
+        "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-cover-song": {
+        "action": "cover-song",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "prompt"),
+        "allowed_fields": ("task_id", "audio_index", "prompt", "version"),
+        "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-inspo": {
+        "action": "inspo",
+        "sync": False,
+        "reference_type": "url",
+        "required_fields": ("audio_urls",),
+        "allowed_fields": ("audio_urls", "version"),
+        "allowed_versions": tuple(SUNO_INSPO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-mashup": {
+        "action": "mashup",
+        "sync": False,
+        "reference_type": "mashup",
+        "required_fields": ("task_ids", "prompt"),
+        "allowed_fields": ("task_ids", "prompt", "version"),
+        "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-upsample-tags": {
+        "action": "upsample-tags",
+        "sync": True,
+        "reference_type": "none",
+        "required_fields": ("tags",),
+        "allowed_fields": ("tags",),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-sounds": {
+        "action": "sounds",
+        "sync": False,
+        "reference_type": "none",
+        "required_fields": ("prompt",),
+        "allowed_fields": ("prompt", "version"),
+        "allowed_versions": tuple(SUNO_V5_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-create-voice": {
+        "action": "create-voice",
+        "sync": False,
+        "reference_type": "url",
+        "required_fields": ("audio_url",),
+        "allowed_fields": ("audio_url",),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-stems": {
+        "action": "stems",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-stems-all": {
+        "action": "stems-all",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-wav": {
+        "action": "wav",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-generate-mp4": {
+        "action": "generate-mp4",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "video",
+    },
+    "suno-concat": {
+        "action": "concat",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-crop": {
+        "action": "crop",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "start_s", "end_s"),
+        "allowed_fields": ("task_id", "audio_index", "start_s", "end_s"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-fade-in": {
+        "action": "fade-in",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "duration_s"),
+        "allowed_fields": ("task_id", "audio_index", "duration_s"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-fade-out": {
+        "action": "fade-out",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "duration_s"),
+        "allowed_fields": ("task_id", "audio_index", "duration_s"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-remove-section": {
+        "action": "remove-section",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "start_s", "end_s"),
+        "allowed_fields": ("task_id", "audio_index", "start_s", "end_s"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-replace-music": {
+        "action": "replace-music",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "start_s", "end_s"),
+        "allowed_fields": (
+            "task_id",
+            "audio_index",
+            "start_s",
+            "end_s",
+            "version",
+        ),
+        "allowed_versions": tuple(SUNO_REPLACE_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-adjust-speed": {
+        "action": "adjust-speed",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "speed"),
+        "allowed_fields": ("task_id", "audio_index", "speed"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-remaster": {
+        "action": "remaster",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index", "version"),
+        "allowed_versions": tuple(SUNO_REMASTER_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-midi": {
+        "action": "midi",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "file",
+    },
+    "suno-bpm": {
+        "action": "bpm",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-aligned-lyrics": {
+        "action": "aligned-lyrics",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-persona": {
+        "action": "persona",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "name"),
+        "allowed_fields": ("task_id", "audio_index", "name"),
+        "allowed_versions": (),
+        "result_family": "text",
+    },
+    "suno-vox": {
+        "action": "vox",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id",),
+        "allowed_fields": ("task_id", "audio_index"),
+        "allowed_versions": (),
+        "result_family": "audio",
+    },
+    "suno-sample": {
+        "action": "sample",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "start_s", "end_s", "prompt"),
+        "allowed_fields": (
+            "task_id",
+            "audio_index",
+            "prompt",
+            "start_s",
+            "end_s",
+            "version",
+        ),
+        "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-add-vocals": {
+        "action": "add-vocals",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "prompt"),
+        "allowed_fields": ("task_id", "audio_index", "prompt", "version"),
+        "allowed_versions": tuple(SUNO_V5_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-add-instrumental": {
+        "action": "add-instrumental",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "prompt"),
+        "allowed_fields": ("task_id", "audio_index", "prompt", "version"),
+        "allowed_versions": tuple(SUNO_V5_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-add-stem": {
+        "action": "add-stem",
+        "sync": False,
+        "reference_type": "task_audio",
+        "required_fields": ("task_id", "prompt"),
+        "allowed_fields": ("task_id", "audio_index", "prompt", "version"),
+        "allowed_versions": ("v5.5",),
+        "result_family": "audio",
+    },
+}
+SUNO_OPERATIONS = list(SUNO_ACTION_SPECS)
+
+
+_SUNO_RUNNING_STATUSES = {
+    "created",
+    "submitted",
+    "queued",
+    "pending",
+    "processing",
+    "in_progress",
+    "running",
+}
+_SUNO_COMPLETED_STATUSES = {"completed", "complete", "success", "succeeded"}
+_SUNO_FAILED_STATUSES = {"failed", "failure", "error", "cancelled", "canceled"}
+
+
+def _extract_suno_task_id(value: Any) -> Optional[str]:
+    if isinstance(value, list):
+        for item in value:
+            task_id = _extract_suno_task_id(item)
+            if task_id:
+                return task_id
+        return None
+    if not isinstance(value, dict):
+        return None
+    for key in ("task_id", "id"):
+        candidate = value.get(key)
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+    nested = value.get("data")
+    if isinstance(nested, (dict, list)):
+        return _extract_suno_task_id(nested)
+    return None
+
+
+def submit_suno_action(
+    action: str,
+    payload: Dict[str, Any],
+    config: Dict[str, Any],
+    sleep: Callable[[float], None] = time.sleep,
+) -> Tuple[Optional[str], Dict[str, Any]]:
+    action_text = str(action or "").strip().strip("/")
+    suffix = f"/{action_text}" if action_text else ""
+    url = f"{config['base_url']}/v1/music/generations{suffix}"
+    last_error = "unknown error"
+    for attempt in range(3):
+        if attempt:
+            sleep(min(2 ** attempt + 1, 15))
+        try:
+            response = _get_session().post(
+                url,
+                headers=_headers(config["api_key"]),
+                json=payload,
+                timeout=config.get("timeout", 60),
+            )
+        except requests.ConnectTimeout as exc:
+            last_error = f"network error: {type(exc).__name__}: {exc}"
+            continue
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                "Suno submit transport failed after the request may have reached "
+                "the server; it was not retried to avoid a duplicate paid task. "
+                f"Check the provider console before retrying: {type(exc).__name__}: {exc}"
+            ) from exc
+
+        data = _response_json(response)
+        message = extract_error_message(data, response.text[:300])
+        if response.status_code == 429 or response.status_code >= 500:
+            last_error = f"HTTP {response.status_code}: {message}"
+            continue
+        if not 200 <= response.status_code < 300:
+            raise SeedanceLowPriceError(
+                f"Suno submit rejected (HTTP {response.status_code}): {message}"
+            )
+        if not isinstance(data, dict):
+            raise SeedanceLowPriceError("Suno submit returned a non-object JSON response")
+        return _extract_suno_task_id(data), data
+    raise RuntimeError(f"Suno submit failed after 3 attempts: {last_error}")
+
+
+def poll_suno_task(
+    task_id: str,
+    config: Dict[str, Any],
+    on_progress: Optional[Callable[[int], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> Dict[str, Any]:
+    task_id_text = str(task_id or "").strip()
+    if not task_id_text:
+        raise SeedanceLowPriceError("Suno task_id is required for polling")
+    url = f"{config['base_url']}/v1/music/tasks/{task_id_text}"
+    start = clock()
+    failures = 0
+    while True:
+        if clock() - start > config.get("max_poll_time", 1800):
+            raise RuntimeError("Suno polling timed out")
+        sleep(config.get("poll_interval", 4))
+        try:
+            response = _get_session().get(
+                url,
+                headers=_headers(config["api_key"], json_content=False),
+                timeout=30,
+            )
+        except requests.RequestException:
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError("Suno polling failed after repeated network errors")
+            sleep(min(failures * 2, 10))
+            continue
+
+        data = _response_json(response)
+        message = extract_error_message(data, response.text[:300])
+        if response.status_code != 200:
+            if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
+                raise SeedanceLowPriceError(
+                    f"Suno polling rejected (HTTP {response.status_code}): {message}"
+                )
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    f"Suno polling repeatedly returned HTTP {response.status_code}: {message}"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+        if not isinstance(data, dict):
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError("Suno polling repeatedly returned invalid JSON")
+            continue
+
+        task_data: Any = data.get("data")
+        if isinstance(task_data, list) and task_data and isinstance(task_data[0], dict):
+            task_data = task_data[0]
+        elif not isinstance(task_data, dict) and data.get("status"):
+            task_data = data
+        if not isinstance(task_data, dict):
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError("Suno polling response did not contain a data object")
+            continue
+
+        failures = 0
+        status = str(task_data.get("status") or "").strip().lower()
+        progress = _coerce_progress(task_data.get("progress"))
+        if on_progress and progress is not None:
+            on_progress(progress)
+        if status in _SUNO_COMPLETED_STATUSES:
+            return data
+        if status in _SUNO_FAILED_STATUSES:
+            reason = (
+                task_data.get("fail_reason")
+                or task_data.get("error")
+                or extract_error_message(task_data, "music task failed")
+            )
+            raise SeedanceLowPriceError(f"Suno task failed: {reason}")
+        if status and status not in _SUNO_RUNNING_STATUSES:
+            print(f"[Suno Low Price] Unknown task status '{status}', continuing to poll")
+
+
+def _suno_url_kind(key: str, url: str) -> str:
+    key_text = str(key or "").lower()
+    path = urlsplit(url).path.lower()
+    extension = os.path.splitext(path)[1]
+    if "image" in key_text or extension in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+        return "image"
+    if (
+        "video" in key_text
+        or "mp4" in key_text
+        or extension in {".mp4", ".mov", ".mkv", ".avi", ".webm"}
+    ):
+        return "video"
+    if (
+        "audio" in key_text
+        or "wav" in key_text
+        or extension in {".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a", ".aac"}
+    ):
+        return "audio"
+    return "file"
+
+
+def _collect_suno_urls(
+    value: Any,
+    key: str,
+    buckets: Dict[str, List[str]],
+    seen: Set[str],
+    artifacts: List[Dict[str, str]],
+) -> None:
+    if isinstance(value, dict):
+        for child_key, child_value in value.items():
+            _collect_suno_urls(child_value, str(child_key), buckets, seen, artifacts)
+        return
+    if isinstance(value, list):
+        for item in value:
+            _collect_suno_urls(item, key, buckets, seen, artifacts)
+        return
+    if not isinstance(value, str):
+        return
+    url = value.strip()
+    if not url.startswith(("http://", "https://")) or url in seen:
+        return
+    seen.add(url)
+    kind = _suno_url_kind(key, url)
+    buckets[kind].append(url)
+    buckets["all"].append(url)
+    artifacts.append({"url": url, "kind": kind})
+
+
+def _extract_suno_text(value: Any) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, (int, float, bool)):
+        return str(value)
+    if isinstance(value, list):
+        simple = [item for item in value if isinstance(item, (str, int, float, bool))]
+        if simple and len(simple) == len(value):
+            return json.dumps(simple, ensure_ascii=False)
+    if not isinstance(value, dict):
+        return ""
+    for key in (
+        "text",
+        "lyrics",
+        "tags",
+        "aligned_lyrics",
+        "bpm",
+        "persona_id",
+        "voice_id",
+        "audio_id",
+        "content",
+        "message",
+    ):
+        if key in value:
+            text = _extract_suno_text(value.get(key))
+            if text:
+                return text
+    music = value.get("music")
+    if isinstance(music, list):
+        for item in music:
+            if isinstance(item, dict):
+                for key in ("lyrics", "title", "audio_id"):
+                    text = _extract_suno_text(item.get(key))
+                    if text:
+                        return text
+    for key, child in value.items():
+        if key in {"id", "task_id", "status", "progress"}:
+            continue
+        text = _extract_suno_text(child)
+        if text:
+            return text
+    return ""
+
+
+def extract_suno_results(final_response: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(final_response, dict):
+        raise SeedanceLowPriceError("Suno response must be a JSON object")
+    data = final_response.get("data")
+    if isinstance(data, list) and len(data) == 1 and isinstance(data[0], dict):
+        task_data: Any = data[0]
+    else:
+        task_data = data if isinstance(data, dict) else final_response
+    result = task_data.get("result") if isinstance(task_data, dict) else None
+    result_data = result if result is not None else task_data
+    buckets: Dict[str, List[str]] = {
+        "audio": [],
+        "video": [],
+        "image": [],
+        "file": [],
+        "all": [],
+    }
+    artifacts: List[Dict[str, str]] = []
+    _collect_suno_urls(result_data, "", buckets, set(), artifacts)
+    return {
+        "task_id": _extract_suno_task_id(final_response) or "",
+        "status": (
+            str(task_data.get("status") or "").strip()
+            if isinstance(task_data, dict)
+            else ""
+        ),
+        "result": result_data,
+        "artifacts": artifacts,
+        "all_urls": buckets["all"],
+        "text": _extract_suno_text(result_data),
+    }
+
+
+def _suno_output_directory() -> str:
+    try:
+        import folder_paths
+
+        output_dir = folder_paths.get_output_directory()
+    except ImportError:
+        output_dir = os.environ.get("SEEDANCE_OUTPUT_DIR") or tempfile.gettempdir()
+    os.makedirs(output_dir, exist_ok=True)
+    return output_dir
+
+
+def _guess_suno_extension(url: str, content_type: str, fallback: str) -> str:
+    extension = os.path.splitext(urlsplit(url).path)[1].lower()
+    if 1 < len(extension) <= 10 and extension[1:].replace("_", "").isalnum():
+        return extension
+    media_type = str(content_type or "").split(";", 1)[0].strip().lower()
+    guessed = mimetypes.guess_extension(media_type) if media_type else None
+    if guessed:
+        return guessed
+    return f".{str(fallback or 'bin').strip().lower().lstrip('.') or 'bin'}"
+
+
+def download_suno_file(
+    url: str,
+    filename_prefix: str,
+    fallback_extension: str,
+    max_retries: int = 3,
+) -> str:
+    output_dir = _suno_output_directory()
+    last_error: Optional[Exception] = None
+    for attempt in range(max_retries):
+        if attempt:
+            time.sleep(2 ** attempt)
+        path = ""
+        try:
+            response = _get_session().get(url, stream=True, timeout=300)
+            response.raise_for_status()
+            content_type = (getattr(response, "headers", {}) or {}).get(
+                "Content-Type", ""
+            )
+            extension = _guess_suno_extension(
+                url, content_type, fallback_extension
+            )
+            path = os.path.join(
+                output_dir,
+                f"{filename_prefix}_{uuid.uuid4().hex[:12]}{extension}",
+            )
+            with open(path, "wb") as handle:
+                for chunk in response.iter_content(chunk_size=65536):
+                    if chunk:
+                        handle.write(chunk)
+            if os.path.getsize(path) <= 0:
+                raise RuntimeError("downloaded file is empty")
+            return path
+        except Exception as exc:
+            last_error = exc
+            if path:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+    raise RuntimeError(
+        f"Suno result download failed after {max_retries} attempts: {last_error}"
+    )
+
+
+def _load_suno_wav(path: str) -> Dict[str, Any]:
+    with open(path, "rb") as handle:
+        return audio_bytes_to_comfy(handle.read(), "wav", 44100)
+
+
+def _find_suno_ffmpeg() -> Optional[str]:
+    configured = str(
+        os.environ.get("SEEDANCE_FFMPEG")
+        or os.environ.get("FFMPEG_BINARY")
+        or ""
+    ).strip()
+    if configured and os.path.isfile(configured):
+        return configured
+    path_binary = shutil.which("ffmpeg")
+    if path_binary:
+        return path_binary
+    bundle_candidate = Path(__file__).resolve().parents[3] / "ffmpeg" / "bin" / "ffmpeg.exe"
+    return str(bundle_candidate) if bundle_candidate.is_file() else None
+
+
+def _decode_suno_audio(path: str) -> Dict[str, Any]:
+    try:
+        import torchaudio
+
+        waveform, sample_rate = torchaudio.load(path)
+        if waveform.ndim == 1:
+            waveform = waveform.unsqueeze(0)
+        return {
+            "waveform": waveform.float().unsqueeze(0),
+            "sample_rate": int(sample_rate),
+        }
+    except Exception:
+        pass
+    if Path(path).suffix.lower() == ".wav":
+        return _load_suno_wav(path)
+    ffmpeg = _find_suno_ffmpeg()
+    if not ffmpeg:
+        raise RuntimeError(
+            "Suno audio was downloaded but cannot be decoded; torchaudio failed "
+            "and FFmpeg was not found"
+        )
+    wav_path = f"{path}.decoded.wav"
+    creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+    try:
+        completed = subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-i",
+                path,
+                "-acodec",
+                "pcm_s16le",
+                wav_path,
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            check=False,
+            timeout=180,
+            creationflags=creation_flags,
+        )
+        if completed.returncode != 0:
+            error = completed.stderr.decode("utf-8", errors="replace")[:300]
+            raise RuntimeError(f"FFmpeg decode failed: {error}")
+        return _load_suno_wav(wav_path)
+    finally:
+        try:
+            os.remove(wav_path)
+        except OSError:
+            pass
+
+
+def download_suno_audio(url: str) -> Tuple[Dict[str, Any], str]:
+    path = download_suno_file(url, "suno_audio", "mp3")
+    try:
+        return _decode_suno_audio(path), path
+    except Exception:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        raise
+
+
+def download_suno_video(url: str) -> Tuple[Any, str]:
+    path = download_suno_file(url, "suno_video", "mp4")
+    return _video_from_path(path), path
+
+
+def make_silent_audio(
+    sample_rate: int = 44100, duration_seconds: float = 1.0
+) -> Dict[str, Any]:
+    samples = max(1, int(sample_rate * duration_seconds))
+    return {
+        "waveform": torch.zeros((1, 1, samples), dtype=torch.float32),
+        "sample_rate": int(sample_rate),
+    }
+
+
+class Comfly_suno_music_lowprice:
+    """All documented Suno music actions through the domestic low-price API."""
+
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    RETURN_TYPES = (
+        AUDIO_TYPE,
+        AUDIO_TYPE,
+        VIDEO_TYPE,
+        "STRING",
+        "STRING",
+        "STRING",
+        "STRING",
+        "STRING",
+        "STRING",
+        "STRING",
+    )
+    RETURN_NAMES = (
+        "audio1",
+        "audio2",
+        "video",
+        "text",
+        "primary_url",
+        "result_urls",
+        "primary_path",
+        "result_paths",
+        "task_id",
+        "response",
+    )
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {}
+        for index in range(1, MAX_SUNO_REFERENCE_AUDIOS + 1):
+            optional[f"audio{index}"] = (
+                AUDIO_TYPE,
+                {
+                    "tooltip": (
+                        f"本地音频素材 {index}，用于 upload、create-voice 或 inspo；"
+                        "upload 至少 6 秒，create-voice 需要 10-240 秒。"
+                    )
+                },
+            )
+            optional[f"audio_url{index}"] = (
+                "STRING",
+                {
+                    "default": "",
+                    "tooltip": (
+                        f"公网音频 URL {index}，不能与同槽本地音频同时使用。"
+                    ),
+                },
+            )
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "operation": (
+                    SUNO_OPERATIONS,
+                    {"default": "suno-generation"},
+                ),
+                "prompt": (
+                    "STRING",
+                    {
+                        "multiline": True,
+                        "default": "",
+                        "tooltip": "当前操作使用的提示词、歌词或编辑说明。",
+                    },
+                ),
+                "version": (
+                    SUNO_VERSIONS,
+                    {
+                        "default": "v5.5",
+                        "tooltip": "仅在当前操作支持版本参数时发送。",
+                    },
+                ),
+                "custom": ("BOOLEAN", {"default": False}),
+                "instrumental": ("BOOLEAN", {"default": False}),
+                "title": ("STRING", {"default": ""}),
+                "style": ("STRING", {"default": ""}),
+                "vocal_gender": (
+                    ["unspecified", "Male", "Female"],
+                    {"default": "unspecified"},
+                ),
+                "tags": (
+                    "STRING",
+                    {"multiline": True, "default": ""},
+                ),
+                "name": ("STRING", {"default": ""}),
+                "task_id": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": "源 Suno 任务 ID，可连接前一个节点的 task_id 输出。",
+                    },
+                ),
+                "task_id_2": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": "mashup 使用的第二个源任务 ID。",
+                    },
+                ),
+                "audio_index": (
+                    "INT",
+                    {"default": 1, "min": 1, "max": 2147483647, "step": 1},
+                ),
+                "continue_at": (
+                    "FLOAT",
+                    {"default": 30.0, "min": 0.0, "step": 0.1},
+                ),
+                "start_s": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "step": 0.1},
+                ),
+                "end_s": (
+                    "FLOAT",
+                    {"default": 30.0, "min": 0.0, "step": 0.1},
+                ),
+                "duration_s": (
+                    "FLOAT",
+                    {"default": 5.0, "min": 0.1, "step": 0.1},
+                ),
+                "speed": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.1, "step": 0.05},
+                ),
+            },
+            "optional": optional,
+        }
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        operation=None,
+        version=None,
+        audio_index=None,
+        **kwargs,
+    ):
+        if operation not in SUNO_ACTION_SPECS:
+            return f"Unsupported Suno operation: {operation}"
+        allowed_versions = SUNO_ACTION_SPECS[operation]["allowed_versions"]
+        if allowed_versions and version not in allowed_versions:
+            return (
+                f"{operation} does not support version '{version}'; "
+                f"allowed: {', '.join(allowed_versions)}"
+            )
+        if audio_index is not None and int(audio_index) < 1:
+            return "audio_index must be at least 1"
+        return True
+
+    @staticmethod
+    def _text(value: Any) -> str:
+        return str(value or "").strip()
+
+    @staticmethod
+    def _update_progress(progress_bar: Any, value: float) -> None:
+        if progress_bar is not None:
+            try:
+                progress_bar.update_absolute(int(value), 100)
+            except Exception:
+                pass
+
+    @staticmethod
+    def _audio_duration_seconds(audio: Any) -> Optional[float]:
+        if not isinstance(audio, dict):
+            return None
+        waveform = audio.get("waveform")
+        sample_rate = int(audio.get("sample_rate") or 0)
+        shape = getattr(waveform, "shape", None)
+        if not shape or sample_rate <= 0:
+            return None
+        try:
+            return float(shape[-1]) / float(sample_rate)
+        except (TypeError, ValueError, IndexError):
+            return None
+
+    def _collect_audio_inputs(
+        self,
+        operation: str,
+        values: Dict[str, Any],
+        config: Dict[str, Any],
+        progress_cb: Callable[[float], None],
+    ) -> List[str]:
+        if operation not in {"suno-upload", "suno-create-voice", "suno-inspo"}:
+            return []
+        slots: List[Tuple[int, Any, str]] = []
+        for index in range(1, MAX_SUNO_REFERENCE_AUDIOS + 1):
+            audio = values.get(f"audio{index}")
+            url = self._text(values.get(f"audio_url{index}"))
+            if audio is not None and url:
+                raise SeedanceLowPriceError(
+                    f"audio{index} and audio_url{index} cannot both be used"
+                )
+            if url:
+                parsed = urlsplit(url)
+                if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                    raise SeedanceLowPriceError(
+                        f"audio_url{index} must be an http(s) URL"
+                    )
+            if audio is not None or url:
+                slots.append((index, audio, url))
+
+        if operation in {"suno-upload", "suno-create-voice"}:
+            if any(index != 1 for index, _audio, _url in slots):
+                raise SeedanceLowPriceError(
+                    f"{operation} only accepts audio slot 1"
+                )
+            if len(slots) != 1:
+                raise SeedanceLowPriceError(
+                    f"{operation} requires exactly one local audio or URL"
+                )
+        elif not 1 <= len(slots) <= MAX_SUNO_REFERENCE_AUDIOS:
+            raise SeedanceLowPriceError(
+                "suno-inspo requires 1-4 local audios or URLs"
+            )
+
+        resolved: List[str] = []
+        total_uploads = sum(1 for _index, audio, _url in slots if audio is not None)
+        uploaded = 0
+        for index, audio, url in slots:
+            if audio is not None:
+                duration = self._audio_duration_seconds(audio)
+                if (
+                    operation == "suno-upload"
+                    and duration is not None
+                    and duration < SUNO_UPLOAD_MIN_SECONDS
+                ):
+                    raise SeedanceLowPriceError(
+                        "suno-upload local audio must be at least 6 seconds"
+                    )
+                if (
+                    operation == "suno-create-voice"
+                    and duration is not None
+                    and not (
+                        SUNO_CREATE_VOICE_MIN_SECONDS
+                        <= duration
+                        <= SUNO_CREATE_VOICE_MAX_SECONDS
+                    )
+                ):
+                    raise SeedanceLowPriceError(
+                        "suno-create-voice local audio must be 10-240 seconds"
+                    )
+                url = upload_media(
+                    audio_to_wav_bytes(audio),
+                    f"suno_reference_{index}.wav",
+                    "audio/wav",
+                    config,
+                )
+                uploaded += 1
+                progress_cb(uploaded / max(total_uploads, 1))
+            resolved.append(url)
+        if total_uploads == 0:
+            progress_cb(1.0)
+        return resolved
+
+    def _build_payload(
+        self,
+        operation: str,
+        audio_urls: List[str],
+        **values,
+    ) -> Dict[str, Any]:
+        if operation not in SUNO_ACTION_SPECS:
+            raise SeedanceLowPriceError(f"Unsupported Suno operation: {operation}")
+        spec = SUNO_ACTION_SPECS[operation]
+        allowed_fields = set(spec["allowed_fields"])
+        payload: Dict[str, Any] = {"model": "suno"}
+
+        version = self._text(values.get("version"))
+        allowed_versions = spec["allowed_versions"]
+        if allowed_versions:
+            if version not in allowed_versions:
+                raise SeedanceLowPriceError(
+                    f"{operation} does not support version '{version}'; "
+                    f"allowed: {', '.join(allowed_versions)}"
+                )
+            payload["version"] = version
+
+        if "prompt" in allowed_fields:
+            prompt = self._text(values.get("prompt"))
+            if prompt:
+                payload["prompt"] = prompt
+        if "tags" in allowed_fields:
+            tags = self._text(values.get("tags"))
+            if tags:
+                payload["tags"] = tags
+        if "name" in allowed_fields:
+            name = self._text(values.get("name"))
+            if name:
+                payload["name"] = name
+
+        if operation == "suno-generation":
+            payload["custom"] = bool(values.get("custom", False))
+            payload["instrumental"] = bool(values.get("instrumental", False))
+            for field in ("title", "style"):
+                text = self._text(values.get(field))
+                if text:
+                    payload[field] = text
+            vocal_gender = self._text(values.get("vocal_gender"))
+            if vocal_gender in {"Male", "Female"}:
+                payload["vocal_gender"] = vocal_gender
+
+        if spec["reference_type"] == "task_audio":
+            task_id = self._text(values.get("task_id"))
+            if task_id:
+                payload["task_id"] = task_id
+            payload["audio_index"] = int(values.get("audio_index") or 1)
+        elif spec["reference_type"] == "mashup":
+            task_ids = [
+                self._text(values.get("task_id")),
+                self._text(values.get("task_id_2")),
+            ]
+            if all(task_ids):
+                payload["task_ids"] = task_ids
+
+        if operation == "suno-upload" and audio_urls:
+            payload["audioFilePath"] = audio_urls[0]
+        elif operation == "suno-create-voice" and audio_urls:
+            payload["audio_url"] = audio_urls[0]
+        elif operation == "suno-inspo" and audio_urls:
+            payload["audio_urls"] = audio_urls
+
+        for field in ("continue_at", "start_s", "end_s", "duration_s", "speed"):
+            if field in allowed_fields:
+                raw_value = values.get(field)
+                if raw_value not in (None, ""):
+                    payload[field] = float(raw_value)
+
+        missing = [
+            field
+            for field in spec["required_fields"]
+            if field not in payload
+            or payload[field] is None
+            or payload[field] == ""
+            or payload[field] == []
+        ]
+        if missing:
+            raise SeedanceLowPriceError(
+                f"{operation} requires: {', '.join(missing)}"
+            )
+        if "task_ids" in payload and len(payload["task_ids"]) != 2:
+            raise SeedanceLowPriceError(
+                "suno-mashup requires exactly two task IDs"
+            )
+        if "audio_urls" in payload and not 1 <= len(payload["audio_urls"]) <= 4:
+            raise SeedanceLowPriceError("suno-inspo requires 1-4 audio URLs")
+        if payload.get("audio_index", 1) < 1:
+            raise SeedanceLowPriceError("audio_index must be at least 1")
+        if "start_s" in payload and "end_s" in payload:
+            if payload["end_s"] <= payload["start_s"]:
+                raise SeedanceLowPriceError(
+                    "end_s must be greater than start_s"
+                )
+        return {
+            key: value
+            for key, value in payload.items()
+            if key == "model" or key in allowed_fields
+        }
+
+    def _make_error_result(self, message: str) -> Dict[str, Any]:
+        response = json.dumps({"error": message}, ensure_ascii=False, indent=2)
+        silence = make_silent_audio()
+        return {
+            "ui": {"text": ["", "", "", "", response]},
+            "result": (
+                silence,
+                silence,
+                make_error_video(message),
+                "",
+                "",
+                "[]",
+                "",
+                "[]",
+                "",
+                response,
+            ),
+        }
+
+    def execute(
+        self,
+        operation: str,
+        prompt: str,
+        version: str,
+        custom: bool,
+        instrumental: bool,
+        title: str,
+        style: str,
+        vocal_gender: str,
+        tags: str,
+        name: str,
+        task_id: str,
+        task_id_2: str,
+        audio_index: int,
+        continue_at: float,
+        start_s: float,
+        end_s: float,
+        duration_s: float,
+        speed: float,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        values = {
+            **kwargs,
+            "prompt": prompt,
+            "version": version,
+            "custom": custom,
+            "instrumental": instrumental,
+            "title": title,
+            "style": style,
+            "vocal_gender": vocal_gender,
+            "tags": tags,
+            "name": name,
+            "task_id": task_id,
+            "task_id_2": task_id_2,
+            "audio_index": audio_index,
+            "continue_at": continue_at,
+            "start_s": start_s,
+            "end_s": end_s,
+            "duration_s": duration_s,
+            "speed": speed,
+        }
+        try:
+            return self._execute_inner(operation, api_config, values)
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._make_error_result(
+                f"Suno Low Price: {type(exc).__name__}: {exc}"
+            )
+
+    def _execute_inner(
+        self,
+        operation: str,
+        api_config: Any,
+        values: Dict[str, Any],
+    ):
+        validation = self.VALIDATE_INPUTS(
+            operation=operation,
+            version=values.get("version"),
+            audio_index=values.get("audio_index"),
+        )
+        if validation is not True:
+            raise SeedanceLowPriceError(validation)
+        spec = SUNO_ACTION_SPECS[operation]
+        config = resolve_config(api_config)
+        progress_bar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        self._update_progress(progress_bar, 0)
+
+        audio_urls = self._collect_audio_inputs(
+            operation,
+            values,
+            config,
+            lambda fraction: self._update_progress(progress_bar, fraction * 15),
+        )
+        payload = self._build_payload(operation, audio_urls, **values)
+        self._update_progress(progress_bar, 15)
+        submitted_task_id, submit_response = submit_suno_action(
+            spec["action"], payload, config
+        )
+        self._update_progress(progress_bar, 20)
+
+        final_response = submit_response
+        if submitted_task_id:
+            final_response = poll_suno_task(
+                submitted_task_id,
+                config,
+                on_progress=lambda progress: self._update_progress(
+                    progress_bar, 20 + progress / 100.0 * 65
+                ),
+            )
+        elif not spec["sync"]:
+            raise SeedanceLowPriceError(
+                f"{operation} returned no task id in its asynchronous response"
+            )
+        self._update_progress(progress_bar, 85)
+
+        extracted = extract_suno_results(final_response)
+        result_task_id = submitted_task_id or extracted["task_id"]
+        artifacts = extracted["artifacts"]
+        result_paths: List[str] = []
+        audio_objects: List[Dict[str, Any]] = []
+        video: Any = None
+        warnings: List[Dict[str, Any]] = []
+        successful_downloads = 0
+        artifact_count = max(1, len(artifacts))
+
+        for index, artifact in enumerate(artifacts, start=1):
+            url = artifact["url"]
+            kind = artifact["kind"]
+            path = ""
+            try:
+                if kind == "audio":
+                    audio, path = download_suno_audio(url)
+                    audio_objects.append(audio)
+                elif kind == "video" and video is None:
+                    video, path = download_suno_video(url)
+                else:
+                    prefix = {
+                        "video": "suno_video",
+                        "image": "suno_image",
+                        "file": "suno_file",
+                    }.get(kind, "suno_file")
+                    extension = {
+                        "video": "mp4",
+                        "image": "jpg",
+                        "file": "bin",
+                    }.get(kind, "bin")
+                    path = download_suno_file(url, prefix, extension)
+                successful_downloads += 1
+            except Exception as exc:
+                warnings.append(
+                    {
+                        "artifact_index": index,
+                        "kind": kind,
+                        "error": type(exc).__name__,
+                    }
+                )
+                print(
+                    f"[Suno Low Price] Artifact {index}/{artifact_count} "
+                    f"({kind}) download failed: {type(exc).__name__}"
+                )
+            result_paths.append(path)
+            self._update_progress(
+                progress_bar,
+                85 + min(10, index / artifact_count * 10),
+            )
+
+        if artifacts and successful_downloads == 0:
+            raise SeedanceLowPriceError(
+                "All Suno result artifacts failed to download"
+            )
+
+        all_urls = [artifact["url"] for artifact in artifacts]
+        text = extracted["text"]
+        if not text and spec["result_family"] in {"text", "file"}:
+            text = json.dumps(extracted["result"], ensure_ascii=False, indent=2)
+        response_payload: Dict[str, Any] = final_response
+        if warnings:
+            response_payload = dict(final_response)
+            response_payload["_zhenzhen_local"] = {"download_warnings": warnings}
+        response = json.dumps(response_payload, ensure_ascii=False, indent=2)
+        primary_url = all_urls[0] if all_urls else ""
+        primary_path = result_paths[0] if result_paths else ""
+        self._update_progress(progress_bar, 100)
+        return {
+            "ui": {
+                "text": [
+                    text,
+                    primary_url,
+                    primary_path,
+                    result_task_id,
+                    response,
+                ]
+            },
+            "result": (
+                audio_objects[0] if audio_objects else None,
+                audio_objects[1] if len(audio_objects) > 1 else None,
+                video,
+                text,
+                primary_url,
+                json.dumps(all_urls, ensure_ascii=False),
+                primary_path,
+                json.dumps(result_paths, ensure_ascii=False),
+                result_task_id,
+                response,
+            ),
+        }
+
+
 __all__ = [
     "Comfly_seedance2_low_price_settings",
     "Comfly_seedance2_low_price",
@@ -5386,4 +6722,5 @@ __all__ = [
     "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
+    "Comfly_suno_music_lowprice",
 ]

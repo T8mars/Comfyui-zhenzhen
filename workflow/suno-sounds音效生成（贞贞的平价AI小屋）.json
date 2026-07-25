@@ -1,0 +1,249 @@
+{
+  "id": "67e299cd-204b-57f6-ab0e-3141f7d6ea59",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_suno_music_lowprice",
+      "title": "Suno - suno-sounds",
+      "pos": [
+        400,
+        100
+      ],
+      "size": [
+        470,
+        520
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio1",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio2",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio3",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio4",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio1",
+          "type": "AUDIO",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "audio2",
+          "type": "AUDIO",
+          "links": null
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "1.9.4",
+        "Node name for S&R": "Comfly_suno_music_lowprice"
+      },
+      "widgets_values": [
+        "suno-sounds",
+        "a short wooden door creak in a quiet room",
+        "v5.5",
+        false,
+        false,
+        "",
+        "",
+        "unspecified",
+        "cinematic, emotional, piano",
+        "Studio Persona",
+        "",
+        "",
+        1,
+        30.0,
+        0.0,
+        4.0,
+        2.0,
+        1.1,
+        "",
+        "",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Comfly_api_set",
+      "title": "Zhenzhen API Settings（国内版）",
+      "pos": [
+        40,
+        760
+      ],
+      "size": [
+        330,
+        174
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "1.9.4",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveAudio",
+      "pos": [
+        940,
+        180
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "audio/suno-sounds"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      1,
+      1,
+      4,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20",
+    "ds": {
+      "scale": 0.9,
+      "offset": [
+        80,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

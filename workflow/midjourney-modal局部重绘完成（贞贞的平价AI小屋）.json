@@ -1,0 +1,1029 @@
+{
+  "id": "b8536f31-c248-5b2e-92bd-9ee43898e435",
+  "revision": 0,
+  "last_node_id": 7,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_seedance2_low_price_settings",
+      "pos": [
+        20,
+        760
+      ],
+      "size": [
+        330,
+        100
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            2,
+            4,
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_seedance2_low_price_settings"
+      },
+      "widgets_values": [
+        "https://api.seedance.nz",
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "title": "选择局部重绘遮罩图片",
+      "pos": [
+        20,
+        80
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "",
+        "image"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Comfly_midjourney_lowprice",
+      "title": "生成源四宫格",
+      "pos": [
+        400,
+        80
+      ],
+      "size": [
+        510,
+        640
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "end_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "grid_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "video1",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video2",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video3",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video4",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "buttons_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_midjourney_lowprice"
+      },
+      "widgets_values": [
+        "midjourney-imagine",
+        "a small red paper boat on a quiet lake, soft natural light",
+        "unset",
+        "",
+        "unset",
+        "unset",
+        "",
+        "6.1",
+        -1,
+        "",
+        -1,
+        -1,
+        -1,
+        false,
+        false,
+        -1.0,
+        -1,
+        -1,
+        "",
+        "",
+        "",
+        -1.0,
+        0,
+        false,
+        false,
+        false,
+        0,
+        "",
+        "",
+        -1,
+        "",
+        "unset",
+        2.0,
+        "region",
+        "vid_1.1_i2v_480",
+        "manual",
+        "high",
+        1,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Comfly_midjourney_lowprice",
+      "title": "放大第 1 张",
+      "pos": [
+        960,
+        80
+      ],
+      "size": [
+        510,
+        640
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "end_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "widget": {
+            "name": "task_id"
+          },
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "grid_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "video1",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video2",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video3",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video4",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "buttons_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_midjourney_lowprice"
+      },
+      "widgets_values": [
+        "midjourney-upscale",
+        "a small red paper boat on a quiet lake, soft natural light",
+        "unset",
+        "",
+        "unset",
+        "unset",
+        "",
+        "unset",
+        -1,
+        "",
+        -1,
+        -1,
+        -1,
+        false,
+        false,
+        -1.0,
+        -1,
+        -1,
+        "",
+        "",
+        "",
+        -1.0,
+        0,
+        false,
+        false,
+        false,
+        0,
+        "",
+        "",
+        1,
+        "",
+        "unset",
+        2.0,
+        "region",
+        "vid_1.1_i2v_480",
+        "manual",
+        "high",
+        1,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Comfly_midjourney_lowprice",
+      "title": "midjourney-inpaint",
+      "pos": [
+        1520,
+        80
+      ],
+      "size": [
+        510,
+        640
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "end_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 4
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "widget": {
+            "name": "task_id"
+          },
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "grid_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "video1",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video2",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video3",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video4",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "buttons_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_midjourney_lowprice"
+      },
+      "widgets_values": [
+        "midjourney-inpaint",
+        "a small red paper boat on a quiet lake, soft natural light",
+        "unset",
+        "",
+        "unset",
+        "unset",
+        "",
+        "unset",
+        -1,
+        "",
+        -1,
+        -1,
+        -1,
+        false,
+        false,
+        -1.0,
+        -1,
+        -1,
+        "",
+        "",
+        "",
+        -1.0,
+        0,
+        false,
+        false,
+        false,
+        0,
+        "",
+        "",
+        -1,
+        "",
+        "unset",
+        2.0,
+        "region",
+        "vid_1.1_i2v_480",
+        "manual",
+        "high",
+        1,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Comfly_midjourney_lowprice",
+      "title": "midjourney-modal",
+      "pos": [
+        2080,
+        80
+      ],
+      "size": [
+        510,
+        640
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "end_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": 8
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 6
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "widget": {
+            "name": "task_id"
+          },
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "grid_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "video1",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video2",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video3",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video4",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "buttons_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Comfly_midjourney_lowprice"
+      },
+      "widgets_values": [
+        "midjourney-modal",
+        "replace the selected region with a small blue sail",
+        "unset",
+        "",
+        "unset",
+        "unset",
+        "",
+        "unset",
+        -1,
+        "",
+        -1,
+        -1,
+        -1,
+        false,
+        false,
+        -1.0,
+        -1,
+        -1,
+        "",
+        "",
+        "",
+        -1.0,
+        0,
+        false,
+        false,
+        false,
+        0,
+        "",
+        "",
+        -1,
+        "",
+        "unset",
+        2.0,
+        "region",
+        "vid_1.1_i2v_480",
+        "manual",
+        "high",
+        1,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveImage",
+      "pos": [
+        2660,
+        150
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "midjourney/midjourney-modal"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      3,
+      6,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      0,
+      4,
+      6,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      3,
+      14,
+      4,
+      7,
+      "STRING"
+    ],
+    [
+      4,
+      1,
+      0,
+      5,
+      6,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      5,
+      4,
+      14,
+      5,
+      7,
+      "STRING"
+    ],
+    [
+      6,
+      1,
+      0,
+      6,
+      6,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      7,
+      5,
+      14,
+      6,
+      7,
+      "STRING"
+    ],
+    [
+      8,
+      2,
+      1,
+      6,
+      5,
+      "MASK"
+    ],
+    [
+      9,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        100,
+        80
+      ]
+    },
+    "frontendVersion": "1.24.4"
+  },
+  "version": 0.4
+}

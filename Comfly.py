@@ -94,7 +94,9 @@ from .seedance_low_price_nodes import (
     Comfly_vidu_q3_short_play_lowprice,
     Comfly_zhenzhen_upscaler_lowprice,
     Comfly_doubao_seed_audio_1_0_lowprice,
+    Comfly_suno_music_lowprice,
 )
+from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
 
 # For LLM API functionality
 try:
@@ -25600,6 +25602,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_vidu_q3_short_play_lowprice": Comfly_vidu_q3_short_play_lowprice,
     "Comfly_zhenzhen_upscaler_lowprice": Comfly_zhenzhen_upscaler_lowprice,
     "Comfly_doubao_seed_audio_1_0_lowprice": Comfly_doubao_seed_audio_1_0_lowprice,
+    "Comfly_suno_music_lowprice": Comfly_suno_music_lowprice,
+    "Comfly_midjourney_lowprice": Comfly_midjourney_lowprice,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
     "OpenAI_Sora_API": OpenAISoraAPI,
     "Comfly_Mj": Comfly_Mj,
@@ -25745,6 +25749,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_vidu_q3_short_play_lowprice": "zhenzhen-vidu-q3-short-play-lowprice",
     "Comfly_zhenzhen_upscaler_lowprice": "zhenzhen-upscaler-lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice": "zhenzhen-doubao-seed-audio-1.0-lowprice",
+    "Comfly_suno_music_lowprice": "zhenzhen-suno-music-lowprice",
+    "Comfly_midjourney_lowprice": "zhenzhen-midjourney-lowprice",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",
     "Comfly_Mj": "Zhenzhen_Mj", 
