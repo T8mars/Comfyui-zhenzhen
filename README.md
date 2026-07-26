@@ -71,43 +71,70 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260726-2
+
+修正 `zhenzhen-image-g-v2-lowprice` 的节点体验：
+
+- 示例节点统一显示为“Image G V2 图像生成/编辑”，准确覆盖文生图与参考图编辑能力。
+- `size` 改为常用比例下拉，包含 `1:1`、`16:9`、`9:16`、`21:9`、`9:21`、`4:3`、`3:4`、`3:2`、`2:3`、`4:5`、`5:4`，并保留文档支持的自定义 `WxH`；旧工作流直接保存的 `WxH` 会自动迁移。
+
 ### 20260726-1
 
-新增模型和节点  
+新增贞贞的平价AI小屋（国内版）统一节点：`zhenzhen-image-nb-lowprice`。
 
-zhenzhen-image-nb-pro  
-zhenzhen-image-nb-2-lite  
-zhenzhen-image-nb-flash  
-zhenzhen-image-nb-2  
-zhenzhen-video-v31-lite  
+- 一个节点包含 `zhenzhen-image-nb-flash`、`zhenzhen-image-nb-2`、`zhenzhen-image-nb-2-lite`、`zhenzhen-image-nb-pro`。
+- 四个模型均支持文生图和最多 14 张参考图的图像编辑，切换模型时自动匹配可用分辨率、比例和生成数量。
+- 原 `zhenzhen-video-v31-lowprice` 节点新增 `zhenzhen-video-v31-lite`，仅支持固定 8 秒文生视频；Fast 和 Quality 老工作流保持兼容。
+- 新增 9 份对应工作流，工作流不保存 APIKEY、任务号和历史生成结果。
+- 已使用真实接口验证四个图像模型的文生图与图像编辑，以及 V3.1 Lite 文生视频，共 9/9 成功。
 
-更新对应工作流（贞贞的平价AI小屋对应API）  
+### 20260725-3
+
+新增贞贞的平价AI小屋（国内版）统一节点：`zhenzhen-midjourney-lowprice`。
+
+- 一个节点覆盖 Midjourney Imagine、Blend、Describe、Edits、Upscale、Variation、High/Low Variation、Reroll、Zoom、Pan、Inpaint、Modal、Video 和两种 Remix 共 16 项操作。
+- 切换操作时只显示对应参数，复用现有国内版 API Settings，节点底部提供国内版 ApiKey 获取按钮。
+- 支持 4 张图片、四宫格、4 段视频、文本、结果 URL、本地路径、task id、buttons 和完整响应输出。
+- 新增 19 份示例工作流，覆盖全部 16 项操作及参考图、任务复用视频、首尾帧视频；工作流不保存 APIKEY 和历史运行结果。
+- 已使用真实接口逐项验证 16/16，包含图像、Describe 文本、Inpaint/Modal 局部重绘和 Video。
 
 ### 20260725-2
 
-新增模型及节点  
-suno相关模型及节点  
-midjourney相关模型及节点  
-更新对应工作流（贞贞的平价AI小屋对应API）    
+新增贞贞的平价AI小屋（国内版）统一节点：`zhenzhen-suno-music-lowprice`。
+
+- 一个节点覆盖 Suno 音乐生成、歌词、导入、续写、翻唱、参考生成、混音、音效、音色、分轨、导出、分析和编辑等全部 31 项操作。
+- 切换操作时自动显示对应参数，复用现有国内版 API Settings，节点底部提供国内版 ApiKey 获取按钮。
+- 新增 31 份对应工作流；需要源任务的操作已经连接前置生成或导入节点，工作流不保存 APIKEY 和历史运行结果。
+- 已使用真实接口逐项验证 31 个操作；本地上传至少 6 秒，创建音色素材需为 10-240 秒。
 
 ### 20260725-1
 
-新增模型及节点：  
-语音转文本：whisper-1  
-图像模型：zhenzhen-image-g-v2-lowprice（低价版支持2K,4K，出图飞快）  
-视频模型：zhenzhen-video-g-omni-flash，zhenzhen-video-v31-quality，zhenzhen-video-v31-fast，zhenzhen-video-gk-v15  
-更新对应工作流（贞贞的平价AI小屋对应API）    
+新增 6 个贞贞的平价AI小屋（国内版）节点：
+
+- `zhenzhen-image-g-v2-lowprice`：支持文生图和最多 16 张参考图的图生图。
+- `zhenzhen-video-g-omni-flash-lowprice`：支持文生视频、图生视频、视频编辑和任务续作。
+- `zhenzhen-video-gk-v15-lowprice`：支持文生视频和最多 7 张参考图的视频生成。
+- `zhenzhen-video-v31-lowprice`：合并 V3.1 Fast 与 Quality 模型。
+- `zhenzhen-whisper-1-lowprice`：同步音频转写，支持 JSON、字幕和纯文本格式。
+- `zhenzhen-image-gk-v15-lowprice`：合并 GK V1.5 文生图与图像编辑模型。
+
+所有节点复用国内版 API Settings，节点底部提供国内版 ApiKey 获取按钮，并补充各支持模式的示例工作流。示例工作流不保存 APIKEY 或历史运行结果。
+
 
 ### 20260721-1
 
-新增zhenzhen-image-g2节点，稳定版，适用于所有出图类型  
-更新对应工作流（贞贞的平价AI小屋对应API）  
+新增独立稳定版节点：`zhenzhen-image-g2-lowprice`，适用于文生图和图像编辑。
+
+- 支持 `zhenzhen-image-g2-t2i` 文生图和 `zhenzhen-image-g2-i2i` 图像编辑。
+- 复用贞贞的平价AI小屋 API Settings，G-2 分辨率固定为 `1k`，可选择画面比例，图像编辑支持 1-10 张参考图。
+- 不修改原有 `zhenzhen-sd2-seedream-v5-pro-lowprice` 节点及其 API 请求。
+- 新增 G-2 文生图和图像编辑示例工作流，示例不保存 APIKEY 或历史运行结果。
+- 已真实验证两个模型均可完成提交、轮询、结果下载，并转换为 ComfyUI `IMAGE` 输出。
 
 ### 20260716-1
 
 新增：可灵，海螺，VIDU相关节点  
 更新对应工作流（贞贞的平价AI小屋对应API）  
-
 
 ### 20260715-2
 

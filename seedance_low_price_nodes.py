@@ -4256,7 +4256,20 @@ class Comfly_doubao_seed_audio_1_0_lowprice:
 
 ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL = "zhenzhen-image-g-v2-lowprice"
 ZHENZHEN_IMAGE_G_V2_RESOLUTIONS = ["1k", "2k", "4k"]
-ZHENZHEN_IMAGE_G_V2_SIZES = ["1:1", "16:9", "9:16", "3:2", "2:3"]
+ZHENZHEN_IMAGE_G_V2_SIZES = [
+    "1:1",
+    "16:9",
+    "9:16",
+    "21:9",
+    "9:21",
+    "4:3",
+    "3:4",
+    "3:2",
+    "2:3",
+    "4:5",
+    "5:4",
+]
+ZHENZHEN_IMAGE_G_V2_SIZE_OPTIONS = [*ZHENZHEN_IMAGE_G_V2_SIZES, "custom"]
 ZHENZHEN_IMAGE_G_V2_MAX_IMAGES = 16
 ZHENZHEN_IMAGE_GK_V15_MODEL = "zhenzhen-image-gk-v15"
 ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL = "zhenzhen-image-gk-v15-edit"
@@ -4411,6 +4424,29 @@ def _upload_image_slots(
     return urls
 
 
+def resolve_zhenzhen_image_g_v2_size(
+    size: str,
+    custom_size: str = "",
+) -> str:
+    normalized_size = str(size or "").strip().lower()
+    if normalized_size == "custom":
+        normalized_custom_size = str(custom_size or "").strip().lower()
+        if not _is_width_height_size(normalized_custom_size):
+            raise SeedanceLowPriceError(
+                "Image G V2 custom_size must use WxH, for example 1280x720"
+            )
+        return normalized_custom_size
+    if (
+        normalized_size in ZHENZHEN_IMAGE_G_V2_SIZES
+        or _is_width_height_size(normalized_size)
+    ):
+        return normalized_size
+    supported_sizes = ", ".join(ZHENZHEN_IMAGE_G_V2_SIZES)
+    raise SeedanceLowPriceError(
+        f"Image G V2 size must be {supported_sizes}, custom, or WxH"
+    )
+
+
 def validate_zhenzhen_image_g_v2_inputs(
     model: str,
     prompt: str,
@@ -4418,6 +4454,7 @@ def validate_zhenzhen_image_g_v2_inputs(
     size: str,
     n: int,
     strict: bool = True,
+    custom_size: str = "",
 ) -> None:
     if model != ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL:
         raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image G V2 model: {model}")
@@ -4429,14 +4466,7 @@ def validate_zhenzhen_image_g_v2_inputs(
     )
     if resolution not in ZHENZHEN_IMAGE_G_V2_RESOLUTIONS:
         raise SeedanceLowPriceError("Image G V2 resolution must be 1k, 2k, or 4k")
-    normalized_size = str(size or "").strip().lower()
-    if (
-        normalized_size not in ZHENZHEN_IMAGE_G_V2_SIZES
-        and not _is_width_height_size(normalized_size)
-    ):
-        raise SeedanceLowPriceError(
-            "Image G V2 size must be 1:1, 16:9, 9:16, 3:2, 2:3, or WxH"
-        )
+    resolve_zhenzhen_image_g_v2_size(size, custom_size)
     if not 1 <= int(n) <= 10:
         raise SeedanceLowPriceError("Image G V2 n must be between 1 and 10")
 
@@ -4448,10 +4478,18 @@ def build_zhenzhen_image_g_v2_payload(
     size: str,
     n: int,
     image_urls: Optional[List[str]] = None,
+    custom_size: str = "",
 ) -> Dict[str, Any]:
     validate_zhenzhen_image_g_v2_inputs(
-        model, prompt, resolution, size, n, strict=True
+        model,
+        prompt,
+        resolution,
+        size,
+        n,
+        strict=True,
+        custom_size=custom_size,
     )
+    effective_size = resolve_zhenzhen_image_g_v2_size(size, custom_size)
     urls = list(image_urls or [])
     if len(urls) > ZHENZHEN_IMAGE_G_V2_MAX_IMAGES:
         raise SeedanceLowPriceError("Image G V2 accepts at most 16 reference images")
@@ -4459,7 +4497,7 @@ def build_zhenzhen_image_g_v2_payload(
         "model": model,
         "prompt": str(prompt).strip(),
         "n": int(n),
-        "size": str(size).strip().lower(),
+        "size": effective_size,
         "metadata": {"resolution": resolution},
     }
     if urls:
@@ -4474,6 +4512,7 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
         for index in range(1, ZHENZHEN_IMAGE_G_V2_MAX_IMAGES + 1):
             optional[f"image{index}"] = ("IMAGE",)
         optional["skip_error"] = ("BOOLEAN", {"default": False})
+        optional["custom_size"] = ("STRING", {"default": "1024x1024"})
         return {
             "required": {
                 "model": (
@@ -4485,7 +4524,10 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
                     ZHENZHEN_IMAGE_G_V2_RESOLUTIONS,
                     {"default": "1k"},
                 ),
-                "size": ("STRING", {"default": "1:1"}),
+                "size": (
+                    ZHENZHEN_IMAGE_G_V2_SIZE_OPTIONS,
+                    {"default": "1:1"},
+                ),
                 "n": ("INT", {"default": 1, "min": 1, "max": 10, "step": 1}),
             },
             "optional": optional,
@@ -4505,6 +4547,7 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
         resolution=None,
         size="1:1",
         n=1,
+        custom_size="1024x1024",
         strict=False,
         **kwargs,
     ):
@@ -4512,7 +4555,13 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
             return True
         try:
             validate_zhenzhen_image_g_v2_inputs(
-                model, prompt, resolution, size, n, strict=bool(strict)
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                strict=bool(strict),
+                custom_size=custom_size,
             )
         except Exception as exc:
             return str(exc)
@@ -4527,6 +4576,7 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
         n: int,
         api_config: Any = None,
         skip_error: bool = False,
+        custom_size: str = "1024x1024",
         **kwargs,
     ):
         task_id = ""
@@ -4541,7 +4591,13 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
 
         try:
             validate_zhenzhen_image_g_v2_inputs(
-                model, prompt, resolution, size, n, strict=True
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                strict=True,
+                custom_size=custom_size,
             )
             config = resolve_config(api_config)
             slots = _connected_slots(
@@ -4557,7 +4613,13 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
                 on_progress=update_progress,
             )
             payload = build_zhenzhen_image_g_v2_payload(
-                model, prompt, resolution, size, n, image_urls
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                image_urls,
+                custom_size=custom_size,
             )
             update_progress(25)
             task_id, submit_response = submit_image_task(payload, config)
