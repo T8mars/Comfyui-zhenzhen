@@ -4265,6 +4265,66 @@ ZHENZHEN_IMAGE_GK_V15_MODELS = [
     ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL,
 ]
 ZHENZHEN_IMAGE_GK_V15_SIZES = ["1:1", "16:9", "9:16", "3:2", "2:3"]
+ZHENZHEN_IMAGE_NB_FLASH_MODEL = "zhenzhen-image-nb-flash"
+ZHENZHEN_IMAGE_NB_2_MODEL = "zhenzhen-image-nb-2"
+ZHENZHEN_IMAGE_NB_2_LITE_MODEL = "zhenzhen-image-nb-2-lite"
+ZHENZHEN_IMAGE_NB_PRO_MODEL = "zhenzhen-image-nb-pro"
+ZHENZHEN_IMAGE_NB_MODELS = [
+    ZHENZHEN_IMAGE_NB_FLASH_MODEL,
+    ZHENZHEN_IMAGE_NB_2_MODEL,
+    ZHENZHEN_IMAGE_NB_2_LITE_MODEL,
+    ZHENZHEN_IMAGE_NB_PRO_MODEL,
+]
+ZHENZHEN_IMAGE_NB_STANDARD_SIZES = [
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "4:5",
+    "5:4",
+    "9:16",
+    "16:9",
+    "21:9",
+]
+ZHENZHEN_IMAGE_NB_EXTREME_SIZES = [
+    "1:1",
+    "1:4",
+    "1:8",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:1",
+    "4:3",
+    "4:5",
+    "5:4",
+    "8:1",
+    "9:16",
+    "16:9",
+    "21:9",
+]
+ZHENZHEN_IMAGE_NB_SIZES = ["auto", *ZHENZHEN_IMAGE_NB_EXTREME_SIZES]
+ZHENZHEN_IMAGE_NB_RESOLUTIONS = ["0.5k", "1k", "2k", "4k"]
+ZHENZHEN_IMAGE_NB_MODEL_RESOLUTIONS = {
+    ZHENZHEN_IMAGE_NB_FLASH_MODEL: ("1k",),
+    ZHENZHEN_IMAGE_NB_2_MODEL: ("0.5k", "1k", "2k", "4k"),
+    ZHENZHEN_IMAGE_NB_2_LITE_MODEL: ("1k",),
+    ZHENZHEN_IMAGE_NB_PRO_MODEL: ("1k", "2k", "4k"),
+}
+ZHENZHEN_IMAGE_NB_MODEL_SIZES = {
+    ZHENZHEN_IMAGE_NB_FLASH_MODEL: ("auto", *ZHENZHEN_IMAGE_NB_STANDARD_SIZES),
+    ZHENZHEN_IMAGE_NB_2_MODEL: tuple(ZHENZHEN_IMAGE_NB_EXTREME_SIZES),
+    ZHENZHEN_IMAGE_NB_2_LITE_MODEL: tuple(ZHENZHEN_IMAGE_NB_EXTREME_SIZES),
+    ZHENZHEN_IMAGE_NB_PRO_MODEL: tuple(ZHENZHEN_IMAGE_NB_STANDARD_SIZES),
+}
+ZHENZHEN_IMAGE_NB_MODEL_N_RANGE = {
+    ZHENZHEN_IMAGE_NB_FLASH_MODEL: (1, 1),
+    ZHENZHEN_IMAGE_NB_2_MODEL: (1, 1),
+    ZHENZHEN_IMAGE_NB_2_LITE_MODEL: (1, 4),
+    ZHENZHEN_IMAGE_NB_PRO_MODEL: (1, 1),
+}
+ZHENZHEN_IMAGE_NB_MAX_IMAGES = 14
+ZHENZHEN_IMAGE_NB_FLASH_PROMPT_MAX_LENGTH = 1000
 APIMART_IMAGE_PROMPT_MAX_LENGTH = 20000
 
 ZHENZHEN_VIDEO_G_OMNI_FLASH_MODEL = "zhenzhen-video-g-omni-flash"
@@ -4274,9 +4334,11 @@ ZHENZHEN_VIDEO_GK_RESOLUTIONS = ["480p", "720p"]
 ZHENZHEN_VIDEO_GK_RATIOS = ["16:9", "9:16", "1:1", "3:2", "2:3"]
 ZHENZHEN_VIDEO_V31_FAST_MODEL = "zhenzhen-video-v31-fast"
 ZHENZHEN_VIDEO_V31_QUALITY_MODEL = "zhenzhen-video-v31-quality"
+ZHENZHEN_VIDEO_V31_LITE_MODEL = "zhenzhen-video-v31-lite"
 ZHENZHEN_VIDEO_V31_MODELS = [
     ZHENZHEN_VIDEO_V31_FAST_MODEL,
     ZHENZHEN_VIDEO_V31_QUALITY_MODEL,
+    ZHENZHEN_VIDEO_V31_LITE_MODEL,
 ]
 ZHENZHEN_VIDEO_V31_RESOLUTIONS = ["720p", "1080p", "4k"]
 ZHENZHEN_VIDEO_V31_RATIOS = ["16:9", "9:16"]
@@ -4496,6 +4558,228 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
             )
             payload = build_zhenzhen_image_g_v2_payload(
                 model, prompt, resolution, size, n, image_urls
+            )
+            update_progress(25)
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(30)
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            image_url = extract_image_url(final_response)
+            image = download_image(image_url)
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                image,
+                image_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": f"{type(exc).__name__}: {exc}",
+            }
+            blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+            return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+def validate_zhenzhen_image_nb_inputs(
+    model: str,
+    prompt: str,
+    resolution: str,
+    size: str,
+    n: int,
+    image_count: int = 0,
+    strict: bool = True,
+) -> str:
+    if model not in ZHENZHEN_IMAGE_NB_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image NB model: {model}")
+    text = str(prompt or "").strip()
+    if strict and not text:
+        raise SeedanceLowPriceError("Zhenzhen Image NB prompt is required")
+    if (
+        model == ZHENZHEN_IMAGE_NB_FLASH_MODEL
+        and len(text) > ZHENZHEN_IMAGE_NB_FLASH_PROMPT_MAX_LENGTH
+    ):
+        raise SeedanceLowPriceError(
+            "zhenzhen-image-nb-flash prompt cannot exceed "
+            f"{ZHENZHEN_IMAGE_NB_FLASH_PROMPT_MAX_LENGTH} characters"
+        )
+    allowed_resolutions = ZHENZHEN_IMAGE_NB_MODEL_RESOLUTIONS[model]
+    if resolution not in allowed_resolutions:
+        raise SeedanceLowPriceError(
+            f"{model} resolution must be one of {', '.join(allowed_resolutions)}"
+        )
+    allowed_sizes = ZHENZHEN_IMAGE_NB_MODEL_SIZES[model]
+    if size not in allowed_sizes:
+        raise SeedanceLowPriceError(
+            f"{model} size must be one of {', '.join(allowed_sizes)}"
+        )
+    try:
+        image_count_value = int(image_count)
+        n_value = int(n)
+    except (TypeError, ValueError) as exc:
+        raise SeedanceLowPriceError("Zhenzhen Image NB n and image count must be integers") from exc
+    minimum_n, maximum_n = ZHENZHEN_IMAGE_NB_MODEL_N_RANGE[model]
+    if not minimum_n <= n_value <= maximum_n:
+        raise SeedanceLowPriceError(
+            f"{model} n must be between {minimum_n} and {maximum_n}"
+        )
+    if not 0 <= image_count_value <= ZHENZHEN_IMAGE_NB_MAX_IMAGES:
+        raise SeedanceLowPriceError(
+            f"Zhenzhen Image NB accepts at most {ZHENZHEN_IMAGE_NB_MAX_IMAGES} images"
+        )
+    return text
+
+
+def build_zhenzhen_image_nb_payload(
+    model: str,
+    prompt: str,
+    resolution: str,
+    size: str,
+    n: int,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    urls = list(image_urls or [])
+    text = validate_zhenzhen_image_nb_inputs(
+        model,
+        prompt,
+        resolution,
+        size,
+        n,
+        image_count=len(urls),
+        strict=True,
+    )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": text,
+        "n": int(n),
+        "size": size,
+        "metadata": {"resolution": resolution},
+    }
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class Comfly_zhenzhen_image_nb_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
+        for index in range(1, ZHENZHEN_IMAGE_NB_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    ZHENZHEN_IMAGE_NB_MODELS,
+                    {"default": ZHENZHEN_IMAGE_NB_FLASH_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (ZHENZHEN_IMAGE_NB_RESOLUTIONS, {"default": "1k"}),
+                "size": (ZHENZHEN_IMAGE_NB_SIZES, {"default": "1:1"}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 4, "step": 1}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        resolution=None,
+        size=None,
+        n=1,
+        strict=False,
+        **kwargs,
+    ):
+        if None in (model, resolution, size):
+            return True
+        try:
+            validate_zhenzhen_image_nb_inputs(
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                image_count=0,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        resolution: str,
+        size: str,
+        n: int,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            config = resolve_config(api_config)
+            slots = _connected_slots(
+                kwargs,
+                "image",
+                ZHENZHEN_IMAGE_NB_MAX_IMAGES,
+                "Zhenzhen Image NB Low Price",
+            )
+            validate_zhenzhen_image_nb_inputs(
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                image_count=len(slots),
+                strict=True,
+            )
+            image_urls = _upload_image_slots(
+                slots,
+                config,
+                "zhenzhen_image_nb_reference",
+                on_progress=update_progress,
+            )
+            payload = build_zhenzhen_image_nb_payload(
+                model,
+                prompt,
+                resolution,
+                size,
+                n,
+                image_urls,
             )
             update_progress(25)
             task_id, submit_response = submit_image_task(payload, config)
@@ -4766,8 +5050,12 @@ def build_zhenzhen_video_v31_payload(
     if resolution not in ZHENZHEN_VIDEO_V31_RESOLUTIONS:
         raise SeedanceLowPriceError("Video V3.1 resolution must be 720p, 1080p, or 4k")
     _validate_ratio(ratio, ZHENZHEN_VIDEO_V31_RATIOS, "Video V3.1")
+    if model == ZHENZHEN_VIDEO_V31_LITE_MODEL and urls:
+        raise SeedanceLowPriceError(
+            "zhenzhen-video-v31-lite is text-to-video only and does not accept images"
+        )
     if len(urls) > 3:
-        raise SeedanceLowPriceError("Video V3.1 Fast accepts at most 3 images")
+        raise SeedanceLowPriceError("Video V3.1 accepts at most 3 images")
     if model == ZHENZHEN_VIDEO_V31_QUALITY_MODEL and len(urls) == 3:
         raise SeedanceLowPriceError(
             "Video V3.1 Quality does not support the 3-image reference mode"
@@ -5074,6 +5362,10 @@ class Comfly_zhenzhen_video_v31_lowprice(_Comfly_apimart_video_base):
             slots = _connected_slots(
                 kwargs, "image", 3, "Zhenzhen Video V3.1 Low Price"
             )
+            if model == ZHENZHEN_VIDEO_V31_LITE_MODEL and slots:
+                raise SeedanceLowPriceError(
+                    "zhenzhen-video-v31-lite is text-to-video only and does not accept images"
+                )
             image_urls = _upload_image_slots(
                 slots,
                 config,
@@ -6708,6 +7000,7 @@ __all__ = [
     "Comfly_sd2_seedream_v5_pro_lowprice",
     "Comfly_zhenzhen_image_g2_lowprice",
     "Comfly_zhenzhen_image_g_v2_lowprice",
+    "Comfly_zhenzhen_image_nb_lowprice",
     "Comfly_zhenzhen_video_g_omni_flash_lowprice",
     "Comfly_zhenzhen_video_gk_v15_lowprice",
     "Comfly_zhenzhen_video_v31_lowprice",
