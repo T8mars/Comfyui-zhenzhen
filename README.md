@@ -71,20 +71,32 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260726-1
+
+新增模型和节点  
+
+zhenzhen-image-nb-pro  
+zhenzhen-image-nb-2-lite  
+zhenzhen-image-nb-flash  
+zhenzhen-image-nb-2  
+zhenzhen-video-v31-lite  
+
+更新对应工作流（贞贞的平价AI小屋对应API）  
+
 ### 20260725-2
 
-新增模型及节点
-suno相关模型及节点
-midjourney相关模型及节点
-更新对应工作流（贞贞的平价AI小屋对应API）  
+新增模型及节点  
+suno相关模型及节点  
+midjourney相关模型及节点  
+更新对应工作流（贞贞的平价AI小屋对应API）    
 
 ### 20260725-1
 
-新增模型及节点：
-语音转文本：whisper-1
-图像模型：zhenzhen-image-g-v2-lowprice（低价版支持2K,4K，出图飞快）
-视频模型：zhenzhen-video-g-omni-flash，zhenzhen-video-v31-quality，zhenzhen-video-v31-fast，zhenzhen-video-gk-v15
-更新对应工作流（贞贞的平价AI小屋对应API）  
+新增模型及节点：  
+语音转文本：whisper-1  
+图像模型：zhenzhen-image-g-v2-lowprice（低价版支持2K,4K，出图飞快）  
+视频模型：zhenzhen-video-g-omni-flash，zhenzhen-video-v31-quality，zhenzhen-video-v31-fast，zhenzhen-video-gk-v15  
+更新对应工作流（贞贞的平价AI小屋对应API）    
 
 ### 20260721-1
 
