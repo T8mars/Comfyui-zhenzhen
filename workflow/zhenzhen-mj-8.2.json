@@ -1,0 +1,256 @@
+{
+  "id": "061214c1-fe69-46f0-b340-0590bd5bec0a",
+  "revision": 0,
+  "last_node_id": 4,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "Comfly_Mj",
+      "pos": [
+        1144.4251696565732,
+        341.605754151991
+      ],
+      "size": [
+        400,
+        578
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "no",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "s",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "iw",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "name": "r",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "cw",
+          "shape": 7,
+          "type": "INT",
+          "link": null
+        },
+        {
+          "name": "sv",
+          "shape": 7,
+          "type": "COMBO",
+          "link": null
+        },
+        {
+          "name": "oref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "cref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "sref",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "taskId",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "374ea4ad5224ddd3c6bb18ec91edb7c4e6e8fd5c",
+        "Node name for S&R": "Comfly_Mj"
+      },
+      "widgets_values": [
+        "美丽的高允贞",
+        "fast mode",
+        "",
+        "",
+        "1:1",
+        "v 8.2",
+        false,
+        false,
+        727509828,
+        "randomize",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveImage",
+      "pos": [
+        1692.7167524025601,
+        444.0832197115547
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.28.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Comfly_api_set",
+      "pos": [
+        814.062329849624,
+        356.8997112985579
+      ],
+      "size": [
+        270,
+        150
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "374ea4ad5224ddd3c6bb18ec91edb7c4e6e8fd5c",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      4,
+      0,
+      2,
+      12,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.3310000000000028,
+      "offset": [
+        -447.32767747037656,
+        -82.364360256439
+      ]
+    },
+    "frontendVersion": "1.45.21",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
