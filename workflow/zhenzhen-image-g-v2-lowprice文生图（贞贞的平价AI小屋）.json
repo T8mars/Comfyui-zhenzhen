@@ -49,7 +49,7 @@
     {
       "id": 2,
       "type": "Comfly_zhenzhen_image_g_v2_lowprice",
-      "title": "Image G V2 文生图",
+      "title": "Image G V2 图像生成/编辑",
       "pos": [
         420,
         100
@@ -200,7 +200,8 @@
         "1k",
         "1:1",
         1,
-        false
+        false,
+        "1024x1024"
       ]
     },
     {

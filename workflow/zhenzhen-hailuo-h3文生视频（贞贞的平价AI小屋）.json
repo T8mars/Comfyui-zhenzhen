@@ -1,0 +1,174 @@
+{
+  "id": "eff3c760-2fb2-5b9f-8fc6-861b877f1e50",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_api_set",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        330,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（国内版）"
+    },
+    {
+      "id": 2,
+      "type": "Comfly_hailuo_h3_video_lowprice",
+      "title": "Hailuo H3 文生视频",
+      "pos": [
+        400,
+        100
+      ],
+      "size": [
+        450,
+        360
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
+      },
+      "widgets_values": [
+        "hailuo-h3-t2v",
+        "清晨薄雾中的玻璃温室，一只白色纸飞机缓慢穿过花丛，镜头平稳跟随，柔和电影光线",
+        "5",
+        "2K",
+        "16:9",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveVideo",
+      "pos": [
+        930,
+        150
+      ],
+      "size": [
+        300,
+        190
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/hailuo_h3_t2v",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

@@ -2847,6 +2847,326 @@ class Comfly_hailuo_2_3_video_lowprice:
             )
 
 
+HAILUO_H3_T2V_MODEL = "hailuo-h3-t2v"
+HAILUO_H3_I2V_MODEL = "hailuo-h3-i2v"
+HAILUO_H3_MULTI_MODEL = "hailuo-h3-multi"
+HAILUO_H3_MODELS = [
+    HAILUO_H3_T2V_MODEL,
+    HAILUO_H3_I2V_MODEL,
+    HAILUO_H3_MULTI_MODEL,
+]
+HAILUO_H3_SECONDS = [str(seconds) for seconds in range(5, 16)]
+HAILUO_H3_RESOLUTIONS = ["2K"]
+HAILUO_H3_PROMPT_MAX_LENGTH = 20480
+HAILUO_H3_MAX_IMAGES = 9
+HAILUO_H3_MAX_VIDEOS = 3
+HAILUO_H3_MAX_AUDIOS = 3
+
+
+def validate_hailuo_h3_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+) -> None:
+    if model not in HAILUO_H3_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo H3 model: {model}")
+    if str(seconds) not in HAILUO_H3_SECONDS:
+        raise SeedanceLowPriceError("Hailuo H3 seconds must be between 5 and 15")
+    if resolution not in HAILUO_H3_RESOLUTIONS:
+        raise SeedanceLowPriceError("Hailuo H3 resolution must be 2K")
+    if ratio not in RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo H3 ratio: {ratio}")
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > HAILUO_H3_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Hailuo H3 prompt exceeds {HAILUO_H3_PROMPT_MAX_LENGTH} characters"
+        )
+    if model in (HAILUO_H3_T2V_MODEL, HAILUO_H3_MULTI_MODEL) and not prompt_text:
+        raise SeedanceLowPriceError(
+            "Hailuo H3 text-to-video and multi require a prompt"
+        )
+
+
+def build_hailuo_h3_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+    video_urls: Optional[List[str]] = None,
+    audio_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_hailuo_h3_inputs(model, prompt, seconds, resolution, ratio)
+    prompt_text = str(prompt or "").strip()
+    images = list(image_urls or [])
+    videos = list(video_urls or [])
+    audios = list(audio_urls or [])
+
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+
+    if model in (HAILUO_H3_T2V_MODEL, HAILUO_H3_MULTI_MODEL):
+        metadata["ratio"] = ratio
+        payload["prompt"] = prompt_text
+
+    if model == HAILUO_H3_I2V_MODEL:
+        if not images:
+            raise SeedanceLowPriceError(
+                "Hailuo H3 image-to-video requires image1 as the first frame"
+            )
+        payload["images"] = images[:2]
+        if prompt_text:
+            payload["prompt"] = prompt_text
+        return payload
+
+    if model == HAILUO_H3_MULTI_MODEL:
+        if not (images or videos or audios):
+            raise SeedanceLowPriceError(
+                "Hailuo H3 multi requires at least one image, video, or audio"
+            )
+        if images:
+            payload["images"] = images[:HAILUO_H3_MAX_IMAGES]
+        if videos:
+            metadata["video_url"] = videos[:HAILUO_H3_MAX_VIDEOS]
+        if audios:
+            metadata["audio_url"] = audios[:HAILUO_H3_MAX_AUDIOS]
+    return payload
+
+
+class Comfly_hailuo_h3_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, Tuple[Any, ...]] = {
+            "api_config": (CONFIG_TYPE,),
+        }
+        for index in range(1, HAILUO_H3_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        for index in range(1, HAILUO_H3_MAX_VIDEOS + 1):
+            optional[f"video{index}"] = (VIDEO_TYPE,)
+        for index in range(1, HAILUO_H3_MAX_AUDIOS + 1):
+            optional[f"audio{index}"] = ("AUDIO",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+
+        return {
+            "required": {
+                "model": (
+                    HAILUO_H3_MODELS,
+                    {"default": HAILUO_H3_T2V_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (HAILUO_H3_SECONDS, {"default": "5"}),
+                "resolution": (HAILUO_H3_RESOLUTIONS, {"default": "2K"}),
+                "ratio": (RATIOS, {"default": "16:9"}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        resolution="2K",
+        ratio="16:9",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_hailuo_h3_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_hailuo_h3_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+            )
+            config = resolve_config(api_config)
+            image_slots: List[Tuple[int, Any]] = []
+            video_slots: List[Tuple[int, Any]] = []
+            audio_slots: List[Tuple[int, Any]] = []
+
+            if model == HAILUO_H3_I2V_MODEL:
+                if kwargs.get("image1") is None:
+                    raise SeedanceLowPriceError(
+                        "Hailuo H3 image-to-video requires image1 as the first frame"
+                    )
+                image_slots = _connected_slots(
+                    kwargs,
+                    "image",
+                    2,
+                    "Hailuo H3 Low Price",
+                )
+            elif model == HAILUO_H3_MULTI_MODEL:
+                image_slots = _connected_slots(
+                    kwargs,
+                    "image",
+                    HAILUO_H3_MAX_IMAGES,
+                    "Hailuo H3 Low Price",
+                )
+                video_slots = _connected_slots(
+                    kwargs,
+                    "video",
+                    HAILUO_H3_MAX_VIDEOS,
+                    "Hailuo H3 Low Price",
+                )
+                audio_slots = _connected_slots(
+                    kwargs,
+                    "audio",
+                    HAILUO_H3_MAX_AUDIOS,
+                    "Hailuo H3 Low Price",
+                )
+                if not (image_slots or video_slots or audio_slots):
+                    raise SeedanceLowPriceError(
+                        "Hailuo H3 multi requires at least one image, video, or audio"
+                    )
+
+            total_uploads = len(image_slots) + len(video_slots) + len(audio_slots)
+            completed_uploads = 0
+            image_urls: List[str] = []
+            video_urls: List[str] = []
+            audio_urls: List[str] = []
+
+            def upload_completed() -> None:
+                nonlocal completed_uploads
+                completed_uploads += 1
+                if total_uploads:
+                    update_progress(int(completed_uploads / total_uploads * 25))
+
+            for slot, image in image_slots:
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image),
+                        f"hailuo_h3_image_{slot}.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                upload_completed()
+            for slot, video in video_slots:
+                video_urls.append(
+                    upload_media(
+                        video_to_mp4_bytes(video),
+                        f"hailuo_h3_video_{slot}.mp4",
+                        "video/mp4",
+                        config,
+                    )
+                )
+                upload_completed()
+            for slot, audio in audio_slots:
+                audio_urls.append(
+                    upload_media(
+                        audio_to_wav_bytes(audio),
+                        f"hailuo_h3_audio_{slot}.wav",
+                        "audio/wav",
+                        config,
+                    )
+                )
+                upload_completed()
+
+            payload = build_hailuo_h3_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                image_urls,
+                video_urls,
+                audio_urls,
+            )
+            print(f"[Hailuo H3 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(35)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(35 + int(progress * 0.55))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 VIDU_Q3_T2V_MODELS = [
     "vidu-q3-pro-t2v",
     "vidu-q3-turbo-t2v",
@@ -7073,6 +7393,7 @@ __all__ = [
     "Comfly_kling_video_lowprice",
     "Comfly_kling_o3_edit_lowprice",
     "Comfly_hailuo_2_3_video_lowprice",
+    "Comfly_hailuo_h3_video_lowprice",
     "Comfly_vidu_q3_video_lowprice",
     "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",
