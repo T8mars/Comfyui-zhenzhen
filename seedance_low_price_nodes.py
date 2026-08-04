@@ -62,40 +62,6 @@ class SeedanceLowPriceError(RuntimeError):
     """Non-retryable Seedance API or input error."""
 
 
-_CONFIG_LOCK = threading.RLock()
-
-
-def _config_path() -> Path:
-    return Path(__file__).resolve().parent / "Comflyapi.json"
-
-
-def _read_project_config(strict: bool = False) -> Dict[str, Any]:
-    path = _config_path()
-    if not path.exists():
-        return {}
-    try:
-        with _CONFIG_LOCK:
-            with path.open("r", encoding="utf-8") as handle:
-                data = json.load(handle)
-        return data if isinstance(data, dict) else {}
-    except (OSError, ValueError) as exc:
-        if strict:
-            raise SeedanceLowPriceError(
-                f"Cannot safely update invalid config file {path.name}: {exc}"
-            ) from exc
-        return {}
-
-
-def _write_project_config(config: Dict[str, Any]) -> None:
-    path = _config_path()
-    with _CONFIG_LOCK:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        temp_path = path.with_suffix(path.suffix + ".tmp")
-        with temp_path.open("w", encoding="utf-8") as handle:
-            json.dump(config, handle, ensure_ascii=False, indent=4)
-        os.replace(temp_path, path)
-
-
 def normalize_base_url(value: str) -> str:
     raw = str(value or DEFAULT_BASE_URL).strip()
     parsed = urlsplit(raw)
@@ -118,7 +84,7 @@ def _unwrap_api_config(api_config: Any) -> Optional[Dict[str, Any]]:
 
 
 def resolve_config(api_config: Any = None) -> Dict[str, Any]:
-    """Resolve settings node, independent project config, then environment."""
+    """Resolve an explicit workflow setting, then optional environment values."""
     settings = _unwrap_api_config(api_config)
     source = ""
     base_url = ""
@@ -134,13 +100,6 @@ def resolve_config(api_config: Any = None) -> Dict[str, Any]:
         source = "settings_node"
 
     if not api_key:
-        stored = _read_project_config()
-        api_key = str(stored.get("seedance2_low_price_api_key") or "").strip()
-        if api_key:
-            base_url = str(stored.get("seedance2_low_price_base_url") or "").strip()
-            source = "Comflyapi.json"
-
-    if not api_key:
         api_key = str(os.environ.get("SEEDANCE_API_KEY") or "").strip()
         base_url = str(os.environ.get("SEEDANCE_BASE_URL") or "").strip()
         if api_key:
@@ -149,7 +108,7 @@ def resolve_config(api_config: Any = None) -> Dict[str, Any]:
     if not api_key:
         raise SeedanceLowPriceError(
             "Seedance API key is required. Connect the Low Price Settings node, "
-            "save its independent key, or set SEEDANCE_API_KEY."
+            "enter its key in the workflow, or set SEEDANCE_API_KEY."
         )
 
     config = {
@@ -181,27 +140,15 @@ class Comfly_seedance2_low_price_settings:
 
     def build(self, base_url: str, api_key: str):
         normalized_base = normalize_base_url(base_url)
-        with _CONFIG_LOCK:
-            config = _read_project_config(strict=True)
-            normalized_key = str(api_key or "").strip()
-            if not normalized_key:
-                normalized_key = str(config.get("seedance2_low_price_api_key") or "").strip()
-            if not normalized_key:
-                raise SeedanceLowPriceError(
-                    "api_key cannot be empty until a key has been saved locally once"
-                )
-
-            config["seedance2_low_price_base_url"] = normalized_base
-            config["seedance2_low_price_api_key"] = normalized_key
-            _write_project_config(config)
-        print(f"[Seedance Low Price Settings] Saved independent config for {normalized_base}")
+        normalized_key = str(api_key or "").strip()
+        print(f"[Seedance Low Price Settings] Using workflow config for {normalized_base}")
         return ({"base_url": normalized_base, "api_key": normalized_key},)
 
 
 class _SSLContextAdapter(requests.adapters.HTTPAdapter):
-    def __init__(self, context: ssl.SSLContext):
+    def __init__(self, context: ssl.SSLContext, **kwargs):
         self._context = context
-        super().__init__()
+        super().__init__(**kwargs)
 
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = self._context
@@ -212,13 +159,13 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return super().proxy_manager_for(*args, **kwargs)
 
 
-_SESSION: Optional[requests.Session] = None
+_SESSION_LOCAL = threading.local()
 
 
 def _get_session() -> requests.Session:
-    global _SESSION
-    if _SESSION is not None:
-        return _SESSION
+    session = getattr(_SESSION_LOCAL, "session", None)
+    if session is not None:
+        return session
 
     if not BUNDLED_ROOT_YR_CERT.is_file():
         raise RuntimeError(
@@ -231,9 +178,14 @@ def _get_session() -> requests.Session:
     session = requests.Session()
     session.mount(
         f"{DEFAULT_BASE_URL}/",
-        _SSLContextAdapter(context),
+        _SSLContextAdapter(
+            context,
+            pool_connections=8,
+            pool_maxsize=30,
+            pool_block=True,
+        ),
     )
-    _SESSION = session
+    _SESSION_LOCAL.session = session
     return session
 
 

@@ -26,7 +26,10 @@ import subprocess
 import threading
 import concurrent.futures
 import copy
+import functools
+import inspect
 from .utils import pil2tensor, tensor2pil
+from .config_store import read_project_config, write_project_config
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
@@ -119,18 +122,10 @@ def _normalize_fal_seed(seed):
     return min(seed_value, FAL_SEED_MAX)
 
 def get_config():
-    try:
-        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Comflyapi.json')
-        with open(config_path, 'r') as f:  
-            config = json.load(f)
-        return config
-    except:
-        return {}
+    return read_project_config()
 
 def save_config(config):
-    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Comflyapi.json')
-    with open(config_path, 'w') as f:
-        json.dump(config, f, indent=4)
+    write_project_config(config)
 
 def _comfly_split_asset_ids(s):
     if not s or not str(s).strip():
@@ -317,20 +312,15 @@ class Comfly_api_set:
 
         baseurl = base_url_mapping[api_base]
             
-        config = get_config()
-        if apikey.strip():
-            config['api_key'] = apikey
-            save_config(config)
-
-        effective_api_key = apikey.strip() or str(config.get('api_key', '')).strip()
+        effective_api_key = apikey.strip()
         api_config = {
             "base_url": baseurl,
             "api_key": effective_api_key,
         }
             
         message = f"API Base URL set to: {baseurl}"
-        if apikey.strip():
-            message += "\nAPI key has been updated"
+        if effective_api_key:
+            message += "\nAPI key is supplied by the current workflow"
 
         print(message)
         return (apikey, api_config)
@@ -2824,7 +2814,7 @@ class Comfly_kling_text2video:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            error_response = {"task_status": "failed", "task_status_msg": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_kling_text2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
@@ -3002,7 +2992,7 @@ class Comfly_kling_image2video:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            error_response = {"task_status": "failed", "task_status_msg": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_kling_image2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
@@ -3351,7 +3341,7 @@ class Comfly_kling_multi_image2video:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            error_response = {"task_status": "failed", "task_status_msg": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_kling_multi_image2video] {error_response}")
             return ("", "", "", "", json.dumps(error_response))
@@ -3501,7 +3491,7 @@ class Comfly_video_extend:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            error_response = {"task_status": "failed", "task_status_msg": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_video_extend] {error_response}")
             return ("", "", json.dumps(error_response))
@@ -3698,7 +3688,7 @@ class Comfly_lip_sync:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"task_status": "failed", "task_status_msg": "API key not found in Comflyapi.json"}
+            error_response = {"task_status": "failed", "task_status_msg": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_lip_sync] {error_response}")
             return ("", "", "", json.dumps(error_response))
@@ -4151,7 +4141,7 @@ class Comfly_Doubao_Seedream:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -4406,7 +4396,7 @@ class Comfly_Doubao_Seedream_4:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -4669,7 +4659,7 @@ class Comfly_Doubao_Seedream_4_5:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -4879,7 +4869,7 @@ class Comfly_Doubao_Seededit:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             if not skip_error:
                 raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
@@ -5100,7 +5090,7 @@ class ComflyJimengApi:
 
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
 
                 blank_image = Image.new('RGB', (width, height), color='white')
@@ -5450,7 +5440,7 @@ class ComflyJimengVideoApi:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            error_response = {"code": "error", "message": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[ComflyJimengVideoApi] {error_response}")
             return ("", "", json.dumps(error_response), "")
@@ -5693,7 +5683,7 @@ class ComflySeededit:
             
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                 if not skip_error:
                     raise RuntimeError(f"[ComflySeededit] {error_message}")
@@ -6057,7 +6047,7 @@ class Comfly_gpt_image_1_edit:
             
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                 if not skip_error:
                     raise RuntimeError(f"[Comfly_gpt_image_1_edit] {error_message}")
@@ -6347,7 +6337,7 @@ class Comfly_gpt_image_1:
             
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
@@ -6929,7 +6919,7 @@ class Comfly_gpt_image_2_official:
         blank_t = pil2tensor(blank)
 
         if not self.api_key:
-            msg = "API key not found in Comflyapi.json"
+            msg = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(msg)
             if not skip_error:
                 raise RuntimeError(f"[Comfly_gpt_image_2_official] {msg}")
@@ -7628,7 +7618,7 @@ class Comfly_gpt_image_2_official_ratio:
         blank_t = pil2tensor(blank)
 
         if not self.api_key:
-            msg = "API key not found in Comflyapi.json"
+            msg = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(msg)
             return (blank_t, "", msg)
 
@@ -7919,7 +7909,7 @@ class Comfly_gpt_image_2:
                 Comfly_gpt_image_2._conversation_history = []
 
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(f"[Comfly_gpt_image_2] {error_message}")
                 blank_img = Image.new('RGB', (1024, 1024), color='white')
                 if not skip_error:
@@ -8102,7 +8092,7 @@ class Comfly_gpt_image_2_S2A:
             save_config(config)
 
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(f"[Comfly_gpt_image_2_S2A] {error_message}")
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -8782,7 +8772,7 @@ class ComflyChatGPTApi:
                 self.conversation_history = []
                 
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                
                 blank_img = Image.new('RGB', (512, 512), color='white')
@@ -11069,7 +11059,7 @@ class Comfly_Flux_Kontext:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
 
             if input_image is None:
@@ -11268,7 +11258,7 @@ class Comfly_Flux_Kontext_Edit:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
 
             if image is None:
@@ -12148,7 +12138,7 @@ class ComflyGeminiTextOnly:
             save_config(config)
 
         if not self.api_key:
-            return ("API key not found in Comflyapi.json",)
+            return ("API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings.",)
 
         try:
             content = [{"type": "text", "text": prompt}]
@@ -12251,7 +12241,7 @@ class Comfly_Googel_Veo3:
             self.api_key = apikey
             
         if not self.api_key:
-            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            error_response = {"code": "error", "message": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_Googel_Veo3] {error_response}")
             return ("", "", json.dumps(error_response))
@@ -12464,7 +12454,7 @@ class Comfly_Googel_Veo3_Lite:
             self.api_key = apikey
             
         if not self.api_key:
-            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            error_response = {"code": "error", "message": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[Comfly_Googel_Veo3_Lite] {error_response}")
             return ("", "", json.dumps(error_response))
@@ -13181,7 +13171,7 @@ class Comfly_nano_banana2_edit:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -13406,7 +13396,7 @@ class Comfly_nano_banana_edit:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -13619,7 +13609,7 @@ class Comfly_nano_banana2_edit:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -13849,7 +13839,7 @@ class Comfly_qwen_image:
 
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                 blank_image = Image.new('RGB', (1024, 1024), color='white')
                 blank_tensor = pil2tensor(blank_image)
@@ -14041,7 +14031,7 @@ class Comfly_qwen_image_edit:
             
         try:
             if not self.api_key:
-                error_message = "API key not found in Comflyapi.json"
+                error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(error_message)
                 if not skip_error:
                     raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
@@ -14231,7 +14221,7 @@ class Comfly_Z_image_turbo:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -14678,7 +14668,7 @@ class Comfly_suno_description:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             empty_audio = create_audio_object("")
             if not skip_error:
@@ -14925,7 +14915,7 @@ class Comfly_suno_lyrics:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             if not skip_error:
                 raise RuntimeError(f"[Comfly_suno_lyrics] {error_message}")
@@ -15061,7 +15051,7 @@ class Comfly_suno_custom:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             empty_audio = create_audio_object("")
             if not skip_error:
@@ -15304,7 +15294,7 @@ class Comfly_suno_upload:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             if not skip_error:
                 raise RuntimeError(f"[Comfly_suno_upload] {error_message}")
@@ -15537,7 +15527,7 @@ class Comfly_suno_upload_extend:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             empty_audio = create_audio_object("")
             if not skip_error:
@@ -15780,7 +15770,7 @@ class Comfly_suno_cover:
             config['api_key'] = api_key
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             empty_audio = create_audio_object("")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
@@ -18211,7 +18201,7 @@ class Comfly_nano_banana2_edit_S2A:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -18833,7 +18823,7 @@ class ComflyGrok3VideoApi:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            error_response = {"code": "error", "message": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[ComflyGrok3VideoApi] {error_response}")
             return ("", "", json.dumps(error_response), "")
@@ -19084,7 +19074,7 @@ class ComflyGrok3VideoApi30S:
             save_config(config)
             
         if not self.api_key:
-            error_response = {"code": "error", "message": "API key not found in Comflyapi.json"}
+            error_response = {"code": "error", "message": "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."}
             if not skip_error:
                 raise RuntimeError(f"[ComflyGrok3VideoApi30S] {error_response}")
             return ("", "", json.dumps(error_response), "")
@@ -19744,7 +19734,7 @@ class Comfly_grok_image:
 
         try:
             if not self.api_key:
-                err = "API key not found in Comflyapi.json"
+                err = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
                 print(f"[Comfly_grok_image] {err}")
                 if not skip_error:
                     raise RuntimeError(f"[Comfly_grok_image] {err}")
@@ -20357,7 +20347,7 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             save_config(config)
             
         if not self.api_key:
-            error_message = "API key not found in Comflyapi.json"
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(error_message)
             blank_image = Image.new('RGB', (1024, 1024), color='white')
             blank_tensor = pil2tensor(blank_image)
@@ -24903,7 +24893,7 @@ class Comfly_seedream_v5_pro:
             save_config(config)
 
         if not self.api_key:
-            message = "API key not found in Comflyapi.json"
+            message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             if not skip_error:
                 raise RuntimeError(f"[seedream_v5_pro] {message}")
             return self._blank_result(message)
@@ -25476,7 +25466,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
         blank_t = pil2tensor(blank)
 
         if not self.api_key:
-            msg = "API key not found in Comflyapi.json"
+            msg = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
             print(msg)
             return (blank_t, "", msg)
 
@@ -25878,6 +25868,73 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_zonos2_fal": "zhenzhen-zonos2-fal",
     "Comfly_boogu_image_fal": "zhenzhen-boogu-image-fal"
 }
+
+
+def _install_workflow_api_key_reset(node_mappings=None):
+    """Clear stale instance keys whenever the workflow key input is blank."""
+    mappings = node_mappings or NODE_CLASS_MAPPINGS
+    wrapped_count = 0
+    for node_class in set(mappings.values()):
+        function_name = getattr(node_class, "FUNCTION", "")
+        original_function = getattr(node_class, function_name, None)
+        if not callable(original_function) or getattr(
+            original_function, "_comfly_workflow_key_reset", False
+        ):
+            continue
+        try:
+            signature = inspect.signature(original_function)
+        except (TypeError, ValueError):
+            continue
+        parameter_names = list(signature.parameters)
+        if not parameter_names or parameter_names[0] != "self":
+            continue
+        key_name = next(
+            (
+                name
+                for name in ("api_key", "apikey")
+                if name in signature.parameters
+            ),
+            None,
+        )
+        if key_name is None:
+            continue
+
+        if inspect.iscoroutinefunction(original_function):
+            @functools.wraps(original_function)
+            async def workflow_key_function(
+                self,
+                *args,
+                __function=original_function,
+                __signature=signature,
+                __key_name=key_name,
+                **kwargs,
+            ):
+                bound = __signature.bind_partial(self, *args, **kwargs)
+                supplied_key = bound.arguments.get(__key_name, "")
+                self.api_key = str(supplied_key or "").strip()
+                return await __function(self, *args, **kwargs)
+        else:
+            @functools.wraps(original_function)
+            def workflow_key_function(
+                self,
+                *args,
+                __function=original_function,
+                __signature=signature,
+                __key_name=key_name,
+                **kwargs,
+            ):
+                bound = __signature.bind_partial(self, *args, **kwargs)
+                supplied_key = bound.arguments.get(__key_name, "")
+                self.api_key = str(supplied_key or "").strip()
+                return __function(self, *args, **kwargs)
+
+        workflow_key_function._comfly_workflow_key_reset = True
+        setattr(node_class, function_name, workflow_key_function)
+        wrapped_count += 1
+    return wrapped_count
+
+
+WORKFLOW_API_KEY_RESET_NODE_COUNT = _install_workflow_api_key_reset()
 
 # Aliyun WanX 2.6 API Node
 # BASEURL is fixed to Aliyun official API

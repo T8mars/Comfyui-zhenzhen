@@ -80,7 +80,12 @@ def _midjourney_session() -> requests.Session:
     session = requests.Session()
     session.mount(
         f"{DEFAULT_BASE_URL}/",
-        _SSLContextAdapter(context),
+        _SSLContextAdapter(
+            context,
+            pool_connections=8,
+            pool_maxsize=30,
+            pool_block=True,
+        ),
     )
     _SESSION_LOCAL.session = session
     return session

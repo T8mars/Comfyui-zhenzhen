@@ -19,6 +19,7 @@ from PIL import Image
 from comfy.comfy_types import IO
 
 from .utils import pil2tensor, tensor2pil
+from .config_store import read_project_config, write_project_config
 
 
 baseurl = "https://ai.t8star.org"
@@ -50,18 +51,11 @@ _HEYGEN_AVATAR4_VOICE_CATALOG = None
 
 
 def get_config():
-    try:
-        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Comflyapi.json")
-        with open(config_path, "r") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    return read_project_config()
 
 
 def save_config(config):
-    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Comflyapi.json")
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=4)
+    write_project_config(config)
 
 
 def _dedupe_preserve_order(values):
@@ -196,15 +190,12 @@ class ComflyFalBase:
     FAILED_STATUSES = {"FAILED", "FAILURE", "ERROR", "CANCELLED", "CANCELED"}
 
     def __init__(self):
-        self.api_key = get_config().get("api_key", "")
+        self.api_key = ""
         self.timeout = 300
 
     def set_api_key(self, api_key):
         if api_key and str(api_key).strip():
             self.api_key = str(api_key).strip()
-            config = get_config()
-            config["api_key"] = self.api_key
-            save_config(config)
 
     def get_headers(self):
         return {

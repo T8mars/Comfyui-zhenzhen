@@ -3,7 +3,6 @@ import aiohttp
 from aiohttp import web
 from aiohttp_cors import setup, ResourceOptions
 import os
-import json
 import requests
 import logging
 import time
@@ -69,19 +68,7 @@ async def get_purify_js(request):
     
 
 def load_api_config():
-   try:
-       current_dir = os.path.dirname(os.path.realpath(__file__))
-       config_path = os.path.join(current_dir, 'Comflyapi.json')
-
-       if not os.path.exists(config_path):
-           return {}
-
-       with open(config_path, 'r') as f:
-           config = json.load(f)
-       return config
-   except Exception as e:
-       logging.error(f"Error loading API config: {str(e)}")
-       return {}
+   return {}
 
 async def get_config(request):
    config = load_api_config()
