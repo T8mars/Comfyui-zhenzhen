@@ -3119,6 +3119,254 @@ class Comfly_hailuo_h3_video_lowprice:
             )
 
 
+MINIMAX_H3_OW_T2V_MODEL = "minimax-h3-ow-t2v"
+MINIMAX_H3_OW_R2V_MODEL = "minimax-h3-ow-r2v"
+MINIMAX_H3_OW_I2V_MODEL = "minimax-h3-ow-i2v"
+MINIMAX_H3_OW_MODELS = [
+    MINIMAX_H3_OW_T2V_MODEL,
+    MINIMAX_H3_OW_R2V_MODEL,
+    MINIMAX_H3_OW_I2V_MODEL,
+]
+MINIMAX_H3_OW_SECONDS = ["5", "10", "15"]
+MINIMAX_H3_OW_RESOLUTIONS = ["480p", "720p"]
+MINIMAX_H3_OW_RATIOS = [
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "9:16",
+    "16:9",
+    "21:9",
+]
+
+
+def validate_minimax_h3_ow_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    has_image: bool = False,
+    strict: bool = True,
+) -> str:
+    if model not in MINIMAX_H3_OW_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported MiniMax H3 OW model: {model}")
+    if str(seconds) not in MINIMAX_H3_OW_SECONDS:
+        raise SeedanceLowPriceError("MiniMax H3 OW seconds must be 5, 10, or 15")
+    if resolution not in MINIMAX_H3_OW_RESOLUTIONS:
+        raise SeedanceLowPriceError("MiniMax H3 OW resolution must be 480p or 720p")
+    if ratio not in MINIMAX_H3_OW_RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported MiniMax H3 OW ratio: {ratio}")
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"MiniMax H3 OW prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if (
+        strict
+        and model in (MINIMAX_H3_OW_T2V_MODEL, MINIMAX_H3_OW_R2V_MODEL)
+        and not prompt_text
+    ):
+        raise SeedanceLowPriceError(
+            "MiniMax H3 OW T2V and R2V require a prompt"
+        )
+    if (
+        strict
+        and model in (MINIMAX_H3_OW_I2V_MODEL, MINIMAX_H3_OW_R2V_MODEL)
+        and not has_image
+    ):
+        raise SeedanceLowPriceError(
+            "MiniMax H3 OW I2V and R2V require image1"
+        )
+    return prompt_text
+
+
+def build_minimax_h3_ow_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    images = list(image_urls or [])
+    prompt_text = validate_minimax_h3_ow_inputs(
+        model,
+        prompt,
+        seconds,
+        resolution,
+        ratio,
+        has_image=bool(images),
+        strict=True,
+    )
+    if len(images) > 1:
+        raise SeedanceLowPriceError("MiniMax H3 OW accepts exactly one reference image")
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": {
+            "resolution": resolution,
+            "ratio": ratio,
+        },
+    }
+    if prompt_text:
+        payload["prompt"] = prompt_text
+    if model in (MINIMAX_H3_OW_I2V_MODEL, MINIMAX_H3_OW_R2V_MODEL):
+        payload["images"] = images
+    return payload
+
+
+class Comfly_minimax_h3_ow_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    MINIMAX_H3_OW_MODELS,
+                    {"default": MINIMAX_H3_OW_T2V_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (MINIMAX_H3_OW_SECONDS, {"default": "5"}),
+                "resolution": (MINIMAX_H3_OW_RESOLUTIONS, {"default": "480p"}),
+                "ratio": (MINIMAX_H3_OW_RATIOS, {"default": "16:9"}),
+            },
+            "optional": {
+                "image1": ("IMAGE",),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        resolution="480p",
+        ratio="16:9",
+        image1=None,
+        strict=False,
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_minimax_h3_ow_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                has_image=image1 is not None,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        image1: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_minimax_h3_ow_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                has_image=image1 is not None,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            if model in (MINIMAX_H3_OW_I2V_MODEL, MINIMAX_H3_OW_R2V_MODEL):
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image1),
+                        "minimax_h3_ow_reference.png",
+                        "image/png",
+                        config,
+                    )
+                )
+            update_progress(25)
+            payload = build_minimax_h3_ow_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                image_urls,
+            )
+            print(f"[MiniMax H3 OW Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 VIDU_Q3_T2V_MODELS = [
     "vidu-q3-pro-t2v",
     "vidu-q3-turbo-t2v",
@@ -4524,6 +4772,349 @@ class Comfly_doubao_seed_audio_1_0_lowprice:
                 task_id,
                 json.dumps(response, ensure_ascii=False, indent=2),
             )
+
+
+QWEN_IMAGE_30_T2I_MODEL = "qwen-image-3.0-t2i"
+QWEN_IMAGE_30_I2I_MODEL = "qwen-image-3.0-i2i"
+QWEN_IMAGE_30_PRO_T2I_MODEL = "qwen-image-3.0-pro-t2i"
+QWEN_IMAGE_30_PRO_I2I_MODEL = "qwen-image-3.0-pro-i2i"
+QWEN_IMAGE_30_GLOBAL_T2I_MODEL = "qwen-image-3.0-global-t2i"
+QWEN_IMAGE_30_GLOBAL_I2I_MODEL = "qwen-image-3.0-global-i2i"
+QWEN_IMAGE_30_GLOBAL_PRO_T2I_MODEL = "qwen-image-3.0-global-pro-t2i"
+QWEN_IMAGE_30_GLOBAL_PRO_I2I_MODEL = "qwen-image-3.0-global-pro-i2i"
+QWEN_IMAGE_30_T2I_MODELS = [
+    QWEN_IMAGE_30_T2I_MODEL,
+    QWEN_IMAGE_30_PRO_T2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_T2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_PRO_T2I_MODEL,
+]
+QWEN_IMAGE_30_I2I_MODELS = [
+    QWEN_IMAGE_30_I2I_MODEL,
+    QWEN_IMAGE_30_PRO_I2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_I2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_PRO_I2I_MODEL,
+]
+QWEN_IMAGE_30_MODELS = [
+    QWEN_IMAGE_30_T2I_MODEL,
+    QWEN_IMAGE_30_I2I_MODEL,
+    QWEN_IMAGE_30_PRO_T2I_MODEL,
+    QWEN_IMAGE_30_PRO_I2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_T2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_I2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_PRO_T2I_MODEL,
+    QWEN_IMAGE_30_GLOBAL_PRO_I2I_MODEL,
+]
+QWEN_IMAGE_30_SIZING_MODES = ["auto", "ratio", "custom_size"]
+QWEN_IMAGE_30_RESOLUTIONS = ["1k", "2k"]
+QWEN_IMAGE_30_RATIOS = [
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "4:5",
+    "5:4",
+    "9:16",
+    "16:9",
+    "21:9",
+]
+QWEN_IMAGE_30_PROMPT_MIN_LENGTH = 5
+QWEN_IMAGE_30_PROMPT_MAX_LENGTH = 2000
+QWEN_IMAGE_30_MAX_IMAGES = 3
+
+
+def normalize_qwen_image_30_custom_size(value: Any) -> str:
+    return str(value or "").strip().replace("X", "*").replace("x", "*")
+
+
+def is_valid_qwen_image_30_custom_size(value: Any) -> bool:
+    parts = [part.strip() for part in normalize_qwen_image_30_custom_size(value).split("*")]
+    return len(parts) == 2 and all(part.isdigit() and int(part) > 0 for part in parts)
+
+
+def validate_qwen_image_30_inputs(
+    model: str,
+    prompt: str,
+    sizing_mode: str,
+    resolution: str,
+    ratio: str,
+    custom_size: str,
+    n: int,
+    seed: int,
+    image_count: int = 0,
+    strict: bool = True,
+) -> str:
+    if model not in QWEN_IMAGE_30_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Qwen Image 3.0 model: {model}")
+    prompt_text = str(prompt or "").strip()
+    if strict and not prompt_text:
+        raise SeedanceLowPriceError("Qwen Image 3.0 prompt is required")
+    if prompt_text and not (
+        QWEN_IMAGE_30_PROMPT_MIN_LENGTH
+        <= len(prompt_text)
+        <= QWEN_IMAGE_30_PROMPT_MAX_LENGTH
+    ):
+        raise SeedanceLowPriceError(
+            "Qwen Image 3.0 prompt must contain 5 to 2000 characters"
+        )
+    if sizing_mode not in QWEN_IMAGE_30_SIZING_MODES:
+        raise SeedanceLowPriceError(
+            f"Unsupported Qwen Image 3.0 sizing_mode: {sizing_mode}"
+        )
+    if resolution not in QWEN_IMAGE_30_RESOLUTIONS:
+        raise SeedanceLowPriceError("Qwen Image 3.0 resolution must be 1k or 2k")
+    if ratio not in QWEN_IMAGE_30_RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Qwen Image 3.0 ratio: {ratio}")
+    if sizing_mode == "custom_size" and not is_valid_qwen_image_30_custom_size(custom_size):
+        raise SeedanceLowPriceError(
+            "Qwen Image 3.0 custom_size must use positive WxH, for example 1024*1024"
+        )
+    if not 1 <= int(n) <= 6:
+        raise SeedanceLowPriceError("Qwen Image 3.0 n must be between 1 and 6")
+    if int(seed) < -1:
+        raise SeedanceLowPriceError("Qwen Image 3.0 seed must be -1 or non-negative")
+    if not 0 <= int(image_count) <= QWEN_IMAGE_30_MAX_IMAGES:
+        raise SeedanceLowPriceError("Qwen Image 3.0 accepts at most 3 images")
+    if strict and model in QWEN_IMAGE_30_I2I_MODELS and image_count == 0:
+        raise SeedanceLowPriceError("Qwen Image 3.0 I2I requires 1 to 3 images")
+    return prompt_text
+
+
+def build_qwen_image_30_payload(
+    model: str,
+    prompt: str,
+    negative_prompt: str,
+    prompt_extend: bool,
+    sizing_mode: str,
+    resolution: str,
+    ratio: str,
+    custom_size: str,
+    n: int,
+    seed: int,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    images = list(image_urls or [])
+    prompt_text = validate_qwen_image_30_inputs(
+        model,
+        prompt,
+        sizing_mode,
+        resolution,
+        ratio,
+        custom_size,
+        n,
+        seed,
+        image_count=len(images),
+        strict=True,
+    )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": prompt_text,
+        "n": int(n),
+        "prompt_extend": bool(prompt_extend),
+    }
+    negative_text = str(negative_prompt or "").strip()
+    if negative_text:
+        payload["negative_prompt"] = negative_text
+
+    metadata: Dict[str, Any] = {}
+    if int(seed) >= 0:
+        metadata["seed"] = int(seed)
+    if sizing_mode == "ratio":
+        metadata["ratio"] = ratio
+        metadata["resolution"] = resolution
+    elif sizing_mode == "custom_size":
+        payload["size"] = normalize_qwen_image_30_custom_size(custom_size)
+    if metadata:
+        payload["metadata"] = metadata
+    if model in QWEN_IMAGE_30_I2I_MODELS:
+        payload["images"] = images
+    return payload
+
+
+class Comfly_qwen_image_3_0_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
+        for index in range(1, QWEN_IMAGE_30_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    QWEN_IMAGE_30_MODELS,
+                    {"default": QWEN_IMAGE_30_T2I_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "negative_prompt": ("STRING", {"multiline": True, "default": ""}),
+                "prompt_extend": ("BOOLEAN", {"default": True}),
+                "sizing_mode": (
+                    QWEN_IMAGE_30_SIZING_MODES,
+                    {"default": "auto"},
+                ),
+                "resolution": (QWEN_IMAGE_30_RESOLUTIONS, {"default": "1k"}),
+                "ratio": (QWEN_IMAGE_30_RATIOS, {"default": "1:1"}),
+                "custom_size": ("STRING", {"default": "1024*1024"}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 6, "step": 1}),
+                "seed": (
+                    "INT",
+                    {
+                        "default": -1,
+                        "min": -1,
+                        "max": 2147483647,
+                        "step": 1,
+                        "control_after_generate": True,
+                    },
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        sizing_mode="auto",
+        resolution="1k",
+        ratio="1:1",
+        custom_size="1024*1024",
+        n=1,
+        seed=-1,
+        strict=False,
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        image_count = sum(
+            kwargs.get(f"image{index}") is not None
+            for index in range(1, QWEN_IMAGE_30_MAX_IMAGES + 1)
+        )
+        try:
+            validate_qwen_image_30_inputs(
+                model,
+                prompt,
+                sizing_mode,
+                resolution,
+                ratio,
+                custom_size,
+                n,
+                seed,
+                image_count=image_count,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        negative_prompt: str,
+        prompt_extend: bool,
+        sizing_mode: str,
+        resolution: str,
+        ratio: str,
+        custom_size: str,
+        n: int,
+        seed: int,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            slots = _connected_slots(
+                kwargs,
+                "image",
+                QWEN_IMAGE_30_MAX_IMAGES,
+                "Qwen Image 3.0 Low Price",
+            )
+            validate_qwen_image_30_inputs(
+                model,
+                prompt,
+                sizing_mode,
+                resolution,
+                ratio,
+                custom_size,
+                n,
+                seed,
+                image_count=len(slots),
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            if model in QWEN_IMAGE_30_I2I_MODELS:
+                image_urls = _upload_image_slots(
+                    slots,
+                    config,
+                    "qwen_image_3_reference",
+                    on_progress=update_progress,
+                )
+            payload = build_qwen_image_30_payload(
+                model,
+                prompt,
+                negative_prompt,
+                prompt_extend,
+                sizing_mode,
+                resolution,
+                ratio,
+                custom_size,
+                n,
+                seed,
+                image_urls,
+            )
+            update_progress(25)
+            print(f"[Qwen Image 3.0 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(30)
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            image_url = extract_image_url(final_response)
+            image = download_image(image_url)
+            update_progress(100)
+            response = {
+                "status": "SUCCESS",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                image,
+                image_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": f"{type(exc).__name__}: {exc}",
+            }
+            blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+            return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
 
 
 ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL = "zhenzhen-image-g-v2-lowprice"
@@ -7346,9 +7937,11 @@ __all__ = [
     "Comfly_kling_o3_edit_lowprice",
     "Comfly_hailuo_2_3_video_lowprice",
     "Comfly_hailuo_h3_video_lowprice",
+    "Comfly_minimax_h3_ow_video_lowprice",
     "Comfly_vidu_q3_video_lowprice",
     "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
+    "Comfly_qwen_image_3_0_lowprice",
     "Comfly_suno_music_lowprice",
 ]

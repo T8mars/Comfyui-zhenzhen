@@ -71,11 +71,32 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 2026086-1
+
+新增qwen image 3相关节点  
+新增minimax h3 ow相关节点  
+
+新增模型：  
+qwen-image-3.0-global-i2i  
+qwen-image-3.0-global-pro-i2i  
+qwen-image-3.0-global-pro-t2i  
+qwen-image-3.0-global-t2i  
+qwen-image-3.0-i2i  
+qwen-image-3.0-pro-i2i  
+qwen-image-3.0-pro-t2i  
+qwen-image-3.0-t2i  
+minimax-h3-ow-i2v  
+minimax-h3-ow-r2v  
+minimax-h3-ow-t2v  
+
+新增对应工作流以及并发工作流，以上模型属于贞贞的平价AI小屋
+
+
 ### 2026085-1
 
-支持图像30并发以及视频10并发
-节点搜索：Concurrent，支持所有图像和视频的并发
-示例工作流在workflow目录下
+支持图像30并发以及视频10并发  
+节点搜索：Concurrent，支持所有图像和视频的并发  
+示例工作流在workflow目录下  
 
 ### 20260731-1
 
