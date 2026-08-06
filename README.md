@@ -71,6 +71,14 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 2026087-1
+
+新增统一重试下载器 [media_download.py]  
+支持临时 503、结果未就绪、无效图片内容等情况。    
+修复 [Comfly.py]中 Nano Banana 2 串行、S2A 和并发路径。  
+同步加固 Nano Banana、Qwen、Gemini、GPT Image、Seedream、Flux、Jimeng、FAL 等同类图片节点。  
+失败信息不再泄露签名图片 URL。  
+
 ### 2026086-1
 
 新增qwen image 3相关节点  

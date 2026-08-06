@@ -30,6 +30,7 @@ import functools
 import inspect
 from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
+from .media_download import download_image_with_retry
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
@@ -938,8 +939,7 @@ class Comfly_Mj(ComflyBaseNode):
             pbar = comfy.utils.ProgressBar(10)
             image_url, text, taskId = self.process_text(pbar, ar, no, c, s, iw, tile, r, video, sw, cw, sv, seed)
             
-            response = requests.get(image_url)
-            image = Image.open(BytesIO(response.content))
+            image = download_image_with_retry(image_url)
             tensor_image = pil2tensor(image)
             return tensor_image, text, taskId
         else:
@@ -1766,8 +1766,7 @@ class Comfly_Mjv(ComflyBaseNode):
                     image_url = await self.process_task(new_task_id)
 
                 if image_url:
-                    response = requests.get(image_url)
-                    image = Image.open(BytesIO(response.content))
+                    image = download_image_with_retry(image_url)
                     tensor_image = pil2tensor(image)
                     return (tensor_image,)
                 else:
@@ -2057,10 +2056,9 @@ class Comfly_Mj_swap_face(ComflyBaseNode):
                     print(f"Found image URL: {image_url}")
                     
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        
-                        swapped_image = Image.open(BytesIO(img_response.content))
+                        swapped_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         swapped_tensor = pil2tensor(swapped_image)
                         
                         pbar.update_absolute(100)
@@ -4001,9 +3999,9 @@ class ComflyGeminiAPI:
                             first_image_url = url  
                         
                         try:
-                            img_response = requests.get(url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            pil_image = Image.open(BytesIO(img_response.content))
+                            pil_image = download_image_with_retry(
+                                url, timeout=self.timeout
+                            )
 
                             resized_image = self.resize_to_target_size(pil_image, target_size)
 
@@ -4213,6 +4211,7 @@ class Comfly_Doubao_Seedream:
             
             image_url = None
             image_data = None
+            downloaded_image = None
 
             if response_format == "url":
                 image_url = result["data"][0].get("url")
@@ -4226,9 +4225,9 @@ class Comfly_Doubao_Seedream:
                     return (blank_tensor, error_message)
                     
                 try:
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
-                    image_data = BytesIO(img_response.content)
+                    downloaded_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                 except Exception as e:
                     error_message = f"Error downloading image: {str(e)}"
                     print(error_message)
@@ -4253,7 +4252,7 @@ class Comfly_Doubao_Seedream:
             pbar.update_absolute(80)
 
             try:
-                pil_image = Image.open(image_data)
+                pil_image = downloaded_image or Image.open(image_data)
                 tensor_image = pil2tensor(pil_image)
 
                 response_info = {
@@ -4498,11 +4497,9 @@ class Comfly_Doubao_Seedream_4:
                     image_urls.append(image_url)
                     
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        image_data = BytesIO(img_response.content)
-                        
-                        pil_image = Image.open(image_data)
+                        pil_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         tensor_image = pil2tensor(pil_image)
                         generated_images.append(tensor_image)
                     except Exception as e:
@@ -4761,11 +4758,9 @@ class Comfly_Doubao_Seedream_4_5:
                     image_urls.append(image_url)
                     
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        image_data = BytesIO(img_response.content)
-                        
-                        pil_image = Image.open(image_data)
+                        pil_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         tensor_image = pil2tensor(pil_image)
                         generated_images.append(tensor_image)
                     except Exception as e:
@@ -4929,6 +4924,7 @@ class Comfly_Doubao_Seededit:
             
             image_url = None
             image_data = None
+            downloaded_image = None
 
             if response_format == "url":
                 image_url = result["data"][0].get("url")
@@ -4940,9 +4936,9 @@ class Comfly_Doubao_Seededit:
                     return (image, error_message)
                     
                 try:
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
-                    image_data = BytesIO(img_response.content)
+                    downloaded_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                 except Exception as e:
                     error_message = f"Error downloading image: {str(e)}"
                     print(error_message)
@@ -4963,7 +4959,7 @@ class Comfly_Doubao_Seededit:
             pbar.update_absolute(80)
 
             try:
-                edited_pil_image = Image.open(image_data)
+                edited_pil_image = downloaded_image or Image.open(image_data)
                 edited_tensor = pil2tensor(edited_pil_image)
 
                 response_info = {
@@ -5208,9 +5204,9 @@ class ComflyJimengApi:
                     response_info += f"Model response: {full_response}"
 
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         pbar.update_absolute(100)
                         return (generated_tensor, response_info, image_url)
@@ -5314,8 +5310,9 @@ class ComflyJimengApi:
                 print(f"Found image URL: {image_url}")
 
                 try:
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
+                    generated_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                 except requests.exceptions.Timeout:
                     error_message = f"Timeout while downloading result image after {self.timeout} seconds"
                     print(error_message)
@@ -5335,8 +5332,6 @@ class ComflyJimengApi:
                         raise
                     return (blank_tensor, response_info, image_url)  
                     
-                generated_image = Image.open(BytesIO(img_response.content))
-                
                 generated_tensor = pil2tensor(generated_image)
                 
                 pbar.update_absolute(100)
@@ -5793,8 +5788,9 @@ class ComflySeededit:
             
             # Download the image
             try:
-                img_response = requests.get(image_url, timeout=self.timeout)
-                img_response.raise_for_status()
+                edited_image = download_image_with_retry(
+                    image_url, timeout=self.timeout
+                )
             except requests.exceptions.Timeout:
                 error_message = f"Timeout while downloading result image after {self.timeout} seconds"
                 print(error_message)
@@ -5810,8 +5806,6 @@ class ComflySeededit:
                     raise
                 return (image, response_info, image_url)  # Return the URL even though download failed
                 
-            edited_image = Image.open(BytesIO(img_response.content))
-            
             # Convert back to tensor
             edited_tensor = pil2tensor(edited_image)
             
@@ -8339,15 +8333,9 @@ class Comfly_gpt_image_2_S2A:
                 elif "url" in item and item["url"]:
                     image_url = item["url"]
                     image_urls.append(image_url)
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
-                    image_stream = BytesIO(img_response.content)
-                    generated_image = Image.open(image_stream)
-                    generated_image.verify()
-                    image_stream.seek(0)
-                    generated_image = Image.open(image_stream)
-                    if generated_image.mode != 'RGB':
-                        generated_image = generated_image.convert('RGB')
+                    generated_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                     generated_tensor = pil2tensor(generated_image)
                     generated_tensors.append(generated_tensor)
             except Exception as e:
@@ -8407,15 +8395,9 @@ class Comfly_gpt_image_2_S2A:
                 elif "url" in item and item["url"]:
                     image_url = item["url"]
                     image_urls.append(image_url)
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
-                    image_stream = BytesIO(img_response.content)
-                    generated_image = Image.open(image_stream)
-                    generated_image.verify()
-                    image_stream.seek(0)
-                    generated_image = Image.open(image_stream)
-                    if generated_image.mode != 'RGB':
-                        generated_image = generated_image.convert('RGB')
+                    generated_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                     generated_tensor = pil2tensor(generated_image)
                     generated_tensors.append(generated_tensor)
             except Exception as e:
@@ -8514,15 +8496,9 @@ class Comfly_gpt_image_2_S2A:
                             elif "url" in item and item["url"]:
                                 image_url = item["url"]
                                 image_urls.append(image_url)
-                                img_response = requests.get(image_url, timeout=self.timeout)
-                                img_response.raise_for_status()
-                                image_stream = BytesIO(img_response.content)
-                                generated_image = Image.open(image_stream)
-                                generated_image.verify()
-                                image_stream.seek(0)
-                                generated_image = Image.open(image_stream)
-                                if generated_image.mode != 'RGB':
-                                    generated_image = generated_image.convert('RGB')
+                                generated_image = download_image_with_retry(
+                                    image_url, timeout=self.timeout
+                                )
                                 generated_tensor = pil2tensor(generated_image)
                                 generated_tensors.append(generated_tensor)
                         except Exception as e:
@@ -10942,10 +10918,9 @@ class Comfly_Flux_2_Max:
             pbar.update_absolute(90)
 
             try:
-                img_response = requests.get(image_url, timeout=self.timeout)
-                img_response.raise_for_status()
-                
-                generated_image = Image.open(BytesIO(img_response.content))
+                generated_image = download_image_with_retry(
+                    image_url, timeout=self.timeout
+                )
                 generated_tensor = pil2tensor(generated_image)
                 
                 pbar.update_absolute(100)
@@ -11169,9 +11144,9 @@ class Comfly_Flux_Kontext:
                     image_urls.append(image_url)
                     
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         generated_tensors.append(generated_tensor)
                     except Exception as e:
@@ -11368,9 +11343,9 @@ class Comfly_Flux_Kontext_Edit:
                     image_urls.append(image_url)
                     
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         generated_tensors.append(generated_tensor)
                     except Exception as e:
@@ -11577,10 +11552,9 @@ class Comfly_Flux_Kontext_bfl:
             pbar.update_absolute(90)
             
             try:
-                img_response = requests.get(image_url, timeout=self.timeout)
-                img_response.raise_for_status()
-                
-                generated_image = Image.open(BytesIO(img_response.content))
+                generated_image = download_image_with_retry(
+                    image_url, timeout=self.timeout
+                )
                 generated_tensor = pil2tensor(generated_image)
                 
                 pbar.update_absolute(100)
@@ -11803,10 +11777,9 @@ class Comfly_Flux_2_Pro:
             pbar.update_absolute(90)
 
             try:
-                img_response = requests.get(image_url, timeout=self.timeout)
-                img_response.raise_for_status()
-                
-                generated_image = Image.open(BytesIO(img_response.content))
+                generated_image = download_image_with_retry(
+                    image_url, timeout=self.timeout
+                )
                 generated_tensor = pil2tensor(generated_image)
                 
                 pbar.update_absolute(100)
@@ -12038,10 +12011,9 @@ class Comfly_Flux_2_Flex:
             pbar.update_absolute(90)
 
             try:
-                img_response = requests.get(image_url, timeout=self.timeout)
-                img_response.raise_for_status()
-                
-                generated_image = Image.open(BytesIO(img_response.content))
+                generated_image = download_image_with_retry(
+                    image_url, timeout=self.timeout
+                )
                 generated_tensor = pil2tensor(generated_image)
                 
                 pbar.update_absolute(100)
@@ -12803,10 +12775,9 @@ class Comfly_nano_banana:
             if matches:
                 image_url = matches[0]
                 try:
-                    img_response = requests.get(image_url, timeout=self.timeout)
-                    img_response.raise_for_status()
-                    
-                    generated_image = Image.open(BytesIO(img_response.content))
+                    generated_image = download_image_with_retry(
+                        image_url, timeout=self.timeout
+                    )
                     generated_tensor = pil2tensor(generated_image)
                     
                     pbar.update_absolute(100)
@@ -13077,13 +13048,13 @@ class Comfly_nano_banana_fal:
                         img_url = img_url.replace("https://queue.fal.run", "https://ai.t8star.org")
                     
                     try:
-                        img_response = requests.get(img_url, timeout=self.timeout)
-                        if img_response.status_code == 200:
-                            generated_image = Image.open(BytesIO(img_response.content))
-                            generated_tensor = pil2tensor(generated_image)
-                            generated_images.append(generated_tensor)
+                        generated_image = download_image_with_retry(
+                            img_url, timeout=self.timeout
+                        )
+                        generated_tensor = pil2tensor(generated_image)
+                        generated_images.append(generated_tensor)
                     except Exception as e:
-                        print(f"Error downloading image: {str(e)}")
+                        print(f"Error downloading generated image: {str(e)}")
             
             if generated_images:
                 combined_tensor = torch.cat(generated_images, dim=0)
@@ -13305,13 +13276,13 @@ class Comfly_nano_banana2_edit:
                     image_urls.append(image_url)
                     response_info += f"Image {i+1}: {image_url}\n"
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         generated_tensors.append(generated_tensor)
                     except Exception as e:
-                        print(f"Error downloading image from URL: {str(e)}")
+                        print(f"Error downloading generated image: {str(e)}")
             
             pbar.update_absolute(100)
             
@@ -13508,13 +13479,13 @@ class Comfly_nano_banana_edit:
                     image_url = item["url"]
                     response_info += f"Image {i+1}: {image_url}\n"
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         generated_tensors.append(generated_tensor)
                     except Exception as e:
-                        print(f"Error downloading image from URL: {str(e)}")
+                        print(f"Error downloading generated image: {str(e)}")
             
             pbar.update_absolute(100)
             
@@ -13743,13 +13714,13 @@ class Comfly_nano_banana2_edit:
                     image_urls.append(image_url)
                     response_info += f"Image {i+1}: {image_url}\n"
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                         generated_tensor = pil2tensor(generated_image)
                         generated_tensors.append(generated_tensor)
                     except Exception as e:
-                        print(f"Error downloading image from URL: {str(e)}")
+                        print(f"Error downloading generated image: {str(e)}")
             
             pbar.update_absolute(100)
             
@@ -13934,13 +13905,13 @@ class Comfly_qwen_image:
                         image_url = item["url"]
                         image_urls.append(image_url)
                         try:
-                            img_response = requests.get(image_url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            generated_image = Image.open(BytesIO(img_response.content))
+                            generated_image = download_image_with_retry(
+                                image_url, timeout=self.timeout
+                            )
                             generated_tensor = pil2tensor(generated_image)
                             generated_images.append(generated_tensor)
                         except Exception as e:
-                            print(f"Error downloading image from URL: {str(e)}")
+                            print(f"Error downloading generated image: {str(e)}")
             else:
                 error_message = "No generated images in response"
                 print(error_message)
@@ -14137,13 +14108,13 @@ class Comfly_qwen_image_edit:
                         image_url = item["url"]
                         image_urls.append(image_url)
                         try:
-                            img_response = requests.get(image_url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            edited_image = Image.open(BytesIO(img_response.content))
+                            edited_image = download_image_with_retry(
+                                image_url, timeout=self.timeout
+                            )
                             edited_tensor = pil2tensor(edited_image)
                             edited_images.append(edited_tensor)
                         except Exception as e:
-                            print(f"Error downloading image from URL: {str(e)}")
+                            print(f"Error downloading generated image: {str(e)}")
             else:
                 error_message = "No edited images in response"
                 print(error_message)
@@ -14331,11 +14302,11 @@ class Comfly_Z_image_turbo:
                     image_url = item["url"]
                     response_info += f"Image URL: {image_url}\n"
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        generated_image = Image.open(BytesIO(img_response.content))
+                        generated_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                     except Exception as e:
-                        print(f"Error downloading image from URL: {str(e)}")
+                        print(f"Error downloading generated image: {str(e)}")
                         response_info += f"Error: {str(e)}\n"
             else:
                 error_message = "No image data in response"
@@ -18404,17 +18375,9 @@ class Comfly_nano_banana2_edit_S2A:
                                                 # 处理URL图片数据
                                                 image_url = item["url"]
                                                 image_urls.append(image_url)
-                                                img_response = requests.get(image_url, timeout=self.timeout)
-                                                img_response.raise_for_status()
-                                                image_stream = BytesIO(img_response.content)
-                                                generated_image = Image.open(image_stream)
-                                                generated_image.verify()  # 验证图片完整性
-                                                # 重新打开图片（verify后流位置改变）
-                                                image_stream.seek(0)
-                                                generated_image = Image.open(image_stream)
-                                                # 确保RGB模式
-                                                if generated_image.mode != 'RGB':
-                                                    generated_image = generated_image.convert('RGB')
+                                                generated_image = download_image_with_retry(
+                                                    image_url, timeout=self.timeout
+                                                )
                                                 generated_tensor = pil2tensor(generated_image)
                                                 generated_tensors.append(generated_tensor)
                                         except Exception as e:
@@ -18514,17 +18477,9 @@ class Comfly_nano_banana2_edit_S2A:
                             image_url = item["url"]
                             image_urls.append(image_url)
                             response_info += f"Image {i+1}: {image_url}\n"
-                            img_response = requests.get(image_url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            image_stream = BytesIO(img_response.content)
-                            generated_image = Image.open(image_stream)
-                            generated_image.verify()  # 验证图片完整性
-                            # 重新打开图片（verify后流位置改变）
-                            image_stream.seek(0)
-                            generated_image = Image.open(image_stream)
-                            # 确保RGB模式
-                            if generated_image.mode != 'RGB':
-                                generated_image = generated_image.convert('RGB')
+                            generated_image = download_image_with_retry(
+                                image_url, timeout=self.timeout
+                            )
                             generated_tensor = pil2tensor(generated_image)
                             generated_tensors.append(generated_tensor)
                     except Exception as e:
@@ -18664,17 +18619,9 @@ class Comfly_nano_banana2_edit_S2A:
                                 image_url = item["url"]
                                 image_urls.append(image_url)
                                 response_info += f"Image {i+1}: {image_url}\n"
-                                img_response = requests.get(image_url, timeout=self.timeout)
-                                img_response.raise_for_status()
-                                image_stream = BytesIO(img_response.content)
-                                generated_image = Image.open(image_stream)
-                                generated_image.verify()  # 验证图片完整性
-                                # 重新打开图片（verify后流位置改变）
-                                image_stream.seek(0)
-                                generated_image = Image.open(image_stream)
-                                # 确保RGB模式
-                                if generated_image.mode != 'RGB':
-                                    generated_image = generated_image.convert('RGB')
+                                generated_image = download_image_with_retry(
+                                    image_url, timeout=self.timeout
+                                )
                                 generated_tensor = pil2tensor(generated_image)
                                 generated_tensors.append(generated_tensor)
                         except Exception as e:
@@ -19644,9 +19591,7 @@ class Comfly_grok_image:
             return pil2tensor(pil_image), ""
 
         if image_url:
-            response = requests.get(image_url, timeout=self.timeout)
-            response.raise_for_status()
-            pil_image = Image.open(BytesIO(response.content))
+            pil_image = download_image_with_retry(image_url, timeout=self.timeout)
             return pil2tensor(pil_image), image_url
 
         return None, ""
@@ -20550,17 +20495,9 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                                                 # 处理URL图片数据
                                                 image_url = item["url"]
                                                 image_urls.append(image_url)
-                                                img_response = requests.get(image_url, timeout=self.timeout)
-                                                img_response.raise_for_status()
-                                                image_stream = BytesIO(img_response.content)
-                                                generated_image = Image.open(image_stream)
-                                                generated_image.verify()  # 验证图片完整性
-                                                # 重新打开图片（verify后流位置改变）
-                                                image_stream.seek(0)
-                                                generated_image = Image.open(image_stream)
-                                                # 确保RGB模式
-                                                if generated_image.mode != 'RGB':
-                                                    generated_image = generated_image.convert('RGB')
+                                                generated_image = download_image_with_retry(
+                                                    image_url, timeout=self.timeout
+                                                )
                                                 generated_tensor = pil2tensor(generated_image)
                                                 generated_tensors.append(generated_tensor)
                                         except Exception as e:
@@ -20659,17 +20596,9 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                             image_url = item["url"]
                             image_urls.append(image_url)
                             response_info += f"Image {i+1}: {image_url}\n"
-                            img_response = requests.get(image_url, timeout=self.timeout)
-                            img_response.raise_for_status()
-                            image_stream = BytesIO(img_response.content)
-                            generated_image = Image.open(image_stream)
-                            generated_image.verify()  # 验证图片完整性
-                            # 重新打开图片（verify后流位置改变）
-                            image_stream.seek(0)
-                            generated_image = Image.open(image_stream)
-                            # 确保RGB模式
-                            if generated_image.mode != 'RGB':
-                                generated_image = generated_image.convert('RGB')
+                            generated_image = download_image_with_retry(
+                                image_url, timeout=self.timeout
+                            )
                             generated_tensor = pil2tensor(generated_image)
                             generated_tensors.append(generated_tensor)
                     except Exception as e:
@@ -20809,17 +20738,9 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
                                 image_url = item["url"]
                                 image_urls.append(image_url)
                                 response_info += f"Image {i+1}: {image_url}\n"
-                                img_response = requests.get(image_url, timeout=self.timeout)
-                                img_response.raise_for_status()
-                                image_stream = BytesIO(img_response.content)
-                                generated_image = Image.open(image_stream)
-                                generated_image.verify()  # 验证图片完整性
-                                # 重新打开图片（verify后流位置改变）
-                                image_stream.seek(0)
-                                generated_image = Image.open(image_stream)
-                                # 确保RGB模式
-                                if generated_image.mode != 'RGB':
-                                    generated_image = generated_image.convert('RGB')
+                                generated_image = download_image_with_retry(
+                                    image_url, timeout=self.timeout
+                                )
                                 generated_tensor = pil2tensor(generated_image)
                                 generated_tensors.append(generated_tensor)
                         except Exception as e:
@@ -21073,9 +20994,7 @@ class Comfly_Doubao_Seedance2_0:
 
     def download_image_from_url(self, url):
         try:
-            img_response = requests.get(url, timeout=60)
-            img_response.raise_for_status()
-            pil_image = Image.open(BytesIO(img_response.content))
+            pil_image = download_image_with_retry(url, timeout=60)
             return pil2tensor(pil_image)
         except Exception as e:
             print(f"Error downloading last frame image: {str(e)}")
@@ -22061,11 +21980,11 @@ class Comfly_gpt_image_2_fal:
                     continue
                 url_list.append(img_url)
                 try:
-                    img_resp = requests.get(img_url, timeout=self.timeout)
-                    if img_resp.status_code == 200:
-                        pil_img = Image.open(BytesIO(img_resp.content))
-                        generated_tensors.append(pil2tensor(pil_img))
-                        print(f"[gpt_image_2_fal] Downloaded image {i+1}/{len(images_list)}")
+                    pil_img = download_image_with_retry(
+                        img_url, timeout=self.timeout
+                    )
+                    generated_tensors.append(pil2tensor(pil_img))
+                    print(f"[gpt_image_2_fal] Downloaded image {i+1}/{len(images_list)}")
                 except Exception as e:
                     print(f"[gpt_image_2_fal] Error downloading image {i+1}: {e}")
 
@@ -23010,11 +22929,11 @@ class Comfly_nano_banana_pro_fal:
                         img_url = img_url.replace("https://queue.fal.run", f"{baseurl}/fal")
                     result_urls.append(img_url)
                     try:
-                        img_response = requests.get(img_url, timeout=self.timeout)
-                        if img_response.status_code == 200:
-                            generated_image = Image.open(BytesIO(img_response.content))
-                            generated_tensor = pil2tensor(generated_image)
-                            generated_images.append(generated_tensor)
+                        generated_image = download_image_with_retry(
+                            img_url, timeout=self.timeout
+                        )
+                        generated_tensor = pil2tensor(generated_image)
+                        generated_images.append(generated_tensor)
                     except Exception as e:
                         print(f"[nano_banana_pro_fal] Error downloading image: {e}")
 
@@ -23334,11 +23253,11 @@ class Comfly_nano_banana_2_fal:
                         img_url = img_url.replace("https://queue.fal.run", f"{baseurl}/fal")
                     result_urls.append(img_url)
                     try:
-                        img_response = requests.get(img_url, timeout=self.timeout)
-                        if img_response.status_code == 200:
-                            generated_image = Image.open(BytesIO(img_response.content))
-                            generated_tensor = pil2tensor(generated_image)
-                            generated_images.append(generated_tensor)
+                        generated_image = download_image_with_retry(
+                            img_url, timeout=self.timeout
+                        )
+                        generated_tensor = pil2tensor(generated_image)
+                        generated_images.append(generated_tensor)
                     except Exception as e:
                         print(f"[nano_banana_2_fal] Error downloading image: {e}")
 
@@ -24857,24 +24776,24 @@ class Comfly_seedream_v5_pro:
             image_url = item.get("url") or item.get("image_url")
             b64_data = item.get("b64_json")
             try:
-                image_stream = None
+                pil_image = None
                 if image_url:
                     urls.append(image_url)
                     try:
-                        img_response = requests.get(image_url, timeout=self.timeout)
-                        img_response.raise_for_status()
-                        image_stream = BytesIO(img_response.content)
+                        pil_image = download_image_with_retry(
+                            image_url, timeout=self.timeout
+                        )
                     except Exception as url_exc:
                         if not b64_data:
                             raise
                         print(f"[seedream_v5_pro] URL download failed, using b64_json: {url_exc}")
 
-                if image_stream is None and b64_data:
+                if pil_image is None and b64_data:
                     image_stream = BytesIO(self._decode_base64_image(b64_data))
-                if image_stream is None:
+                    pil_image = Image.open(image_stream).convert("RGB")
+                if pil_image is None:
                     continue
 
-                pil_image = Image.open(image_stream).convert("RGB")
                 generated_images.append(pil2tensor(pil_image))
             except Exception as exc:
                 print(f"[seedream_v5_pro] Failed to process image item: {exc}")

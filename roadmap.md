@@ -159,3 +159,16 @@ Status: implemented_verified
 - 离线验证：80/80 自动化测试通过；真实插件映射为 146 个原节点、119 个并发提交节点、267 个总节点，21 个自定义校验器代理一致。
 - 真实 API 验证：8 个 Qwen 模型均通过并发提交节点完成并下载为四维 ComfyUI IMAGE；3 个 MiniMax 模型在同一并发批次完成，下载 MP4 均可解码为 864x480、24 fps、124 帧。
 - 实测临时媒体已清理，测试 API Key 未写入源码、测试、roadmap 或工作流。
+
+## 2026-08-06 Nano Banana 2 编辑结果下载修复
+
+Status: implemented_verified
+
+- 实测确认 `/v1/images/edits` 的编辑响应仍为 `200 + data[].url`；原故障风险位于结果图下载阶段：旧实现只请求一次，CDN 文件暂未就绪、临时网络错误或返回非图片内容时会吞掉下载异常，最终表现为后台任务成功但节点没有有效图片。
+- 新增 `media_download.py` 公共下载器：最多重试 5 次，分别限制连接/读取超时，每次完整解码并校验图片；最终错误只保留错误类型或 HTTP 状态，不回显签名 URL。
+- `Zhenzhen_nano_banana2_edit` 的两份兼容定义、S2A 异步版及自动生成的并发提交节点共用同一下载逻辑。同步提交格式、模型列表、输入输出和旧工作流 key 均未修改。
+- 审计并收口同类标准图片结果路径，包括 Nano Banana、Qwen、Gemini/GPT Image S2A、Doubao Seedream/Seededit、Flux、Jimeng、FAL 图片及 Seedream v5 Pro；已有专用重试或鉴权请求头的实现保持原样。
+- 新增 3 个离线回归测试，覆盖“URL 首次尚不可解码后成功”“临时 HTTP 503 后成功”“最终错误不泄露签名 URL”。完整自动化测试为 83/83，通过 Python 编译、`git diff --check`、真实插件映射检查。
+- 真实 API 双路验证：非并发 `nano-banana-2` 编辑与并发 `nano-banana-pro` 编辑均返回有效 `1 x 1024 x 1024 x 3` ComfyUI IMAGE，结果 URL 存在且无下载/解码错误。
+- ComfyUI `--quick-test-for-ci` 白名单加载成功，原节点 146、并发提交节点 119、总节点 267；测试机现有数据库锁和 AiHelper 8080 端口占用不影响本插件导入。
+- 测试 API Key 未写入源码、测试、roadmap、工作流或配置；仓库中仍不存在 `Comflyapi.json`。
