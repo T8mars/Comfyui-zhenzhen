@@ -1,4 +1,4 @@
-"""Seedance 2.0 low-price settings and unified video node."""
+"""Low-price Seedance settings and unified media generation nodes."""
 
 from __future__ import annotations
 
@@ -56,6 +56,36 @@ MODE_SUFFIXES = {
     "image_to_video": "i2v",
     "multimodal_video": "multi",
 }
+
+SEEDANCE25_T2V_MODELS = [
+    "seedance-2.5-standard-t2v",
+    "seedance-2.5-global-standard-t2v",
+]
+SEEDANCE25_I2V_MODELS = [
+    "seedance-2.5-standard-i2v",
+    "seedance-2.5-global-standard-i2v",
+]
+SEEDANCE25_MULTI_MODELS = [
+    "seedance-2.5-standard-multi",
+    "seedance-2.5-global-standard-multi",
+]
+SEEDANCE25_MODELS = [
+    "seedance-2.5-standard-t2v",
+    "seedance-2.5-standard-i2v",
+    "seedance-2.5-standard-multi",
+    "seedance-2.5-global-standard-t2v",
+    "seedance-2.5-global-standard-i2v",
+    "seedance-2.5-global-standard-multi",
+]
+SEEDANCE25_SECONDS = ["-1"] + [str(value) for value in range(4, 31)]
+SEEDANCE25_RESOLUTIONS = ["480p", "720p", "1080p", "2k", "4k"]
+SEEDANCE25_MAX_IMAGES = 30
+SEEDANCE25_MAX_VIDEOS = 10
+SEEDANCE25_MAX_AUDIOS = 10
+SEEDANCE25_MAX_REFERENCES = 50
+SEEDANCE25_MEDIA_MIN_SECONDS = 2.0
+SEEDANCE25_MEDIA_MAX_SECONDS = 30.0
+SEEDANCE25_MEDIA_TOTAL_MAX_SECONDS = 30.0
 
 
 class SeedanceLowPriceError(RuntimeError):
@@ -413,7 +443,11 @@ def _video_from_path(path: str) -> Any:
         return path
 
 
-def download_video(url: str, max_retries: int = 3) -> Any:
+def download_video(
+    url: str,
+    max_retries: int = 5,
+    attempt_timeout: float = 180.0,
+) -> Any:
     try:
         import folder_paths
 
@@ -422,26 +456,45 @@ def download_video(url: str, max_retries: int = 3) -> Any:
         output_dir = os.environ.get("SEEDANCE_OUTPUT_DIR") or tempfile.gettempdir()
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, f"seedance_low_price_{uuid.uuid4().hex[:12]}.mp4")
+    part_path = f"{path}.part"
     last_error: Optional[Exception] = None
     for attempt in range(max_retries):
         if attempt:
             time.sleep(2 ** attempt)
+        response = None
         try:
-            response = _get_session().get(url, stream=True, timeout=300)
+            started = time.monotonic()
+            response = _get_session().get(url, stream=True, timeout=(15, 45))
             response.raise_for_status()
-            with open(path, "wb") as handle:
+            with open(part_path, "wb") as handle:
                 for chunk in response.iter_content(chunk_size=65536):
                     if chunk:
                         handle.write(chunk)
-            if os.path.getsize(path) == 0:
+                    if time.monotonic() - started > attempt_timeout:
+                        raise TimeoutError(
+                            f"video download exceeded {attempt_timeout:.0f}s attempt limit"
+                        )
+            if not os.path.isfile(part_path) or os.path.getsize(part_path) == 0:
                 raise RuntimeError("downloaded video is empty")
+            os.replace(part_path, path)
             return _video_from_path(path)
         except Exception as exc:
             last_error = exc
-    try:
-        os.remove(path)
-    except OSError:
-        pass
+            try:
+                os.remove(part_path)
+            except OSError:
+                pass
+        finally:
+            if response is not None:
+                try:
+                    response.close()
+                except Exception:
+                    pass
+    for candidate in (part_path, path):
+        try:
+            os.remove(candidate)
+        except OSError:
+            pass
     raise RuntimeError(f"Video download failed after {max_retries} attempts: {last_error}")
 
 
@@ -552,6 +605,94 @@ def audio_to_wav_bytes(audio: Any) -> bytes:
     if len(result) > MEDIA_MAX_BYTES:
         raise SeedanceLowPriceError("Audio exceeds the 50MB generation limit")
     return result
+
+
+def _seedance25_video_duration_seconds(value: Any) -> float:
+    path: Optional[str] = None
+    if isinstance(value, str) and os.path.isfile(value):
+        path = value
+    elif isinstance(value, dict):
+        candidate = value.get("file_path") or value.get("path")
+        if isinstance(candidate, str) and os.path.isfile(candidate):
+            path = candidate
+    if path is None:
+        for attribute in ("path", "file_path"):
+            candidate = getattr(value, attribute, None)
+            if isinstance(candidate, str) and os.path.isfile(candidate):
+                path = candidate
+                break
+    if path is None and hasattr(value, "get_stream_source"):
+        source = value.get_stream_source()
+        if isinstance(source, str) and os.path.isfile(source):
+            path = source
+
+    try:
+        import av
+
+        source_value: Any = path
+        if source_value is None:
+            source_value = io.BytesIO(video_to_mp4_bytes(value))
+        with av.open(source_value, mode="r") as container:
+            if container.duration is not None:
+                duration = float(container.duration) / float(av.time_base)
+            else:
+                durations = [
+                    float(stream.duration * stream.time_base)
+                    for stream in container.streams
+                    if stream.duration is not None and stream.time_base is not None
+                ]
+                duration = max(durations, default=0.0)
+    except SeedanceLowPriceError:
+        raise
+    except Exception as exc:
+        raise SeedanceLowPriceError(
+            f"Could not determine Seedance 2.5 reference video duration: {exc}"
+        ) from exc
+    if duration <= 0:
+        raise SeedanceLowPriceError(
+            "Could not determine Seedance 2.5 reference video duration"
+        )
+    return duration
+
+
+def _seedance25_audio_duration_seconds(audio: Any) -> float:
+    if not isinstance(audio, dict) or "waveform" not in audio:
+        raise SeedanceLowPriceError("Expected ComfyUI AUDIO with waveform/sample_rate")
+    waveform = audio["waveform"]
+    shape = getattr(waveform, "shape", None)
+    sample_rate = int(audio.get("sample_rate") or 0)
+    if not shape or sample_rate <= 0 or int(shape[-1]) <= 0:
+        raise SeedanceLowPriceError(
+            "Could not determine Seedance 2.5 reference audio duration"
+        )
+    return float(shape[-1]) / float(sample_rate)
+
+
+def _validate_seedance25_media_durations(
+    video_slots: List[Tuple[int, Any]],
+    audio_slots: List[Tuple[int, Any]],
+) -> None:
+    durations: List[Tuple[str, int, float]] = []
+    durations.extend(
+        ("video", index, _seedance25_video_duration_seconds(video))
+        for index, video in video_slots
+    )
+    durations.extend(
+        ("audio", index, _seedance25_audio_duration_seconds(audio))
+        for index, audio in audio_slots
+    )
+    for media_type, index, duration in durations:
+        if not SEEDANCE25_MEDIA_MIN_SECONDS <= duration <= SEEDANCE25_MEDIA_MAX_SECONDS:
+            raise SeedanceLowPriceError(
+                f"Seedance 2.5 {media_type}{index} duration must be between 2 and 30 "
+                f"seconds; received {duration:.3f}s"
+            )
+    total_duration = sum(duration for _kind, _index, duration in durations)
+    if total_duration > SEEDANCE25_MEDIA_TOTAL_MAX_SECONDS:
+        raise SeedanceLowPriceError(
+            "Seedance 2.5 combined reference video/audio duration must not exceed "
+            f"30 seconds; received {total_duration:.3f}s"
+        )
 
 
 def make_error_video(message: str) -> Any:
@@ -878,6 +1019,297 @@ class Comfly_seedance2_low_price:
             response = {
                 "status": "error",
                 "mode": mode,
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+class Comfly_seedance25_standard_low_price:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            "api_config": (CONFIG_TYPE,),
+        }
+        for index in range(1, SEEDANCE25_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        for index in range(1, SEEDANCE25_MAX_VIDEOS + 1):
+            optional[f"video{index}"] = (VIDEO_TYPE,)
+        for index in range(1, SEEDANCE25_MAX_AUDIOS + 1):
+            optional[f"audio{index}"] = (AUDIO_TYPE,)
+        optional.update({
+            "generate_audio": ("BOOLEAN", {"default": True}),
+            "return_last_frame": ("BOOLEAN", {"default": False}),
+            "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647, "step": 1}),
+            "skip_error": ("BOOLEAN", {"default": False}),
+        })
+        return {
+            "required": {
+                "model": (SEEDANCE25_MODELS, {"default": SEEDANCE25_MODELS[0]}),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (SEEDANCE25_SECONDS, {"default": "4"}),
+                "resolution": (SEEDANCE25_RESOLUTIONS, {"default": "480p"}),
+                "ratio": (RATIOS, {"default": "adaptive"}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt=None,
+        seconds="4",
+        resolution="480p",
+        ratio="adaptive",
+        seed=-1,
+        **kwargs,
+    ):
+        try:
+            cls._validate(model, prompt or "", seconds, resolution, ratio, seed)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _validate(
+        model: Any,
+        prompt: str,
+        seconds: Any,
+        resolution: str,
+        ratio: str,
+        seed: Any,
+    ) -> None:
+        if model not in SEEDANCE25_MODELS:
+            raise SeedanceLowPriceError(f"Unsupported Seedance 2.5 model: {model}")
+        if str(seconds) not in SEEDANCE25_SECONDS:
+            raise SeedanceLowPriceError("seconds must be smart (-1) or an integer from 4 to 30")
+        if resolution not in SEEDANCE25_RESOLUTIONS:
+            raise SeedanceLowPriceError(f"Unsupported Seedance 2.5 resolution: {resolution}")
+        if ratio not in RATIOS:
+            raise SeedanceLowPriceError(f"Unsupported ratio: {ratio}")
+        text = str(prompt or "").strip()
+        if len(text) > PROMPT_MAX_LENGTH:
+            raise SeedanceLowPriceError(
+                f"Seedance prompt must not exceed {PROMPT_MAX_LENGTH} characters"
+            )
+        if model in SEEDANCE25_T2V_MODELS + SEEDANCE25_MULTI_MODELS and not text:
+            raise SeedanceLowPriceError("prompt is required for Seedance 2.5 T2V and Multi")
+        if int(seed) < -1 or int(seed) > 2147483647:
+            raise SeedanceLowPriceError("seed must be between -1 and 2147483647")
+
+    @staticmethod
+    def _connected(kwargs: Dict[str, Any], prefix: str, count: int) -> List[Tuple[int, Any]]:
+        result = [
+            (index, kwargs[f"{prefix}{index}"])
+            for index in range(1, count + 1)
+            if kwargs.get(f"{prefix}{index}") is not None
+        ]
+        indexes = [index for index, _value in result]
+        if indexes and indexes != list(range(1, len(indexes) + 1)):
+            print(
+                f"[Seedance 2.5 Low Price] {prefix} slots {indexes} contain gaps; "
+                f"they are compacted to @{prefix.capitalize()} 1..{len(indexes)}"
+            )
+        return result
+
+    @staticmethod
+    def _upload(data: bytes, filename: str, mime: str, config: Dict[str, Any]) -> str:
+        print(f"[Seedance 2.5 Low Price] Uploading {filename} ({len(data) / 1024:.1f}KB)")
+        return upload_media(data, filename, mime, config)
+
+    def collect_media(
+        self,
+        kwargs: Dict[str, Any],
+        config: Dict[str, Any],
+        on_progress: Optional[Callable[[float], None]] = None,
+    ) -> Dict[str, Any]:
+        model = kwargs.get("model")
+        image_slots = self._connected(kwargs, "image", SEEDANCE25_MAX_IMAGES)
+        video_slots = self._connected(kwargs, "video", SEEDANCE25_MAX_VIDEOS)
+        audio_slots = self._connected(kwargs, "audio", SEEDANCE25_MAX_AUDIOS)
+
+        if model in SEEDANCE25_T2V_MODELS:
+            if image_slots or video_slots or audio_slots:
+                raise SeedanceLowPriceError("Seedance 2.5 T2V does not accept reference media")
+            return {}
+
+        if model in SEEDANCE25_I2V_MODELS:
+            if video_slots or audio_slots or any(index > 2 for index, _value in image_slots):
+                raise SeedanceLowPriceError(
+                    "Seedance 2.5 I2V accepts image1 and optional image2 only"
+                )
+            if not image_slots or image_slots[0][0] != 1:
+                raise SeedanceLowPriceError("image1 is required for Seedance 2.5 I2V")
+            urls = []
+            for completed, (index, image) in enumerate(image_slots, start=1):
+                urls.append(self._upload(
+                    image_to_png_bytes(image),
+                    f"seedance25_frame_{index}.png",
+                    "image/png",
+                    config,
+                ))
+                if on_progress:
+                    on_progress(completed / len(image_slots))
+            return {"images": urls}
+
+        if model not in SEEDANCE25_MULTI_MODELS:
+            raise SeedanceLowPriceError(f"Unsupported Seedance 2.5 model: {model}")
+        if not (image_slots or video_slots or audio_slots):
+            raise SeedanceLowPriceError(
+                "Seedance 2.5 Multi requires at least one image, video, or audio"
+            )
+        reference_count = len(image_slots) + len(video_slots) + len(audio_slots)
+        if reference_count > SEEDANCE25_MAX_REFERENCES:
+            raise SeedanceLowPriceError(
+                f"Seedance 2.5 Multi accepts at most {SEEDANCE25_MAX_REFERENCES} references"
+            )
+        _validate_seedance25_media_durations(video_slots, audio_slots)
+
+        total = reference_count
+        completed = 0
+        content: List[Dict[str, Any]] = []
+        for index, image in image_slots:
+            url = self._upload(
+                image_to_png_bytes(image), f"seedance25_image_{index}.png", "image/png", config
+            )
+            content.append({"type": "image_url", "image_url": {"url": url}})
+            completed += 1
+            if on_progress:
+                on_progress(completed / total)
+        for index, video in video_slots:
+            url = self._upload(
+                video_to_mp4_bytes(video), f"seedance25_video_{index}.mp4", "video/mp4", config
+            )
+            content.append({"type": "video_url", "video_url": {"url": url}})
+            completed += 1
+            if on_progress:
+                on_progress(completed / total)
+        for index, audio in audio_slots:
+            url = self._upload(
+                audio_to_wav_bytes(audio), f"seedance25_audio_{index}.wav", "audio/wav", config
+            )
+            content.append({"type": "audio_url", "audio_url": {"url": url}})
+            completed += 1
+            if on_progress:
+                on_progress(completed / total)
+        return {"content": content}
+
+    @staticmethod
+    def build_payload(kwargs: Dict[str, Any], media: Dict[str, Any]) -> Dict[str, Any]:
+        model = kwargs["model"]
+        metadata: Dict[str, Any] = {
+            "resolution": kwargs["resolution"],
+            "ratio": "adaptive" if model in SEEDANCE25_I2V_MODELS else kwargs["ratio"],
+            "generate_audio": bool(kwargs.get("generate_audio", True)),
+        }
+        if kwargs.get("return_last_frame", False):
+            metadata["return_last_frame"] = True
+        seed = int(kwargs.get("seed", -1))
+        if seed >= 0:
+            metadata["seed"] = seed
+        payload: Dict[str, Any] = {"model": model, "metadata": metadata}
+        if str(kwargs["seconds"]) == "-1":
+            metadata["duration"] = -1
+        else:
+            payload["seconds"] = str(kwargs["seconds"])
+
+        prompt = str(kwargs.get("prompt") or "").strip()
+        if prompt:
+            payload["prompt"] = prompt
+        if model in SEEDANCE25_I2V_MODELS:
+            payload["images"] = media["images"][:2]
+        elif model in SEEDANCE25_MULTI_MODELS:
+            metadata["content"] = media["content"]
+        return payload
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        generate_audio: bool = True,
+        return_last_frame: bool = False,
+        seed: int = -1,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        try:
+            pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+            def update_progress(value: int) -> None:
+                if pbar is not None:
+                    try:
+                        pbar.update_absolute(value, 100)
+                    except Exception:
+                        pass
+
+            self._validate(model, prompt, seconds, resolution, ratio, seed)
+            config = resolve_config(api_config)
+            request = {
+                "model": model,
+                "prompt": prompt,
+                "seconds": seconds,
+                "resolution": resolution,
+                "ratio": ratio,
+                "generate_audio": generate_audio,
+                "return_last_frame": return_last_frame,
+                "seed": seed,
+                **kwargs,
+            }
+            media = self.collect_media(
+                request,
+                config,
+                on_progress=lambda progress: update_progress(int(progress * 15)),
+            )
+            payload = self.build_payload(request, media)
+            update_progress(15)
+            print(f"[Seedance 2.5 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(20)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(20 + int(progress * 0.75))
+
+            final_response = poll_task(task_id, config, on_progress=on_poll_progress)
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
                 "model": model,
                 "task_id": task_id,
                 "message": message,
@@ -7922,6 +8354,7 @@ class Comfly_suno_music_lowprice:
 __all__ = [
     "Comfly_seedance2_low_price_settings",
     "Comfly_seedance2_low_price",
+    "Comfly_seedance25_standard_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
     "Comfly_zhenzhen_image_g2_lowprice",
     "Comfly_zhenzhen_image_g_v2_lowprice",

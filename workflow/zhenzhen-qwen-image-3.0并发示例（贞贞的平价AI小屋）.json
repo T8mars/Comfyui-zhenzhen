@@ -1,0 +1,686 @@
+{
+  "id": "4df74040-8520-550c-b7de-4eab09d6416f",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_api_set",
+      "title": "Zhenzhen API Settings（国内版）",
+      "pos": [
+        30,
+        430
+      ],
+      "size": [
+        340,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_api_set"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 2,
+      "type": "ComflyConcurrent_Comfly_qwen_image_3_0_lowprice_Submit",
+      "title": "并发提交 1",
+      "pos": [
+        400,
+        30
+      ],
+      "size": [
+        480,
+        390
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        },
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "ComflyConcurrent_Comfly_qwen_image_3_0_lowprice_Submit"
+      },
+      "widgets_values": [
+        "qwen-image-3.0-t2i",
+        "蓝色玻璃立方体放在白色摄影台上，柔和自然光，细节清晰",
+        "",
+        true,
+        "auto",
+        "1k",
+        "1:1",
+        "1024*1024",
+        1,
+        -1,
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "ComflyConcurrent_Comfly_qwen_image_3_0_lowprice_Submit",
+      "title": "并发提交 2",
+      "pos": [
+        400,
+        470
+      ],
+      "size": [
+        480,
+        390
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        },
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "ComflyConcurrent_Comfly_qwen_image_3_0_lowprice_Submit"
+      },
+      "widgets_values": [
+        "qwen-image-3.0-pro-t2i",
+        "红色金属球体放在白色摄影台上，柔和自然光，细节清晰",
+        "",
+        true,
+        "auto",
+        "1k",
+        "1:1",
+        "1024*1024",
+        1,
+        -1,
+        false
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ComflyConcurrent_Image_Await",
+      "title": "并发接收图片",
+      "pos": [
+        940,
+        220
+      ],
+      "size": [
+        360,
+        760
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "task_1",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": 3
+        },
+        {
+          "name": "task_2",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": 4
+        },
+        {
+          "name": "task_3",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_4",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_5",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_6",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_7",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_8",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_9",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_10",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_11",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_12",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_13",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_14",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_15",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_16",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_17",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_18",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_19",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_20",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_21",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_22",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_23",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_24",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_25",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_26",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_27",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_28",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_29",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_30",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_1",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "image_2",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "image_3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_5",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_6",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_7",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_8",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_9",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_10",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_11",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_12",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_13",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_14",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_15",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_16",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_17",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_18",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_19",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_20",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_21",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_22",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_23",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_24",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_25",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_26",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_27",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_28",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_29",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_30",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "ComflyConcurrent_Image_Await"
+      },
+      "widgets_values": [
+        "fail_fast"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [
+        1370,
+        100
+      ],
+      "size": [
+        280,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "qwen_image_3/concurrent_1"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "SaveImage",
+      "pos": [
+        1370,
+        440
+      ],
+      "size": [
+        280,
+        270
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "qwen_image_3/concurrent_2"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      1,
+      3,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      2,
+      0,
+      4,
+      0,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      4,
+      3,
+      0,
+      4,
+      1,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      5,
+      4,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      4,
+      1,
+      6,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

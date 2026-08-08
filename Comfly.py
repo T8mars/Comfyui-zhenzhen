@@ -81,6 +81,7 @@ from .fal_batch_nodes import (
 from .seedance_low_price_nodes import (
     Comfly_seedance2_low_price_settings,
     Comfly_seedance2_low_price,
+    Comfly_seedance25_standard_low_price,
     Comfly_sd2_seedream_v5_pro_lowprice,
     Comfly_zhenzhen_image_g2_lowprice,
     Comfly_zhenzhen_image_g_v2_lowprice,
@@ -25498,6 +25499,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_api_set": Comfly_api_set,
     "Comfly_seedance2_low_price_settings": Comfly_seedance2_low_price_settings,
     "Comfly_seedance2_low_price": Comfly_seedance2_low_price,
+    "Comfly_seedance25_standard_low_price": Comfly_seedance25_standard_low_price,
     "Comfly_sd2_seedream_v5_pro_lowprice": Comfly_sd2_seedream_v5_pro_lowprice,
     "Comfly_zhenzhen_image_g2_lowprice": Comfly_zhenzhen_image_g2_lowprice,
     "Comfly_zhenzhen_image_g_v2_lowprice": Comfly_zhenzhen_image_g_v2_lowprice,
@@ -25649,6 +25651,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_api_set": "Zhenzhen API Settings",
     "Comfly_seedance2_low_price_settings": "zhenzhen-seedance2-low-price-api-settings",
     "Comfly_seedance2_low_price": "zhenzhen-seedance2-low-price",
+    "Comfly_seedance25_standard_low_price": "zhenzhen-seedance2.5-standard-low-price",
     "Comfly_sd2_seedream_v5_pro_lowprice": "zhenzhen-sd2-seedream-v5-pro-lowprice",
     "Comfly_zhenzhen_image_g2_lowprice": "zhenzhen-image-g2-lowprice",
     "Comfly_zhenzhen_image_g_v2_lowprice": "zhenzhen-image-g-v2-lowprice",
