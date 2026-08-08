@@ -1,133 +1,23 @@
 {
-  "id": "f4c1047f-2bbb-5470-adc0-172ea1ea4970",
+  "id": "fd993a70-17d5-5555-bed3-b3bbe2628f7e",
   "revision": 0,
-  "last_node_id": 6,
-  "last_link_id": 5,
+  "last_node_id": 3,
+  "last_link_id": 2,
   "nodes": [
     {
       "id": 1,
-      "type": "LoadImage",
-      "title": "选择参考图.png",
-      "pos": [
-        20,
-        20
-      ],
-      "size": [
-        280,
-        250
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            1
-          ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.27.0",
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "选择参考图.png",
-        "image"
-      ]
-    },
-    {
-      "id": 2,
-      "type": "LoadVideo",
-      "title": "选择参考视频.mp4",
-      "pos": [
-        20,
-        330
-      ],
-      "size": [
-        280,
-        150
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "VIDEO",
-          "type": "VIDEO",
-          "links": [
-            2
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.27.0",
-        "Node name for S&R": "LoadVideo"
-      },
-      "widgets_values": [
-        "选择参考视频.mp4"
-      ]
-    },
-    {
-      "id": 3,
-      "type": "LoadAudio",
-      "title": "选择参考音频.wav",
-      "pos": [
-        20,
-        510
-      ],
-      "size": [
-        280,
-        150
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "AUDIO",
-          "type": "AUDIO",
-          "links": [
-            3
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.27.0",
-        "Node name for S&R": "LoadAudio"
-      },
-      "widgets_values": [
-        "选择参考音频.wav",
-        null,
-        ""
-      ]
-    },
-    {
-      "id": 4,
       "type": "Comfly_api_set",
       "title": "Zhenzhen API Settings（国内版）",
       "pos": [
         20,
-        700
+        650
       ],
       "size": [
         340,
         174
       ],
       "flags": {},
-      "order": 3,
+      "order": 0,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -140,7 +30,7 @@
           "name": "api_config",
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
           "links": [
-            4
+            1
           ]
         }
       ],
@@ -157,32 +47,32 @@
       ]
     },
     {
-      "id": 5,
+      "id": 2,
       "type": "Comfly_hailuo_h3_video_lowprice",
-      "title": "Hailuo H3 国内MULTI",
+      "title": "Hailuo H3 海外T2V",
       "pos": [
         420,
         60
       ],
       "size": [
         520,
-        650
+        500
       ],
       "flags": {},
-      "order": 4,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
           "name": "api_config",
           "shape": 7,
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
-          "link": 4
+          "link": 1
         },
         {
           "name": "image1",
           "shape": 7,
           "type": "IMAGE",
-          "link": 1
+          "link": null
         },
         {
           "name": "image2",
@@ -236,7 +126,7 @@
           "name": "video1",
           "shape": 7,
           "type": "VIDEO",
-          "link": 2
+          "link": null
         },
         {
           "name": "video2",
@@ -254,7 +144,7 @@
           "name": "audio1",
           "shape": 7,
           "type": "AUDIO",
-          "link": 3
+          "link": null
         },
         {
           "name": "audio2",
@@ -274,7 +164,7 @@
           "name": "video",
           "type": "VIDEO",
           "links": [
-            5
+            2
           ]
         },
         {
@@ -299,16 +189,16 @@
         "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
       },
       "widgets_values": [
-        "hailuo-h3-multi",
-        "让 @Image 1 中的主体进入 @Video 1 的场景，动作节奏跟随 @Audio 1，保持画面连续性",
+        "hailuo-h3-global-t2v",
+        "清晨薄雾中的玻璃温室，一只白色纸飞机缓慢穿过花丛，镜头平稳跟随，柔和电影光线",
         "5",
-        "2K",
+        "768P",
         "16:9",
         false
       ]
     },
     {
-      "id": 6,
+      "id": 3,
       "type": "SaveVideo",
       "pos": [
         1020,
@@ -319,13 +209,13 @@
         200
       ],
       "flags": {},
-      "order": 5,
+      "order": 2,
       "mode": 0,
       "inputs": [
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 5
+          "link": 2
         }
       ],
       "outputs": [
@@ -341,7 +231,7 @@
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/hailuo_h3/hailuo-h3-multi",
+        "video/hailuo_h3/hailuo-h3-global-t2v",
         "auto",
         "auto"
       ]
@@ -351,40 +241,16 @@
     [
       1,
       1,
-      0,
-      5,
       1,
-      "IMAGE"
-    ],
-    [
       2,
-      2,
-      0,
-      5,
-      10,
-      "VIDEO"
-    ],
-    [
-      3,
-      3,
-      0,
-      5,
-      13,
-      "AUDIO"
-    ],
-    [
-      4,
-      4,
-      1,
-      5,
       0,
       "ZHENZHEN_SEEDANCE2_CONFIG"
     ],
     [
-      5,
-      5,
+      2,
+      2,
       0,
-      6,
+      3,
       0,
       "VIDEO"
     ]

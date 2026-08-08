@@ -1,5 +1,5 @@
 {
-  "id": "f4c1047f-2bbb-5470-adc0-172ea1ea4970",
+  "id": "1d78a53e-dbc2-5347-bc23-c9ee235aa7ef",
   "revision": 0,
   "last_node_id": 6,
   "last_link_id": 5,
@@ -159,7 +159,7 @@
     {
       "id": 5,
       "type": "Comfly_hailuo_h3_video_lowprice",
-      "title": "Hailuo H3 国内MULTI",
+      "title": "Hailuo H3 海外MULTI",
       "pos": [
         420,
         60
@@ -299,10 +299,10 @@
         "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
       },
       "widgets_values": [
-        "hailuo-h3-multi",
+        "hailuo-h3-global-multi",
         "让 @Image 1 中的主体进入 @Video 1 的场景，动作节奏跟随 @Audio 1，保持画面连续性",
         "5",
-        "2K",
+        "768P",
         "16:9",
         false
       ]
@@ -341,7 +341,7 @@
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/hailuo_h3/hailuo-h3-multi",
+        "video/hailuo_h3/hailuo-h3-global-multi",
         "auto",
         "auto"
       ]

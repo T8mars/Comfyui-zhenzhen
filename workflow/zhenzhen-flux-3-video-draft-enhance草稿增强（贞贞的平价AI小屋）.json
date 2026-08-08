@@ -1,8 +1,8 @@
 {
-  "id": "eff3c760-2fb2-5b9f-8fc6-861b877f1e50",
+  "id": "342ebdb7-cf2e-5e63-9dab-5685bfea1e2f",
   "revision": 0,
-  "last_node_id": 3,
-  "last_link_id": 2,
+  "last_node_id": 4,
+  "last_link_id": 4,
   "nodes": [
     {
       "id": 1,
@@ -30,7 +30,8 @@
           "name": "api_config",
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
           "links": [
-            1
+            1,
+            2
           ]
         }
       ],
@@ -48,15 +49,15 @@
     },
     {
       "id": 2,
-      "type": "Comfly_hailuo_h3_video_lowprice",
-      "title": "Hailuo H3 国内T2V",
+      "type": "Comfly_flux3_video_lowprice",
+      "title": "FLUX 3 国内草稿生成",
       "pos": [
         420,
-        60
+        20
       ],
       "size": [
-        520,
-        500
+        540,
+        560
       ],
       "flags": {},
       "order": 1,
@@ -123,39 +124,15 @@
           "link": null
         },
         {
-          "name": "video1",
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_video",
           "shape": 7,
           "type": "VIDEO",
-          "link": null
-        },
-        {
-          "name": "video2",
-          "shape": 7,
-          "type": "VIDEO",
-          "link": null
-        },
-        {
-          "name": "video3",
-          "shape": 7,
-          "type": "VIDEO",
-          "link": null
-        },
-        {
-          "name": "audio1",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio2",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio3",
-          "shape": 7,
-          "type": "AUDIO",
           "link": null
         }
       ],
@@ -163,12 +140,163 @@
         {
           "name": "video",
           "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "draft_cache",
+          "type": "STRING",
           "links": [
-            2
+            3
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_flux3_video_lowprice"
+      },
+      "widgets_values": [
+        "flux-3-video-t2v",
+        "一架银色纸飞机穿过清晨薄雾，稳定镜头，柔和电影光线",
+        "5",
+        "hd",
+        "16:9",
+        true,
+        "api_default",
+        "api_default",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Comfly_flux3_video_lowprice",
+      "title": "FLUX 3 国内草稿增强",
+      "pos": [
+        1020,
+        20
+      ],
+      "size": [
+        540,
+        560
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        },
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "input_video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "draft_cache",
+          "shape": 7,
+          "type": "STRING",
+          "link": 3,
+          "widget": {
+            "name": "draft_cache"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            4
           ]
         },
         {
           "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "draft_cache",
           "type": "STRING",
           "links": null
         },
@@ -186,36 +314,41 @@
       "properties": {
         "cnr_id": "zhenzhen",
         "ver": "2.0.2",
-        "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
+        "Node name for S&R": "Comfly_flux3_video_lowprice"
       },
       "widgets_values": [
-        "hailuo-h3-t2v",
-        "清晨薄雾中的玻璃温室，一只白色纸飞机缓慢穿过花丛，镜头平稳跟随，柔和电影光线",
+        "flux-3-video-draft-enhance",
+        "",
         "5",
-        "2K",
+        "hd",
         "16:9",
+        false,
+        "api_default",
+        "api_default",
+        "",
+        "",
         false
       ]
     },
     {
-      "id": 3,
+      "id": 4,
       "type": "SaveVideo",
       "pos": [
-        1020,
-        200
+        1640,
+        180
       ],
       "size": [
         320,
         200
       ],
       "flags": {},
-      "order": 2,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 2
+          "link": 4
         }
       ],
       "outputs": [
@@ -231,7 +364,7 @@
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/hailuo_h3/hailuo-h3-t2v",
+        "video/flux3/flux-3-video-draft-enhance",
         "auto",
         "auto"
       ]
@@ -248,9 +381,25 @@
     ],
     [
       2,
-      2,
-      0,
+      1,
+      1,
       3,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      2,
+      2,
+      3,
+      12,
+      "STRING"
+    ],
+    [
+      4,
+      3,
+      0,
+      4,
       0,
       "VIDEO"
     ]

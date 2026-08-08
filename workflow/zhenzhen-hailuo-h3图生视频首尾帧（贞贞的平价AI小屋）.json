@@ -7,14 +7,14 @@
     {
       "id": 1,
       "type": "LoadImage",
-      "title": "选择首帧.png",
+      "title": "选择首帧图.png",
       "pos": [
-        40,
-        40
+        20,
+        20
       ],
       "size": [
-        270,
-        314
+        280,
+        250
       ],
       "flags": {},
       "order": 0,
@@ -40,21 +40,21 @@
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "选择首帧.png",
+        "选择首帧图.png",
         "image"
       ]
     },
     {
       "id": 2,
       "type": "LoadImage",
-      "title": "选择尾帧.png",
+      "title": "选择尾帧图.png",
       "pos": [
-        40,
-        390
+        20,
+        330
       ],
       "size": [
-        270,
-        314
+        280,
+        250
       ],
       "flags": {},
       "order": 1,
@@ -80,19 +80,20 @@
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "选择尾帧.png",
+        "选择尾帧图.png",
         "image"
       ]
     },
     {
       "id": 3,
       "type": "Comfly_api_set",
+      "title": "Zhenzhen API Settings（国内版）",
       "pos": [
-        40,
-        750
+        20,
+        650
       ],
       "size": [
-        330,
+        340,
         174
       ],
       "flags": {},
@@ -115,7 +116,7 @@
       ],
       "properties": {
         "cnr_id": "zhenzhen",
-        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "ver": "2.0.2",
         "Node name for S&R": "Comfly_api_set"
       },
       "widgets_values": [
@@ -123,20 +124,19 @@
         "",
         "",
         false
-      ],
-      "title": "Zhenzhen API Settings（国内版）"
+      ]
     },
     {
       "id": 4,
       "type": "Comfly_hailuo_h3_video_lowprice",
-      "title": "Hailuo H3 图生视频（首尾帧）",
+      "title": "Hailuo H3 国内I2V",
       "pos": [
-        430,
-        170
+        420,
+        60
       ],
       "size": [
-        470,
-        520
+        520,
+        500
       ],
       "flags": {},
       "order": 3,
@@ -159,6 +159,84 @@
           "shape": 7,
           "type": "IMAGE",
           "link": 2
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video1",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video2",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video3",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "audio1",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio2",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "audio3",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
         }
       ],
       "outputs": [
@@ -187,15 +265,15 @@
       ],
       "properties": {
         "cnr_id": "zhenzhen",
-        "ver": "835aa72863857f6dc0b243e2eedaf10435979a76",
+        "ver": "2.0.2",
         "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
       },
       "widgets_values": [
         "hailuo-h3-i2v",
-        "主体保持一致，从首帧自然过渡到尾帧，镜头轻缓推进，动作连续流畅",
+        "从首帧自然过渡到尾帧，保持主体一致，镜头运动平稳连贯",
         "5",
         "2K",
-        "16:9",
+        "adaptive",
         false
       ]
     },
@@ -203,12 +281,12 @@
       "id": 5,
       "type": "SaveVideo",
       "pos": [
-        980,
-        280
+        1020,
+        200
       ],
       "size": [
-        300,
-        190
+        320,
+        200
       ],
       "flags": {},
       "order": 4,
@@ -233,7 +311,7 @@
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/hailuo_h3_i2v",
+        "video/hailuo_h3/hailuo-h3-i2v",
         "auto",
         "auto"
       ]

@@ -24,6 +24,11 @@ import torch
 from PIL import Image
 
 try:
+    from .media_download import download_image_with_alpha_retry
+except ImportError:
+    from media_download import download_image_with_alpha_retry
+
+try:
     import comfy.utils
     from comfy.comfy_types import IO
 
@@ -1342,6 +1347,9 @@ SEEDREAM_OUTPUT_FORMATS = ["png", "jpeg"]
 SEEDREAM_PROMPT_MIN_LENGTH = 5
 SEEDREAM_PROMPT_MAX_LENGTH = 2000
 SEEDREAM_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+SEEDREAM_LAYER_DECOMPOSITION_MODEL = "seedream-v5-pro-layer-decomposition"
+SEEDREAM_LAYER_RESOLUTIONS = ["auto", "1k", "1.5k", "2k"]
+SEEDREAM_LAYER_SOURCE_MAX_BYTES = 30 * 1024 * 1024
 ZHENZHEN_IMAGE_G2_T2I_MODEL = "zhenzhen-image-g2-t2i"
 ZHENZHEN_IMAGE_G2_I2I_MODEL = "zhenzhen-image-g2-i2i"
 ZHENZHEN_IMAGE_G2_MODELS = [
@@ -1568,6 +1576,27 @@ def extract_image_url(response: Dict[str, Any]) -> str:
     raise SeedanceLowPriceError("Seedream completed response did not contain an image URL")
 
 
+def extract_image_urls(response: Dict[str, Any]) -> List[str]:
+    """Return the complete documented image_urls array without reordering it."""
+    if isinstance(response, dict):
+        data = response.get("data")
+        if isinstance(data, dict):
+            nested = data.get("data")
+            if isinstance(nested, dict):
+                content = nested.get("content")
+                if isinstance(content, dict):
+                    values = content.get("image_urls")
+                    if isinstance(values, (list, tuple)):
+                        urls = [
+                            str(value or "").strip()
+                            for value in values
+                            if str(value or "").strip()
+                        ]
+                        if urls:
+                            return urls
+    return [extract_image_url(response)]
+
+
 def _pil_to_image_tensor(image: Image.Image) -> torch.Tensor:
     array = np.asarray(image.convert("RGB"), dtype=np.float32).copy() / 255.0
     return torch.from_numpy(array).unsqueeze(0)
@@ -1586,6 +1615,16 @@ def download_image(url: str, max_retries: int = 3) -> torch.Tensor:
         except Exception as exc:
             last_error = exc
     raise RuntimeError(f"Seedream image download failed after {max_retries} attempts: {last_error}")
+
+
+def download_image_with_mask(url: str) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Download one layer as ComfyUI IMAGE plus inverse-alpha MASK."""
+    rgba = download_image_with_alpha_retry(url)
+    rgb = np.asarray(rgba.convert("RGB"), dtype=np.float32).copy() / 255.0
+    alpha = np.asarray(rgba.getchannel("A"), dtype=np.float32).copy() / 255.0
+    image = torch.from_numpy(rgb).unsqueeze(0)
+    mask = torch.from_numpy(1.0 - alpha).unsqueeze(0)
+    return image, mask
 
 
 class Comfly_sd2_seedream_v5_pro_lowprice:
@@ -3234,13 +3273,31 @@ class Comfly_hailuo_2_3_video_lowprice:
 HAILUO_H3_T2V_MODEL = "hailuo-h3-t2v"
 HAILUO_H3_I2V_MODEL = "hailuo-h3-i2v"
 HAILUO_H3_MULTI_MODEL = "hailuo-h3-multi"
+HAILUO_H3_GLOBAL_T2V_MODEL = "hailuo-h3-global-t2v"
+HAILUO_H3_GLOBAL_I2V_MODEL = "hailuo-h3-global-i2v"
+HAILUO_H3_GLOBAL_MULTI_MODEL = "hailuo-h3-global-multi"
+HAILUO_H3_T2V_MODELS = [
+    HAILUO_H3_T2V_MODEL,
+    HAILUO_H3_GLOBAL_T2V_MODEL,
+]
+HAILUO_H3_I2V_MODELS = [
+    HAILUO_H3_I2V_MODEL,
+    HAILUO_H3_GLOBAL_I2V_MODEL,
+]
+HAILUO_H3_MULTI_MODELS = [
+    HAILUO_H3_MULTI_MODEL,
+    HAILUO_H3_GLOBAL_MULTI_MODEL,
+]
 HAILUO_H3_MODELS = [
     HAILUO_H3_T2V_MODEL,
     HAILUO_H3_I2V_MODEL,
     HAILUO_H3_MULTI_MODEL,
+    HAILUO_H3_GLOBAL_T2V_MODEL,
+    HAILUO_H3_GLOBAL_I2V_MODEL,
+    HAILUO_H3_GLOBAL_MULTI_MODEL,
 ]
 HAILUO_H3_SECONDS = [str(seconds) for seconds in range(5, 16)]
-HAILUO_H3_RESOLUTIONS = ["2K"]
+HAILUO_H3_RESOLUTIONS = ["768P", "2K"]
 HAILUO_H3_PROMPT_MAX_LENGTH = 20480
 HAILUO_H3_MAX_IMAGES = 9
 HAILUO_H3_MAX_VIDEOS = 3
@@ -3259,7 +3316,7 @@ def validate_hailuo_h3_inputs(
     if str(seconds) not in HAILUO_H3_SECONDS:
         raise SeedanceLowPriceError("Hailuo H3 seconds must be between 5 and 15")
     if resolution not in HAILUO_H3_RESOLUTIONS:
-        raise SeedanceLowPriceError("Hailuo H3 resolution must be 2K")
+        raise SeedanceLowPriceError("Hailuo H3 resolution must be 768P or 2K")
     if ratio not in RATIOS:
         raise SeedanceLowPriceError(f"Unsupported Hailuo H3 ratio: {ratio}")
 
@@ -3268,7 +3325,7 @@ def validate_hailuo_h3_inputs(
         raise SeedanceLowPriceError(
             f"Hailuo H3 prompt exceeds {HAILUO_H3_PROMPT_MAX_LENGTH} characters"
         )
-    if model in (HAILUO_H3_T2V_MODEL, HAILUO_H3_MULTI_MODEL) and not prompt_text:
+    if model in (*HAILUO_H3_T2V_MODELS, *HAILUO_H3_MULTI_MODELS) and not prompt_text:
         raise SeedanceLowPriceError(
             "Hailuo H3 text-to-video and multi require a prompt"
         )
@@ -3297,11 +3354,11 @@ def build_hailuo_h3_payload(
         "metadata": metadata,
     }
 
-    if model in (HAILUO_H3_T2V_MODEL, HAILUO_H3_MULTI_MODEL):
+    if model in (*HAILUO_H3_T2V_MODELS, *HAILUO_H3_MULTI_MODELS):
         metadata["ratio"] = ratio
         payload["prompt"] = prompt_text
 
-    if model == HAILUO_H3_I2V_MODEL:
+    if model in HAILUO_H3_I2V_MODELS:
         if not images:
             raise SeedanceLowPriceError(
                 "Hailuo H3 image-to-video requires image1 as the first frame"
@@ -3311,7 +3368,7 @@ def build_hailuo_h3_payload(
             payload["prompt"] = prompt_text
         return payload
 
-    if model == HAILUO_H3_MULTI_MODEL:
+    if model in HAILUO_H3_MULTI_MODELS:
         if not (images or videos or audios):
             raise SeedanceLowPriceError(
                 "Hailuo H3 multi requires at least one image, video, or audio"
@@ -3417,7 +3474,7 @@ class Comfly_hailuo_h3_video_lowprice:
             video_slots: List[Tuple[int, Any]] = []
             audio_slots: List[Tuple[int, Any]] = []
 
-            if model == HAILUO_H3_I2V_MODEL:
+            if model in HAILUO_H3_I2V_MODELS:
                 if kwargs.get("image1") is None:
                     raise SeedanceLowPriceError(
                         "Hailuo H3 image-to-video requires image1 as the first frame"
@@ -3428,7 +3485,7 @@ class Comfly_hailuo_h3_video_lowprice:
                     2,
                     "Hailuo H3 Low Price",
                 )
-            elif model == HAILUO_H3_MULTI_MODEL:
+            elif model in HAILUO_H3_MULTI_MODELS:
                 image_slots = _connected_slots(
                     kwargs,
                     "image",
@@ -3545,6 +3602,382 @@ class Comfly_hailuo_h3_video_lowprice:
             }
             return (
                 make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+FLUX3_T2V_MODELS = [
+    "flux-3-video-t2v",
+    "flux-3-video-global-t2v",
+]
+FLUX3_I2V_MODELS = [
+    "flux-3-video-i2v",
+    "flux-3-video-global-i2v",
+]
+FLUX3_V2V_MODELS = [
+    "flux-3-video-v2v",
+    "flux-3-video-global-v2v",
+]
+FLUX3_DRAFT_ENHANCE_MODELS = [
+    "flux-3-video-draft-enhance",
+    "flux-3-video-global-draft-enhance",
+]
+FLUX3_VIDEO_MODELS = [
+    FLUX3_T2V_MODELS[0],
+    FLUX3_I2V_MODELS[0],
+    FLUX3_V2V_MODELS[0],
+    FLUX3_DRAFT_ENHANCE_MODELS[0],
+    FLUX3_T2V_MODELS[1],
+    FLUX3_I2V_MODELS[1],
+    FLUX3_V2V_MODELS[1],
+    FLUX3_DRAFT_ENHANCE_MODELS[1],
+]
+FLUX3_SECONDS = [str(seconds) for seconds in range(5, 21)]
+FLUX3_RESOLUTIONS = ["hd", "fhd"]
+FLUX3_RATIOS = ["auto", "21:9", "2:1", "16:9", "4:3", "1:1", "3:4", "9:16"]
+FLUX3_AUDIO_MODES = ["api_default", "enabled", "disabled"]
+FLUX3_SAFETY_TOLERANCES = ["api_default", "0", "1", "2", "3", "4"]
+FLUX3_MAX_IMAGES = 10
+FLUX3_PROMPT_MAX_LENGTH = 20480
+
+
+def validate_flux3_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    audio_mode: str,
+    safety_tolerance: str,
+    video_url: str = "",
+    draft_cache: str = "",
+    has_image: bool = False,
+    has_video: bool = False,
+    strict: bool = True,
+) -> str:
+    if model not in FLUX3_VIDEO_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported FLUX 3 model: {model}")
+    if str(seconds) not in FLUX3_SECONDS:
+        raise SeedanceLowPriceError("FLUX 3 seconds must be between 5 and 20")
+    if resolution not in FLUX3_RESOLUTIONS:
+        raise SeedanceLowPriceError("FLUX 3 resolution must be hd or fhd")
+    if ratio not in FLUX3_RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported FLUX 3 ratio: {ratio}")
+    if audio_mode not in FLUX3_AUDIO_MODES:
+        raise SeedanceLowPriceError(f"Unsupported FLUX 3 audio mode: {audio_mode}")
+    if str(safety_tolerance) not in FLUX3_SAFETY_TOLERANCES:
+        raise SeedanceLowPriceError(
+            f"Unsupported FLUX 3 safety tolerance: {safety_tolerance}"
+        )
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > FLUX3_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"FLUX 3 prompt exceeds {FLUX3_PROMPT_MAX_LENGTH} characters"
+        )
+    direct_video_url = str(video_url or "").strip()
+    if direct_video_url and not direct_video_url.startswith(("http://", "https://")):
+        raise SeedanceLowPriceError("FLUX 3 video_url must be an http(s) URL")
+
+    if strict and model not in FLUX3_DRAFT_ENHANCE_MODELS and not prompt_text:
+        raise SeedanceLowPriceError("FLUX 3 generation requires a prompt")
+    if strict and model in FLUX3_I2V_MODELS and not has_image:
+        raise SeedanceLowPriceError("FLUX 3 image-to-video requires image1")
+    if strict and model in FLUX3_V2V_MODELS and not (has_video or direct_video_url):
+        raise SeedanceLowPriceError(
+            "FLUX 3 video-to-video requires input_video or video_url"
+        )
+    if (
+        strict
+        and model in FLUX3_DRAFT_ENHANCE_MODELS
+        and not str(draft_cache or "").strip()
+    ):
+        raise SeedanceLowPriceError("FLUX 3 Draft Enhance requires draft_cache")
+    return prompt_text
+
+
+def build_flux3_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    draft: bool = False,
+    audio_mode: str = "api_default",
+    safety_tolerance: str = "api_default",
+    image_urls: Optional[List[str]] = None,
+    uploaded_video_url: str = "",
+    draft_cache: str = "",
+) -> Dict[str, Any]:
+    images = list(image_urls or [])
+    source_video_url = str(uploaded_video_url or "").strip()
+    prompt_text = validate_flux3_inputs(
+        model,
+        prompt,
+        seconds,
+        resolution,
+        ratio,
+        audio_mode,
+        safety_tolerance,
+        video_url=source_video_url,
+        draft_cache=draft_cache,
+        has_image=bool(images),
+        has_video=bool(source_video_url),
+        strict=True,
+    )
+
+    metadata: Dict[str, Any] = {
+        "resolution": resolution,
+        "ratio": ratio,
+    }
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+
+    if model in FLUX3_DRAFT_ENHANCE_MODELS:
+        metadata["draft_cache"] = str(draft_cache).strip()
+    else:
+        payload["prompt"] = prompt_text
+        if bool(draft):
+            metadata["draft"] = True
+
+    if audio_mode == "enabled":
+        metadata["generate_audio"] = True
+    elif audio_mode == "disabled":
+        metadata["generate_audio"] = False
+
+    if safety_tolerance != "api_default":
+        metadata["safety_tolerance"] = int(safety_tolerance)
+
+    if model in FLUX3_I2V_MODELS:
+        payload["images"] = images[:FLUX3_MAX_IMAGES]
+    elif model in FLUX3_V2V_MODELS:
+        metadata["video_url"] = source_video_url
+    return payload
+
+
+def extract_flux3_draft_cache(response: Dict[str, Any]) -> str:
+    metadata = response.get("metadata") if isinstance(response, dict) else None
+    if isinstance(metadata, dict) and metadata.get("draft_cache"):
+        return str(metadata["draft_cache"])
+    return ""
+
+
+class Comfly_flux3_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, Tuple[Any, ...]] = {
+            "api_config": (CONFIG_TYPE,),
+        }
+        for index in range(1, FLUX3_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional.update(
+            {
+                "input_video": (VIDEO_TYPE,),
+                "video_url": ("STRING", {"default": ""}),
+                "draft_cache": ("STRING", {"default": ""}),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            }
+        )
+        return {
+            "required": {
+                "model": (
+                    FLUX3_VIDEO_MODELS,
+                    {"default": FLUX3_T2V_MODELS[0]},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (FLUX3_SECONDS, {"default": "5"}),
+                "resolution": (FLUX3_RESOLUTIONS, {"default": "hd"}),
+                "ratio": (FLUX3_RATIOS, {"default": "auto"}),
+                "draft": ("BOOLEAN", {"default": False}),
+                "audio_mode": (FLUX3_AUDIO_MODES, {"default": "api_default"}),
+                "safety_tolerance": (
+                    FLUX3_SAFETY_TOLERANCES,
+                    {"default": "api_default"},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "draft_cache", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        resolution="hd",
+        ratio="auto",
+        audio_mode="api_default",
+        safety_tolerance="api_default",
+        video_url="",
+        draft_cache="",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_flux3_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                audio_mode,
+                safety_tolerance,
+                video_url=video_url,
+                draft_cache=draft_cache,
+                strict=False,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        draft: bool,
+        audio_mode: str,
+        safety_tolerance: str,
+        api_config: Any = None,
+        input_video: Any = None,
+        video_url: str = "",
+        draft_cache: str = "",
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            image_slots = (
+                _connected_slots(
+                    kwargs,
+                    "image",
+                    FLUX3_MAX_IMAGES,
+                    "FLUX 3 Low Price",
+                )
+                if model in FLUX3_I2V_MODELS
+                else []
+            )
+            direct_video_url = str(video_url or "").strip()
+            validate_flux3_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                audio_mode,
+                safety_tolerance,
+                video_url=direct_video_url,
+                draft_cache=draft_cache,
+                has_image=bool(image_slots and kwargs.get("image1") is not None),
+                has_video=input_video is not None,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            source_video_url = direct_video_url
+
+            if model in FLUX3_I2V_MODELS:
+                for position, (slot, image) in enumerate(image_slots, start=1):
+                    image_urls.append(
+                        upload_media(
+                            image_to_png_bytes(image),
+                            f"flux3_keyframe_{slot}.png",
+                            "image/png",
+                            config,
+                        )
+                    )
+                    update_progress(int(position / len(image_slots) * 25))
+            elif model in FLUX3_V2V_MODELS:
+                if not source_video_url:
+                    source_video_url = upload_media(
+                        video_to_mp4_bytes(input_video),
+                        "flux3_source.mp4",
+                        "video/mp4",
+                        config,
+                    )
+                update_progress(25)
+            else:
+                update_progress(25)
+
+            payload = build_flux3_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                draft=draft,
+                audio_mode=audio_mode,
+                safety_tolerance=safety_tolerance,
+                image_urls=image_urls,
+                uploaded_video_url=source_video_url,
+                draft_cache=draft_cache,
+            )
+            print(f"[FLUX 3 Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(35)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(35 + int(progress * 0.55))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            result_video_url = extract_video_url(final_response)
+            video = download_video(result_video_url)
+            result_draft_cache = extract_flux3_draft_cache(final_response)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                result_video_url,
+                result_draft_cache,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
                 "",
                 task_id,
                 json.dumps(response, ensure_ascii=False, indent=2),
@@ -5547,6 +5980,193 @@ class Comfly_qwen_image_3_0_lowprice:
             }
             blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
             return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
+    """Split one source image into the complete ordered base/layer result lists."""
+
+    COMFLY_CONCURRENT_DISABLED = True
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (SEEDREAM_LAYER_RESOLUTIONS, {"default": "auto"}),
+                "output_format": (SEEDREAM_OUTPUT_FORMATS, {"default": "png"}),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "MASK", "STRING", "INT", "STRING", "STRING")
+    RETURN_NAMES = (
+        "images",
+        "masks",
+        "image_urls",
+        "image_count",
+        "task_id",
+        "response",
+    )
+    OUTPUT_IS_LIST = (True, True, False, False, False, False)
+    FUNCTION = "decompose_layers"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        image=None,
+        prompt="",
+        resolution="auto",
+        output_format="png",
+        strict=False,
+        **kwargs,
+    ):
+        prompt_text = str(prompt or "").strip()
+        if len(prompt_text) > SEEDREAM_PROMPT_MAX_LENGTH:
+            return f"Layer decomposition prompt cannot exceed {SEEDREAM_PROMPT_MAX_LENGTH} characters"
+        if resolution not in SEEDREAM_LAYER_RESOLUTIONS:
+            return f"Unsupported layer decomposition resolution: {resolution}"
+        if output_format not in SEEDREAM_OUTPUT_FORMATS:
+            return f"Unsupported layer decomposition output_format: {output_format}"
+        if strict and image is None:
+            return "Layer decomposition requires exactly one source image"
+        shape = getattr(image, "shape", None)
+        if strict and shape is not None and len(shape) == 4 and int(shape[0]) != 1:
+            return "Layer decomposition accepts one source image, not an IMAGE batch"
+        return True
+
+    @staticmethod
+    def _build_payload(
+        source_url: str,
+        prompt: str,
+        resolution: str,
+        output_format: str,
+    ) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {
+            "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+            "images": [source_url],
+            "metadata": {
+                "resolution": resolution,
+                "output_format": output_format,
+            },
+        }
+        if prompt:
+            payload["prompt"] = prompt
+        return payload
+
+    @staticmethod
+    def _error_result(message: str, task_id: str = ""):
+        image = torch.ones((1, 512, 512, 3), dtype=torch.float32)
+        mask = torch.zeros((1, 512, 512), dtype=torch.float32)
+        response = json.dumps(
+            {
+                "status": "error",
+                "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+                "task_id": task_id,
+                "message": message,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        return ([image], [mask], "[]", 0, task_id, response)
+
+    def decompose_layers(
+        self,
+        image,
+        prompt: str,
+        resolution: str,
+        output_format: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: float) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(int(value), 100)
+                except Exception:
+                    pass
+
+        try:
+            validation = self.VALIDATE_INPUTS(
+                image=image,
+                prompt=prompt,
+                resolution=resolution,
+                output_format=output_format,
+                strict=True,
+            )
+            if validation is not True:
+                raise SeedanceLowPriceError(validation)
+
+            prompt_text = str(prompt or "").strip()
+            config = resolve_config(api_config)
+            source_bytes = image_to_png_bytes(image)
+            if len(source_bytes) > SEEDREAM_LAYER_SOURCE_MAX_BYTES:
+                raise SeedanceLowPriceError(
+                    "Layer decomposition source image exceeds the 30MB upload limit"
+                )
+            source_url = upload_media(
+                source_bytes,
+                "seedream_layer_source.png",
+                "image/png",
+                config,
+            )
+            update_progress(15)
+
+            payload = self._build_payload(
+                source_url,
+                prompt_text,
+                resolution,
+                output_format,
+            )
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(20)
+
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda progress: update_progress(20 + progress * 0.7),
+            )
+            image_urls = extract_image_urls(final_response)
+            images: List[torch.Tensor] = []
+            masks: List[torch.Tensor] = []
+            for index, image_url in enumerate(image_urls, start=1):
+                layer_image, layer_mask = download_image_with_mask(image_url)
+                images.append(layer_image)
+                masks.append(layer_mask)
+                update_progress(90 + index / len(image_urls) * 10)
+
+            urls_json = json.dumps(image_urls, ensure_ascii=False)
+            response = json.dumps(
+                {
+                    "status": "SUCCESS",
+                    "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+                    "task_id": task_id,
+                    "submit": submit_response,
+                    "result": final_response,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            return (
+                images,
+                masks,
+                urls_json,
+                len(image_urls),
+                task_id,
+                response,
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(f"{type(exc).__name__}: {exc}", task_id)
 
 
 ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL = "zhenzhen-image-g-v2-lowprice"
@@ -8356,6 +8976,7 @@ __all__ = [
     "Comfly_seedance2_low_price",
     "Comfly_seedance25_standard_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
+    "Comfly_seedream_v5_pro_layer_decomposition_lowprice",
     "Comfly_zhenzhen_image_g2_lowprice",
     "Comfly_zhenzhen_image_g_v2_lowprice",
     "Comfly_zhenzhen_image_nb_lowprice",

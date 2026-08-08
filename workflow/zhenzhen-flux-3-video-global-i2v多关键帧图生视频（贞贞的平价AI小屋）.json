@@ -1,13 +1,13 @@
 {
-  "id": "f4c1047f-2bbb-5470-adc0-172ea1ea4970",
+  "id": "6a26632a-35cb-5a46-b67d-11b28211b85b",
   "revision": 0,
-  "last_node_id": 6,
-  "last_link_id": 5,
+  "last_node_id": 5,
+  "last_link_id": 4,
   "nodes": [
     {
       "id": 1,
       "type": "LoadImage",
-      "title": "选择参考图.png",
+      "title": "选择关键帧1.png",
       "pos": [
         20,
         20
@@ -40,21 +40,21 @@
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "选择参考图.png",
+        "选择关键帧1.png",
         "image"
       ]
     },
     {
       "id": 2,
-      "type": "LoadVideo",
-      "title": "选择参考视频.mp4",
+      "type": "LoadImage",
+      "title": "选择关键帧2.png",
       "pos": [
         20,
         330
       ],
       "size": [
         280,
-        150
+        250
       ],
       "flags": {},
       "order": 1,
@@ -62,72 +62,42 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "VIDEO",
-          "type": "VIDEO",
+          "name": "IMAGE",
+          "type": "IMAGE",
           "links": [
             2
           ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
         }
       ],
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.27.0",
-        "Node name for S&R": "LoadVideo"
+        "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "选择参考视频.mp4"
+        "选择关键帧2.png",
+        "image"
       ]
     },
     {
       "id": 3,
-      "type": "LoadAudio",
-      "title": "选择参考音频.wav",
-      "pos": [
-        20,
-        510
-      ],
-      "size": [
-        280,
-        150
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "AUDIO",
-          "type": "AUDIO",
-          "links": [
-            3
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.27.0",
-        "Node name for S&R": "LoadAudio"
-      },
-      "widgets_values": [
-        "选择参考音频.wav",
-        null,
-        ""
-      ]
-    },
-    {
-      "id": 4,
       "type": "Comfly_api_set",
       "title": "Zhenzhen API Settings（国内版）",
       "pos": [
         20,
-        700
+        650
       ],
       "size": [
         340,
         174
       ],
       "flags": {},
-      "order": 3,
+      "order": 2,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -140,7 +110,7 @@
           "name": "api_config",
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
           "links": [
-            4
+            3
           ]
         }
       ],
@@ -157,26 +127,26 @@
       ]
     },
     {
-      "id": 5,
-      "type": "Comfly_hailuo_h3_video_lowprice",
-      "title": "Hailuo H3 国内MULTI",
+      "id": 4,
+      "type": "Comfly_flux3_video_lowprice",
+      "title": "FLUX 3 海外多关键帧图生视频",
       "pos": [
         420,
         60
       ],
       "size": [
-        520,
-        650
+        540,
+        560
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "name": "api_config",
           "shape": 7,
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
-          "link": 4
+          "link": 3
         },
         {
           "name": "image1",
@@ -188,7 +158,7 @@
           "name": "image2",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 2
         },
         {
           "name": "image3",
@@ -233,39 +203,15 @@
           "link": null
         },
         {
-          "name": "video1",
+          "name": "image10",
           "shape": 7,
-          "type": "VIDEO",
-          "link": 2
-        },
-        {
-          "name": "video2",
-          "shape": 7,
-          "type": "VIDEO",
+          "type": "IMAGE",
           "link": null
         },
         {
-          "name": "video3",
+          "name": "input_video",
           "shape": 7,
           "type": "VIDEO",
-          "link": null
-        },
-        {
-          "name": "audio1",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": 3
-        },
-        {
-          "name": "audio2",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio3",
-          "shape": 7,
-          "type": "AUDIO",
           "link": null
         }
       ],
@@ -274,11 +220,16 @@
           "name": "video",
           "type": "VIDEO",
           "links": [
-            5
+            4
           ]
         },
         {
           "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "draft_cache",
           "type": "STRING",
           "links": null
         },
@@ -296,22 +247,27 @@
       "properties": {
         "cnr_id": "zhenzhen",
         "ver": "2.0.2",
-        "Node name for S&R": "Comfly_hailuo_h3_video_lowprice"
+        "Node name for S&R": "Comfly_flux3_video_lowprice"
       },
       "widgets_values": [
-        "hailuo-h3-multi",
-        "让 @Image 1 中的主体进入 @Video 1 的场景，动作节奏跟随 @Audio 1，保持画面连续性",
+        "flux-3-video-global-i2v",
+        "让关键帧之间自然过渡，保持主体结构一致，镜头运动平稳",
         "5",
-        "2K",
+        "hd",
         "16:9",
+        false,
+        "api_default",
+        "api_default",
+        "",
+        "",
         false
       ]
     },
     {
-      "id": 6,
+      "id": 5,
       "type": "SaveVideo",
       "pos": [
-        1020,
+        1040,
         200
       ],
       "size": [
@@ -319,13 +275,13 @@
         200
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 5
+          "link": 4
         }
       ],
       "outputs": [
@@ -341,7 +297,7 @@
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/hailuo_h3/hailuo-h3-multi",
+        "video/flux3/flux-3-video-global-i2v",
         "auto",
         "auto"
       ]
@@ -352,7 +308,7 @@
       1,
       1,
       0,
-      5,
+      4,
       1,
       "IMAGE"
     ],
@@ -360,31 +316,23 @@
       2,
       2,
       0,
-      5,
-      10,
-      "VIDEO"
+      4,
+      2,
+      "IMAGE"
     ],
     [
       3,
       3,
-      0,
-      5,
-      13,
-      "AUDIO"
-    ],
-    [
-      4,
-      4,
       1,
-      5,
+      4,
       0,
       "ZHENZHEN_SEEDANCE2_CONFIG"
     ],
     [
-      5,
-      5,
+      4,
+      4,
       0,
-      6,
+      5,
       0,
       "VIDEO"
     ]
