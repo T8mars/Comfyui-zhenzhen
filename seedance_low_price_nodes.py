@@ -3404,7 +3404,7 @@ class Comfly_hailuo_h3_video_lowprice:
                 ),
                 "prompt": ("STRING", {"multiline": True, "default": ""}),
                 "seconds": (HAILUO_H3_SECONDS, {"default": "5"}),
-                "resolution": (HAILUO_H3_RESOLUTIONS, {"default": "2K"}),
+                "resolution": (HAILUO_H3_RESOLUTIONS, {"default": "768P"}),
                 "ratio": (RATIOS, {"default": "16:9"}),
             },
             "optional": optional,
@@ -3422,7 +3422,7 @@ class Comfly_hailuo_h3_video_lowprice:
         model=None,
         prompt="",
         seconds="5",
-        resolution="2K",
+        resolution="768P",
         ratio="16:9",
         **kwargs,
     ):
@@ -4191,6 +4191,279 @@ class Comfly_minimax_h3_ow_video_lowprice:
                 image_urls,
             )
             print(f"[MiniMax H3 OW Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(30)
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(30 + int(value * 0.6)),
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+MINIMAX_H3_OW_FAST_I2V_MODEL = "minimax-h3-ow-i2v-fast"
+MINIMAX_H3_OW_FAST_R2V_MODEL = "minimax-h3-ow-r2v-fast"
+MINIMAX_H3_OW_FAST_MODELS = [
+    MINIMAX_H3_OW_FAST_I2V_MODEL,
+    MINIMAX_H3_OW_FAST_R2V_MODEL,
+]
+MINIMAX_H3_OW_FAST_MAX_IMAGES = 9
+
+
+def validate_minimax_h3_ow_fast_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    connected_image_slots: Optional[List[int]] = None,
+    strict: bool = True,
+) -> str:
+    if model not in MINIMAX_H3_OW_FAST_MODELS:
+        raise SeedanceLowPriceError(
+            f"Unsupported MiniMax H3 OW Fast model: {model}"
+        )
+    if str(seconds) not in MINIMAX_H3_OW_SECONDS:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 OW Fast seconds must be 5, 10, or 15"
+        )
+    if resolution not in MINIMAX_H3_OW_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 OW Fast resolution must be 480p or 720p"
+        )
+    if ratio not in MINIMAX_H3_OW_RATIOS:
+        raise SeedanceLowPriceError(
+            f"Unsupported MiniMax H3 OW Fast ratio: {ratio}"
+        )
+
+    prompt_text = str(prompt or "").strip()
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"MiniMax H3 OW Fast prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+    if strict and model == MINIMAX_H3_OW_FAST_R2V_MODEL and not prompt_text:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 OW R2V Fast requires a prompt"
+        )
+
+    if strict:
+        slots = list(connected_image_slots or [])
+        if not slots:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW Fast requires at least one image"
+            )
+        if len(slots) > MINIMAX_H3_OW_FAST_MAX_IMAGES:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW Fast accepts at most 9 images"
+            )
+        if model == MINIMAX_H3_OW_FAST_I2V_MODEL and slots != [1]:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW I2V Fast requires exactly image1"
+            )
+    return prompt_text
+
+
+def build_minimax_h3_ow_fast_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    images = list(image_urls or [])
+    max_images = (
+        1
+        if model == MINIMAX_H3_OW_FAST_I2V_MODEL
+        else MINIMAX_H3_OW_FAST_MAX_IMAGES
+    )
+    if len(images) > max_images:
+        raise SeedanceLowPriceError(
+            f"MiniMax H3 OW Fast model {model} accepts at most {max_images} image(s)"
+        )
+    prompt_text = validate_minimax_h3_ow_fast_inputs(
+        model,
+        prompt,
+        seconds,
+        resolution,
+        ratio,
+        connected_image_slots=list(range(1, len(images) + 1)),
+        strict=True,
+    )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "seconds": str(seconds),
+        "images": images,
+        "metadata": {
+            "resolution": resolution,
+            "ratio": ratio,
+        },
+    }
+    if prompt_text:
+        payload["prompt"] = prompt_text
+    return payload
+
+
+class Comfly_minimax_h3_ow_fast_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, Tuple[Any, ...]] = {}
+        for index in range(1, MINIMAX_H3_OW_FAST_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": (
+                    MINIMAX_H3_OW_FAST_MODELS,
+                    {"default": MINIMAX_H3_OW_FAST_I2V_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (MINIMAX_H3_OW_SECONDS, {"default": "5"}),
+                "resolution": (MINIMAX_H3_OW_RESOLUTIONS, {"default": "480p"}),
+                "ratio": (MINIMAX_H3_OW_RATIOS, {"default": "16:9"}),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        resolution="480p",
+        ratio="16:9",
+        strict=False,
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            connected_slots = [
+                index
+                for index in range(1, MINIMAX_H3_OW_FAST_MAX_IMAGES + 1)
+                if kwargs.get(f"image{index}") is not None
+            ]
+            validate_minimax_h3_ow_fast_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                connected_image_slots=connected_slots,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _connected_images(kwargs: Dict[str, Any]) -> List[Tuple[int, Any]]:
+        connected = [
+            (index, kwargs[f"image{index}"])
+            for index in range(1, MINIMAX_H3_OW_FAST_MAX_IMAGES + 1)
+            if kwargs.get(f"image{index}") is not None
+        ]
+        slots = [slot for slot, _image in connected]
+        if slots and slots != list(range(1, len(slots) + 1)):
+            print(
+                f"[MiniMax H3 OW Fast Low Price] Image slots {slots} have gaps; "
+                "connected images will be compacted in slot order"
+            )
+        return connected
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            connected = self._connected_images(kwargs)
+            validate_minimax_h3_ow_fast_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                connected_image_slots=[slot for slot, _image in connected],
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+            for position, (slot, image) in enumerate(connected, start=1):
+                image_urls.append(
+                    upload_media(
+                        image_to_png_bytes(image),
+                        f"minimax_h3_ow_fast_reference_{slot}.png",
+                        "image/png",
+                        config,
+                    )
+                )
+                update_progress(int(position / len(connected) * 25))
+
+            payload = build_minimax_h3_ow_fast_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                image_urls,
+            )
+            print(f"[MiniMax H3 OW Fast Low Price] Submitting model={model}")
             task_id, submit_response = submit_task(payload, config)
             update_progress(30)
             final_response = poll_task(
@@ -8992,6 +9265,7 @@ __all__ = [
     "Comfly_hailuo_2_3_video_lowprice",
     "Comfly_hailuo_h3_video_lowprice",
     "Comfly_minimax_h3_ow_video_lowprice",
+    "Comfly_minimax_h3_ow_fast_video_lowprice",
     "Comfly_vidu_q3_video_lowprice",
     "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",

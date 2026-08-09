@@ -71,11 +71,17 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260809-2
+
+新增支持minimax-h3-ow-i2v-fast,minimax-h3-ow-r2v-fast
+新增支持minimax-h3之前官方节点的768P
+对应工作流
+
 ### 20260809-1
 
-新增seedream-v5-pro-layer-decomposition对应工作流及节点，支持图像分层
-新增flu3视频模型对应工作流及节点
-新增minimax h3 海外版模型工作流及节点
+新增seedream-v5-pro-layer-decomposition对应工作流及节点，支持图像分层  
+新增flu3视频模型对应工作流及节点  
+新增minimax h3 海外版模型工作流及节点  
 
 ### 20260808-1
 
