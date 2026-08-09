@@ -195,10 +195,6 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
     def input_types(cls):
         return copy.deepcopy(target_class.INPUT_TYPES())
 
-    @classmethod
-    def is_changed(cls, **kwargs):
-        return float("nan")
-
     def submit(self, **kwargs):
         context = contextvars.copy_context()
         future = executor.submit(
@@ -212,7 +208,6 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
     attrs = {
         "__module__": __name__,
         "INPUT_TYPES": input_types,
-        "IS_CHANGED": is_changed,
         "RETURN_TYPES": (task_type,),
         "RETURN_NAMES": ("task",),
         "FUNCTION": "submit",

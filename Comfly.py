@@ -30,6 +30,7 @@ import functools
 import inspect
 from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
+from .execution_seed import install_execution_seed_controls
 from .media_download import download_image_with_retry
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
@@ -25872,6 +25873,11 @@ def _install_workflow_api_key_reset(node_mappings=None):
 
 
 WORKFLOW_API_KEY_RESET_NODE_COUNT = _install_workflow_api_key_reset()
+EXECUTION_SEED_NODE_KEYS = install_execution_seed_controls(NODE_CLASS_MAPPINGS)
+print(
+    f"[Zhenzhen Seed] Added cache controls to "
+    f"{len(EXECUTION_SEED_NODE_KEYS)} generation nodes."
+)
 
 # Aliyun WanX 2.6 API Node
 # BASEURL is fixed to Aliyun official API
