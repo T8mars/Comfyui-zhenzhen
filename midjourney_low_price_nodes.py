@@ -6,7 +6,6 @@ import io
 import json
 import mimetypes
 import os
-import ssl
 import tempfile
 import threading
 import time
@@ -23,15 +22,19 @@ from PIL import Image, ImageDraw, ImageFont
 try:
     from .seedance_low_price_nodes import (
         COMFYUI_AVAILABLE,
-        BUNDLED_ROOT_YR_CERT,
         CONFIG_TYPE,
-        DEFAULT_BASE_URL,
+        IMAGE_DOWNLOAD_MAX_BYTES,
+        NETWORK_ROUTE_ATTEMPTS,
+        VIDEO_DOWNLOAD_MAX_BYTES,
         VIDEO_TYPE,
         SeedanceLowPriceError,
-        _SSLContextAdapter,
+        _build_session,
         _headers,
+        _post_once,
+        _request_with_retry,
         _response_json,
         _video_from_path,
+        _write_limited,
         extract_error_message,
         image_to_png_bytes,
         make_error_video,
@@ -41,15 +44,19 @@ try:
 except ImportError:
     from seedance_low_price_nodes import (
         COMFYUI_AVAILABLE,
-        BUNDLED_ROOT_YR_CERT,
         CONFIG_TYPE,
-        DEFAULT_BASE_URL,
+        IMAGE_DOWNLOAD_MAX_BYTES,
+        NETWORK_ROUTE_ATTEMPTS,
+        VIDEO_DOWNLOAD_MAX_BYTES,
         VIDEO_TYPE,
         SeedanceLowPriceError,
-        _SSLContextAdapter,
+        _build_session,
         _headers,
+        _post_once,
+        _request_with_retry,
         _response_json,
         _video_from_path,
+        _write_limited,
         extract_error_message,
         image_to_png_bytes,
         make_error_video,
@@ -66,27 +73,19 @@ except ImportError:
 _SESSION_LOCAL = threading.local()
 
 
-def _midjourney_session() -> requests.Session:
+def _midjourney_session(
+    route_attempt: Optional[int] = None,
+) -> requests.Session:
+    if route_attempt is not None:
+        _mode, trust_env = NETWORK_ROUTE_ATTEMPTS[
+            route_attempt % len(NETWORK_ROUTE_ATTEMPTS)
+        ]
+        return _build_session(trust_env=trust_env)
+
     session = getattr(_SESSION_LOCAL, "session", None)
     if session is not None:
         return session
-    if not BUNDLED_ROOT_YR_CERT.is_file():
-        raise RuntimeError(
-            f"Bundled TLS certificate is missing: "
-            f"{BUNDLED_ROOT_YR_CERT.name}"
-        )
-    context = ssl.create_default_context(cafile=requests.certs.where())
-    context.load_verify_locations(cafile=str(BUNDLED_ROOT_YR_CERT))
-    session = requests.Session()
-    session.mount(
-        f"{DEFAULT_BASE_URL}/",
-        _SSLContextAdapter(
-            context,
-            pool_connections=8,
-            pool_maxsize=30,
-            pool_block=True,
-        ),
-    )
+    session = _build_session()
     _SESSION_LOCAL.session = session
     return session
 
@@ -459,45 +458,22 @@ def submit_midjourney_action(
     if not action_text:
         raise SeedanceLowPriceError("Midjourney action is required")
     url = f"{config['base_url']}/v1/midjourney/generations/{action_text}"
-    last_error = "unknown error"
-    for attempt in range(3):
-        if attempt:
-            sleep(min(2 ** attempt + 1, 15))
-        try:
-            response = _midjourney_session().post(
-                url,
-                headers=_headers(config["api_key"]),
-                json=payload,
-                timeout=config.get("timeout", 60),
-            )
-        except requests.ConnectTimeout as exc:
-            last_error = f"network error: {type(exc).__name__}: {exc}"
-            continue
-        except requests.RequestException as exc:
-            raise RuntimeError(
-                "Midjourney submit transport failed after the request may have "
-                "reached the server; it was not retried to avoid a duplicate "
-                f"paid task: {type(exc).__name__}: {exc}"
-            ) from exc
-
-        data = _response_json(response)
-        message = extract_error_message(data, response.text[:300])
-        if response.status_code == 429 or response.status_code >= 500:
-            last_error = f"HTTP {response.status_code}: {message}"
-            continue
-        if not 200 <= response.status_code < 300:
-            raise SeedanceLowPriceError(
-                f"Midjourney {action_text} rejected "
-                f"(HTTP {response.status_code}): {message}"
-            )
-        if not isinstance(data, dict):
-            raise SeedanceLowPriceError(
-                "Midjourney submit returned a non-object JSON response"
-            )
-        return _extract_task_id(data), data
-    raise RuntimeError(
-        f"Midjourney submit failed after 3 attempts: {last_error}"
+    response = _post_once(
+        url, headers=_headers(config["api_key"]), json=payload,
+        timeout=config.get("timeout", 60),
     )
+    data = _response_json(response)
+    message = extract_error_message(data, response.text[:300])
+    if not 200 <= response.status_code < 300:
+        raise SeedanceLowPriceError(
+            f"Midjourney {action_text} rejected "
+            f"(HTTP {response.status_code}): {message}"
+        )
+    if not isinstance(data, dict):
+        raise SeedanceLowPriceError(
+            "Midjourney submit returned a non-object JSON response"
+        )
+    return _extract_task_id(data), data
 
 
 def poll_midjourney_task(
@@ -532,19 +508,16 @@ def poll_midjourney_task(
                 continue
             route = route_template.format(task_id=task_id_text)
             try:
-                candidate = _midjourney_session().get(
-                    f"{config['base_url']}{route}",
+                candidate = _request_with_retry(
+                    "get", f"{config['base_url']}{route}", sleep=sleep,
+                    session_factory=_midjourney_session,
                     headers=_headers(config["api_key"], json_content=False),
                     timeout=30,
                 )
-            except requests.RequestException:
-                failures += 1
-                if failures >= 6:
-                    raise RuntimeError(
-                        "Midjourney polling failed after repeated network errors"
-                    )
-                response = None
-                break
+            except requests.RequestException as exc:
+                raise RuntimeError(
+                    "Midjourney polling failed after 4 route attempts"
+                ) from exc
             if candidate.status_code == 404 and active_route is None:
                 last_not_found = candidate
                 continue
@@ -562,15 +535,6 @@ def poll_midjourney_task(
 
         data = _response_json(response)
         message = extract_error_message(data, response.text[:300])
-        if response.status_code == 429 or response.status_code >= 500:
-            failures += 1
-            if failures >= 6:
-                raise RuntimeError(
-                    f"Midjourney polling repeatedly returned "
-                    f"HTTP {response.status_code}: {message}"
-                )
-            sleep(min(failures * 2, 10))
-            continue
         if response.status_code != 200:
             raise SeedanceLowPriceError(
                 f"Midjourney polling rejected "
@@ -765,47 +729,39 @@ def _download_file(
     url: str,
     prefix: str,
     fallback_extension: str,
-    max_retries: int = 3,
+    max_retries: int = len(NETWORK_ROUTE_ATTEMPTS),
 ) -> str:
     output_dir = _output_directory()
-    last_error: Optional[Exception] = None
-    for attempt in range(max_retries):
-        if attempt:
-            time.sleep(2 ** attempt)
-        path = ""
-        try:
-            response = _midjourney_session().get(
-                url, stream=True, timeout=300
+    max_bytes = (
+        VIDEO_DOWNLOAD_MAX_BYTES
+        if fallback_extension.lstrip(".") == "mp4"
+        else IMAGE_DOWNLOAD_MAX_BYTES
+    )
+
+    def consume(response: requests.Response) -> str:
+        response.raise_for_status()
+        extension = os.path.splitext(urlsplit(url).path)[1].lower()
+        if not extension or len(extension) > 10:
+            content_type = response.headers.get("Content-Type", "")
+            media_type = content_type.split(";", 1)[0].strip().lower()
+            extension = mimetypes.guess_extension(media_type) or (
+                f".{fallback_extension.lstrip('.')}"
             )
-            response.raise_for_status()
-            extension = os.path.splitext(urlsplit(url).path)[1].lower()
-            if not extension or len(extension) > 10:
-                content_type = response.headers.get("Content-Type", "")
-                media_type = content_type.split(";", 1)[0].strip().lower()
-                extension = mimetypes.guess_extension(media_type) or (
-                    f".{fallback_extension.lstrip('.')}"
-                )
-            path = os.path.join(
-                output_dir,
-                f"{prefix}_{uuid.uuid4().hex[:12]}{extension}",
-            )
-            with open(path, "wb") as handle:
-                for chunk in response.iter_content(chunk_size=65536):
-                    if chunk:
-                        handle.write(chunk)
-            if os.path.getsize(path) <= 0:
-                raise RuntimeError("downloaded file is empty")
-            return path
-        except Exception as exc:
-            last_error = exc
-            if path:
-                try:
-                    os.remove(path)
-                except OSError:
-                    pass
-    raise RuntimeError(
-        f"Midjourney result download failed after "
-        f"{max_retries} attempts: {last_error}"
+        path = os.path.join(
+            output_dir, f"{prefix}_{uuid.uuid4().hex[:12]}{extension}"
+        )
+        _write_limited(
+            response, path, max_bytes, "Midjourney result download"
+        )
+        return path
+
+    return _request_with_retry(
+        "get",
+        url,
+        session_factory=_midjourney_session,
+        _consume=consume,
+        stream=True,
+        timeout=300,
     )
 
 
