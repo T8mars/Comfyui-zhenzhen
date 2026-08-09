@@ -31,6 +31,10 @@ import inspect
 from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
 from .media_download import download_image_with_retry
+from .t8star_http import (
+    create_alternating_route_session,
+    create_t8star_session,
+)
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
@@ -41,6 +45,8 @@ from comfy_api.input_impl import VideoFromFile
 from comfy_api.util import VideoComponents
 from comfy_api.input_impl import VideoFromComponents
 from fractions import Fraction
+
+
 from .fal_batch_nodes import (
     Comfly_ideogram_v4_fal,
     Comfly_mai_image_2_5_fal,
@@ -109,6 +115,24 @@ from .seedance_low_price_nodes import (
     Comfly_suno_music_lowprice,
 )
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
+
+
+RESULT_DOWNLOAD_ATTEMPTS = 4
+
+
+def _rewind_multipart_files(value):
+    """Reset file-like multipart values before a submit retry."""
+    if hasattr(value, "seek"):
+        value.seek(0)
+        return
+    if isinstance(value, dict):
+        values = value.values()
+    elif isinstance(value, (list, tuple)):
+        values = value
+    else:
+        return
+    for item in values:
+        _rewind_multipart_files(item)
 
 # For LLM API functionality
 try:
@@ -361,7 +385,7 @@ class ComflyVideoAdapter:
     def save_to(self, output_path, format="auto", codec="auto", metadata=None):
         if self.is_url:
             try:
-                response = requests.get(self.video_url, stream=True)
+                response = requests.get(self.video_url, stream=True, timeout=300)
                 response.raise_for_status()
                 
                 with open(output_path, "wb") as f:
@@ -958,7 +982,9 @@ class Comfly_Mj(ComflyBaseNode):
             
             task_result = None
 
-            while True:
+            deadline = time.monotonic() + 1800
+            consecutive_failures = 0
+            while time.monotonic() < deadline:
                 time.sleep(1)
                 try:
                     task_result = self.midjourney_fetch_task_result_sync(taskId)
@@ -970,6 +996,7 @@ class Comfly_Mj(ComflyBaseNode):
                         raise Exception(error_message)  
                     if task_result.get("status") == "SUCCESS":
                         break
+                    consecutive_failures = 0
                         
                     progress = task_result.get("progress", 0)
                     try:
@@ -981,10 +1008,15 @@ class Comfly_Mj(ComflyBaseNode):
                 except Exception as e:
                     if "Midjourney task failed" in str(e):
                         raise  
+                    consecutive_failures += 1
+                    if consecutive_failures >= 6:
+                        raise RuntimeError("Midjourney polling failed 6 consecutive times") from e
                     print(f"Error fetching task result: {str(e)}")
                     time.sleep(2)
                     continue
-                
+            else:
+                raise TimeoutError("Midjourney polling timed out after 1800 seconds")
+
             image_url = task_result.get("imageUrl", "")
             prompt = task_result.get("prompt", text)
 
@@ -1288,7 +1320,8 @@ class Comfly_Mju(ComflyBaseNode):
                 raise self.MidjourneyError(f"Unexpected response from Midjourney API: {response}")
 
             new_task_id = response["result"]
-            while True:
+            deadline = asyncio.get_running_loop().time() + 1800
+            while asyncio.get_running_loop().time() < deadline:
                 await asyncio.sleep(1)
                 task_result = await self.midjourney_fetch_task_result(new_task_id)
 
@@ -1300,11 +1333,13 @@ class Comfly_Mju(ComflyBaseNode):
 
                 if task_result.get("status") == "SUCCESS":
                     break
+            else:
+                raise TimeoutError("Midjourney action polling timed out after 1800 seconds")
 
             if task_result.get("code") == 5 and task_result.get("description") == "task_no_found":
                 raise self.MidjourneyError(f"Task not found for taskId: {new_task_id}")
 
-            response = requests.get(task_result["imageUrl"])
+            response = requests.get(task_result["imageUrl"], timeout=self.timeout)
             image = Image.open(BytesIO(response.content))
             tensor_image = pil2tensor(image)
             return tensor_image, new_task_id 
@@ -1347,9 +1382,19 @@ class Comfly_Mju(ComflyBaseNode):
 
                 
                 task_result = None
-                while not task_result or task_result.get("status") != "SUCCESS":
+                deadline = asyncio.get_running_loop().time() + 1800
+                while (
+                    (not task_result or task_result.get("status") != "SUCCESS")
+                    and asyncio.get_running_loop().time() < deadline
+                ):
                     await asyncio.sleep(1)
                     task_result = await self.midjourney_fetch_task_result(taskId)
+                    if task_result.get("status") == "FAILURE":
+                        raise RuntimeError(
+                            f"Midjourney task failed: {task_result.get('fail_reason', 'unknown')}"
+                        )
+                if not task_result or task_result.get("status") != "SUCCESS":
+                    raise TimeoutError("Midjourney action polling timed out after 1800 seconds")
                 
                 image_url = task_result["imageUrl"]
                 return image_url
@@ -1820,7 +1865,7 @@ class Comfly_Mjv(ComflyBaseNode):
         }
         
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/action", headers=headers, json=payload) as response: 
+            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/action", headers=headers, json=payload, timeout=self.timeout) as response:
                 if response.status == 200:
                     try:
                         data = await response.json()
@@ -1857,7 +1902,7 @@ class Comfly_Mjv(ComflyBaseNode):
             payload["maskBase64"] = maskBase64
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/modal", headers=headers, json=payload) as response:
+            async with session.post(f"{self.midjourney_api_url[self.speed]}/mj/submit/modal", headers=headers, json=payload, timeout=self.timeout) as response:
                 if response.status == 200:
                     data = await response.json()
                     return data
@@ -3203,16 +3248,6 @@ class Comfly_kling_multi_image2video:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 300
-        self.session = requests.Session()
-        retry_strategy = requests.packages.urllib3.util.retry.Retry(
-            total=5,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"]
-        )
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
 
     def get_headers(self):
         return {
@@ -3235,49 +3270,18 @@ class Comfly_kling_multi_image2video:
             return None
     
     def make_request_with_retry(self, method, url, **kwargs):
-        max_retries = kwargs.pop('max_retries', 10)
+        kwargs.pop('max_retries', None)
         initial_timeout = kwargs.pop('initial_timeout', self.timeout)
-        
-        for attempt in range(1, max_retries + 1):
-            current_timeout = min(initial_timeout * (2 ** (attempt - 1)), 900)  
-            
-            try:
-                kwargs['timeout'] = current_timeout
-                
-                if method.lower() == 'get':
-                    response = self.session.get(url, **kwargs)
-                else:
-                    response = self.session.post(url, **kwargs)
-                
-                response.raise_for_status()
-                return response
-            
-            except requests.exceptions.Timeout as e:
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)  
-                time.sleep(wait_time)
-            
-            except requests.exceptions.ConnectionError as e:
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
-            
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code in (400, 401, 403):
-                    print(f"Client error: {str(e)}")
-                    raise
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
-            
-            except Exception as e:
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
+        kwargs['timeout'] = min(initial_timeout, 900)
+        if method.lower() == 'get':
+            response = create_t8star_session().get(url, **kwargs)
+        else:
+            # Task creation is billable and has no idempotency key. Send once;
+            # retrying an ambiguous timeout can create a duplicate paid task.
+            with create_alternating_route_session(0) as session:
+                response = session.post(url, **kwargs)
+        response.raise_for_status()
+        return response
     
     def poll_task_status(self, task_id, max_attempts=100, initial_interval=2, max_interval=60, headers=None, pbar=None):
         attempt = 0
@@ -5909,16 +5913,8 @@ class Comfly_gpt_image_1_edit:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 900
-        self.session = requests.Session()
-        retry_strategy = requests.packages.urllib3.util.retry.Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"]
-        )
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
+        self.last_edited_image = None
+        self.conversation_history = []
 
     def get_headers(self):
         return {
@@ -5937,56 +5933,21 @@ class Comfly_gpt_image_1_edit:
         return formatted_history.strip()
     
     def make_request_with_retry(self, url, data=None, files=None, max_retries=5, initial_timeout=300):
-        """Make a request with automatic retries and exponential backoff"""
-        for attempt in range(1, max_retries + 1):
-            current_timeout = min(initial_timeout * (1.5 ** (attempt - 1)), 1200)  
-            
-            try:
-                if files:
-                    response = self.session.post(
-                        url,
-                        headers=self.get_headers(),
-                        data=data,
-                        files=files,
-                        timeout=current_timeout
-                    )
-                else:
-                    response = self.session.post(
-                        url,
-                        headers=self.get_headers(),
-                        json=data,
-                        timeout=current_timeout
-                    )
-                
-                response.raise_for_status()
-                return response
-            
-            except requests.exceptions.Timeout as e:
-                if attempt == max_retries:
-                    raise TimeoutError(f"Request timed out after {max_retries} attempts. Last timeout: {current_timeout}s")
-                wait_time = min(2 ** (attempt - 1), 60)  
-                time.sleep(wait_time)
-            
-            except requests.exceptions.ConnectionError as e:
-                if attempt == max_retries:
-                    raise ConnectionError(f"Connection error after {max_retries} attempts: {str(e)}")
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
-            
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code in (400, 401, 403):
-                    print(f"Client error: {str(e)}")
-                    raise
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
-            
-            except Exception as e:
-                if attempt == max_retries:
-                    raise
-                wait_time = min(2 ** (attempt - 1), 60)
-                time.sleep(wait_time)
+        """Send a billable image request once to avoid duplicate charges."""
+        with create_alternating_route_session(0) as route_session:
+            if files:
+                _rewind_multipart_files(files)
+                response = route_session.post(
+                    url, headers=self.get_headers(), data=data, files=files,
+                    timeout=min(initial_timeout, 1200)
+                )
+            else:
+                response = route_session.post(
+                    url, headers=self.get_headers(), json=data,
+                    timeout=min(initial_timeout, 1200)
+                )
+        response.raise_for_status()
+        return response
     
     def edit_image(self, prompt, model="gpt-image-1", n=1, quality="auto", 
               seed=0, api_key="", size="auto", clear_chats=True,
@@ -6208,9 +6169,11 @@ class Comfly_gpt_image_1_edit:
                 elif "url" in item:
                     image_urls.append(item["url"])
                     try:
-                        for download_attempt in range(1, max_retries + 1):
+                        for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                             try:
-                                img_response = requests.get(
+                                img_response = create_alternating_route_session(
+                                    download_attempt - 1
+                                ).get(
                                     item["url"], 
                                     timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
                                 )
@@ -6221,11 +6184,18 @@ class Comfly_gpt_image_1_edit:
                                 edited_images.append(edited_tensor)
                                 break
                             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                                if download_attempt == max_retries:
-                                    print(f"Failed to download image after {max_retries} attempts: {str(e)}")
+                                if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
+                                    print(
+                                        "Failed to download image after "
+                                        f"{RESULT_DOWNLOAD_ATTEMPTS} attempts: {str(e)}"
+                                    )
                                     continue
                                 wait_time = min(2 ** (download_attempt - 1), 60)
-                                print(f"Image download error (attempt {download_attempt}/{max_retries}). Retrying in {wait_time} seconds...")
+                                print(
+                                    "Image download error "
+                                    f"(attempt {download_attempt}/{RESULT_DOWNLOAD_ATTEMPTS}). "
+                                    f"Retrying in {wait_time} seconds..."
+                                )
                                 time.sleep(wait_time)
                             except Exception as e:
                                 print(f"Error downloading image from URL: {str(e)}")
@@ -6564,16 +6534,6 @@ class Comfly_gpt_image_2_official:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 300
-        self.session = requests.Session()
-        retry_strategy = requests.packages.urllib3.util.retry.Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"]
-        )
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
 
     def _auth_headers_bearer(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -6585,44 +6545,20 @@ class Comfly_gpt_image_2_official:
         }
 
     def make_request_with_retry(self, url, data=None, files=None, max_retries=5, initial_timeout=300):
-        for attempt in range(1, max_retries + 1):
-            current_timeout = min(initial_timeout * (1.5 ** (attempt - 1)), 1200)
-            try:
-                if files is not None:
-                    response = self.session.post(
-                        url,
-                        headers=self._auth_headers_bearer(),
-                        data=data,
-                        files=files,
-                        timeout=current_timeout
-                    )
-                else:
-                    response = self.session.post(
-                        url,
-                        headers=self._headers_json(),
-                        json=data,
-                        timeout=current_timeout
-                    )
-                response.raise_for_status()
-                return response
-            except requests.exceptions.Timeout:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.ConnectionError:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.HTTPError as e:
-                if e.response is not None and e.response.status_code in (400, 401, 403):
-                    raise
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except Exception:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
+        with create_alternating_route_session(0) as route_session:
+            if files is not None:
+                _rewind_multipart_files(files)
+                response = route_session.post(
+                    url, headers=self._auth_headers_bearer(), data=data,
+                    files=files, timeout=min(initial_timeout, 1200)
+                )
+            else:
+                response = route_session.post(
+                    url, headers=self._headers_json(), json=data,
+                    timeout=min(initial_timeout, 1200)
+                )
+        response.raise_for_status()
+        return response
 
     def get_headers_multipart(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -6718,7 +6654,7 @@ class Comfly_gpt_image_2_official:
 
         return data, request_files
 
-    def _decode_b64_url_one(self, b64_json, image_url, max_retries, initial_timeout):
+    def _decode_b64_url_one(self, b64_json, image_url, initial_timeout):
         """One image entry to tensor or None."""
         if b64_json:
             b64_data = b64_json
@@ -6730,9 +6666,11 @@ class Comfly_gpt_image_2_official:
             pil_img = Image.open(BytesIO(image_data))
             return pil2tensor(pil_img)
         if image_url:
-            for download_attempt in range(1, max_retries + 1):
+            for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                 try:
-                    img_response = requests.get(
+                    img_response = create_alternating_route_session(
+                        download_attempt - 1
+                    ).get(
                         image_url,
                         timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
                     )
@@ -6740,7 +6678,7 @@ class Comfly_gpt_image_2_official:
                     pil_img = Image.open(BytesIO(img_response.content))
                     return pil2tensor(pil_img)
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                    if download_attempt == max_retries:
+                    if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                         return None
                     time.sleep(min(2 ** (download_attempt - 1), 60))
         return None
@@ -6774,12 +6712,12 @@ class Comfly_gpt_image_2_official:
             url += f"&webhook={webhook.strip()}"
 
         pbar.update_absolute(10)
-        response = requests.post(
+        response = self.make_request_with_retry(
             url,
-            headers=self.get_headers_multipart(),
             data=data,
             files=request_files,
-            timeout=self.timeout,
+            max_retries=max_retries,
+            initial_timeout=initial_timeout,
         )
         if response.status_code != 200:
             raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
@@ -6828,9 +6766,7 @@ class Comfly_gpt_image_2_official:
                         bj = item.get("b64_json", "") or ""
                         if u and not image_url_first:
                             image_url_first = u
-                        t = self._decode_b64_url_one(
-                            bj, u, max_retries, initial_timeout
-                        )
+                        t = self._decode_b64_url_one(bj, u, initial_timeout)
                         if t is not None:
                             tensors.append(t)
                     if not tensors:
@@ -6848,7 +6784,7 @@ class Comfly_gpt_image_2_official:
                 print(f"Error polling task status: {str(e)}")
         raise RuntimeError(f"Failed to get image after {max_poll_attempts} poll attempts")
 
-    def _items_to_tensors(self, result, max_retries=5, initial_timeout=300):
+    def _items_to_tensors(self, result, initial_timeout=300):
         """Parse Images API data[] b64_json or url into a list of tensors."""
         out = []
         for item in result.get("data", []) or []:
@@ -6862,9 +6798,11 @@ class Comfly_gpt_image_2_official:
                 pil_img = Image.open(BytesIO(image_data))
                 out.append(pil2tensor(pil_img))
             elif "url" in item and item["url"]:
-                for download_attempt in range(1, max_retries + 1):
+                for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                     try:
-                        img_response = requests.get(
+                        img_response = create_alternating_route_session(
+                            download_attempt - 1
+                        ).get(
                             item["url"],
                             timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
                         )
@@ -6873,7 +6811,7 @@ class Comfly_gpt_image_2_official:
                         out.append(pil2tensor(pil_img))
                         break
                     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                        if download_attempt == max_retries:
+                        if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                             break
                         time.sleep(min(2 ** (download_attempt - 1), 60))
         return out
@@ -7014,7 +6952,7 @@ class Comfly_gpt_image_2_official:
                     raise RuntimeError(f"[Comfly_gpt_image_2_official] {msg}")
                 return (blank_t, "", msg)
 
-            tensors = self._items_to_tensors(result, max_retries, initial_timeout)
+            tensors = self._items_to_tensors(result, initial_timeout)
             pbar.update_absolute(95)
 
             if not tensors:
@@ -7230,16 +7168,6 @@ class Comfly_gpt_image_2_official_ratio:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 300
-        self.session = requests.Session()
-        retry_strategy = requests.packages.urllib3.util.retry.Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"]
-        )
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
 
     def _auth_headers_bearer(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -7251,44 +7179,20 @@ class Comfly_gpt_image_2_official_ratio:
         }
 
     def make_request_with_retry(self, url, data=None, files=None, max_retries=5, initial_timeout=300):
-        for attempt in range(1, max_retries + 1):
-            current_timeout = min(initial_timeout * (1.5 ** (attempt - 1)), 1200)
-            try:
-                if files is not None:
-                    response = self.session.post(
-                        url,
-                        headers=self._auth_headers_bearer(),
-                        data=data,
-                        files=files,
-                        timeout=current_timeout
-                    )
-                else:
-                    response = self.session.post(
-                        url,
-                        headers=self._headers_json(),
-                        json=data,
-                        timeout=current_timeout
-                    )
-                response.raise_for_status()
-                return response
-            except requests.exceptions.Timeout:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.ConnectionError:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.HTTPError as e:
-                if e.response is not None and e.response.status_code in (400, 401, 403):
-                    raise
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except Exception:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
+        with create_alternating_route_session(0) as route_session:
+            if files is not None:
+                _rewind_multipart_files(files)
+                response = route_session.post(
+                    url, headers=self._auth_headers_bearer(), data=data,
+                    files=files, timeout=min(initial_timeout, 1200)
+                )
+            else:
+                response = route_session.post(
+                    url, headers=self._headers_json(), json=data,
+                    timeout=min(initial_timeout, 1200)
+                )
+        response.raise_for_status()
+        return response
 
     def get_headers_multipart(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -7392,7 +7296,7 @@ class Comfly_gpt_image_2_official_ratio:
 
         return data, request_files
 
-    def _decode_b64_url_one(self, b64_json, image_url, max_retries, initial_timeout):
+    def _decode_b64_url_one(self, b64_json, image_url, initial_timeout):
         """One image entry to tensor or None."""
         if b64_json:
             b64_data = b64_json
@@ -7404,9 +7308,11 @@ class Comfly_gpt_image_2_official_ratio:
             pil_img = Image.open(BytesIO(image_data))
             return pil2tensor(pil_img)
         if image_url:
-            for download_attempt in range(1, max_retries + 1):
+            for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                 try:
-                    img_response = requests.get(
+                    img_response = create_alternating_route_session(
+                        download_attempt - 1
+                    ).get(
                         image_url,
                         timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
                     )
@@ -7414,7 +7320,7 @@ class Comfly_gpt_image_2_official_ratio:
                     pil_img = Image.open(BytesIO(img_response.content))
                     return pil2tensor(pil_img)
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                    if download_attempt == max_retries:
+                    if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                         return None
                     time.sleep(min(2 ** (download_attempt - 1), 60))
         return None
@@ -7467,12 +7373,12 @@ class Comfly_gpt_image_2_official_ratio:
             url += f"&webhook={webhook.strip()}"
 
         pbar.update_absolute(10)
-        response = requests.post(
+        response = self.make_request_with_retry(
             url,
-            headers=self.get_headers_multipart(),
             data=data,
             files=request_files,
-            timeout=self.timeout,
+            max_retries=max_retries,
+            initial_timeout=initial_timeout,
         )
         if response.status_code != 200:
             raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
@@ -7521,9 +7427,7 @@ class Comfly_gpt_image_2_official_ratio:
                         bj = item.get("b64_json", "") or ""
                         if u and not image_url_first:
                             image_url_first = u
-                        t = self._decode_b64_url_one(
-                            bj, u, max_retries, initial_timeout
-                        )
+                        t = self._decode_b64_url_one(bj, u, initial_timeout)
                         if t is not None:
                             tensors.append(t)
                     if not tensors:
@@ -7541,7 +7445,7 @@ class Comfly_gpt_image_2_official_ratio:
                 print(f"Error polling task status: {str(e)}")
         raise RuntimeError(f"Failed to get image after {max_poll_attempts} poll attempts")
 
-    def _items_to_tensors(self, result, max_retries=5, initial_timeout=300):
+    def _items_to_tensors(self, result, initial_timeout=300):
         """Parse Images API data[] b64_json or url into a list of tensors."""
         out = []
         for item in result.get("data", []) or []:
@@ -7555,9 +7459,11 @@ class Comfly_gpt_image_2_official_ratio:
                 pil_img = Image.open(BytesIO(image_data))
                 out.append(pil2tensor(pil_img))
             elif "url" in item and item["url"]:
-                for download_attempt in range(1, max_retries + 1):
+                for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                     try:
-                        img_response = requests.get(
+                        img_response = create_alternating_route_session(
+                            download_attempt - 1
+                        ).get(
                             item["url"],
                             timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
                         )
@@ -7566,7 +7472,7 @@ class Comfly_gpt_image_2_official_ratio:
                         out.append(pil2tensor(pil_img))
                         break
                     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                        if download_attempt == max_retries:
+                        if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                             break
                         time.sleep(min(2 ** (download_attempt - 1), 60))
         return out
@@ -7727,7 +7633,7 @@ class Comfly_gpt_image_2_official_ratio:
                 print(msg)
                 return (blank_t, "", msg)
 
-            tensors = self._items_to_tensors(result, max_retries, initial_timeout)
+            tensors = self._items_to_tensors(result, initial_timeout)
             pbar.update_absolute(95)
 
             if not tensors:
@@ -25019,16 +24925,6 @@ class Comfly_gpt_image_2_official_ratio_stable:
     def __init__(self):
         self.api_key = get_config().get('api_key', '')
         self.timeout = 300
-        self.session = requests.Session()
-        retry_strategy = requests.packages.urllib3.util.retry.Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"]
-        )
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
 
     def _auth_headers_bearer(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -25040,44 +24936,20 @@ class Comfly_gpt_image_2_official_ratio_stable:
         }
 
     def make_request_with_retry(self, url, data=None, files=None, max_retries=5, initial_timeout=300):
-        for attempt in range(1, max_retries + 1):
-            current_timeout = min(initial_timeout * (1.5 ** (attempt - 1)), 1200)
-            try:
-                if files is not None:
-                    response = self.session.post(
-                        url,
-                        headers=self._auth_headers_bearer(),
-                        data=data,
-                        files=files,
-                        timeout=current_timeout
-                    )
-                else:
-                    response = self.session.post(
-                        url,
-                        headers=self._headers_json(),
-                        json=data,
-                        timeout=current_timeout
-                    )
-                response.raise_for_status()
-                return response
-            except requests.exceptions.Timeout:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.ConnectionError:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except requests.exceptions.HTTPError as e:
-                if e.response is not None and e.response.status_code in (400, 401, 403):
-                    raise
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
-            except Exception:
-                if attempt == max_retries:
-                    raise
-                time.sleep(min(2 ** (attempt - 1), 60))
+        with create_alternating_route_session(0) as route_session:
+            if files is not None:
+                _rewind_multipart_files(files)
+                response = route_session.post(
+                    url, headers=self._auth_headers_bearer(), data=data,
+                    files=files, timeout=min(initial_timeout, 1200)
+                )
+            else:
+                response = route_session.post(
+                    url, headers=self._headers_json(), json=data,
+                    timeout=min(initial_timeout, 1200)
+                )
+        response.raise_for_status()
+        return response
 
     def get_headers_multipart(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -25185,7 +25057,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
 
         return data, request_files
 
-    def _decode_b64_url_one(self, b64_json, image_url, max_retries, initial_timeout):
+    def _decode_b64_url_one(self, b64_json, image_url, initial_timeout):
         """One image entry to tensor or None."""
         if b64_json:
             b64_data = b64_json
@@ -25197,9 +25069,11 @@ class Comfly_gpt_image_2_official_ratio_stable:
             pil_img = Image.open(BytesIO(image_data))
             return pil2tensor(pil_img)
         if image_url:
-            for download_attempt in range(1, max_retries + 1):
+            for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                 try:
-                    img_response = requests.get(
+                    img_response = create_alternating_route_session(
+                        download_attempt - 1
+                    ).get(
                         image_url,
                         timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
                     )
@@ -25207,7 +25081,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                     pil_img = Image.open(BytesIO(img_response.content))
                     return pil2tensor(pil_img)
                 except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                    if download_attempt == max_retries:
+                    if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                         return None
                     time.sleep(min(2 ** (download_attempt - 1), 60))
         return None
@@ -25237,12 +25111,12 @@ class Comfly_gpt_image_2_official_ratio_stable:
             url += f"&webhook={webhook.strip()}"
 
         pbar.update_absolute(10)
-        response = requests.post(
+        response = self.make_request_with_retry(
             url,
-            headers=self.get_headers_multipart(),
             data=data,
             files=request_files,
-            timeout=self.timeout,
+            max_retries=max_retries,
+            initial_timeout=initial_timeout,
         )
         if response.status_code != 200:
             raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
@@ -25291,9 +25165,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                         bj = item.get("b64_json", "") or ""
                         if u and not image_url_first:
                             image_url_first = u
-                        t = self._decode_b64_url_one(
-                            bj, u, max_retries, initial_timeout
-                        )
+                        t = self._decode_b64_url_one(bj, u, initial_timeout)
                         if t is not None:
                             tensors.append(t)
                     if not tensors:
@@ -25311,7 +25183,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 print(f"Error polling task status: {str(e)}")
         raise RuntimeError(f"Failed to get image after {max_poll_attempts} poll attempts")
 
-    def _items_to_tensors(self, result, max_retries=5, initial_timeout=300):
+    def _items_to_tensors(self, result, initial_timeout=300):
         """Parse Images API data[] b64_json or url into a list of tensors."""
         out = []
         for item in result.get("data", []) or []:
@@ -25325,9 +25197,11 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 pil_img = Image.open(BytesIO(image_data))
                 out.append(pil2tensor(pil_img))
             elif "url" in item and item["url"]:
-                for download_attempt in range(1, max_retries + 1):
+                for download_attempt in range(1, RESULT_DOWNLOAD_ATTEMPTS + 1):
                     try:
-                        img_response = requests.get(
+                        img_response = create_alternating_route_session(
+                            download_attempt - 1
+                        ).get(
                             item["url"],
                             timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
                         )
@@ -25336,7 +25210,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                         out.append(pil2tensor(pil_img))
                         break
                     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                        if download_attempt == max_retries:
+                        if download_attempt == RESULT_DOWNLOAD_ATTEMPTS:
                             break
                         time.sleep(min(2 ** (download_attempt - 1), 60))
         return out
@@ -25463,7 +25337,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 print(msg)
                 return (blank_t, "", msg)
 
-            tensors = self._items_to_tensors(result, max_retries, initial_timeout)
+            tensors = self._items_to_tensors(result, initial_timeout)
             pbar.update_absolute(95)
 
             if not tensors:

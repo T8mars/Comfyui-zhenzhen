@@ -5,9 +5,27 @@ from __future__ import annotations
 import io
 import time
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import requests
 from PIL import Image, UnidentifiedImageError
+
+try:
+    from .t8star_http import (
+        T8STAR_RETRY_DELAYS,
+        T8STAR_RETRYABLE_NETWORK_ERRORS,
+        T8STAR_RETRYABLE_STATUS_CODES,
+        T8STAR_ROUTE_ATTEMPTS,
+        create_alternating_route_session,
+    )
+except ImportError:
+    from t8star_http import (
+        T8STAR_RETRY_DELAYS,
+        T8STAR_RETRYABLE_NETWORK_ERRORS,
+        T8STAR_RETRYABLE_STATUS_CODES,
+        T8STAR_ROUTE_ATTEMPTS,
+        create_alternating_route_session,
+    )
 
 
 _IMAGE_HEADERS = {
@@ -30,92 +48,112 @@ def _failure_summary(error: BaseException) -> str:
     return type(error).__name__
 
 
+def _safe_url(url: str) -> str:
+    parsed = urlsplit(url)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, "", ""))
+
+
+def _download_image(
+    url: str,
+    *,
+    mode: str,
+    timeout: float,
+    max_attempts: int,
+    request_get: Any,
+) -> Image.Image:
+    if not isinstance(url, str) or not url.strip():
+        raise ValueError("Image result URL is empty")
+    attempts = max(1, min(int(max_attempts), len(T8STAR_ROUTE_ATTEMPTS)))
+    last_error: BaseException | None = None
+    safe_url = _safe_url(url)
+
+    for attempt in range(attempts):
+        if attempt:
+            time.sleep(T8STAR_RETRY_DELAYS[attempt - 1])
+        response = None
+        try:
+            if request_get is None:
+                with create_alternating_route_session(attempt) as session:
+                    response = session.get(
+                        url, headers=_IMAGE_HEADERS, timeout=_request_timeout(timeout)
+                    )
+                    image = _decode_image_response(response, mode)
+            else:
+                response = request_get(
+                    url, headers=_IMAGE_HEADERS, timeout=_request_timeout(timeout)
+                )
+                image = _decode_image_response(response, mode)
+            return image
+        except requests.exceptions.HTTPError as error:
+            last_error = error
+            status = error.response.status_code if error.response is not None else None
+            if status not in T8STAR_RETRYABLE_STATUS_CODES:
+                raise
+        except (*T8STAR_RETRYABLE_NETWORK_ERRORS, UnidentifiedImageError, OSError, ValueError) as error:
+            last_error = error
+        finally:
+            close = getattr(response, "close", None)
+            if callable(close):
+                close()
+        print(
+            f"[zhenzhen] Image download failed for {safe_url} "
+            f"(attempt {attempt + 1}/{attempts}, "
+            f"mode={T8STAR_ROUTE_ATTEMPTS[attempt][0]}): "
+            f"{type(last_error).__name__}"
+        )
+
+    summary = _failure_summary(last_error or RuntimeError("unknown image error"))
+    raise RuntimeError(
+        f"Image result download failed after {attempts} attempts ({summary})"
+    ) from last_error
+
+
+def _decode_image_response(response: requests.Response, mode: str) -> Image.Image:
+    if response.status_code in T8STAR_RETRYABLE_STATUS_CODES:
+        raise requests.exceptions.HTTPError(
+            f"retryable HTTP {response.status_code}", response=response
+        )
+    response.raise_for_status()
+    content = response.content
+    if not content:
+        raise OSError("Image response was empty")
+    with Image.open(io.BytesIO(content)) as image:
+        image.load()
+        return image.convert(mode)
+
+
 def download_image_with_retry(
     url: str,
     *,
     timeout: float = 300,
-    max_attempts: int = 5,
+    max_attempts: int = len(T8STAR_ROUTE_ATTEMPTS),
     request_get: Any = None,
 ) -> Image.Image:
     """Download and fully decode an image, retrying transient or not-yet-ready results."""
-    if not isinstance(url, str) or not url.strip():
-        raise ValueError("Image result URL is empty")
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
-
-    getter = request_get or requests.get
-    last_error: BaseException | None = None
-    for attempt in range(1, max_attempts + 1):
-        try:
-            response = getter(
-                url,
-                headers=_IMAGE_HEADERS,
-                timeout=_request_timeout(timeout),
-            )
-            response.raise_for_status()
-            if not response.content:
-                raise OSError("Image response was empty")
-            with Image.open(io.BytesIO(response.content)) as image:
-                image.load()
-                return image.convert("RGB")
-        except (
-            requests.exceptions.RequestException,
-            UnidentifiedImageError,
-            OSError,
-            ValueError,
-        ) as error:
-            last_error = error
-            if attempt < max_attempts:
-                time.sleep(min(2 ** (attempt - 1), 8))
-
-    summary = _failure_summary(last_error or RuntimeError("unknown image error"))
-    raise RuntimeError(
-        f"Image result download failed after {max_attempts} attempts ({summary})"
-    ) from last_error
+    return _download_image(
+        url,
+        mode="RGB",
+        timeout=timeout,
+        max_attempts=max_attempts,
+        request_get=request_get,
+    )
 
 
 def download_image_with_alpha_retry(
     url: str,
     *,
     timeout: float = 300,
-    max_attempts: int = 5,
+    max_attempts: int = len(T8STAR_ROUTE_ATTEMPTS),
     request_get: Any = None,
 ) -> Image.Image:
     """Download and fully decode an image without discarding its alpha channel."""
-    if not isinstance(url, str) or not url.strip():
-        raise ValueError("Image result URL is empty")
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
-
-    getter = request_get or requests.get
-    last_error: BaseException | None = None
-    for attempt in range(1, max_attempts + 1):
-        try:
-            response = getter(
-                url,
-                headers=_IMAGE_HEADERS,
-                timeout=_request_timeout(timeout),
-            )
-            response.raise_for_status()
-            if not response.content:
-                raise OSError("Image response was empty")
-            with Image.open(io.BytesIO(response.content)) as image:
-                image.load()
-                return image.convert("RGBA")
-        except (
-            requests.exceptions.RequestException,
-            UnidentifiedImageError,
-            OSError,
-            ValueError,
-        ) as error:
-            last_error = error
-            if attempt < max_attempts:
-                time.sleep(min(2 ** (attempt - 1), 8))
-
-    summary = _failure_summary(last_error or RuntimeError("unknown image error"))
-    raise RuntimeError(
-        f"Image result download failed after {max_attempts} attempts ({summary})"
-    ) from last_error
+    return _download_image(
+        url,
+        mode="RGBA",
+        timeout=timeout,
+        max_attempts=max_attempts,
+        request_get=request_get,
+    )
 
 
 __all__ = ["download_image_with_retry", "download_image_with_alpha_retry"]
