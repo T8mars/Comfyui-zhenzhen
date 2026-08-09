@@ -13,7 +13,7 @@ from io import BytesIO
 
 import cv2
 import comfy.utils
-import requests
+from . import zhenzhen_http as requests
 import torch
 from PIL import Image
 from comfy.comfy_types import IO
@@ -22,7 +22,7 @@ from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
 
 
-baseurl = "https://ai.t8star.org"
+baseurl = requests.PRIMARY_BASE_URL
 FAL_SEED_MAX = 65535
 HEYGEN_AVATAR5_OPENAPI_URL = "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/heygen/avatar5/digital-twin"
 HEYGEN_AVATAR5_SERVER_DEFAULT = "server_default"

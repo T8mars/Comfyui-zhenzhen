@@ -5,7 +5,7 @@ import random
 import tempfile
 import torch
 import torchaudio
-import requests
+from . import zhenzhen_http as requests
 #import nest_asyncio
 import time
 import numpy as np
@@ -32,6 +32,11 @@ from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
 from .execution_seed import install_execution_seed_controls
 from .media_download import download_image_with_retry
+from .zhenzhen_http import (
+    PRIMARY_BASE_URL as ZHENZHEN_PRIMARY_BASE_URL,
+    choose_zhenzhen_base_url,
+    rewrite_zhenzhen_url,
+)
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
@@ -117,7 +122,7 @@ try:
 except ImportError:
     OpenAI = None
 
-baseurl = "https://ai.t8star.org"
+baseurl = ZHENZHEN_PRIMARY_BASE_URL
 FAL_SEED_MAX = 65535
 
 def _normalize_fal_seed(seed):
@@ -307,7 +312,7 @@ class Comfly_api_set:
         global baseurl
         
         base_url_mapping = {
-            "zhenzhen": "https://ai.t8star.org",
+            "zhenzhen": ZHENZHEN_PRIMARY_BASE_URL,
             "seedance_low_price": "https://api.seedance.nz",
             "ip": custom_ip
         }
@@ -487,10 +492,11 @@ def create_audio_object(audio_url):
 
 class ComflyBaseNode:
     def __init__(self):
+        active_baseurl = choose_zhenzhen_base_url()
         self.midjourney_api_url = {
-            "turbo mode": f"{baseurl}/mj-turbo",
-            "fast mode": f"{baseurl}/mj-fast",
-            "relax mode": f"{baseurl}/mj-relax"
+            "turbo mode": f"{active_baseurl}/mj-turbo",
+            "fast mode": f"{active_baseurl}/mj-fast",
+            "relax mode": f"{active_baseurl}/mj-relax"
         }
         self.api_key = get_config().get('api_key', '') 
         self.speed = "fast mode"
@@ -19808,6 +19814,7 @@ class Comfly_LLm_API:
                 raise RuntimeError(f"[Comfly_LLm_API] Error: OpenAI package not installed. Please install it with ")
             return ("Error: OpenAI package not installed. Please install it with 'pip install openai'",)
 
+        api_baseurl = rewrite_zhenzhen_url(api_baseurl)
         client = OpenAI(api_key=api_key, base_url=api_baseurl)
 
         # Priority: video > image > text (align with reference node behavior)

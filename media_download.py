@@ -6,7 +6,10 @@ import io
 import time
 from typing import Any
 
-import requests
+try:
+    from . import zhenzhen_http as requests
+except ImportError:  # Support the existing standalone unit-test import path.
+    import zhenzhen_http as requests
 from PIL import Image, UnidentifiedImageError
 
 
