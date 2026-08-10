@@ -24,9 +24,21 @@ import torch
 from PIL import Image
 
 try:
-    from .media_download import download_image_with_alpha_retry
+    from .media_download import (
+        direct_media_get,
+        download_image_with_alpha_retry,
+        download_image_with_retry,
+        get_media_response,
+        media_download_timeout,
+    )
 except ImportError:
-    from media_download import download_image_with_alpha_retry
+    from media_download import (
+        direct_media_get,
+        download_image_with_alpha_retry,
+        download_image_with_retry,
+        get_media_response,
+        media_download_timeout,
+    )
 
 try:
     import comfy.utils
@@ -469,7 +481,13 @@ def download_video(
         response = None
         try:
             started = time.monotonic()
-            response = _get_session().get(url, stream=True, timeout=(15, 45))
+            response = get_media_response(
+                url,
+                request_get=_get_session().get,
+                direct_get=direct_media_get,
+                stream=True,
+                timeout=media_download_timeout(45),
+            )
             response.raise_for_status()
             with open(part_path, "wb") as handle:
                 for chunk in response.iter_content(chunk_size=65536):
@@ -1603,18 +1621,14 @@ def _pil_to_image_tensor(image: Image.Image) -> torch.Tensor:
 
 
 def download_image(url: str, max_retries: int = 3) -> torch.Tensor:
-    last_error: Optional[Exception] = None
-    for attempt in range(max_retries):
-        if attempt:
-            time.sleep(2 ** attempt)
-        try:
-            response = _get_session().get(url, timeout=300)
-            response.raise_for_status()
-            with Image.open(io.BytesIO(response.content)) as image:
-                return _pil_to_image_tensor(image)
-        except Exception as exc:
-            last_error = exc
-    raise RuntimeError(f"Seedream image download failed after {max_retries} attempts: {last_error}")
+    image = download_image_with_retry(
+        url,
+        timeout=300,
+        max_attempts=max_retries,
+        request_get=_get_session().get,
+        direct_get=direct_media_get,
+    )
+    return _pil_to_image_tensor(image)
 
 
 def download_image_with_mask(url: str) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -5637,14 +5651,26 @@ def download_audio(
     for attempt in range(max_retries):
         if attempt:
             time.sleep(2 ** attempt)
+        response = None
         try:
-            response = _get_session().get(url, timeout=300)
+            response = get_media_response(
+                url,
+                request_get=_get_session().get,
+                direct_get=direct_media_get,
+                timeout=media_download_timeout(300),
+            )
             response.raise_for_status()
             return audio_bytes_to_comfy(
                 response.content, output_format, expected_sample_rate
             )
         except Exception as exc:
             last_error = exc
+        finally:
+            if response is not None:
+                try:
+                    response.close()
+                except Exception:
+                    pass
     raise RuntimeError(
         f"Seed Audio download failed after {max_retries} attempts: {last_error}"
     )
@@ -8541,8 +8567,15 @@ def download_suno_file(
         if attempt:
             time.sleep(2 ** attempt)
         path = ""
+        response = None
         try:
-            response = _get_session().get(url, stream=True, timeout=300)
+            response = get_media_response(
+                url,
+                request_get=_get_session().get,
+                direct_get=direct_media_get,
+                stream=True,
+                timeout=media_download_timeout(300),
+            )
             response.raise_for_status()
             content_type = (getattr(response, "headers", {}) or {}).get(
                 "Content-Type", ""
@@ -8567,6 +8600,12 @@ def download_suno_file(
                 try:
                     os.remove(path)
                 except OSError:
+                    pass
+        finally:
+            if response is not None:
+                try:
+                    response.close()
+                except Exception:
                     pass
     raise RuntimeError(
         f"Suno result download failed after {max_retries} attempts: {last_error}"

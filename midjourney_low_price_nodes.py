@@ -21,6 +21,11 @@ import torch
 from PIL import Image, ImageDraw, ImageFont
 
 try:
+    from .media_download import direct_media_get, get_media_response, media_download_timeout
+except ImportError:
+    from media_download import direct_media_get, get_media_response, media_download_timeout
+
+try:
     from .seedance_low_price_nodes import (
         COMFYUI_AVAILABLE,
         BUNDLED_ROOT_YR_CERT,
@@ -773,9 +778,14 @@ def _download_file(
         if attempt:
             time.sleep(2 ** attempt)
         path = ""
+        response = None
         try:
-            response = _midjourney_session().get(
-                url, stream=True, timeout=300
+            response = get_media_response(
+                url,
+                request_get=_midjourney_session().get,
+                direct_get=direct_media_get,
+                stream=True,
+                timeout=media_download_timeout(300),
             )
             response.raise_for_status()
             extension = os.path.splitext(urlsplit(url).path)[1].lower()
@@ -802,6 +812,12 @@ def _download_file(
                 try:
                     os.remove(path)
                 except OSError:
+                    pass
+        finally:
+            if response is not None:
+                try:
+                    response.close()
+                except Exception:
                     pass
     raise RuntimeError(
         f"Midjourney result download failed after "

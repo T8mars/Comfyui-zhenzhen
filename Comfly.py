@@ -31,7 +31,7 @@ import inspect
 from .utils import pil2tensor, tensor2pil
 from .config_store import read_project_config, write_project_config
 from .execution_seed import install_execution_seed_controls
-from .media_download import download_image_with_retry
+from .media_download import download_image_with_retry, media_download_seconds
 from .zhenzhen_http import (
     PRIMARY_BASE_URL as ZHENZHEN_PRIMARY_BASE_URL,
     choose_zhenzhen_base_url,
@@ -6219,7 +6219,9 @@ class Comfly_gpt_image_1_edit:
                             try:
                                 img_response = requests.get(
                                     item["url"], 
-                                    timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                                    timeout=media_download_seconds(
+                                        min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                                    )
                                 )
                                 img_response.raise_for_status()
                                 
@@ -6741,7 +6743,9 @@ class Comfly_gpt_image_2_official:
                 try:
                     img_response = requests.get(
                         image_url,
-                        timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
+                        timeout=media_download_seconds(
+                            min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                        ),
                     )
                     img_response.raise_for_status()
                     pil_img = Image.open(BytesIO(img_response.content))
@@ -6873,7 +6877,9 @@ class Comfly_gpt_image_2_official:
                     try:
                         img_response = requests.get(
                             item["url"],
-                            timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            timeout=media_download_seconds(
+                                min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            )
                         )
                         img_response.raise_for_status()
                         pil_img = Image.open(BytesIO(img_response.content))
@@ -7415,7 +7421,9 @@ class Comfly_gpt_image_2_official_ratio:
                 try:
                     img_response = requests.get(
                         image_url,
-                        timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
+                        timeout=media_download_seconds(
+                            min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                        ),
                     )
                     img_response.raise_for_status()
                     pil_img = Image.open(BytesIO(img_response.content))
@@ -7566,7 +7574,9 @@ class Comfly_gpt_image_2_official_ratio:
                     try:
                         img_response = requests.get(
                             item["url"],
-                            timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            timeout=media_download_seconds(
+                                min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            )
                         )
                         img_response.raise_for_status()
                         pil_img = Image.open(BytesIO(img_response.content))
@@ -7794,7 +7804,7 @@ class Comfly_gpt_image_2:
                 "moderation": (["auto", "low"], {"default": "auto"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "clear_chats": ("BOOLEAN", {"default": True}),
-                "image_download_timeout": ("INT", {"default": 600, "min": 60, "max": 1200, "step": 10}),
+                "image_download_timeout": ("INT", {"default": 600, "min": 120, "max": 1200, "step": 10}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
             }
         }
@@ -7834,14 +7844,18 @@ class Comfly_gpt_image_2:
             matches = re.findall(all_urls_pattern, response_text)
         return matches if matches else []
 
-    def download_image(self, url, timeout=30):
+    def download_image(self, url, timeout=120):
         """Download image from URL and convert to tensor"""
         try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
             }
-            response = requests.get(url, headers=headers, timeout=timeout)
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=media_download_seconds(timeout),
+            )
             response.raise_for_status()
             image = Image.open(BytesIO(response.content))
             return pil2tensor(image)
@@ -8644,7 +8658,7 @@ class ComflyChatGPTApi:
             matches = re.findall(all_urls_pattern, response_text)
         return matches if matches else []
 
-    def download_image(self, url, timeout=30):
+    def download_image(self, url, timeout=120):
         """Download image from URL and convert to tensor with improved error handling"""
         try:
             
@@ -8655,7 +8669,11 @@ class ComflyChatGPTApi:
                 'Referer': 'https://comfyui.com/'
             }
            
-            response = requests.get(url, headers=headers, timeout=timeout)
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=media_download_seconds(timeout),
+            )
             response.raise_for_status()
           
             content_type = response.headers.get('Content-Type', '')
@@ -8734,7 +8752,7 @@ class ComflyChatGPTApi:
 
     def process(self, prompt, model, clear_chats=True, files=None, image_url="", images=None, temperature=0.7, 
            max_tokens=4096, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0, seed=-1,
-           image_download_timeout=100, api_key="", skip_error=False):
+           image_download_timeout=120, api_key="", skip_error=False):
 
         if model.lower() == "gpt-image-1":
             error_message = "不支持此模型，请使用 gpt-4o-image，gpt-4o-image-vip，sora_image，sora_image-vip 这4个模型。"
@@ -21006,7 +21024,7 @@ class Comfly_Doubao_Seedance2_0:
 
     def download_image_from_url(self, url):
         try:
-            pil_image = download_image_with_retry(url, timeout=60)
+            pil_image = download_image_with_retry(url, timeout=120)
             return pil2tensor(pil_image)
         except Exception as e:
             print(f"Error downloading last frame image: {str(e)}")
@@ -25209,7 +25227,9 @@ class Comfly_gpt_image_2_official_ratio_stable:
                 try:
                     img_response = requests.get(
                         image_url,
-                        timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900),
+                        timeout=media_download_seconds(
+                            min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                        ),
                     )
                     img_response.raise_for_status()
                     pil_img = Image.open(BytesIO(img_response.content))
@@ -25337,7 +25357,9 @@ class Comfly_gpt_image_2_official_ratio_stable:
                     try:
                         img_response = requests.get(
                             item["url"],
-                            timeout=min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            timeout=media_download_seconds(
+                                min(initial_timeout * (1.5 ** (download_attempt - 1)), 900)
+                            )
                         )
                         img_response.raise_for_status()
                         pil_img = Image.open(BytesIO(img_response.content))

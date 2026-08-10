@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import threading
 import time
 from typing import Any
 
@@ -17,14 +18,77 @@ _IMAGE_HEADERS = {
     "User-Agent": "ComfyUI-Zhenzhen/2.0",
     "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*,*/*;q=0.8",
 }
+MEDIA_DOWNLOAD_MIN_TIMEOUT = 120.0
+_DIRECT_SESSION_LOCAL = threading.local()
+
+
+def media_download_seconds(timeout: float = 300.0) -> float:
+    """Apply the 120-second media-download floor to a scalar timeout."""
+    try:
+        requested_timeout = float(timeout)
+    except (TypeError, ValueError):
+        requested_timeout = 300.0
+    return max(MEDIA_DOWNLOAD_MIN_TIMEOUT, requested_timeout)
+
+
+def media_download_timeout(timeout: float = 300.0) -> tuple[float, float]:
+    """Build a connect/read timeout while preserving longer read values."""
+    return (
+        MEDIA_DOWNLOAD_MIN_TIMEOUT,
+        media_download_seconds(timeout),
+    )
 
 
 def _request_timeout(timeout: float) -> tuple[float, float]:
+    return media_download_timeout(timeout)
+
+
+def _direct_session() -> Any:
+    session = getattr(_DIRECT_SESSION_LOCAL, "session", None)
+    if session is not None:
+        return session
+
+    session = requests.Session()
+    session.trust_env = False
+    _DIRECT_SESSION_LOCAL.session = session
+    return session
+
+
+def direct_media_get(url: str, **kwargs: Any) -> Any:
+    """Download directly, bypassing broken HTTP(S)_PROXY environment values."""
+    return _direct_session().get(url, **kwargs)
+
+
+def _should_retry_without_proxy(error: BaseException) -> bool:
+    return isinstance(
+        error,
+        (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.ProxyError,
+            ConnectionError,
+        ),
+    )
+
+
+def get_media_response(
+    url: str,
+    *,
+    request_get: Any = None,
+    direct_get: Any = None,
+    **kwargs: Any,
+) -> Any:
+    """GET generated media, retrying route failures without environment proxies."""
+    getter = request_get or requests.get
+    fallback_getter = direct_get
+    if fallback_getter is None and request_get is None:
+        fallback_getter = direct_media_get
+
     try:
-        read_timeout = float(timeout)
-    except (TypeError, ValueError):
-        read_timeout = 300.0
-    return (15.0, max(30.0, min(read_timeout, 600.0)))
+        return getter(url, **kwargs)
+    except Exception as error:
+        if fallback_getter is None or not _should_retry_without_proxy(error):
+            raise
+        return fallback_getter(url, **kwargs)
 
 
 def _failure_summary(error: BaseException) -> str:
@@ -39,6 +103,7 @@ def download_image_with_retry(
     timeout: float = 300,
     max_attempts: int = 5,
     request_get: Any = None,
+    direct_get: Any = None,
 ) -> Image.Image:
     """Download and fully decode an image, retrying transient or not-yet-ready results."""
     if not isinstance(url, str) or not url.strip():
@@ -47,11 +112,16 @@ def download_image_with_retry(
         raise ValueError("max_attempts must be at least 1")
 
     getter = request_get or requests.get
+    fallback_getter = direct_get
+    if fallback_getter is None and request_get is None:
+        fallback_getter = direct_media_get
     last_error: BaseException | None = None
     for attempt in range(1, max_attempts + 1):
         try:
-            response = getter(
+            response = get_media_response(
                 url,
+                request_get=getter,
+                direct_get=fallback_getter,
                 headers=_IMAGE_HEADERS,
                 timeout=_request_timeout(timeout),
             )
@@ -83,6 +153,7 @@ def download_image_with_alpha_retry(
     timeout: float = 300,
     max_attempts: int = 5,
     request_get: Any = None,
+    direct_get: Any = None,
 ) -> Image.Image:
     """Download and fully decode an image without discarding its alpha channel."""
     if not isinstance(url, str) or not url.strip():
@@ -91,11 +162,16 @@ def download_image_with_alpha_retry(
         raise ValueError("max_attempts must be at least 1")
 
     getter = request_get or requests.get
+    fallback_getter = direct_get
+    if fallback_getter is None and request_get is None:
+        fallback_getter = direct_media_get
     last_error: BaseException | None = None
     for attempt in range(1, max_attempts + 1):
         try:
-            response = getter(
+            response = get_media_response(
                 url,
+                request_get=getter,
+                direct_get=fallback_getter,
                 headers=_IMAGE_HEADERS,
                 timeout=_request_timeout(timeout),
             )
@@ -121,4 +197,12 @@ def download_image_with_alpha_retry(
     ) from last_error
 
 
-__all__ = ["download_image_with_retry", "download_image_with_alpha_retry"]
+__all__ = [
+    "MEDIA_DOWNLOAD_MIN_TIMEOUT",
+    "media_download_seconds",
+    "media_download_timeout",
+    "direct_media_get",
+    "get_media_response",
+    "download_image_with_retry",
+    "download_image_with_alpha_retry",
+]
