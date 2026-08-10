@@ -4519,6 +4519,541 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
             )
 
 
+MINMAX_H3_CONTEXT_IR_TEXT_MODEL = "minmax-h3-context-ir-text"
+MINMAX_H3_CONTEXT_IR_IMAGE_MODEL = "minmax-h3-context-ir-image"
+MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL = "minmax-h3-context-ir-multimodal"
+MINMAX_H3_CONTEXT_IR_MODELS = [
+    MINMAX_H3_CONTEXT_IR_TEXT_MODEL,
+    MINMAX_H3_CONTEXT_IR_IMAGE_MODEL,
+    MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL,
+]
+MINMAX_H3_CONTEXT_IR_SECONDS = [str(value) for value in range(4, 16)]
+MINMAX_H3_CONTEXT_IR_TEXT_RATIOS = [
+    "21:9",
+    "16:9",
+    "4:3",
+    "1:1",
+    "3:4",
+    "9:16",
+]
+MINMAX_H3_CONTEXT_IR_RATIOS = [
+    "api_default",
+    "adaptive",
+    *MINMAX_H3_CONTEXT_IR_TEXT_RATIOS,
+]
+MINMAX_H3_CONTEXT_IR_PROMPT_MAX_LENGTH = 7000
+MINMAX_H3_CONTEXT_IR_MAX_IMAGES = 9
+MINMAX_H3_CONTEXT_IR_MAX_VIDEOS = 3
+MINMAX_H3_CONTEXT_IR_MAX_AUDIOS = 3
+MINMAX_H3_CONTEXT_IR_RUNNING_STATUSES = {
+    "NOT_START",
+    "SUBMITTED",
+    "QUEUED",
+    "IN_PROGRESS",
+    "PENDING",
+    "PROCESSING",
+}
+MINMAX_H3_CONTEXT_IR_SEED_SPEC = (
+    "INT",
+    {
+        "default": 0,
+        "min": 0,
+        "max": 0xFFFFFFFFFFFFFFFF,
+        "step": 1,
+        "control_after_generate": True,
+        "tooltip": (
+            "ComfyUI cache control only. Fixed reuses a cached result; other modes "
+            "request a new run. This value is not sent to the API."
+        ),
+    },
+)
+
+
+def submit_minmax_h3_context_ir_task(
+    payload: Dict[str, Any],
+    config: Dict[str, Any],
+    sleep: Callable[[float], None] = time.sleep,
+) -> Tuple[str, Dict[str, Any]]:
+    url = f"{config['base_url']}/v1/video/generations"
+    last_error = "unknown error"
+    for attempt in range(3):
+        if attempt:
+            sleep(min(2 ** attempt + 1, 15))
+        try:
+            response = _get_session().post(
+                url,
+                headers=_headers(config["api_key"]),
+                json=payload,
+                timeout=config.get("timeout", 60),
+            )
+        except requests.RequestException as exc:
+            last_error = f"network error: {type(exc).__name__}: {exc}"
+            continue
+
+        data = _response_json(response)
+        message = extract_error_message(data, response.text[:300])
+        if response.status_code == 429 or response.status_code >= 500:
+            last_error = f"HTTP {response.status_code}: {message}"
+            continue
+        if not 200 <= response.status_code < 300:
+            raise SeedanceLowPriceError(
+                "Context IR submit rejected "
+                f"(HTTP {response.status_code}): {message}"
+            )
+
+        task_id = None
+        if isinstance(data, dict):
+            task_id = data.get("task_id") or data.get("id")
+            nested = data.get("data")
+            if not task_id and isinstance(nested, dict):
+                task_id = nested.get("task_id") or nested.get("id")
+        if not task_id:
+            raise SeedanceLowPriceError(
+                "Context IR submit response did not contain id/task_id"
+            )
+        return str(task_id), data
+    raise RuntimeError(f"Context IR submit failed after 3 attempts: {last_error}")
+
+
+def poll_minmax_h3_context_ir_task(
+    task_id: str,
+    config: Dict[str, Any],
+    on_progress: Optional[Callable[[int], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> Dict[str, Any]:
+    url = f"{config['base_url']}/v1/video/generations/{task_id}"
+    start = clock()
+    failures = 0
+    while True:
+        if clock() - start > config.get("max_poll_time", 1800):
+            raise RuntimeError(
+                f"Context IR polling timed out [task_id: {task_id}]"
+            )
+        sleep(config.get("poll_interval", 4))
+        try:
+            response = _get_session().get(
+                url,
+                headers=_headers(config["api_key"], json_content=False),
+                timeout=30,
+            )
+        except requests.RequestException:
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "Context IR polling failed after repeated network errors "
+                    f"[task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        data = _response_json(response)
+        if response.status_code != 200:
+            message = extract_error_message(data, response.text[:300])
+            if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
+                raise SeedanceLowPriceError(
+                    "Context IR polling rejected "
+                    f"(HTTP {response.status_code}): {message} [task_id: {task_id}]"
+                )
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "Context IR polling repeatedly returned "
+                    f"HTTP {response.status_code}: {message} [task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        task_data = data.get("data") if isinstance(data, dict) else None
+        if not isinstance(task_data, dict):
+            task_data = data if isinstance(data, dict) else None
+        if not isinstance(task_data, dict):
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "Context IR polling response repeatedly had no task object "
+                    f"[task_id: {task_id}]"
+                )
+            continue
+
+        failures = 0
+        status = str(task_data.get("status") or "").strip().upper()
+        progress = _coerce_progress(task_data.get("progress"))
+        if on_progress and progress is not None:
+            on_progress(progress)
+        if status in {"SUCCESS", "SUCCEEDED", "COMPLETED"}:
+            return data
+        if status in {"FAILURE", "FAILED", "CANCELED", "CANCELLED"}:
+            reason = task_data.get("fail_reason") or extract_error_message(
+                task_data, "Context IR task failed"
+            )
+            raise SeedanceLowPriceError(
+                f"Context IR task failed: {reason} [task_id: {task_id}]"
+            )
+        if status and status not in MINMAX_H3_CONTEXT_IR_RUNNING_STATUSES:
+            print(
+                f"[MiniMax H3 Context IR] Unknown status '{status}', continuing polling"
+            )
+
+
+def extract_minmax_h3_context_ir_text(response: Dict[str, Any]) -> str:
+    containers: List[Any] = [response]
+    if isinstance(response, dict):
+        containers.append(response.get("data"))
+    for container in containers:
+        if isinstance(container, dict):
+            result_text = container.get("result_text")
+            if isinstance(result_text, str) and result_text.strip():
+                return result_text.strip()
+    raise SeedanceLowPriceError(
+        "Context IR task completed but response did not contain result_text"
+    )
+
+
+class Comfly_minmax_h3_context_ir_lowprice:
+    """Enhance video prompts from text, first/last frames, or mixed media."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, Tuple[Any, ...]] = {}
+        for index in range(1, MINMAX_H3_CONTEXT_IR_MAX_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        for index in range(1, MINMAX_H3_CONTEXT_IR_MAX_VIDEOS + 1):
+            optional[f"video{index}"] = (VIDEO_TYPE,)
+        for index in range(1, MINMAX_H3_CONTEXT_IR_MAX_AUDIOS + 1):
+            optional[f"audio{index}"] = (AUDIO_TYPE,)
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        optional["seed"] = MINMAX_H3_CONTEXT_IR_SEED_SPEC
+        return {
+            "required": {
+                "model": (
+                    MINMAX_H3_CONTEXT_IR_MODELS,
+                    {"default": MINMAX_H3_CONTEXT_IR_TEXT_MODEL},
+                ),
+                "prompt": (
+                    "STRING",
+                    {
+                        "multiline": True,
+                        "default": "",
+                        "tooltip": "Video prompt to enhance, 1 to 7000 characters.",
+                    },
+                ),
+                "seconds": (
+                    MINMAX_H3_CONTEXT_IR_SECONDS,
+                    {"default": "4"},
+                ),
+                "ratio": (
+                    MINMAX_H3_CONTEXT_IR_RATIOS,
+                    {"default": "16:9"},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_NAMES = ("result_text", "task_id", "response")
+    FUNCTION = "enhance"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+    COMFLY_CONCURRENT_DISABLED = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt=None,
+        seconds=None,
+        ratio=None,
+        strict=False,
+        **kwargs,
+    ):
+        if model not in (None, *MINMAX_H3_CONTEXT_IR_MODELS):
+            return f"Unsupported MiniMax H3 Context IR model: {model}"
+        if seconds is not None and str(seconds) not in MINMAX_H3_CONTEXT_IR_SECONDS:
+            return "Context IR seconds must be an integer from 4 to 15"
+        if ratio is not None and ratio not in MINMAX_H3_CONTEXT_IR_RATIOS:
+            return f"Unsupported Context IR ratio: {ratio}"
+
+        prompt_text = str(prompt or "").strip()
+        if len(prompt_text) > MINMAX_H3_CONTEXT_IR_PROMPT_MAX_LENGTH:
+            return (
+                "Context IR prompt exceeds "
+                f"{MINMAX_H3_CONTEXT_IR_PROMPT_MAX_LENGTH} characters"
+            )
+        if strict and not prompt_text:
+            return "Context IR prompt is required"
+        if (
+            model == MINMAX_H3_CONTEXT_IR_TEXT_MODEL
+            and ratio is not None
+            and ratio not in MINMAX_H3_CONTEXT_IR_TEXT_RATIOS
+        ):
+            return "Context IR Text requires a fixed documented ratio"
+
+        if strict and model == MINMAX_H3_CONTEXT_IR_IMAGE_MODEL:
+            connected = [
+                index
+                for index in range(1, MINMAX_H3_CONTEXT_IR_MAX_IMAGES + 1)
+                if kwargs.get(f"image{index}") is not None
+            ]
+            if not connected or connected[0] != 1:
+                return "Context IR Image requires image1"
+            if any(index > 2 for index in connected):
+                return "Context IR Image accepts only image1 and image2"
+
+        if strict and model == MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL:
+            has_media = any(
+                kwargs.get(f"{family}{index}") is not None
+                for family, count in (
+                    ("image", MINMAX_H3_CONTEXT_IR_MAX_IMAGES),
+                    ("video", MINMAX_H3_CONTEXT_IR_MAX_VIDEOS),
+                    ("audio", MINMAX_H3_CONTEXT_IR_MAX_AUDIOS),
+                )
+                for index in range(1, count + 1)
+            )
+            if not has_media:
+                return (
+                    "Context IR Multimodal requires at least one image, video, "
+                    "or audio"
+                )
+        return True
+
+    @staticmethod
+    def _gather_slots(
+        kwargs: Dict[str, Any],
+        family: str,
+        count: int,
+    ) -> List[Tuple[int, Any]]:
+        slots = [
+            (index, kwargs.get(f"{family}{index}"))
+            for index in range(1, count + 1)
+            if kwargs.get(f"{family}{index}") is not None
+        ]
+        connected = [index for index, _value in slots]
+        if connected and connected != list(range(1, len(connected) + 1)):
+            print(
+                f"[MiniMax H3 Context IR] {family} slots {connected} have gaps; "
+                "connected media will be compacted in slot order"
+            )
+        return slots
+
+    def _collect_media(
+        self,
+        model: str,
+        config: Dict[str, Any],
+        kwargs: Dict[str, Any],
+        on_progress: Callable[[int], None],
+    ) -> Dict[str, List[str]]:
+        if model == MINMAX_H3_CONTEXT_IR_TEXT_MODEL:
+            on_progress(15)
+            return {}
+
+        image_count = (
+            2
+            if model == MINMAX_H3_CONTEXT_IR_IMAGE_MODEL
+            else MINMAX_H3_CONTEXT_IR_MAX_IMAGES
+        )
+        image_slots = self._gather_slots(kwargs, "image", image_count)
+        video_slots = (
+            self._gather_slots(
+                kwargs, "video", MINMAX_H3_CONTEXT_IR_MAX_VIDEOS
+            )
+            if model == MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL
+            else []
+        )
+        audio_slots = (
+            self._gather_slots(
+                kwargs, "audio", MINMAX_H3_CONTEXT_IR_MAX_AUDIOS
+            )
+            if model == MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL
+            else []
+        )
+        total = len(image_slots) + len(video_slots) + len(audio_slots)
+        completed = 0
+        images: List[str] = []
+        video_urls: List[str] = []
+        audio_urls: List[str] = []
+
+        for slot, image in image_slots:
+            images.append(
+                upload_media(
+                    image_to_png_bytes(image),
+                    f"minmax_h3_context_ir_image_{slot}.png",
+                    "image/png",
+                    config,
+                )
+            )
+            completed += 1
+            on_progress(int(completed / max(1, total) * 15))
+        for slot, video in video_slots:
+            video_urls.append(
+                upload_media(
+                    video_to_mp4_bytes(video),
+                    f"minmax_h3_context_ir_video_{slot}.mp4",
+                    "video/mp4",
+                    config,
+                )
+            )
+            completed += 1
+            on_progress(int(completed / max(1, total) * 15))
+        for slot, audio in audio_slots:
+            audio_urls.append(
+                upload_media(
+                    audio_to_wav_bytes(audio),
+                    f"minmax_h3_context_ir_audio_{slot}.wav",
+                    "audio/wav",
+                    config,
+                )
+            )
+            completed += 1
+            on_progress(int(completed / max(1, total) * 15))
+        return {
+            "images": images,
+            "video_urls": video_urls,
+            "audio_urls": audio_urls,
+        }
+
+    def _build_payload(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        ratio: str,
+        media: Dict[str, List[str]],
+        kwargs: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        validation = self.VALIDATE_INPUTS(
+            model=model,
+            prompt=prompt,
+            seconds=seconds,
+            ratio=ratio,
+            strict=True,
+            **kwargs,
+        )
+        if validation is not True:
+            raise SeedanceLowPriceError(str(validation))
+
+        payload: Dict[str, Any] = {
+            "model": model,
+            "prompt": str(prompt or "").strip(),
+            "seconds": str(seconds),
+        }
+        metadata: Dict[str, Any] = {}
+        if model == MINMAX_H3_CONTEXT_IR_TEXT_MODEL:
+            metadata["ratio"] = ratio
+        elif model == MINMAX_H3_CONTEXT_IR_IMAGE_MODEL:
+            images = media.get("images") or []
+            if not images:
+                raise SeedanceLowPriceError("Context IR Image requires image1")
+            payload["images"] = images[:2]
+        else:
+            images = media.get("images") or []
+            video_urls = media.get("video_urls") or []
+            audio_urls = media.get("audio_urls") or []
+            if not (images or video_urls or audio_urls):
+                raise SeedanceLowPriceError(
+                    "Context IR Multimodal requires at least one image, video, or audio"
+                )
+            if ratio != "api_default":
+                metadata["ratio"] = ratio
+            if images:
+                payload["images"] = images[:MINMAX_H3_CONTEXT_IR_MAX_IMAGES]
+            if video_urls:
+                metadata["video_urls"] = video_urls[
+                    :MINMAX_H3_CONTEXT_IR_MAX_VIDEOS
+                ]
+            if audio_urls:
+                metadata["audio_url"] = audio_urls[
+                    :MINMAX_H3_CONTEXT_IR_MAX_AUDIOS
+                ]
+        if metadata:
+            payload["metadata"] = metadata
+        return payload
+
+    def enhance(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        ratio: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        seed: int = 0,
+        **kwargs,
+    ):
+        del seed
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validation = self.VALIDATE_INPUTS(
+                model=model,
+                prompt=prompt,
+                seconds=seconds,
+                ratio=ratio,
+                strict=True,
+                **kwargs,
+            )
+            if validation is not True:
+                raise SeedanceLowPriceError(str(validation))
+            config = resolve_config(api_config)
+            media = self._collect_media(model, config, kwargs, update_progress)
+            payload = self._build_payload(
+                model, prompt, seconds, ratio, media, kwargs
+            )
+            print(f"[MiniMax H3 Context IR] Submitting model={model}")
+            task_id, submit_response = submit_minmax_h3_context_ir_task(
+                payload, config
+            )
+            update_progress(20)
+            final_response = poll_minmax_h3_context_ir_task(
+                task_id,
+                config,
+                on_progress=lambda value: update_progress(20 + int(value * 0.8)),
+            )
+            result_text = extract_minmax_h3_context_ir_text(final_response)
+            update_progress(100)
+            response = json.dumps(
+                {
+                    "status": "completed",
+                    "model": model,
+                    "task_id": task_id,
+                    "submit": submit_response,
+                    "result": final_response,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            return {
+                "ui": {"text": [result_text, response]},
+                "result": (result_text, task_id, response),
+            }
+        except Exception as exc:
+            if not skip_error:
+                raise
+            response = json.dumps(
+                {
+                    "status": "error",
+                    "model": model,
+                    "task_id": task_id,
+                    "message": f"{type(exc).__name__}: {exc}",
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            return {
+                "ui": {"text": ["", response]},
+                "result": ("", task_id, response),
+            }
+
+
 VIDU_Q3_T2V_MODELS = [
     "vidu-q3-pro-t2v",
     "vidu-q3-turbo-t2v",
