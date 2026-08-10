@@ -95,7 +95,14 @@ def _install_on_class(node_class: type) -> bool:
         return False
     current_input_types = original_input_types()
     if _has_seed(current_input_types):
-        return False
+        if not getattr(
+            node_class, "SEEDANCE_EXPLICIT_CACHE_ONLY_SEED", False
+        ):
+            return False
+        if not _wrap_execution_function(node_class):
+            return False
+        setattr(node_class, _INSTALLED_MARKER, True)
+        return True
     if not _wrap_execution_function(node_class):
         return False
 

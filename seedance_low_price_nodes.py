@@ -1366,6 +1366,13 @@ SEEDREAM_PROMPT_MIN_LENGTH = 5
 SEEDREAM_PROMPT_MAX_LENGTH = 2000
 SEEDREAM_IMAGE_MAX_BYTES = 10 * 1024 * 1024
 SEEDREAM_LAYER_DECOMPOSITION_MODEL = "seedream-v5-pro-layer-decomposition"
+DOLA_SEEDREAM_LAYER_DECOMPOSITION_MODEL = (
+    "dola-seedream-5.0-pro-layer-decomposition"
+)
+SEEDREAM_LAYER_DECOMPOSITION_MODELS = [
+    SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+    DOLA_SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+]
 SEEDREAM_LAYER_RESOLUTIONS = ["auto", "1k", "1.5k", "2k"]
 SEEDREAM_LAYER_SOURCE_MAX_BYTES = 30 * 1024 * 1024
 ZHENZHEN_IMAGE_G2_T2I_MODEL = "zhenzhen-image-g2-t2i"
@@ -6817,9 +6824,10 @@ class Comfly_qwen_image_3_0_lowprice:
 
 
 class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
-    """Split one source image into the complete ordered base/layer result lists."""
+    """Split one source image with domestic Seedream or overseas Dola."""
 
     COMFLY_CONCURRENT_DISABLED = True
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -6833,6 +6841,26 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
             "optional": {
                 "api_config": (CONFIG_TYPE,),
                 "skip_error": ("BOOLEAN", {"default": False}),
+                "seed": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 0xFFFFFFFFFFFFFFFF,
+                        "step": 1,
+                        "control_after_generate": True,
+                        "tooltip": (
+                            "ComfyUI cache seed only; this value is not sent to "
+                            "Seedream. Fixed reuses the cached result."
+                        ),
+                    },
+                ),
+                # Keep model after the pre-existing seed and its linked control so
+                # workflows serialized before this update retain their widget indexes.
+                "model": (
+                    SEEDREAM_LAYER_DECOMPOSITION_MODELS,
+                    {"default": SEEDREAM_LAYER_DECOMPOSITION_MODEL},
+                ),
             },
         }
 
@@ -6857,6 +6885,7 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         prompt="",
         resolution="auto",
         output_format="png",
+        model=SEEDREAM_LAYER_DECOMPOSITION_MODEL,
         strict=False,
         **kwargs,
     ):
@@ -6867,6 +6896,8 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
             return f"Unsupported layer decomposition resolution: {resolution}"
         if output_format not in SEEDREAM_OUTPUT_FORMATS:
             return f"Unsupported layer decomposition output_format: {output_format}"
+        if model not in SEEDREAM_LAYER_DECOMPOSITION_MODELS:
+            return f"Unsupported layer decomposition model: {model}"
         if strict and image is None:
             return "Layer decomposition requires exactly one source image"
         shape = getattr(image, "shape", None)
@@ -6880,9 +6911,10 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         prompt: str,
         resolution: str,
         output_format: str,
+        model: str = SEEDREAM_LAYER_DECOMPOSITION_MODEL,
     ) -> Dict[str, Any]:
         payload: Dict[str, Any] = {
-            "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+            "model": model,
             "images": [source_url],
             "metadata": {
                 "resolution": resolution,
@@ -6894,13 +6926,17 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         return payload
 
     @staticmethod
-    def _error_result(message: str, task_id: str = ""):
+    def _error_result(
+        message: str,
+        task_id: str = "",
+        model: str = SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+    ):
         image = torch.ones((1, 512, 512, 3), dtype=torch.float32)
         mask = torch.zeros((1, 512, 512), dtype=torch.float32)
         response = json.dumps(
             {
                 "status": "error",
-                "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+                "model": model,
                 "task_id": task_id,
                 "message": message,
             },
@@ -6917,7 +6953,10 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         output_format: str,
         api_config: Any = None,
         skip_error: bool = False,
+        seed: int = 0,
+        model: str = SEEDREAM_LAYER_DECOMPOSITION_MODEL,
     ):
+        del seed
         task_id = ""
         pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
 
@@ -6934,6 +6973,7 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
                 prompt=prompt,
                 resolution=resolution,
                 output_format=output_format,
+                model=model,
                 strict=True,
             )
             if validation is not True:
@@ -6959,6 +6999,7 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
                 prompt_text,
                 resolution,
                 output_format,
+                model,
             )
             task_id, submit_response = submit_image_task(payload, config)
             update_progress(20)
@@ -6981,7 +7022,7 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
             response = json.dumps(
                 {
                     "status": "SUCCESS",
-                    "model": SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+                    "model": model,
                     "task_id": task_id,
                     "submit": submit_response,
                     "result": final_response,
@@ -7000,7 +7041,9 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         except Exception as exc:
             if not skip_error:
                 raise
-            return self._error_result(f"{type(exc).__name__}: {exc}", task_id)
+            return self._error_result(
+                f"{type(exc).__name__}: {exc}", task_id, model
+            )
 
 
 ZHENZHEN_IMAGE_G_V2_LOWPRICE_MODEL = "zhenzhen-image-g-v2-lowprice"
