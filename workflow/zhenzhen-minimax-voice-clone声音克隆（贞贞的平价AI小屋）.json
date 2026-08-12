@@ -1,0 +1,243 @@
+{
+  "id": "d995aa11-901f-5ac7-b400-5ecd0870f185",
+  "revision": 0,
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Comfly_seedance2_low_price_settings",
+      "pos": [
+        40,
+        300
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_seedance2_low_price_settings"
+      },
+      "widgets_values": [
+        "https://api.seedance.nz",
+        ""
+      ],
+      "title": "Zhenzhen API Settings（国内版）"
+    },
+    {
+      "id": 2,
+      "type": "LoadAudio",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        300,
+        120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "example.wav",
+        null,
+        ""
+      ],
+      "title": "选择10秒以上参考音频"
+    },
+    {
+      "id": 3,
+      "type": "Comfly_minimax_audio_lowprice",
+      "pos": [
+        400,
+        80
+      ],
+      "size": [
+        470,
+        500
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 1
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "audio_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "audio_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_minimax_audio_lowprice"
+      },
+      "widgets_values": [
+        "minimax-voice-clone",
+        "This is a short preview of the cloned voice.",
+        "",
+        false,
+        false,
+        "Wise_Woman",
+        1.0,
+        1.0,
+        0,
+        "auto",
+        "mp3",
+        "32000",
+        "128000",
+        "1",
+        "SeedanceVoice01",
+        "minimax-speech-2.8-hd",
+        false,
+        false,
+        false,
+        0,
+        "fixed"
+      ],
+      "title": "minimax-voice-clone 声音克隆"
+    },
+    {
+      "id": 4,
+      "type": "SaveAudio",
+      "pos": [
+        950,
+        140
+      ],
+      "size": [
+        270,
+        112
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "audio/minimax-voice-clone声音克隆"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "AUDIO"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      1,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20",
+    "ds": {
+      "scale": 1,
+      "offset": [
+        80,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

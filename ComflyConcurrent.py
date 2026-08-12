@@ -30,6 +30,7 @@ VIDEO_TASK_TYPE = "COMFLY_VIDEO_FUTURE"
 ALLOWED_MODULES = {
     "Comfly",
     "fal_batch_nodes",
+    "latest_image_audio_low_price_nodes",
     "seedance_low_price_nodes",
     "midjourney_low_price_nodes",
 }

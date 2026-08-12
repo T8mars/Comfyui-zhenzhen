@@ -71,6 +71,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260812-1
+
+新增图像模型grok-imagine-2(WIP)，目前只支持文生图，功能过于复杂逆天，还没研究明白，后续支持其他功能
+应用户要求新增图像模型：wan-2.7-global-i2i，wan-2.7-global-i2i-pro，wan-2.7-global-t2i
+新增音频模型：qwen3-tts-flash，qwen3-tts-instruct-flash，minimax-music-2.6，minimax-speech-2.8-hd，minimax-speech-2.8-turbo，minimax-voice-clone，mureka-v8-bgm，mureka-v9-bgm
+
 ### 20260811-2
 
 新增宽审核模型，图像分解，最多可分解16层：dola-seedream-5.0-pro-layer-decomposition

@@ -6085,31 +6085,43 @@ def poll_audio_task(
             )
 
 
-def extract_audio_url(response: Dict[str, Any]) -> str:
-    candidates: List[Any] = []
+def extract_audio_urls(response: Dict[str, Any]) -> List[str]:
+    """Extract every documented audio URL without reordering or deduplicating."""
     if isinstance(response, dict):
-        candidates.extend(
-            [response.get("result_url"), response.get("audio_url"), response.get("url")]
-        )
         data = response.get("data")
         if isinstance(data, dict):
-            candidates.extend(
-                [data.get("result_url"), data.get("audio_url"), data.get("url")]
-            )
             nested = data.get("data")
             if isinstance(nested, dict):
-                candidates.extend(
-                    [nested.get("result_url"), nested.get("audio_url"), nested.get("url")]
-                )
                 content = nested.get("content")
                 if isinstance(content, dict):
-                    candidates.extend([content.get("audio_url"), content.get("url")])
-    for candidate in candidates:
-        if isinstance(candidate, str) and candidate.strip():
-            return candidate.strip()
+                    values = content.get("audio_urls")
+                    if isinstance(values, (list, tuple)):
+                        urls = [
+                            str(value or "").strip()
+                            for value in values
+                            if str(value or "").strip()
+                        ]
+                        if urls:
+                            return urls
+                    for key in ("audio_url", "url"):
+                        value = content.get(key)
+                        if isinstance(value, str) and value.strip():
+                            return [value.strip()]
+            for key in ("result_url", "audio_url", "url"):
+                value = data.get(key)
+                if isinstance(value, str) and value.strip():
+                    return [value.strip()]
+        for key in ("result_url", "audio_url", "url"):
+            value = response.get(key)
+            if isinstance(value, str) and value.strip():
+                return [value.strip()]
     raise SeedanceLowPriceError(
         "Seed Audio completed response did not contain an audio URL"
     )
+
+
+def extract_audio_url(response: Dict[str, Any]) -> str:
+    return extract_audio_urls(response)[0]
 
 
 def audio_bytes_to_comfy(
@@ -6154,33 +6166,49 @@ def audio_bytes_to_comfy(
         waveform = torch.from_numpy(samples.reshape(-1, channels).T.copy()).unsqueeze(0)
         return {"waveform": waveform, "sample_rate": int(sample_rate)}
 
+    format_hint = "ogg" if output_format == "ogg_opus" else output_format
+    torchaudio_error: Optional[Exception] = None
     try:
         import torchaudio
-    except ImportError as exc:
-        raise SeedanceLowPriceError(
-            "MP3/Opus decoding requires ComfyUI's built-in torchaudio; use wav output "
-            "or repair the ComfyUI Python environment"
-        ) from exc
 
-    format_hint = "ogg" if output_format == "ogg_opus" else output_format
+        try:
+            waveform, sample_rate = torchaudio.load(
+                io.BytesIO(data), format=format_hint
+            )
+        except Exception:
+            waveform, sample_rate = torchaudio.load(io.BytesIO(data))
+        if waveform.ndim == 1:
+            waveform = waveform.unsqueeze(0)
+        if waveform.ndim != 2:
+            raise SeedanceLowPriceError(
+                f"Unexpected downloaded audio shape: {tuple(waveform.shape)}"
+            )
+        if int(sample_rate) <= 0:
+            sample_rate = int(expected_sample_rate)
+        return {
+            "waveform": waveform.float().unsqueeze(0),
+            "sample_rate": int(sample_rate),
+        }
+    except Exception as exc:
+        torchaudio_error = exc
+
+    suffix = f".{format_hint or 'audio'}"
+    handle, path = tempfile.mkstemp(prefix="zhenzhen_audio_", suffix=suffix)
     try:
-        waveform, sample_rate = torchaudio.load(
-            io.BytesIO(data), format=format_hint
-        )
-    except Exception:
-        waveform, sample_rate = torchaudio.load(io.BytesIO(data))
-    if waveform.ndim == 1:
-        waveform = waveform.unsqueeze(0)
-    if waveform.ndim != 2:
+        with os.fdopen(handle, "wb") as output:
+            output.write(data)
+        return _decode_suno_audio(path)
+    except Exception as ffmpeg_error:
         raise SeedanceLowPriceError(
-            f"Unexpected downloaded audio shape: {tuple(waveform.shape)}"
-        )
-    if int(sample_rate) <= 0:
-        sample_rate = int(expected_sample_rate)
-    return {
-        "waveform": waveform.float().unsqueeze(0),
-        "sample_rate": int(sample_rate),
-    }
+            "Compressed audio could not be decoded by torchaudio or the bundled "
+            f"FFmpeg fallback ({type(torchaudio_error).__name__}; "
+            f"{type(ffmpeg_error).__name__})"
+        ) from ffmpeg_error
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
 
 def download_audio(
