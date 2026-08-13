@@ -71,6 +71,14 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260814-1
+
+新增模型和节点更新
+minimax-h3-ow-ref2va-audio-drive-fast  
+minimax-h3-ow-fl2va-audio-drive-fast  
+minimax-h3-ow-t2v-fast  
+支持音频驱动口型数字人和文生视频低价版  
+
 ### 20260812-1
 
 新增图像模型grok-imagine-2(WIP)，目前只支持文生图，功能过于复杂逆天，还没研究明白，后续支持其他功能
@@ -79,24 +87,24 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 ### 20260811-2
 
-新增宽审核模型，图像分解，最多可分解16层：dola-seedream-5.0-pro-layer-decomposition
-工作流同步更新，贞贞的平价AI小屋渠道
+新增宽审核模型，图像分解，最多可分解16层：dola-seedream-5.0-pro-layer-decomposition  
+工作流同步更新，贞贞的平价AI小屋渠道  
 
 ### 20260811-1
 
-新增节点包含模型：
-minmax-h3-context-ir-image
-minmax-h3-context-ir-multimodal
-minmax-h3-context-ir-text
-配套工作流已更新，官方minimax h3提示词增强节点和API调用
+新增节点包含模型：  
+minmax-h3-context-ir-image  
+minmax-h3-context-ir-multimodal  
+minmax-h3-context-ir-text  
+配套工作流已更新，官方minimax h3提示词增强节点和API调用  
 
 ### 20260810-2
 
-优化所有生成节点下载逻辑
+优化所有生成节点下载逻辑  
 
 ### 20260810-1
 
-请求自动检查可达性，.org 连接/TLS 失败时切换至 .cn，缓存 10 分钟。优化网络兼容性
+请求自动检查可达性，.org 连接/TLS 失败时切换至 .cn，缓存 10 分钟。优化网络兼容性  
 
 ### 20260809-3
 
@@ -104,15 +112,15 @@ minmax-h3-context-ir-text
 
 ### 20260809-2
 
-新增支持minimax-h3-ow-i2v-fast,minimax-h3-ow-r2v-fast
-新增支持minimax-h3之前官方节点的768P
-对应工作流
+新增支持minimax-h3-ow-i2v-fast,minimax-h3-ow-r2v-fast  
+新增支持minimax-h3之前官方节点的768P  
+对应工作流  
 
 ### 20260809-1
 
-新增seedream-v5-pro-layer-decomposition对应工作流及节点，支持图像分层  
-新增flu3视频模型对应工作流及节点  
-新增minimax h3 海外版模型工作流及节点  
+新增seedream-v5-pro-layer-decomposition对应工作流及节点，支持图像分层    
+新增flu3视频模型对应工作流及节点    
+新增minimax h3 海外版模型工作流及节点   
 
 ### 20260808-1
 

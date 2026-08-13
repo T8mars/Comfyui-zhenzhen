@@ -4255,9 +4255,19 @@ class Comfly_minimax_h3_ow_video_lowprice:
 
 MINIMAX_H3_OW_FAST_I2V_MODEL = "minimax-h3-ow-i2v-fast"
 MINIMAX_H3_OW_FAST_R2V_MODEL = "minimax-h3-ow-r2v-fast"
+MINIMAX_H3_OW_FAST_FL2VA_AUDIO_MODEL = "minimax-h3-ow-fl2va-audio-drive-fast"
+MINIMAX_H3_OW_FAST_REF2VA_AUDIO_MODEL = "minimax-h3-ow-ref2va-audio-drive-fast"
+MINIMAX_H3_OW_FAST_T2V_MODEL = "minimax-h3-ow-t2v-fast"
+MINIMAX_H3_OW_FAST_AUDIO_MODELS = [
+    MINIMAX_H3_OW_FAST_FL2VA_AUDIO_MODEL,
+    MINIMAX_H3_OW_FAST_REF2VA_AUDIO_MODEL,
+]
 MINIMAX_H3_OW_FAST_MODELS = [
     MINIMAX_H3_OW_FAST_I2V_MODEL,
     MINIMAX_H3_OW_FAST_R2V_MODEL,
+    MINIMAX_H3_OW_FAST_FL2VA_AUDIO_MODEL,
+    MINIMAX_H3_OW_FAST_REF2VA_AUDIO_MODEL,
+    MINIMAX_H3_OW_FAST_T2V_MODEL,
 ]
 MINIMAX_H3_OW_FAST_MAX_IMAGES = 9
 
@@ -4270,6 +4280,7 @@ def validate_minimax_h3_ow_fast_inputs(
     ratio: str,
     connected_image_slots: Optional[List[int]] = None,
     strict: bool = True,
+    audio: Any = None,
 ) -> str:
     if model not in MINIMAX_H3_OW_FAST_MODELS:
         raise SeedanceLowPriceError(
@@ -4293,14 +4304,22 @@ def validate_minimax_h3_ow_fast_inputs(
         raise SeedanceLowPriceError(
             f"MiniMax H3 OW Fast prompt exceeds {PROMPT_MAX_LENGTH} characters"
         )
-    if strict and model == MINIMAX_H3_OW_FAST_R2V_MODEL and not prompt_text:
+    if (
+        strict
+        and model in (MINIMAX_H3_OW_FAST_R2V_MODEL, MINIMAX_H3_OW_FAST_T2V_MODEL)
+        and not prompt_text
+    ):
         raise SeedanceLowPriceError(
-            "MiniMax H3 OW R2V Fast requires a prompt"
+            "MiniMax H3 OW T2V/R2V Fast requires a prompt"
         )
 
     if strict:
         slots = list(connected_image_slots or [])
-        if not slots:
+        if model == MINIMAX_H3_OW_FAST_T2V_MODEL and slots:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW T2V Fast does not accept images"
+            )
+        if model != MINIMAX_H3_OW_FAST_T2V_MODEL and not slots:
             raise SeedanceLowPriceError(
                 "MiniMax H3 OW Fast requires at least one image"
             )
@@ -4308,9 +4327,23 @@ def validate_minimax_h3_ow_fast_inputs(
             raise SeedanceLowPriceError(
                 "MiniMax H3 OW Fast accepts at most 9 images"
             )
-        if model == MINIMAX_H3_OW_FAST_I2V_MODEL and slots != [1]:
+        if (
+            model in (
+                MINIMAX_H3_OW_FAST_I2V_MODEL,
+                *MINIMAX_H3_OW_FAST_AUDIO_MODELS,
+            )
+            and slots != [1]
+        ):
             raise SeedanceLowPriceError(
-                "MiniMax H3 OW I2V Fast requires exactly image1"
+                "This MiniMax H3 OW Fast model requires exactly image1"
+            )
+        if model in MINIMAX_H3_OW_FAST_AUDIO_MODELS and audio is None:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW Audio Drive Fast requires audio"
+            )
+        if model not in MINIMAX_H3_OW_FAST_AUDIO_MODELS and audio is not None:
+            raise SeedanceLowPriceError(
+                "Only MiniMax H3 OW Audio Drive Fast accepts audio"
             )
     return prompt_text
 
@@ -4322,11 +4355,16 @@ def build_minimax_h3_ow_fast_payload(
     resolution: str,
     ratio: str,
     image_urls: Optional[List[str]] = None,
+    audio_urls: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     images = list(image_urls or [])
+    audios = list(audio_urls or [])
     max_images = (
         1
-        if model == MINIMAX_H3_OW_FAST_I2V_MODEL
+        if model in (
+            MINIMAX_H3_OW_FAST_I2V_MODEL,
+            *MINIMAX_H3_OW_FAST_AUDIO_MODELS,
+        )
         else MINIMAX_H3_OW_FAST_MAX_IMAGES
     )
     if len(images) > max_images:
@@ -4340,12 +4378,12 @@ def build_minimax_h3_ow_fast_payload(
         resolution,
         ratio,
         connected_image_slots=list(range(1, len(images) + 1)),
+        audio=object() if audios else None,
         strict=True,
     )
     payload: Dict[str, Any] = {
         "model": model,
         "seconds": str(seconds),
-        "images": images,
         "metadata": {
             "resolution": resolution,
             "ratio": ratio,
@@ -4353,6 +4391,14 @@ def build_minimax_h3_ow_fast_payload(
     }
     if prompt_text:
         payload["prompt"] = prompt_text
+    if model != MINIMAX_H3_OW_FAST_T2V_MODEL:
+        payload["images"] = images
+    if model in MINIMAX_H3_OW_FAST_AUDIO_MODELS:
+        if len(audios) != 1:
+            raise SeedanceLowPriceError(
+                "MiniMax H3 OW Audio Drive Fast requires exactly one audio URL"
+            )
+        payload["metadata"]["audio_urls"] = audios
     return payload
 
 
@@ -4363,6 +4409,7 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
         for index in range(1, MINIMAX_H3_OW_FAST_MAX_IMAGES + 1):
             optional[f"image{index}"] = ("IMAGE",)
         optional["api_config"] = (CONFIG_TYPE,)
+        optional["audio"] = (AUDIO_TYPE,)
         optional["skip_error"] = ("BOOLEAN", {"default": False})
         return {
             "required": {
@@ -4410,6 +4457,7 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
                 resolution,
                 ratio,
                 connected_image_slots=connected_slots,
+                audio=kwargs.get("audio"),
                 strict=bool(strict),
             )
         except Exception as exc:
@@ -4439,6 +4487,7 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
         resolution: str,
         ratio: str,
         api_config: Any = None,
+        audio: Any = None,
         skip_error: bool = False,
         **kwargs,
     ):
@@ -4461,10 +4510,15 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
                 resolution,
                 ratio,
                 connected_image_slots=[slot for slot, _image in connected],
+                audio=audio,
                 strict=True,
             )
             config = resolve_config(api_config)
             image_urls: List[str] = []
+            audio_urls: List[str] = []
+            upload_count = len(connected) + (
+                1 if model in MINIMAX_H3_OW_FAST_AUDIO_MODELS else 0
+            )
             for position, (slot, image) in enumerate(connected, start=1):
                 image_urls.append(
                     upload_media(
@@ -4474,7 +4528,20 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
                         config,
                     )
                 )
-                update_progress(int(position / len(connected) * 25))
+                update_progress(int(position / upload_count * 25))
+
+            if model in MINIMAX_H3_OW_FAST_AUDIO_MODELS:
+                audio_urls.append(
+                    upload_media(
+                        audio_to_wav_bytes(audio),
+                        "minimax_h3_ow_fast_audio_drive.wav",
+                        "audio/wav",
+                        config,
+                    )
+                )
+                update_progress(25)
+            elif not connected:
+                update_progress(25)
 
             payload = build_minimax_h3_ow_fast_payload(
                 model,
@@ -4483,6 +4550,7 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
                 resolution,
                 ratio,
                 image_urls,
+                audio_urls,
             )
             print(f"[MiniMax H3 OW Fast Low Price] Submitting model={model}")
             task_id, submit_response = submit_task(payload, config)

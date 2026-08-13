@@ -302,7 +302,7 @@ class Comfly_api_set:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "api_base": (["zhenzhen", "seedance_low_price", "ip"], {"default": "zhenzhen"}),
+                "api_base": (["zhenzhen", "seedance_low_price", "ip"], {"default": "seedance_low_price"}),
                 "apikey": ("STRING", {"default": ""}),
             },
             "optional": {
