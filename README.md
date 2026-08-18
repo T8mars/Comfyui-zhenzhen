@@ -73,8 +73,8 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 ### 20260818-1
 
-seedance2.2新增原生1080P选项：native10180p
-新增视频放大模型：FlashVSR_video_upscale
+seedance2.2新增原生1080P选项：native10180p  
+新增视频放大模型：FlashVSR_video_upscale  
 
 ### 20260814-1
 
