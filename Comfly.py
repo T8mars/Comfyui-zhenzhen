@@ -110,6 +110,7 @@ from .seedance_low_price_nodes import (
     Comfly_minmax_h3_context_ir_lowprice,
     Comfly_vidu_q3_video_lowprice,
     Comfly_vidu_q3_short_play_lowprice,
+    Comfly_fashvsr_video_upscale_lowprice,
     Comfly_zhenzhen_upscaler_lowprice,
     Comfly_doubao_seed_audio_1_0_lowprice,
     Comfly_qwen_image_3_0_lowprice,
@@ -14191,7 +14192,7 @@ class Comfly_Z_image_turbo:
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True}),
-                "model": (["z-image-turbo"], {"default": "z-image-turbo"}),
+                "model": (["h-image-turbo"], {"default": "h-image-turbo"}),
                 "size": (["512x512", "768x768", "1024x1024", "1280x720", "720x1280", "1536x1024", "1024x1536", "Custom"], {"default": "1024x1024"}),
                 "output_format": (["jpeg", "png", "webp"], {"default": "jpeg"}),
             },
@@ -14221,7 +14222,7 @@ class Comfly_Z_image_turbo:
             "Authorization": f"Bearer {self.api_key}"
         }
     
-    def generate_image(self, prompt, model="z-image-turbo", size="1024x1024", output_format="jpg",
+    def generate_image(self, prompt, model="h-image-turbo", size="1024x1024", output_format="jpg",
                       custom_size="1024x1024", apikey="", guidance_scale=0.0, num_inference_steps=8,
                       output_quality=80, seed=0, skip_error=False):
         if apikey.strip():
@@ -25563,6 +25564,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_minmax_h3_context_ir_lowprice": Comfly_minmax_h3_context_ir_lowprice,
     "Comfly_vidu_q3_video_lowprice": Comfly_vidu_q3_video_lowprice,
     "Comfly_vidu_q3_short_play_lowprice": Comfly_vidu_q3_short_play_lowprice,
+    "Comfly_fashvsr_video_upscale_lowprice": Comfly_fashvsr_video_upscale_lowprice,
     "Comfly_zhenzhen_upscaler_lowprice": Comfly_zhenzhen_upscaler_lowprice,
     "Comfly_doubao_seed_audio_1_0_lowprice": Comfly_doubao_seed_audio_1_0_lowprice,
     "Comfly_qwen_image_3_0_lowprice": Comfly_qwen_image_3_0_lowprice,
@@ -25724,6 +25726,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_minmax_h3_context_ir_lowprice": "zhenzhen-minmax-h3-context-ir-lowprice",
     "Comfly_vidu_q3_video_lowprice": "zhenzhen-vidu-q3-video-lowprice",
     "Comfly_vidu_q3_short_play_lowprice": "zhenzhen-vidu-q3-short-play-lowprice",
+    "Comfly_fashvsr_video_upscale_lowprice": "zhenzhen-FlashVSR-video-upscale-lowprice",
     "Comfly_zhenzhen_upscaler_lowprice": "zhenzhen-upscaler-lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice": "zhenzhen-doubao-seed-audio-1.0-lowprice",
     "Comfly_qwen_image_3_0_lowprice": "zhenzhen-qwen-image-3.0-lowprice",

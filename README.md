@@ -71,6 +71,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260818-1
+
+seedance2.2新增原生1080P选项：native10180p
+新增视频放大模型：FlashVSR_video_upscale
+
 ### 20260814-1
 
 新增模型和节点更新

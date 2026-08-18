@@ -95,7 +95,7 @@ SEEDANCE25_MODELS = [
     "seedance-2.5-global-standard-multi",
 ]
 SEEDANCE25_SECONDS = ["-1"] + [str(value) for value in range(4, 31)]
-SEEDANCE25_RESOLUTIONS = ["480p", "720p", "1080p", "2k", "4k"]
+SEEDANCE25_RESOLUTIONS = ["480p", "720p", "1080p", "2k", "4k", "native1080p"]
 SEEDANCE25_MAX_IMAGES = 30
 SEEDANCE25_MAX_VIDEOS = 10
 SEEDANCE25_MAX_AUDIOS = 10
@@ -4597,6 +4597,7 @@ class Comfly_minimax_h3_ow_fast_video_lowprice:
 MINMAX_H3_CONTEXT_IR_TEXT_MODEL = "minmax-h3-context-ir-text"
 MINMAX_H3_CONTEXT_IR_IMAGE_MODEL = "minmax-h3-context-ir-image"
 MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL = "minmax-h3-context-ir-multimodal"
+FLASHVSR_VIDEO_UPSCALE_MODEL = "FlashVSR_video_upscale"
 MINMAX_H3_CONTEXT_IR_MODELS = [
     MINMAX_H3_CONTEXT_IR_TEXT_MODEL,
     MINMAX_H3_CONTEXT_IR_IMAGE_MODEL,
@@ -4782,6 +4783,65 @@ def extract_minmax_h3_context_ir_text(response: Dict[str, Any]) -> str:
                 return result_text.strip()
     raise SeedanceLowPriceError(
         "Context IR task completed but response did not contain result_text"
+    )
+
+
+def submit_legacy_video_task(
+    payload: Dict[str, Any],
+    config: Dict[str, Any],
+    sleep: Callable[[float], None] = time.sleep,
+) -> Tuple[str, Dict[str, Any]]:
+    """Submit a video task through the documented compatibility endpoint."""
+    return submit_minmax_h3_context_ir_task(payload, config, sleep=sleep)
+
+
+def poll_legacy_video_task(
+    task_id: str,
+    config: Dict[str, Any],
+    on_progress: Optional[Callable[[int], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> Dict[str, Any]:
+    """Poll a video task submitted through the compatibility endpoint."""
+    return poll_minmax_h3_context_ir_task(
+        task_id,
+        config,
+        on_progress=on_progress,
+        sleep=sleep,
+        clock=clock,
+    )
+
+
+def extract_legacy_video_url(response: Dict[str, Any]) -> str:
+    containers: List[Any] = [response]
+    visited: Set[int] = set()
+    index = 0
+    while index < len(containers) and index < 32:
+        container = containers[index]
+        index += 1
+        if not isinstance(container, dict):
+            continue
+        identity = id(container)
+        if identity in visited:
+            continue
+        visited.add(identity)
+        containers.extend([
+            container.get("data"),
+            container.get("result"),
+            container.get("output"),
+            container.get("content"),
+            container.get("metadata"),
+        ])
+        for key in ("result_url", "video_url", "url"):
+            value = container.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, str) and item.strip():
+                        return item.strip()
+    raise SeedanceLowPriceError(
+        "Legacy video task completed but response did not contain a video URL"
     )
 
 
@@ -5748,6 +5808,172 @@ class Comfly_vidu_q3_short_play_lowprice:
 
 
 ZHENZHEN_UPSCALER_MODEL = "zhenzhen-upscaler"
+def validate_flashvsr_inputs(video_url: str) -> None:
+    url = str(video_url or "").strip()
+    if url and not url.startswith(("http://", "https://")):
+        raise SeedanceLowPriceError(
+            "FlashVSR video_url must be an http(s) URL"
+        )
+
+
+def build_flashvsr_payload(video_url: str) -> Dict[str, Any]:
+    validate_flashvsr_inputs(video_url)
+    url = str(video_url or "").strip()
+    if not url:
+        raise SeedanceLowPriceError(
+            "FlashVSR requires metadata.video_url"
+        )
+    return {
+        "model": FLASHVSR_VIDEO_UPSCALE_MODEL,
+        "metadata": {"video_url": url},
+    }
+
+
+class Comfly_fashvsr_video_upscale_lowprice:
+    """Upscale one 480P, 3-15 second video through the legacy endpoint."""
+
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "video_url": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": (
+                            "Optional public video URL. Leave empty when input_video is "
+                            "connected. Source video must be 480P and 3-15 seconds."
+                        ),
+                    },
+                ),
+            },
+            "optional": {
+                "input_video": (VIDEO_TYPE,),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+                "seed": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 0xFFFFFFFFFFFFFFFF,
+                        "step": 1,
+                        "control_after_generate": True,
+                        "tooltip": (
+                            "ComfyUI cache seed only; this value is not sent to "
+                            "FlashVSR. Fixed reuses the cached result."
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, video_url="", **kwargs):
+        try:
+            validate_flashvsr_inputs(video_url)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        video_url: str,
+        input_video: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+        seed: int = 0,
+    ):
+        del seed
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_flashvsr_inputs(video_url)
+            source_url = str(video_url or "").strip()
+            if source_url and input_video is not None:
+                raise SeedanceLowPriceError(
+                    "FlashVSR accepts exactly one source: input_video or video_url"
+                )
+            if not source_url and input_video is None:
+                raise SeedanceLowPriceError(
+                    "Connect input_video or provide video_url for FlashVSR"
+                )
+
+            config = resolve_config(api_config)
+            if not source_url:
+                source_url = upload_media(
+                    video_to_mp4_bytes(input_video),
+                    "flashvsr_input.mp4",
+                    "video/mp4",
+                    config,
+                )
+            update_progress(20)
+
+            payload = build_flashvsr_payload(source_url)
+            print(
+                f"[FlashVSR Low Price] Submitting "
+                f"model={FLASHVSR_VIDEO_UPSCALE_MODEL}"
+            )
+            task_id, submit_response = submit_legacy_video_task(payload, config)
+            update_progress(30)
+
+            final_response = poll_legacy_video_task(
+                task_id,
+                config,
+                on_progress=lambda progress: update_progress(
+                    30 + int(progress * 0.6)
+                ),
+            )
+            result_url = extract_legacy_video_url(final_response)
+            video = download_video(result_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": FLASHVSR_VIDEO_UPSCALE_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                result_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": FLASHVSR_VIDEO_UPSCALE_MODEL,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 ZHENZHEN_UPSCALER_RESOLUTIONS = ["720p", "1080p", "2k", "4k"]
 
 
@@ -9981,6 +10207,7 @@ __all__ = [
     "Comfly_minimax_h3_ow_fast_video_lowprice",
     "Comfly_vidu_q3_video_lowprice",
     "Comfly_vidu_q3_short_play_lowprice",
+    "Comfly_fashvsr_video_upscale_lowprice",
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
     "Comfly_qwen_image_3_0_lowprice",
