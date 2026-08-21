@@ -117,10 +117,12 @@ from .seedance_low_price_nodes import (
     Comfly_suno_music_lowprice,
 )
 from .latest_image_audio_low_price_nodes import (
+    Comfly_flowmusic_lowprice,
     Comfly_minimax_audio_lowprice,
     Comfly_mureka_bgm_lowprice,
     Comfly_qwen3_tts_lowprice,
     Comfly_wan_2_7_global_image_lowprice,
+    Comfly_zhenzhen_image_gk_v2_edit_lowprice,
     Comfly_zhenzhen_image_gk_v2_lowprice,
 )
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
@@ -25570,10 +25572,12 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_qwen_image_3_0_lowprice": Comfly_qwen_image_3_0_lowprice,
     "Comfly_suno_music_lowprice": Comfly_suno_music_lowprice,
     "Comfly_zhenzhen_image_gk_v2_lowprice": Comfly_zhenzhen_image_gk_v2_lowprice,
+    "Comfly_zhenzhen_image_gk_v2_edit_lowprice": Comfly_zhenzhen_image_gk_v2_edit_lowprice,
     "Comfly_wan_2_7_global_image_lowprice": Comfly_wan_2_7_global_image_lowprice,
     "Comfly_qwen3_tts_lowprice": Comfly_qwen3_tts_lowprice,
     "Comfly_minimax_audio_lowprice": Comfly_minimax_audio_lowprice,
     "Comfly_mureka_bgm_lowprice": Comfly_mureka_bgm_lowprice,
+    "Comfly_flowmusic_lowprice": Comfly_flowmusic_lowprice,
     "Comfly_midjourney_lowprice": Comfly_midjourney_lowprice,
     "OpenAI_Sora_API_Plus": OpenAISoraAPIPlus,    
     "OpenAI_Sora_API": OpenAISoraAPI,
@@ -25732,10 +25736,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_qwen_image_3_0_lowprice": "zhenzhen-qwen-image-3.0-lowprice",
     "Comfly_suno_music_lowprice": "zhenzhen-suno-music-lowprice",
     "Comfly_zhenzhen_image_gk_v2_lowprice": "zhenzhen-image-gk-v2-lowprice",
+    "Comfly_zhenzhen_image_gk_v2_edit_lowprice": "zhenzhen-image-gk-v2-edit-lowprice",
     "Comfly_wan_2_7_global_image_lowprice": "zhenzhen-wan-2.7-global-image-lowprice",
     "Comfly_qwen3_tts_lowprice": "zhenzhen-qwen3-tts-lowprice",
     "Comfly_minimax_audio_lowprice": "zhenzhen-minimax-audio-lowprice",
     "Comfly_mureka_bgm_lowprice": "zhenzhen-mureka-bgm-lowprice",
+    "Comfly_flowmusic_lowprice": "zhenzhen-flowmusic-lowprice（9合1）",
     "Comfly_midjourney_lowprice": "zhenzhen-midjourney-lowprice",
     "OpenAI_Sora_API_Plus": "OpenAI Sora API Plus节点",
     "OpenAI_Sora_API": "OpenAI Sora API节点",

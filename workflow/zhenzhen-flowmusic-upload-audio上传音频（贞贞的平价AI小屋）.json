@@ -1,0 +1,223 @@
+{
+  "id": "8cbc36f0-e515-57aa-965e-4856db1e4be9",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadAudio",
+      "pos": [
+        40,
+        80
+      ],
+      "size": [
+        280,
+        136
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "example.wav",
+        null,
+        ""
+      ],
+      "title": "选择一个本地音频"
+    },
+    {
+      "id": 2,
+      "type": "Comfly_flowmusic_lowprice",
+      "pos": [
+        380,
+        80
+      ],
+      "size": [
+        500,
+        560
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 1
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio1",
+          "type": "AUDIO",
+          "links": null
+        },
+        {
+          "name": "audio2",
+          "type": "AUDIO",
+          "links": null
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "clip_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_urls",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "primary_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "result_paths",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_flowmusic_lowprice"
+      },
+      "widgets_values": [
+        "flowmusic-upload-audio",
+        "default",
+        "warm cinematic piano with soft strings",
+        "",
+        "a hopeful song about finding light after rain",
+        "",
+        120,
+        30,
+        "",
+        0.0,
+        15,
+        "continue naturally with soft strings",
+        0.0,
+        5.0,
+        0.5,
+        "mp3",
+        "modern",
+        0,
+        "",
+        false,
+        "fixed"
+      ],
+      "title": "导入源音频"
+    },
+    {
+      "id": 3,
+      "type": "Comfly_seedance2_low_price_settings",
+      "pos": [
+        40,
+        720
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_seedance2_low_price_settings"
+      },
+      "widgets_values": [
+        "https://api.seedance.nz",
+        ""
+      ],
+      "title": "Zhenzhen API Settings（国内版）"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "AUDIO"
+    ],
+    [
+      2,
+      3,
+      0,
+      2,
+      1,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20",
+    "ds": {
+      "scale": 0.85,
+      "offset": [
+        80,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}
