@@ -151,6 +151,212 @@ def get_config():
 def save_config(config):
     write_project_config(config)
 
+
+def _comfly_image_task_id(result):
+    """Extract an asynchronous image task id from compatible response shapes."""
+    if not isinstance(result, dict):
+        return None
+    for key in ("task_id", "taskId"):
+        value = result.get(key)
+        if isinstance(value, (str, int)) and str(value).strip():
+            return str(value).strip()
+    for key in ("data", "result", "output"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            task_id = _comfly_image_task_id(value)
+            if task_id:
+                return task_id
+        elif key == "data" and isinstance(value, (str, int)) and str(value).strip():
+            return str(value).strip()
+    value = result.get("id")
+    if isinstance(value, (str, int)) and str(value).strip():
+        return str(value).strip()
+    return None
+
+
+def _comfly_image_task_status(result):
+    if not isinstance(result, dict):
+        return ""
+    for key in ("status", "state", "task_status"):
+        value = result.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip().lower()
+    for key in ("data", "result", "output"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            status = _comfly_image_task_status(value)
+            if status:
+                return status
+    return ""
+
+
+def _comfly_image_task_error(result):
+    if not isinstance(result, dict):
+        return "Unknown task error"
+    for key in (
+        "error", "message", "detail", "fail_reason", "failed_reason",
+        "failure_reason",
+    ):
+        value = result.get(key)
+        if value:
+            if isinstance(value, (dict, list)):
+                return json.dumps(value, ensure_ascii=False)
+            return str(value)
+    for key in ("data", "result", "output"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            message = _comfly_image_task_error(value)
+            if message != "Unknown task error":
+                return message
+    return "Unknown task error"
+
+
+def _comfly_collect_image_items(result):
+    """Normalize nested synchronous/asynchronous image responses."""
+    items = []
+    seen = set()
+
+    def add_item(kind, value):
+        if not isinstance(value, str) or not value.strip():
+            return
+        value = value.strip()
+        marker = (kind, value)
+        if marker not in seen:
+            seen.add(marker)
+            items.append({kind: value})
+
+    def visit(value, depth=0, image_context=False):
+        if depth > 8 or value is None:
+            return
+        if isinstance(value, list):
+            for child in value:
+                visit(child, depth + 1, image_context)
+            return
+        if isinstance(value, str):
+            if image_context:
+                stripped = value.strip()
+                if stripped.startswith("data:image/"):
+                    add_item("b64_json", stripped)
+                elif stripped.startswith(("http://", "https://")):
+                    add_item("url", stripped)
+                elif stripped.startswith(("{", "[")):
+                    try:
+                        visit(json.loads(stripped), depth + 1, image_context)
+                    except json.JSONDecodeError:
+                        pass
+            return
+        if not isinstance(value, dict):
+            return
+
+        for key in ("url", "image_url", "imageUrl", "output_url"):
+            child = value.get(key)
+            if isinstance(child, str):
+                add_item("url", child)
+            elif isinstance(child, (dict, list)):
+                visit(child, depth + 1, True)
+        for key in ("b64_json", "base64", "image_base64", "imageBase64"):
+            child = value.get(key)
+            if isinstance(child, str):
+                add_item("b64_json", child)
+
+        image_keys = {
+            "data", "result", "output", "outputs", "images", "image",
+            "image_urls", "imageUrls", "urls", "artifacts", "files",
+        }
+        for key in image_keys:
+            if key in value:
+                visit(value[key], depth + 1, True)
+
+    visit(result)
+    return items
+
+
+def _comfly_poll_image_task(node, task_id, pbar):
+    success_states = {"success", "succeeded", "completed", "complete", "done", "finished"}
+    failure_states = {"failed", "failure", "error", "cancelled", "canceled", "rejected"}
+    polling_states = {
+        "not_start", "pending", "queued", "processing", "running",
+        "in_progress", "created",
+    }
+    query_url = f"{baseurl}/v1/images/tasks/{task_id}"
+    last_result = None
+
+    print(f"Image edit task accepted: {task_id}")
+    for attempt in range(60):
+        if attempt:
+            time.sleep(10)
+        query_response = requests.get(
+            query_url,
+            headers=node.get_headers(),
+            timeout=min(node.timeout, 60),
+        )
+        if query_response.status_code != 200:
+            error_message = (
+                f"Task query error: {query_response.status_code} - "
+                f"{query_response.text}"
+            )
+            if query_response.status_code < 500 and query_response.status_code != 429:
+                raise RuntimeError(error_message)
+            print(error_message)
+            continue
+
+        last_result = query_response.json()
+        image_items = _comfly_collect_image_items(last_result)
+        status = _comfly_image_task_status(last_result)
+        pbar.update_absolute(min(90, 50 + ((attempt + 1) * 40 // 60)))
+
+        if image_items:
+            return last_result, image_items, status or "success"
+        if status in failure_states:
+            raise RuntimeError(
+                f"Image edit task {task_id} failed: "
+                f"{_comfly_image_task_error(last_result)}"
+            )
+        if status in success_states:
+            raise RuntimeError(
+                f"Image edit task {task_id} completed but returned no image data: "
+                f"{last_result}"
+            )
+        if status and status not in polling_states:
+            print(f"Image edit task {task_id} returned unknown status: {status}")
+
+    raise RuntimeError(
+        f"Image edit task {task_id} polling timed out after 600 seconds. "
+        f"Last response: {last_result}"
+    )
+
+
+def _comfly_image_items_to_tensors(node, image_items, pbar):
+    generated_tensors = []
+    image_urls = []
+    item_messages = []
+    for index, item in enumerate(image_items):
+        pbar.update_absolute(50 + ((index + 1) * 40 // max(1, len(image_items))))
+        try:
+            if item.get("b64_json"):
+                encoded = item["b64_json"]
+                if encoded.startswith("data:"):
+                    encoded = encoded.split(",", 1)[-1]
+                image_data = base64.b64decode(encoded)
+                with Image.open(BytesIO(image_data)) as generated_image:
+                    generated_image.load()
+                    generated_image = generated_image.convert("RGB")
+                generated_tensors.append(pil2tensor(generated_image))
+                item_messages.append(f"Image {index + 1}: Base64 data")
+            elif item.get("url"):
+                image_url = item["url"]
+                generated_image = download_image_with_retry(
+                    image_url,
+                    timeout=node.timeout,
+                )
+                generated_tensors.append(pil2tensor(generated_image))
+                image_urls.append(image_url)
+                item_messages.append(f"Image {index + 1}: {image_url}")
+        except Exception as error:
+            print(f"Error processing returned image {index + 1}: {error}")
+    return generated_tensors, image_urls, item_messages
+
+
 def _comfly_split_asset_ids(s):
     if not s or not str(s).strip():
         return []
@@ -13789,6 +13995,150 @@ class Comfly_nano_banana2_edit:
             return (blank_tensor, error_message, "")
 
 
+class Comfly_nano_banana2_edit_async_compatible(Comfly_nano_banana2_edit):
+    """Nano Banana 2 Edit with transparent asynchronous task handling."""
+
+    def generate_image(self, prompt, mode="text2img", model="nano-banana-pro", aspect_ratio="auto",
+                      image_size="2K", image1=None, image2=None, image3=None, image4=None,
+                      image5=None, image6=None, image7=None, image8=None, image9=None,
+                      image10=None, image11=None, image12=None, image13=None, image14=None,
+                      apikey="", response_format="url", seed=0, skip_error=False):
+        if apikey.strip():
+            self.api_key = apikey
+            config = get_config()
+            config['api_key'] = apikey
+            save_config(config)
+
+        if not self.api_key:
+            error_message = "API key is empty. Enter it in the current workflow or connect Zhenzhen API Settings."
+            blank_tensor = pil2tensor(Image.new('RGB', (1024, 1024), color='white'))
+            if not skip_error:
+                raise RuntimeError(f"[Comfly_nano_banana2_edit] {error_message}")
+            return (blank_tensor, error_message, "")
+
+        try:
+            pbar = comfy.utils.ProgressBar(100)
+            pbar.update_absolute(10)
+            image_count = 0
+
+            if mode == "text2img":
+                headers = self.get_headers()
+                headers["Content-Type"] = "application/json"
+                payload = {
+                    "prompt": prompt,
+                    "model": model,
+                    "aspect_ratio": aspect_ratio,
+                }
+                if model in ("nano-banana-2", "nano-banana-pro"):
+                    payload["image_size"] = image_size
+                if response_format:
+                    payload["response_format"] = response_format
+                if seed > 0:
+                    payload["seed"] = seed
+                response = requests.post(
+                    f"{baseurl}/v1/images/generations",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout,
+                )
+            else:
+                headers = self.get_headers()
+                all_images = [
+                    image1, image2, image3, image4, image5, image6, image7,
+                    image8, image9, image10, image11, image12, image13, image14,
+                ]
+                files = []
+                for image in all_images:
+                    if image is None:
+                        continue
+                    pil_image = tensor2pil(image)[0]
+                    buffered = BytesIO()
+                    pil_image.save(buffered, format="PNG")
+                    buffered.seek(0)
+                    files.append(
+                        ('image', (f'image_{image_count}.png', buffered, 'image/png'))
+                    )
+                    image_count += 1
+
+                print(f"Processing {image_count} input images")
+                data = {
+                    "prompt": prompt,
+                    "model": model,
+                    "aspect_ratio": aspect_ratio,
+                }
+                if model in ("nano-banana-2", "nano-banana-pro"):
+                    data["image_size"] = image_size
+                if response_format:
+                    data["response_format"] = response_format
+                if seed > 0:
+                    data["seed"] = str(seed)
+
+                response = requests.post(
+                    f"{baseurl}/v1/images/edits",
+                    headers=headers,
+                    params={"async": "true"},
+                    data=data,
+                    files=files,
+                    timeout=self.timeout,
+                )
+
+            pbar.update_absolute(50)
+            if not 200 <= response.status_code < 300:
+                raise RuntimeError(
+                    f"API Error: {response.status_code} - {response.text}"
+                )
+
+            result = response.json()
+            image_items = _comfly_collect_image_items(result)
+            task_id = None
+            task_status = ""
+            if not image_items:
+                task_id = _comfly_image_task_id(result)
+                if not task_id:
+                    raise RuntimeError(
+                        f"Unexpected API response (no image data or task id): {result}"
+                    )
+                result, image_items, task_status = _comfly_poll_image_task(
+                    self, task_id, pbar
+                )
+
+            generated_tensors, image_urls, item_messages = (
+                _comfly_image_items_to_tensors(self, image_items, pbar)
+            )
+            if not generated_tensors:
+                raise RuntimeError(
+                    f"Failed to decode images returned by the API: {result}"
+                )
+
+            response_info = f"Generated {len(generated_tensors)} images using {model}\n"
+            if task_id:
+                response_info += f"Task ID: {task_id}\n"
+                response_info += f"Task status: {task_status or 'success'}\n"
+            if model in ("nano-banana-2", "nano-banana-pro"):
+                response_info += f"Image size: {image_size}\n"
+            response_info += f"Aspect ratio: {aspect_ratio}\n"
+            if mode == "img2img":
+                response_info += f"Input images: {image_count}\n"
+            if seed > 0:
+                response_info += f"Seed: {seed}\n"
+            if item_messages:
+                response_info += "\n".join(item_messages) + "\n"
+
+            pbar.update_absolute(100)
+            combined_tensor = torch.cat(generated_tensors, dim=0)
+            first_image_url = image_urls[0] if image_urls else ""
+            return (combined_tensor, response_info, first_image_url)
+        except Exception as error:
+            error_message = f"Error in image generation: {error}"
+            print(error_message)
+            import traceback
+            traceback.print_exc()
+            blank_tensor = pil2tensor(Image.new('RGB', (1024, 1024), color='white'))
+            if not skip_error:
+                raise
+            return (blank_tensor, error_message, "")
+
+
 
 
 
@@ -25638,7 +25988,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_nano_banana": Comfly_nano_banana,
     "Comfly_nano_banana_fal": Comfly_nano_banana_fal,
     "Comfly_nano_banana_edit": Comfly_nano_banana_edit,
-    "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit,
+    "Comfly_nano_banana2_edit": Comfly_nano_banana2_edit_async_compatible,
     "Comfly_nano_banana2_edit_S2A": Comfly_nano_banana2_edit_S2A,
     "Comfly_gemini_3_1_flash_image_edit_S2A": Comfly_gemini_3_1_flash_image_edit_S2A,
     "Comfly_Z_image_turbo": Comfly_Z_image_turbo,
