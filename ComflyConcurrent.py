@@ -29,6 +29,7 @@ IMAGE_TASK_TYPE = "COMFLY_IMAGE_FUTURE"
 VIDEO_TASK_TYPE = "COMFLY_VIDEO_FUTURE"
 ALLOWED_MODULES = {
     "Comfly",
+    "aug22_low_price_nodes",
     "fal_batch_nodes",
     "latest_image_audio_low_price_nodes",
     "seedance_low_price_nodes",

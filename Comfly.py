@@ -125,6 +125,12 @@ from .latest_image_audio_low_price_nodes import (
     Comfly_zhenzhen_image_gk_v2_edit_lowprice,
     Comfly_zhenzhen_image_gk_v2_lowprice,
 )
+from .aug22_low_price_nodes import (
+    Comfly_hunyuan3d_v3_1_lowprice,
+    Comfly_zhenzhen_image_gk_v2_region_edit_lowprice,
+    Comfly_zhenzhen_image_gk_v2_segment_lowprice,
+    Comfly_zhenzhen_video_g_omni_flash_lowprice_v2,
+)
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
 
 # For LLM API functionality
@@ -25900,6 +25906,10 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_zhenzhen_image_g_v2_lowprice": Comfly_zhenzhen_image_g_v2_lowprice,
     "Comfly_zhenzhen_image_nb_lowprice": Comfly_zhenzhen_image_nb_lowprice,
     "Comfly_zhenzhen_video_g_omni_flash_lowprice": Comfly_zhenzhen_video_g_omni_flash_lowprice,
+    "Comfly_zhenzhen_video_g_omni_flash_lowprice_v2": Comfly_zhenzhen_video_g_omni_flash_lowprice_v2,
+    "Comfly_hunyuan3d_v3_1_lowprice": Comfly_hunyuan3d_v3_1_lowprice,
+    "Comfly_zhenzhen_image_gk_v2_segment_lowprice": Comfly_zhenzhen_image_gk_v2_segment_lowprice,
+    "Comfly_zhenzhen_image_gk_v2_region_edit_lowprice": Comfly_zhenzhen_image_gk_v2_region_edit_lowprice,
     "Comfly_zhenzhen_video_gk_v15_lowprice": Comfly_zhenzhen_video_gk_v15_lowprice,
     "Comfly_zhenzhen_video_v31_lowprice": Comfly_zhenzhen_video_v31_lowprice,
     "Comfly_whisper_1_lowprice": Comfly_whisper_1_lowprice,
@@ -26063,7 +26073,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_zhenzhen_image_g2_lowprice": "zhenzhen-image-g2-lowprice",
     "Comfly_zhenzhen_image_g_v2_lowprice": "zhenzhen-image-g-v2-lowprice",
     "Comfly_zhenzhen_image_nb_lowprice": "zhenzhen-image-nb-lowprice",
-    "Comfly_zhenzhen_video_g_omni_flash_lowprice": "zhenzhen-video-g-omni-flash-lowprice",
+    "Comfly_zhenzhen_video_g_omni_flash_lowprice": "zhenzhen-video-g-omni-flash（旧版兼容）",
+    "Comfly_zhenzhen_video_g_omni_flash_lowprice_v2": "zhenzhen-video-g-omni-flash-lowprice",
+    "Comfly_hunyuan3d_v3_1_lowprice": "zhenzhen-hunyuan3d-v3.1-lowprice（文生/图生3D）",
+    "Comfly_zhenzhen_image_gk_v2_segment_lowprice": "zhenzhen-image-gk-v2-segment",
+    "Comfly_zhenzhen_image_gk_v2_region_edit_lowprice": "zhenzhen-image-gk-v2-region-edit",
     "Comfly_zhenzhen_video_gk_v15_lowprice": "zhenzhen-video-gk-v15-lowprice",
     "Comfly_zhenzhen_video_v31_lowprice": "zhenzhen-video-v31-lowprice",
     "Comfly_whisper_1_lowprice": "zhenzhen-whisper-1-lowprice",

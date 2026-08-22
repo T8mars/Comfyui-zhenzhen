@@ -22,7 +22,9 @@ EXECUTION_SEED_SPEC = (
     },
 )
 
-_GENERATION_OUTPUT_TYPES = frozenset({"IMAGE", "VIDEO", "AUDIO", "FILE_3D"})
+_GENERATION_OUTPUT_TYPES = frozenset(
+    {"IMAGE", "VIDEO", "AUDIO", "FILE_3D", "FILE_3D_GLB"}
+)
 _INPUT_SECTIONS = ("required", "optional", "hidden")
 _INSTALLED_MARKER = "_comfly_execution_seed_installed"
 _NON_GENERATION_NODE_KEYS = frozenset(
