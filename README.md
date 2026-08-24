@@ -71,6 +71,17 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
 
+### 20260824-2
+
+优化下载
+
+### 20260824-1
+
+新增贞贞的平价AI小屋 Wan 3.0 四合一视频节点：`zhenzhen-wan-3.0-video-lowprice（4合1）`。  
+支持 `wan-3.0-i2v`、`wan-3.0-r2v`、`wan-3.0-global-i2v`、`wan-3.0-global-r2v`。  
+I2V 支持首帧和可选尾帧；R2V 支持最多 10 张图片、5 个视频、5 段音频，以及互斥的文档或网页参考。  
+新增 4 份对应工作流，APIKEY 和运行结果均不写入工作流。  
+
 ### 20260822-1
 
 新增模型和节点  

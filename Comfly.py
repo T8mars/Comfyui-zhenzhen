@@ -141,6 +141,8 @@ except ImportError:
 
 baseurl = ZHENZHEN_PRIMARY_BASE_URL
 FAL_SEED_MAX = 65535
+LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS = 1800
+LEGACY_MIDJOURNEY_MAX_CONSECUTIVE_POLL_FAILURES = 6
 
 def _normalize_fal_seed(seed):
     try:
@@ -590,7 +592,7 @@ class ComflyVideoAdapter:
     def save_to(self, output_path, format="auto", codec="auto", metadata=None):
         if self.is_url:
             try:
-                response = requests.get(self.video_url, stream=True)
+                response = requests.get(self.video_url, stream=True, timeout=300)
                 response.raise_for_status()
                 
                 with open(output_path, "wb") as f:
@@ -646,7 +648,7 @@ def create_audio_object(audio_url):
         os.makedirs(temp_dir, exist_ok=True)
         temp_file = os.path.join(temp_dir, f"suno_{str(uuid.uuid4())[:8]}.mp3")
         
-        response = requests.get(audio_url, stream=True)
+        response = requests.get(audio_url, stream=True, timeout=300)
         response.raise_for_status()
         
         with open(temp_file, "wb") as f:
@@ -1187,11 +1189,16 @@ class Comfly_Mj(ComflyBaseNode):
             print(f"Task ID: {taskId}")
             
             task_result = None
+            deadline = (
+                time.monotonic() + LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS
+            )
+            consecutive_fetch_failures = 0
 
-            while True:
+            while time.monotonic() < deadline:
                 time.sleep(1)
                 try:
                     task_result = self.midjourney_fetch_task_result_sync(taskId)
+                    consecutive_fetch_failures = 0
  
                     if task_result.get("status") == "FAILURE":
                         fail_reason = task_result.get("fail_reason", "Unknown failure reason")
@@ -1211,9 +1218,23 @@ class Comfly_Mj(ComflyBaseNode):
                 except Exception as e:
                     if "Midjourney task failed" in str(e):
                         raise  
+                    consecutive_fetch_failures += 1
+                    if (
+                        consecutive_fetch_failures
+                        >= LEGACY_MIDJOURNEY_MAX_CONSECUTIVE_POLL_FAILURES
+                    ):
+                        raise RuntimeError(
+                            "Midjourney task polling failed repeatedly: "
+                            f"{str(e)}"
+                        ) from e
                     print(f"Error fetching task result: {str(e)}")
                     time.sleep(2)
                     continue
+            else:
+                raise TimeoutError(
+                    "Midjourney task polling timed out after "
+                    f"{LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS} seconds"
+                )
                 
             image_url = task_result.get("imageUrl", "")
             prompt = task_result.get("prompt", text)
@@ -1518,7 +1539,9 @@ class Comfly_Mju(ComflyBaseNode):
                 raise self.MidjourneyError(f"Unexpected response from Midjourney API: {response}")
 
             new_task_id = response["result"]
-            while True:
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS
+            while loop.time() < deadline:
                 await asyncio.sleep(1)
                 task_result = await self.midjourney_fetch_task_result(new_task_id)
 
@@ -1530,11 +1553,16 @@ class Comfly_Mju(ComflyBaseNode):
 
                 if task_result.get("status") == "SUCCESS":
                     break
+            else:
+                raise self.MidjourneyError(
+                    "Midjourney action polling timed out after "
+                    f"{LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS} seconds"
+                )
 
             if task_result.get("code") == 5 and task_result.get("description") == "task_no_found":
                 raise self.MidjourneyError(f"Task not found for taskId: {new_task_id}")
 
-            response = requests.get(task_result["imageUrl"])
+            response = requests.get(task_result["imageUrl"], timeout=300)
             image = Image.open(BytesIO(response.content))
             tensor_image = pil2tensor(image)
             return tensor_image, new_task_id 
@@ -1575,12 +1603,28 @@ class Comfly_Mju(ComflyBaseNode):
                 response = await self.midjourney_submit_action(action, taskId, index, custom_id)
                 taskId = response["result"]
 
-                
                 task_result = None
-                while not task_result or task_result.get("status") != "SUCCESS":
+                loop = asyncio.get_running_loop()
+                deadline = loop.time() + LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS
+                while loop.time() < deadline:
                     await asyncio.sleep(1)
                     task_result = await self.midjourney_fetch_task_result(taskId)
-                
+
+                    if task_result.get("status") == "FAILURE":
+                        fail_reason = task_result.get(
+                            "fail_reason", "Unknown failure reason"
+                        )
+                        raise self.MidjourneyError(
+                            f"Task failed: {fail_reason}"
+                        )
+                    if task_result.get("status") == "SUCCESS":
+                        break
+                else:
+                    raise self.MidjourneyError(
+                        "Midjourney custom action polling timed out after "
+                        f"{LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS} seconds"
+                    )
+
                 image_url = task_result["imageUrl"]
                 return image_url
                 
@@ -2021,7 +2065,9 @@ class Comfly_Mjv(ComflyBaseNode):
             return (blank_tensor,)
 
     async def process_task(self, taskId):
-        while True:
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS
+        while loop.time() < deadline:
             await asyncio.sleep(1)
             try:
                 task_result = await self.midjourney_fetch_task_result(taskId)
@@ -2041,6 +2087,10 @@ class Comfly_Mjv(ComflyBaseNode):
                 error_message = f"Error fetching task result: {str(e)}"
                 print(error_message)
                 raise Exception(error_message)
+        raise TimeoutError(
+            "Midjourney task polling timed out after "
+            f"{LEGACY_MIDJOURNEY_POLL_TIMEOUT_SECONDS} seconds"
+        )
 
     async def submit_action(self, customId, taskId):
         headers = self.get_headers()
