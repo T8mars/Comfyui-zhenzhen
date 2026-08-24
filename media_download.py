@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import ssl
 import threading
 import time
 from typing import Any
@@ -59,15 +60,25 @@ def direct_media_get(url: str, **kwargs: Any) -> Any:
     return _direct_session().get(url, **kwargs)
 
 
-def _should_retry_without_proxy(error: BaseException) -> bool:
+def is_media_route_error(error: BaseException) -> bool:
+    """Return whether a generated-media failure may improve on another route."""
+    if isinstance(error, requests.exceptions.HTTPError):
+        return False
     return isinstance(
         error,
         (
+            requests.exceptions.RequestException,
             requests.exceptions.ConnectionError,
             requests.exceptions.ProxyError,
             ConnectionError,
+            TimeoutError,
+            ssl.SSLError,
         ),
     )
+
+
+def _should_retry_without_proxy(error: BaseException) -> bool:
+    return is_media_route_error(error)
 
 
 def get_media_response(
@@ -203,6 +214,7 @@ __all__ = [
     "media_download_timeout",
     "direct_media_get",
     "get_media_response",
+    "is_media_route_error",
     "download_image_with_retry",
     "download_image_with_alpha_retry",
 ]

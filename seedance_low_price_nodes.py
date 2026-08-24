@@ -29,6 +29,7 @@ try:
         download_image_with_alpha_retry,
         download_image_with_retry,
         get_media_response,
+        is_media_route_error,
         media_download_timeout,
     )
 except ImportError:
@@ -37,6 +38,7 @@ except ImportError:
         download_image_with_alpha_retry,
         download_image_with_retry,
         get_media_response,
+        is_media_route_error,
         media_download_timeout,
     )
 
@@ -157,17 +159,6 @@ def resolve_config(api_config: Any = None) -> Dict[str, Any]:
             "Seedance API key is required. Connect the Low Price Settings node, "
             "enter its key in the workflow, or set SEEDANCE_API_KEY."
         )
-
-    if not api_key.startswith("sk-"):
-        raise SeedanceLowPriceError("Seedance API key must start with 'sk-'.")
-    if any(character.isspace() for character in api_key):
-        raise SeedanceLowPriceError("Seedance API key must not contain whitespace.")
-    try:
-        api_key.encode("ascii")
-    except UnicodeEncodeError as exc:
-        raise SeedanceLowPriceError(
-            "Seedance API key must contain ASCII characters only."
-        ) from exc
 
     config = {
         "base_url": normalize_base_url(base_url or DEFAULT_BASE_URL),
@@ -368,15 +359,9 @@ def submit_task(
 
         data = _response_json(response)
         message = extract_error_message(data, response.text[:300])
-        if response.status_code == 429:
+        if response.status_code == 429 or response.status_code >= 500:
             last_error = f"HTTP {response.status_code}: {message}"
             continue
-        if response.status_code >= 500:
-            raise RuntimeError(
-                "Submit returned a server error after the request may have created a paid task; "
-                "it was not retried to avoid a duplicate task. Check the provider console "
-                f"before retrying manually (HTTP {response.status_code}: {message})."
-            )
         if not 200 <= response.status_code < 300:
             raise SeedanceLowPriceError(
                 f"Submit rejected (HTTP {response.status_code}): {message}"
@@ -407,7 +392,7 @@ def poll_task(
     failures = 0
     while True:
         if clock() - start > config.get("max_poll_time", 1800):
-            raise RuntimeError("Polling timed out")
+            raise RuntimeError(f"Polling timed out [task_id: {task_id}]")
         sleep(config.get("poll_interval", 4))
         try:
             response = _get_session().get(
@@ -418,7 +403,7 @@ def poll_task(
         except requests.RequestException:
             failures += 1
             if failures >= 6:
-                raise RuntimeError("Polling failed after repeated network errors")
+                raise RuntimeError(f"Polling failed after repeated network errors [task_id: {task_id}]")
             sleep(min(failures * 2, 10))
             continue
 
@@ -427,12 +412,14 @@ def poll_task(
             message = extract_error_message(data, response.text[:300])
             if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
                 raise SeedanceLowPriceError(
-                    f"Polling rejected (HTTP {response.status_code}): {message}"
+                    f"Polling rejected (HTTP {response.status_code}): {message} "
+                    f"[task_id: {task_id}]"
                 )
             failures += 1
             if failures >= 6:
                 raise RuntimeError(
-                    f"Polling repeatedly returned HTTP {response.status_code}: {message}"
+                    f"Polling repeatedly returned HTTP {response.status_code}: {message} "
+                    f"[task_id: {task_id}]"
                 )
             sleep(min(failures * 2, 10))
             continue
@@ -441,7 +428,7 @@ def poll_task(
         except ValueError:
             failures += 1
             if failures >= 6:
-                raise RuntimeError("Polling repeatedly returned invalid JSON")
+                raise RuntimeError(f"Polling repeatedly returned invalid JSON [task_id: {task_id}]")
             continue
 
         failures = 0
@@ -453,7 +440,7 @@ def poll_task(
             return data
         if status == "failed":
             message = extract_error_message(data, "video generation failed")
-            raise SeedanceLowPriceError(f"Task failed: {message}")
+            raise SeedanceLowPriceError(f"Task failed: {message} [task_id: {task_id}]")
 
 
 def extract_video_url(response: Dict[str, Any]) -> str:
@@ -490,6 +477,7 @@ def download_video(
     path = os.path.join(output_dir, f"seedance_low_price_{uuid.uuid4().hex[:12]}.mp4")
     part_path = f"{path}.part"
     last_error: Optional[Exception] = None
+    force_direct = False
     for attempt in range(max_retries):
         if attempt:
             time.sleep(2 ** attempt)
@@ -498,8 +486,8 @@ def download_video(
             started = time.monotonic()
             response = get_media_response(
                 url,
-                request_get=_get_session().get,
-                direct_get=direct_media_get,
+                request_get=(direct_media_get if force_direct else _get_session().get),
+                direct_get=(None if force_direct else direct_media_get),
                 stream=True,
                 timeout=media_download_timeout(45),
             )
@@ -514,14 +502,12 @@ def download_video(
                         )
             if not os.path.isfile(part_path) or os.path.getsize(part_path) == 0:
                 raise RuntimeError("downloaded video is empty")
-            with open(part_path, "rb") as handle:
-                header = handle.read(64)
-            if len(header) < 12 or b"ftyp" not in header[4:32]:
-                raise RuntimeError("downloaded result is not a valid MP4 stream")
             os.replace(part_path, path)
             return _video_from_path(path)
         except Exception as exc:
             last_error = exc
+            if is_media_route_error(exc):
+                force_direct = True
             try:
                 os.remove(part_path)
             except OSError:
@@ -537,7 +523,10 @@ def download_video(
             os.remove(candidate)
         except OSError:
             pass
-    raise RuntimeError(f"Video download failed after {max_retries} attempts: {last_error}")
+    error_name = type(last_error).__name__ if last_error is not None else "UnknownError"
+    raise RuntimeError(
+        f"Video download failed after {max_retries} attempts ({error_name})"
+    ) from None
 
 
 def image_to_png_bytes(image: Any) -> bytes:
@@ -2357,6 +2346,27 @@ WAN27_SPICY_MODEL = "wan-2.7-spicy-i2v"
 WAN27_SPICY_SECONDS = [str(value) for value in range(2, 16)]
 WAN27_SPICY_RESOLUTIONS = ["720p", "1080p"]
 
+WAN30_I2V_MODEL = "wan-3.0-i2v"
+WAN30_R2V_MODEL = "wan-3.0-r2v"
+WAN30_GLOBAL_I2V_MODEL = "wan-3.0-global-i2v"
+WAN30_GLOBAL_R2V_MODEL = "wan-3.0-global-r2v"
+WAN30_I2V_MODELS = [WAN30_I2V_MODEL, WAN30_GLOBAL_I2V_MODEL]
+WAN30_R2V_MODELS = [WAN30_R2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
+WAN30_GLOBAL_MODELS = [WAN30_GLOBAL_I2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
+WAN30_MODELS = [
+    WAN30_I2V_MODEL,
+    WAN30_R2V_MODEL,
+    WAN30_GLOBAL_I2V_MODEL,
+    WAN30_GLOBAL_R2V_MODEL,
+]
+WAN30_SECONDS = ["auto", *[str(value) for value in range(2, 31)]]
+WAN30_RESOLUTIONS = ["480P", "720P", "1080P"]
+WAN30_RATIOS = ["adaptive", "16:9", "4:3", "1:1", "3:4", "9:16"]
+WAN30_PROMPT_MAX_LENGTH = 20000
+WAN30_MAX_IMAGES = 10
+WAN30_MAX_VIDEOS = 5
+WAN30_MAX_AUDIOS = 5
+
 
 def validate_wan27_spicy_inputs(
     prompt: str,
@@ -2602,63 +2612,6 @@ class Comfly_wan_2_7_spicy_i2v_lowprice:
             )
 
 
-WAN30_I2V_MODEL = "wan-3.0-i2v"
-WAN30_R2V_MODEL = "wan-3.0-r2v"
-WAN30_GLOBAL_I2V_MODEL = "wan-3.0-global-i2v"
-WAN30_GLOBAL_R2V_MODEL = "wan-3.0-global-r2v"
-WAN30_I2V_MODELS = [WAN30_I2V_MODEL, WAN30_GLOBAL_I2V_MODEL]
-WAN30_R2V_MODELS = [WAN30_R2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
-WAN30_GLOBAL_MODELS = [WAN30_GLOBAL_I2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
-WAN30_MODELS = [
-    WAN30_I2V_MODEL,
-    WAN30_R2V_MODEL,
-    WAN30_GLOBAL_I2V_MODEL,
-    WAN30_GLOBAL_R2V_MODEL,
-]
-WAN30_SECONDS = ["auto", *[str(value) for value in range(2, 31)]]
-WAN30_RESOLUTIONS = ["480P", "720P", "1080P"]
-WAN30_RATIOS = ["adaptive", "16:9", "4:3", "1:1", "3:4", "9:16"]
-WAN30_PROMPT_MAX_LENGTH = 20000
-WAN30_MAX_IMAGES = 10
-WAN30_MAX_VIDEOS = 5
-WAN30_MAX_AUDIOS = 5
-
-
-def _validate_wan30_url(name: str, value: str) -> str:
-    text = str(value or "").strip()
-    if not text:
-        return ""
-    parsed = urlsplit(text)
-    if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        raise SeedanceLowPriceError(
-            f"Wan 3.0 {name} must be an http(s) URL"
-        )
-    if len(text) > 2048:
-        raise SeedanceLowPriceError(
-            f"Wan 3.0 {name} must not exceed 2048 characters"
-        )
-    return text
-
-
-def _gather_wan30_slots(
-    values: Dict[str, Any],
-    prefix: str,
-    maximum: int,
-) -> List[Tuple[int, Any]]:
-    slots = [
-        (index, values.get(f"{prefix}{index}"))
-        for index in range(1, maximum + 1)
-        if values.get(f"{prefix}{index}") is not None
-    ]
-    connected = [index for index, _value in slots]
-    if connected and connected != list(range(1, len(connected) + 1)):
-        print(
-            f"[Wan 3.0 Low Price] {prefix} slots {connected} contain gaps; "
-            f"connected inputs will be compacted in their original order."
-        )
-    return slots
-
-
 def validate_wan30_inputs(
     model: str,
     prompt: str,
@@ -2688,14 +2641,25 @@ def validate_wan30_inputs(
             f"Wan 3.0 prompt exceeds {WAN30_PROMPT_MAX_LENGTH} characters"
         )
     if strict and model in WAN30_R2V_MODELS and not prompt_text:
-        raise SeedanceLowPriceError("Wan 3.0 R2V requires a prompt")
+        raise SeedanceLowPriceError("Wan 3.0 R2V prompt is required")
 
-    file_url_text = _validate_wan30_url("file_url", file_url)
-    link_url_text = _validate_wan30_url("link_url", link_url)
+    file_url_text = str(file_url or "").strip()
+    link_url_text = str(link_url or "").strip()
     if file_url_text and link_url_text:
         raise SeedanceLowPriceError(
             "Wan 3.0 file_url and link_url are mutually exclusive"
         )
+    for name, value in (("file_url", file_url_text), ("link_url", link_url_text)):
+        if value:
+            parsed = urlsplit(value)
+            if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                raise SeedanceLowPriceError(
+                    f"Wan 3.0 {name} must be an http(s) URL"
+                )
+            if len(value) > 2048:
+                raise SeedanceLowPriceError(
+                    f"Wan 3.0 {name} must not exceed 2048 characters"
+                )
 
     try:
         seed_value = int(seed)
@@ -2727,49 +2691,37 @@ def validate_wan30_inputs(
 
 
 def build_wan30_payload(
-    model: str,
-    prompt: str,
-    seconds: str,
-    resolution: str,
-    ratio: str,
-    generate_audio: bool,
-    enable_thinking: bool,
-    file_url: str,
-    link_url: str,
-    seed: int,
-    image_urls: Optional[List[str]] = None,
-    video_urls: Optional[List[str]] = None,
-    audio_urls: Optional[List[str]] = None,
+    values: Dict[str, Any],
+    media: Dict[str, List[str]],
 ) -> Dict[str, Any]:
+    model = str(values.get("model") or "")
+    prompt = str(values.get("prompt") or "").strip()
     validate_wan30_inputs(
         model,
         prompt,
-        seconds,
-        resolution,
-        ratio,
-        file_url,
-        link_url,
-        seed,
+        str(values.get("seconds") or ""),
+        str(values.get("resolution") or ""),
+        str(values.get("ratio") or ""),
+        str(values.get("file_url") or ""),
+        str(values.get("link_url") or ""),
+        values.get("seed", 0),
     )
 
-    prompt_text = str(prompt or "").strip()
-    images = [str(value).strip() for value in (image_urls or []) if str(value).strip()]
-    videos = [str(value).strip() for value in (video_urls or []) if str(value).strip()]
-    audios = [str(value).strip() for value in (audio_urls or []) if str(value).strip()]
     metadata: Dict[str, Any] = {
-        "resolution": resolution,
-        "ratio": ratio,
-        "generate_audio": bool(generate_audio),
-        "seed": int(seed),
+        "resolution": values["resolution"],
+        "ratio": values["ratio"],
+        "generate_audio": bool(values.get("generate_audio", True)),
+        "seed": int(values.get("seed", 0)),
     }
     payload: Dict[str, Any] = {
         "model": model,
-        "seconds": str(seconds),
+        "seconds": str(values["seconds"]),
         "metadata": metadata,
     }
-    if prompt_text:
-        payload["prompt"] = prompt_text
+    if prompt:
+        payload["prompt"] = prompt
 
+    images = list(media.get("images") or [])
     if model in WAN30_I2V_MODELS:
         if not images:
             raise SeedanceLowPriceError(
@@ -2777,27 +2729,31 @@ def build_wan30_payload(
             )
         payload["images"] = images[:2]
         if model == WAN30_GLOBAL_I2V_MODEL:
-            metadata["enable_thinking"] = bool(enable_thinking)
+            metadata["enable_thinking"] = bool(
+                values.get("enable_thinking", False)
+            )
         return payload
 
-    if not prompt_text:
-        raise SeedanceLowPriceError("Wan 3.0 R2V requires a prompt")
+    if not prompt:
+        raise SeedanceLowPriceError("Wan 3.0 R2V prompt is required")
     if images:
         payload["images"] = images[:WAN30_MAX_IMAGES]
-    if videos:
-        metadata["video_url"] = videos[:WAN30_MAX_VIDEOS]
-    if audios:
-        metadata["audio_url"] = audios[:WAN30_MAX_AUDIOS]
+    video_urls = list(media.get("video_urls") or [])
+    if video_urls:
+        metadata["video_url"] = video_urls[:WAN30_MAX_VIDEOS]
+    audio_urls = list(media.get("audio_urls") or [])
+    if audio_urls:
+        metadata["audio_url"] = audio_urls[:WAN30_MAX_AUDIOS]
 
-    file_url_text = _validate_wan30_url("file_url", file_url)
-    link_url_text = _validate_wan30_url("link_url", link_url)
-    if file_url_text:
-        metadata["file_url"] = file_url_text
-    if link_url_text:
-        metadata["link_url"] = link_url_text
+    file_url = str(values.get("file_url") or "").strip()
+    link_url = str(values.get("link_url") or "").strip()
+    if file_url:
+        metadata["file_url"] = file_url
+    if link_url:
+        metadata["link_url"] = link_url
     if model == WAN30_GLOBAL_R2V_MODEL:
         metadata["enable_thinking"] = bool(
-            enable_thinking or file_url_text or link_url_text
+            values.get("enable_thinking", False) or file_url or link_url
         )
     return payload
 
@@ -2805,28 +2761,27 @@ def build_wan30_payload(
 class Comfly_wan_3_0_video_lowprice:
     @classmethod
     def INPUT_TYPES(cls):
-        optional: Dict[str, Tuple[Any, ...]] = {}
+        optional: Dict[str, tuple] = {"api_config": (CONFIG_TYPE,)}
         for index in range(1, WAN30_MAX_IMAGES + 1):
             optional[f"image{index}"] = (
                 "IMAGE",
                 {
                     "tooltip": (
-                        f"I2V: image1 is the first frame and image2 is the optional last frame. "
-                        f"R2V: ordered reference image {index}/10."
+                        f"Wan 3.0 图片 {index}。I2V 使用 image1 必填首帧、"
+                        "image2 可选尾帧；R2V 最多 10 张。"
                     )
                 },
             )
         for index in range(1, WAN30_MAX_VIDEOS + 1):
             optional[f"video{index}"] = (
                 VIDEO_TYPE,
-                {"tooltip": f"Wan 3.0 R2V ordered reference video {index}/5."},
+                {"tooltip": f"Wan 3.0 R2V 参考视频 {index}，最多 5 个。"},
             )
         for index in range(1, WAN30_MAX_AUDIOS + 1):
             optional[f"audio{index}"] = (
                 AUDIO_TYPE,
-                {"tooltip": f"Wan 3.0 R2V ordered reference audio {index}/5."},
+                {"tooltip": f"Wan 3.0 R2V 参考音频 {index}，最多 5 个。"},
             )
-        optional["api_config"] = (CONFIG_TYPE,)
         optional["skip_error"] = ("BOOLEAN", {"default": False})
         return {
             "required": {
@@ -2836,7 +2791,10 @@ class Comfly_wan_3_0_video_lowprice:
                     {
                         "multiline": True,
                         "default": "",
-                        "tooltip": "Optional for I2V; required for R2V; maximum 20000 characters.",
+                        "tooltip": (
+                            "最多 20000 字符；R2V 必填，I2V 可选。R2V 可按上传"
+                            "顺序引用 Image 1、Video 1、Audio 1。"
+                        ),
                     },
                 ),
                 "seconds": (WAN30_SECONDS, {"default": "2"}),
@@ -2848,8 +2806,8 @@ class Comfly_wan_3_0_video_lowprice:
                     {
                         "default": False,
                         "tooltip": (
-                            "Global models only. Global R2V forces this on when file_url "
-                            "or link_url is supplied."
+                            "仅海外模型使用；Global R2V 传入 file_url 或 "
+                            "link_url 时自动开启。"
                         ),
                     },
                 ),
@@ -2857,14 +2815,14 @@ class Comfly_wan_3_0_video_lowprice:
                     "STRING",
                     {
                         "default": "",
-                        "tooltip": "R2V public document URL; mutually exclusive with link_url.",
+                        "tooltip": "R2V 可选公网文件 URL，与 link_url 互斥。",
                     },
                 ),
                 "link_url": (
                     "STRING",
                     {
                         "default": "",
-                        "tooltip": "R2V public webpage URL; mutually exclusive with file_url.",
+                        "tooltip": "R2V 可选网页 URL，与 file_url 互斥。",
                     },
                 ),
                 "seed": (
@@ -2890,7 +2848,7 @@ class Comfly_wan_3_0_video_lowprice:
     @classmethod
     def VALIDATE_INPUTS(
         cls,
-        model=None,
+        model=WAN30_I2V_MODEL,
         prompt="",
         seconds="2",
         resolution="480P",
@@ -2901,8 +2859,6 @@ class Comfly_wan_3_0_video_lowprice:
         strict=False,
         **kwargs,
     ):
-        if model is None:
-            return True
         try:
             validate_wan30_inputs(
                 model,
@@ -2920,6 +2876,103 @@ class Comfly_wan_3_0_video_lowprice:
             return str(exc)
         return True
 
+    @staticmethod
+    def _connected_slots(
+        values: Dict[str, Any],
+        base_name: str,
+        count: int,
+    ) -> List[Tuple[int, Any]]:
+        slots = [
+            (index, values.get(f"{base_name}{index}"))
+            for index in range(1, count + 1)
+            if values.get(f"{base_name}{index}") is not None
+        ]
+        connected = [index for index, _value in slots]
+        if connected and connected != list(range(1, len(connected) + 1)):
+            print(
+                f"[Wan 3.0 Low Price] {base_name} slots {connected} contain gaps; "
+                "compacting them in slot order."
+            )
+        return slots
+
+    def collect_media(
+        self,
+        values: Dict[str, Any],
+        config: Dict[str, Any],
+        progress_cb: Optional[Callable[[float], None]] = None,
+    ) -> Dict[str, List[str]]:
+        progress_cb = progress_cb or (lambda _value: None)
+        validation = self.VALIDATE_INPUTS(strict=True, **values)
+        if validation is not True:
+            raise SeedanceLowPriceError(validation)
+        model = values["model"]
+        image_limit = 2 if model in WAN30_I2V_MODELS else WAN30_MAX_IMAGES
+        image_slots = self._connected_slots(values, "image", image_limit)
+        video_slots = (
+            self._connected_slots(values, "video", WAN30_MAX_VIDEOS)
+            if model in WAN30_R2V_MODELS
+            else []
+        )
+        audio_slots = (
+            self._connected_slots(values, "audio", WAN30_MAX_AUDIOS)
+            if model in WAN30_R2V_MODELS
+            else []
+        )
+        total = len(image_slots) + len(video_slots) + len(audio_slots)
+        if total == 0:
+            progress_cb(1.0)
+            return {"images": [], "video_urls": [], "audio_urls": []}
+
+        done = 0
+        image_urls: List[str] = []
+        video_urls: List[str] = []
+        audio_urls: List[str] = []
+        for slot, image in image_slots:
+            image_urls.append(
+                upload_media(
+                    image_to_png_bytes(image),
+                    f"wan30_image_{slot}.png",
+                    "image/png",
+                    config,
+                )
+            )
+            done += 1
+            progress_cb(done / total)
+        for slot, video in video_slots:
+            video_urls.append(
+                upload_media(
+                    video_to_mp4_bytes(video),
+                    f"wan30_video_{slot}.mp4",
+                    "video/mp4",
+                    config,
+                )
+            )
+            done += 1
+            progress_cb(done / total)
+        for slot, audio in audio_slots:
+            audio_urls.append(
+                upload_media(
+                    audio_to_wav_bytes(audio),
+                    f"wan30_audio_{slot}.wav",
+                    "audio/wav",
+                    config,
+                )
+            )
+            done += 1
+            progress_cb(done / total)
+        return {
+            "images": image_urls,
+            "video_urls": video_urls,
+            "audio_urls": audio_urls,
+        }
+
+    @staticmethod
+    def build_payload(
+        values: Dict[str, Any],
+        media: Dict[str, List[str]],
+    ) -> Dict[str, Any]:
+        return build_wan30_payload(values, media)
+
     def generate(
         self,
         model: str,
@@ -2936,108 +2989,48 @@ class Comfly_wan_3_0_video_lowprice:
         skip_error: bool = False,
         **kwargs,
     ):
-        progress_bar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
 
         def update_progress(value: int) -> None:
-            if progress_bar is not None:
+            if pbar is not None:
                 try:
-                    progress_bar.update_absolute(value, 100)
+                    pbar.update_absolute(value, 100)
                 except Exception:
                     pass
 
+        values = dict(kwargs)
+        values.update(
+            {
+                "model": model,
+                "prompt": prompt,
+                "seconds": seconds,
+                "resolution": resolution,
+                "ratio": ratio,
+                "generate_audio": generate_audio,
+                "enable_thinking": enable_thinking,
+                "file_url": file_url,
+                "link_url": link_url,
+                "seed": seed,
+            }
+        )
         try:
-            values = dict(kwargs)
-            values.update(
-                {
-                    "model": model,
-                    "prompt": prompt,
-                    "seconds": seconds,
-                    "resolution": resolution,
-                    "ratio": ratio,
-                    "file_url": file_url,
-                    "link_url": link_url,
-                    "seed": seed,
-                }
-            )
-            validate_wan30_inputs(strict=True, **values)
             config = resolve_config(api_config)
-
-            image_limit = 2 if model in WAN30_I2V_MODELS else WAN30_MAX_IMAGES
-            image_slots = _gather_wan30_slots(values, "image", image_limit)
-            video_slots = (
-                _gather_wan30_slots(values, "video", WAN30_MAX_VIDEOS)
-                if model in WAN30_R2V_MODELS
-                else []
+            media = self.collect_media(
+                values,
+                config,
+                lambda progress: update_progress(int(progress * 20)),
             )
-            audio_slots = (
-                _gather_wan30_slots(values, "audio", WAN30_MAX_AUDIOS)
-                if model in WAN30_R2V_MODELS
-                else []
-            )
-            upload_total = len(image_slots) + len(video_slots) + len(audio_slots)
-            uploaded = 0
-            image_urls: List[str] = []
-            video_urls: List[str] = []
-            audio_urls: List[str] = []
-
-            for slot, image in image_slots:
-                image_urls.append(
-                    upload_media(
-                        image_to_png_bytes(image),
-                        f"wan30_image_{slot}.png",
-                        "image/png",
-                        config,
-                    )
-                )
-                uploaded += 1
-                update_progress(int(uploaded / max(1, upload_total) * 20))
-            for slot, video in video_slots:
-                video_urls.append(
-                    upload_media(
-                        video_to_mp4_bytes(video),
-                        f"wan30_video_{slot}.mp4",
-                        "video/mp4",
-                        config,
-                    )
-                )
-                uploaded += 1
-                update_progress(int(uploaded / max(1, upload_total) * 20))
-            for slot, audio in audio_slots:
-                audio_urls.append(
-                    upload_media(
-                        audio_to_wav_bytes(audio),
-                        f"wan30_audio_{slot}.wav",
-                        "audio/wav",
-                        config,
-                    )
-                )
-                uploaded += 1
-                update_progress(int(uploaded / max(1, upload_total) * 20))
-
-            payload = build_wan30_payload(
-                model,
-                prompt,
-                seconds,
-                resolution,
-                ratio,
-                generate_audio,
-                enable_thinking,
-                file_url,
-                link_url,
-                seed,
-                image_urls,
-                video_urls,
-                audio_urls,
-            )
+            payload = self.build_payload(values, media)
             print(
                 f"[Wan 3.0 Low Price] Submitting model={model}, "
                 f"seconds={seconds}, resolution={resolution}"
             )
             task_id, submit_response = submit_task(payload, config)
-            update_progress(30)
+            update_progress(25)
 
             def on_poll_progress(progress: int) -> None:
-                update_progress(30 + int(progress * 0.6))
+                update_progress(25 + int(progress * 0.65))
 
             final_response = poll_task(
                 task_id,
@@ -3067,12 +3060,13 @@ class Comfly_wan_3_0_video_lowprice:
             response = {
                 "status": "error",
                 "model": model,
+                "task_id": task_id,
                 "message": message,
             }
             return (
                 make_error_video(message),
                 "",
-                "",
+                task_id,
                 json.dumps(response, ensure_ascii=False, indent=2),
             )
 
@@ -10693,7 +10687,6 @@ __all__ = [
     "Comfly_zhenzhen_image_gk_v15_lowprice",
     "Comfly_happyhorse_1_1_lowprice",
     "Comfly_wan_2_7_spicy_i2v_lowprice",
-    "Comfly_wan_3_0_video_lowprice",
     "Comfly_kling_video_lowprice",
     "Comfly_kling_o3_edit_lowprice",
     "Comfly_hailuo_2_3_video_lowprice",
