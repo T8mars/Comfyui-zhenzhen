@@ -2350,14 +2350,38 @@ WAN30_I2V_MODEL = "wan-3.0-i2v"
 WAN30_R2V_MODEL = "wan-3.0-r2v"
 WAN30_GLOBAL_I2V_MODEL = "wan-3.0-global-i2v"
 WAN30_GLOBAL_R2V_MODEL = "wan-3.0-global-r2v"
-WAN30_I2V_MODELS = [WAN30_I2V_MODEL, WAN30_GLOBAL_I2V_MODEL]
-WAN30_R2V_MODELS = [WAN30_R2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
-WAN30_GLOBAL_MODELS = [WAN30_GLOBAL_I2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
+WAN30_PRIME_I2V_MODEL = "wan-3.0-prime-i2v"
+WAN30_PRIME_R2V_MODEL = "wan-3.0-prime-r2v"
+WAN30_GLOBAL_PRIME_I2V_MODEL = "wan-3.0-global-prime-i2v"
+WAN30_GLOBAL_PRIME_R2V_MODEL = "wan-3.0-global-prime-r2v"
+WAN30_I2V_MODELS = [
+    WAN30_I2V_MODEL,
+    WAN30_GLOBAL_I2V_MODEL,
+    WAN30_PRIME_I2V_MODEL,
+    WAN30_GLOBAL_PRIME_I2V_MODEL,
+]
+WAN30_R2V_MODELS = [
+    WAN30_R2V_MODEL,
+    WAN30_GLOBAL_R2V_MODEL,
+    WAN30_PRIME_R2V_MODEL,
+    WAN30_GLOBAL_PRIME_R2V_MODEL,
+]
+WAN30_GLOBAL_MODELS = [
+    WAN30_GLOBAL_I2V_MODEL,
+    WAN30_GLOBAL_R2V_MODEL,
+    WAN30_GLOBAL_PRIME_I2V_MODEL,
+    WAN30_GLOBAL_PRIME_R2V_MODEL,
+]
+WAN30_THINKING_MODELS = [WAN30_GLOBAL_I2V_MODEL, WAN30_GLOBAL_R2V_MODEL]
 WAN30_MODELS = [
     WAN30_I2V_MODEL,
     WAN30_R2V_MODEL,
     WAN30_GLOBAL_I2V_MODEL,
     WAN30_GLOBAL_R2V_MODEL,
+    WAN30_PRIME_I2V_MODEL,
+    WAN30_PRIME_R2V_MODEL,
+    WAN30_GLOBAL_PRIME_I2V_MODEL,
+    WAN30_GLOBAL_PRIME_R2V_MODEL,
 ]
 WAN30_SECONDS = ["auto", *[str(value) for value in range(2, 31)]]
 WAN30_RESOLUTIONS = ["480P", "720P", "1080P"]
@@ -2728,7 +2752,7 @@ def build_wan30_payload(
                 "Wan 3.0 I2V requires image1 as the first frame"
             )
         payload["images"] = images[:2]
-        if model == WAN30_GLOBAL_I2V_MODEL:
+        if model in WAN30_THINKING_MODELS:
             metadata["enable_thinking"] = bool(
                 values.get("enable_thinking", False)
             )
@@ -2751,7 +2775,7 @@ def build_wan30_payload(
         metadata["file_url"] = file_url
     if link_url:
         metadata["link_url"] = link_url
-    if model == WAN30_GLOBAL_R2V_MODEL:
+    if model in WAN30_THINKING_MODELS:
         metadata["enable_thinking"] = bool(
             values.get("enable_thinking", False) or file_url or link_url
         )
@@ -2806,8 +2830,8 @@ class Comfly_wan_3_0_video_lowprice:
                     {
                         "default": False,
                         "tooltip": (
-                            "仅海外模型使用；Global R2V 传入 file_url 或 "
-                            "link_url 时自动开启。"
+                            "仅标准版海外模型使用，Prime 海外模型不支持；标准版 "
+                            "Global R2V 传入 file_url 或 link_url 时自动开启。"
                         ),
                     },
                 ),

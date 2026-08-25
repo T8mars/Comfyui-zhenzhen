@@ -7,6 +7,7 @@ import ssl
 import threading
 import time
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 try:
     from . import zhenzhen_http as requests
@@ -77,6 +78,27 @@ def is_media_route_error(error: BaseException) -> bool:
     )
 
 
+def tencent_cos_media_url_fallback(url: str) -> str | None:
+    """Return Tencent COS's official new-domain equivalent when applicable."""
+    parsed = urlsplit(str(url or ""))
+    hostname = (parsed.hostname or "").lower()
+    old_suffix = ".myqcloud.com"
+    if (
+        parsed.scheme.lower() != "https"
+        or not hostname.endswith(old_suffix)
+        or ".cos." not in hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        return None
+
+    replacement_host = hostname[: -len(old_suffix)] + ".tencentcos.cn"
+    netloc = replacement_host
+    if parsed.port is not None:
+        netloc = f"{netloc}:{parsed.port}"
+    return urlunsplit(parsed._replace(netloc=netloc))
+
+
 def _should_retry_without_proxy(error: BaseException) -> bool:
     return is_media_route_error(error)
 
@@ -93,13 +115,31 @@ def get_media_response(
     fallback_getter = direct_get
     if fallback_getter is None and request_get is None:
         fallback_getter = direct_media_get
+    cos_fallback_url = tencent_cos_media_url_fallback(url)
 
     try:
         return getter(url, **kwargs)
     except Exception as error:
-        if fallback_getter is None or not _should_retry_without_proxy(error):
+        if not _should_retry_without_proxy(error):
             raise
+        last_error = error
+
+    if cos_fallback_url is not None:
+        try:
+            return getter(cos_fallback_url, **kwargs)
+        except Exception as error:
+            if not _should_retry_without_proxy(error):
+                raise
+            last_error = error
+
+    if fallback_getter is None:
+        raise last_error
+    try:
         return fallback_getter(url, **kwargs)
+    except Exception as error:
+        if cos_fallback_url is None or not _should_retry_without_proxy(error):
+            raise
+        return fallback_getter(cos_fallback_url, **kwargs)
 
 
 def _failure_summary(error: BaseException) -> str:
@@ -215,6 +255,7 @@ __all__ = [
     "direct_media_get",
     "get_media_response",
     "is_media_route_error",
+    "tencent_cos_media_url_fallback",
     "download_image_with_retry",
     "download_image_with_alpha_retry",
 ]

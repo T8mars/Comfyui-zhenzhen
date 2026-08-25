@@ -26136,7 +26136,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_zhenzhen_image_gk_v15_lowprice": "zhenzhen-image-gk-v15-lowprice",
     "Comfly_happyhorse_1_1_lowprice": "zhenzhen-happyhorse-1.1-lowprice",
     "Comfly_wan_2_7_spicy_i2v_lowprice": "zhenzhen-wan-2.7-spicy-i2v-lowprice",
-    "Comfly_wan_3_0_video_lowprice": "zhenzhen-wan-3.0-video-lowprice（4合1）",
+    "Comfly_wan_3_0_video_lowprice": "zhenzhen-wan-3.0-video-lowprice（8合1）",
     "Comfly_kling_video_lowprice": "zhenzhen-kling-video-lowprice",
     "Comfly_kling_o3_edit_lowprice": "zhenzhen-kling-o3-edit-lowprice",
     "Comfly_hailuo_2_3_video_lowprice": "zhenzhen-hailuo-2.3-video-lowprice",
