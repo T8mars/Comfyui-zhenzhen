@@ -130,6 +130,7 @@ from .aug22_low_price_nodes import (
     Comfly_hunyuan3d_v3_1_lowprice,
     Comfly_zhenzhen_image_gk_v2_region_edit_lowprice,
     Comfly_zhenzhen_image_gk_v2_segment_lowprice,
+    Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice,
     Comfly_zhenzhen_video_g_omni_flash_lowprice_v2,
 )
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
@@ -25958,6 +25959,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_zhenzhen_image_nb_lowprice": Comfly_zhenzhen_image_nb_lowprice,
     "Comfly_zhenzhen_video_g_omni_flash_lowprice": Comfly_zhenzhen_video_g_omni_flash_lowprice,
     "Comfly_zhenzhen_video_g_omni_flash_lowprice_v2": Comfly_zhenzhen_video_g_omni_flash_lowprice_v2,
+    "Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice": Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice,
     "Comfly_hunyuan3d_v3_1_lowprice": Comfly_hunyuan3d_v3_1_lowprice,
     "Comfly_zhenzhen_image_gk_v2_segment_lowprice": Comfly_zhenzhen_image_gk_v2_segment_lowprice,
     "Comfly_zhenzhen_image_gk_v2_region_edit_lowprice": Comfly_zhenzhen_image_gk_v2_region_edit_lowprice,
@@ -26127,6 +26129,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_zhenzhen_image_nb_lowprice": "zhenzhen-image-nb-lowprice",
     "Comfly_zhenzhen_video_g_omni_flash_lowprice": "zhenzhen-video-g-omni-flash（旧版兼容）",
     "Comfly_zhenzhen_video_g_omni_flash_lowprice_v2": "zhenzhen-video-g-omni-flash-lowprice",
+    "Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice": "zhenzhen-video-g-omni-1.1-flash-lowprice",
     "Comfly_hunyuan3d_v3_1_lowprice": "zhenzhen-hunyuan3d-v3.1-lowprice（文生/图生3D）",
     "Comfly_zhenzhen_image_gk_v2_segment_lowprice": "zhenzhen-image-gk-v2-segment",
     "Comfly_zhenzhen_image_gk_v2_region_edit_lowprice": "zhenzhen-image-gk-v2-region-edit",

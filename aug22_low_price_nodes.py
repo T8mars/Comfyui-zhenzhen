@@ -52,6 +52,9 @@ except ImportError:
 ZHENZHEN_VIDEO_G_OMNI_FLASH_LOWPRICE_MODEL = (
     "zhenzhen-video-g-omni-flash-lowprice"
 )
+ZHENZHEN_VIDEO_G_OMNI_11_FLASH_LOWPRICE_MODEL = (
+    "zhenzhen-video-g-omni-1.1-flash-lowprice"
+)
 ZHENZHEN_VIDEO_G_OMNI_FLASH_LOWPRICE_MODES = [
     "text",
     "frame",
@@ -432,6 +435,9 @@ def extract_region_edit_url(final_response: Dict[str, Any]) -> str:
 class Comfly_zhenzhen_video_g_omni_flash_lowprice_v2(_Comfly_apimart_video_base):
     """Documented low-price text, frame, image-reference, and video-reference modes."""
 
+    MODEL = ZHENZHEN_VIDEO_G_OMNI_FLASH_LOWPRICE_MODEL
+    MEDIA_STEM = "zhenzhen_omni_lowprice"
+
     @classmethod
     def INPUT_TYPES(cls):
         optional: Dict[str, tuple] = {
@@ -528,11 +534,11 @@ class Comfly_zhenzhen_video_g_omni_flash_lowprice_v2(_Comfly_apimart_video_base)
                 return "Omni reference_video mode requires exactly one input_video or video_url"
         return True
 
-    @staticmethod
-    def build_payload(values: Dict[str, Any], media: Dict[str, Any]) -> Dict[str, Any]:
+    @classmethod
+    def build_payload(cls, values: Dict[str, Any], media: Dict[str, Any]) -> Dict[str, Any]:
         mode = values["mode"]
         payload: Dict[str, Any] = {
-            "model": ZHENZHEN_VIDEO_G_OMNI_FLASH_LOWPRICE_MODEL,
+            "model": cls.MODEL,
             "prompt": str(values["prompt"]).strip(),
             "resolution": values["resolution"],
             "aspect_ratio": values["aspect_ratio"],
@@ -594,7 +600,7 @@ class Comfly_zhenzhen_video_g_omni_flash_lowprice_v2(_Comfly_apimart_video_base)
                     image_urls.append(
                         upload_media(
                             image_to_png_bytes(image),
-                            f"zhenzhen_omni_lowprice_reference_{index}.png",
+                            f"{self.MEDIA_STEM}_reference_{index}.png",
                             "image/png",
                             config,
                         )
@@ -608,7 +614,7 @@ class Comfly_zhenzhen_video_g_omni_flash_lowprice_v2(_Comfly_apimart_video_base)
                 else:
                     media["video_url"] = upload_media(
                         video_to_mp4_bytes(input_video),
-                        "zhenzhen_omni_lowprice_reference.mp4",
+                        f"{self.MEDIA_STEM}_reference.mp4",
                         "video/mp4",
                         config,
                     )
@@ -618,9 +624,16 @@ class Comfly_zhenzhen_video_g_omni_flash_lowprice_v2(_Comfly_apimart_video_base)
         except Exception as error:
             if not skip_error:
                 raise
-            return self._error_result(
-                ZHENZHEN_VIDEO_G_OMNI_FLASH_LOWPRICE_MODEL, task_id, error
-            )
+            return self._error_result(self.MODEL, task_id, error)
+
+
+class Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice(
+    Comfly_zhenzhen_video_g_omni_flash_lowprice_v2
+):
+    """Omni 1.1 Flash Lowprice with the documented four-mode contract."""
+
+    MODEL = ZHENZHEN_VIDEO_G_OMNI_11_FLASH_LOWPRICE_MODEL
+    MEDIA_STEM = "zhenzhen_omni_1_1_lowprice"
 
 
 class Comfly_hunyuan3d_v3_1_lowprice:
@@ -1052,6 +1065,7 @@ class Comfly_zhenzhen_image_gk_v2_region_edit_lowprice:
 
 __all__ = [
     "Comfly_zhenzhen_video_g_omni_flash_lowprice_v2",
+    "Comfly_zhenzhen_video_g_omni_1_1_flash_lowprice",
     "Comfly_hunyuan3d_v3_1_lowprice",
     "Comfly_zhenzhen_image_gk_v2_segment_lowprice",
     "Comfly_zhenzhen_image_gk_v2_region_edit_lowprice",
