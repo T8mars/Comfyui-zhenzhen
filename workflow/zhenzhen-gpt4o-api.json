@@ -327,12 +327,18 @@
           "type": "IMAGE",
           "link": 11
         },
-        {
-          "name": "image_2",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 12
-        }
+    {
+      "name": "image_2",
+      "shape": 7,
+      "type": "IMAGE",
+      "link": 12
+    },
+    {
+      "name": "image_3",
+      "shape": 7,
+      "type": "IMAGE",
+      "link": 13
+    }
       ],
       "outputs": [
         {
@@ -701,7 +707,7 @@
     },
     {
       "id": 24,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         -4314.792898333319,
         -6280.824869757994
@@ -726,7 +732,7 @@
       "properties": {
         "aux_id": "T8mars/Comfyui-zhenzhen",
         "ver": "adf9e0f39de29353810237fad96984456739fff3",
-        "Node name for S&R": "Comfly_api_set"
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
       },
       "widgets_values": [
         "zhenzhen",

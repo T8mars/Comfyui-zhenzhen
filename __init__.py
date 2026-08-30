@@ -3,9 +3,15 @@ from .ComflyConcurrent import (
     CONCURRENT_NODE_CLASS_MAPPINGS,
     CONCURRENT_NODE_DISPLAY_NAME_MAPPINGS,
 )
+from .api_settings_compat import avoid_legacy_registration_collision
 
 NODE_CLASS_MAPPINGS.update(CONCURRENT_NODE_CLASS_MAPPINGS)
 NODE_DISPLAY_NAME_MAPPINGS.update(CONCURRENT_NODE_DISPLAY_NAME_MAPPINGS)
+
+avoid_legacy_registration_collision(
+    NODE_CLASS_MAPPINGS,
+    NODE_DISPLAY_NAME_MAPPINGS,
+)
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']
 

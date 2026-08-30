@@ -144,7 +144,7 @@
     },
     {
       "id": 3198,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         3550.8351037730727,
         4023.5504397391524
@@ -167,11 +167,11 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "Comfly_api_set"
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
       },
       "widgets_values": [
         "zhenzhen",
-        "sk-NG68WAOSQH057aO4vIphL8SBuYS6MldfFR1nXFZre4oxiWVN",
+        "",
         "",
         false
       ]

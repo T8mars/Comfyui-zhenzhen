@@ -577,7 +577,7 @@
         "nano-banana",
         1,
         0.9,
-        "sk-FRuPFFpxsu3wl8QdxWHMDILR24F4CHFEuAN6P2V58N11Nmle",
+        "",
         278390055,
         "randomize",
         32768
@@ -585,7 +585,7 @@
     },
     {
       "id": 97,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         -2316.2063476813823,
         1681.8043953031229
@@ -610,7 +610,7 @@
       "properties": {
         "aux_id": "T8mars/Comfyui-zhenzhen",
         "ver": "adf9e0f39de29353810237fad96984456739fff3",
-        "Node name for S&R": "Comfly_api_set"
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
       },
       "widgets_values": [
         "zhenzhen",

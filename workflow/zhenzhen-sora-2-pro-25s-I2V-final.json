@@ -343,7 +343,7 @@
         }
       },
       "widgets_values": [
-        "sk-QlGG5N2v3ekUi7iI9Er2dJi7keAn8UKxSIIDxjwyBu1uV6Y9"
+        ""
       ],
       "color": "#322",
       "bgcolor": "#533"
@@ -1121,7 +1121,7 @@
     },
     {
       "id": 20,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         850.6877882985882,
         3075.9656966607145
@@ -1146,7 +1146,7 @@
       "properties": {
         "aux_id": "T8mars/Comfyui-zhenzhen",
         "ver": "adf9e0f39de29353810237fad96984456739fff3",
-        "Node name for S&R": "Comfly_api_set"
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
       },
       "widgets_values": [
         "zhenzhen",

@@ -516,7 +516,9 @@ def _doubao_seedance_video_input_to_bytes(video_input):
     return _doubao_seedance_io_file_to_bytes(video_input, ".mp4", "video")
 
 
-class Comfly_api_set:
+class T8Zhenzhen_API_Settings:
+    """Canonical settings node with a project-unique registration id."""
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -535,14 +537,21 @@ class Comfly_api_set:
     FUNCTION = "set_api_base"
     CATEGORY = "zhenzhen"
 
-    def set_api_base(self, api_base, apikey="", custom_ip="", skip_error=False):
-        global baseurl
-        
-        base_url_mapping = {
+    @classmethod
+    def _base_url_mapping(cls, custom_ip):
+        return {
             "zhenzhen": ZHENZHEN_PRIMARY_BASE_URL,
             "seedance_low_price": "https://api.seedance.nz",
-            "ip": custom_ip
+            "ip": custom_ip,
         }
+
+    def _after_base_url_selected(self, selected_base_url):
+        return None
+
+    def set_api_base(self, api_base, apikey="", custom_ip="", skip_error=False):
+        global baseurl
+
+        base_url_mapping = self._base_url_mapping(custom_ip)
         
         if api_base == "ip" and not custom_ip.strip():
             raise ValueError("When selecting 'ip' option, you must provide a custom IP address in the 'custom_ip' field")
@@ -551,6 +560,7 @@ class Comfly_api_set:
             raise ValueError(f"Unsupported API service: {api_base}")
 
         baseurl = base_url_mapping[api_base]
+        self._after_base_url_selected(baseurl)
             
         effective_api_key = apikey.strip()
         api_config = {
@@ -565,6 +575,17 @@ class Comfly_api_set:
         print(message)
         return (apikey, api_config)
 
+
+class Zhenzhen_api_set(T8Zhenzhen_API_Settings):
+    """Compatibility alias used by workflows from recent releases."""
+
+    DEPRECATED = True
+
+
+class Comfly_api_set(T8Zhenzhen_API_Settings):
+    """Compatibility alias for Zhenzhen workflows saved before the rename."""
+
+    DEPRECATED = True
 
 class ComflyVideoAdapter:
     def __init__(self, video_path_or_url):
@@ -10862,6 +10883,7 @@ class Comfly_sora2_character:
             },
             "optional": {
                 "url": ("STRING", {"default": "", "multiline": False}),
+                "video_url": ("STRING", {"default": "", "multiline": False}),
                 "from_task": ("STRING", {"default": "", "multiline": False}),
                 "api_key": ("STRING", {"default": ""}),
                 "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
@@ -10883,7 +10905,9 @@ class Comfly_sora2_character:
             "Authorization": f"Bearer {self.api_key}"
         }
     
-    def create_character(self, timestamps="1,3", seed=0, url="", from_task="", api_key="", skip_error=False):
+    def create_character(self, timestamps="1,3", seed=0, url="", video_url="", from_task="", api_key="", skip_error=False):
+        if not str(url).strip() and str(video_url).strip():
+            url = video_url
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -18061,6 +18085,7 @@ class Comfly_vidu_ref2video:
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
+                "image": ("IMAGE",),
                 "image1": ("IMAGE",),
                 "image2": ("IMAGE",),
                 "image3": ("IMAGE",),
@@ -19212,7 +19237,9 @@ class ComflyGrok3VideoApi:
             print(f"Error uploading image: {str(e)}")
             return None
     
-    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0, skip_error=False):
+    def generate_video(self, prompt, model, ratio, duration, resolution, api_key="", image=None, image1=None, image2=None, image3=None, image4=None, image5=None, image6=None, image7=None, seed=0, skip_error=False):
+        if image1 is None and image is not None:
+            image1 = image
         if api_key.strip():
             self.api_key = api_key
             config = get_config()
@@ -25948,6 +25975,8 @@ class Comfly_gpt_image_2_official_ratio_stable:
 
 
 NODE_CLASS_MAPPINGS = {
+    "T8Zhenzhen_API_Settings": T8Zhenzhen_API_Settings,
+    "Zhenzhen_api_set": Zhenzhen_api_set,
     "Comfly_api_set": Comfly_api_set,
     "Comfly_seedance2_low_price_settings": Comfly_seedance2_low_price_settings,
     "Comfly_seedance2_low_price": Comfly_seedance2_low_price,
@@ -26118,7 +26147,9 @@ NODE_CLASS_MAPPINGS = {
 
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Comfly_api_set": "Zhenzhen API Settings",
+    "T8Zhenzhen_API_Settings": "Zhenzhen API Settings",
+    "Zhenzhen_api_set": "Zhenzhen API Settings (Legacy)",
+    "Comfly_api_set": "Zhenzhen API Settings (Legacy)",
     "Comfly_seedance2_low_price_settings": "zhenzhen-seedance2-low-price-api-settings",
     "Comfly_seedance2_low_price": "zhenzhen-seedance2-low-price",
     "Comfly_seedance25_standard_low_price": "zhenzhen-seedance2.5-standard-low-price",

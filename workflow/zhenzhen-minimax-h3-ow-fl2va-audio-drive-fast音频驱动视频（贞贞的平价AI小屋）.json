@@ -1,0 +1,328 @@
+{
+  "id": "d6529a6b-42f6-5379-a9c8-04c49a7b08aa",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "title": "选择参考图.png",
+      "pos": [
+        30,
+        40
+      ],
+      "size": [
+        270,
+        314
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "选择参考图.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadAudio",
+      "title": "选择驱动音频.wav",
+      "pos": [
+        30,
+        390
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "选择驱动音频.wav",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 3,
+      "type": "T8Zhenzhen_API_Settings",
+      "title": "Zhenzhen API Settings（国内版）",
+      "pos": [
+        30,
+        560
+      ],
+      "size": [
+        340,
+        174
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Comfly_minimax_h3_ow_fast_video_lowprice",
+      "title": "MiniMax H3 OW Fast 音频驱动视频",
+      "pos": [
+        400,
+        90
+      ],
+      "size": [
+        470,
+        410
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 3
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "zhenzhen",
+        "ver": "2.0.2",
+        "Node name for S&R": "Comfly_minimax_h3_ow_fast_video_lowprice"
+      },
+      "widgets_values": [
+        "minimax-h3-ow-fl2va-audio-drive-fast",
+        "保持参考主体一致，表演动作由所连接音频自然驱动，镜头稳定",
+        "5",
+        "480p",
+        "16:9",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "SaveVideo",
+      "pos": [
+        980,
+        170
+      ],
+      "size": [
+        300,
+        190
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/minimax-h3-ow-fl2va-audio-drive-fast",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      4,
+      10,
+      "AUDIO"
+    ],
+    [
+      3,
+      3,
+      1,
+      4,
+      9,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

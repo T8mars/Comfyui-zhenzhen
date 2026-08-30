@@ -37,7 +37,7 @@
     },
     {
       "id": 104,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         166.78264062548553,
         498.89429208519084
@@ -62,11 +62,11 @@
       "properties": {
         "aux_id": "T8mars/Comfyui-zhenzhen",
         "ver": "2607ea71e5269ced450802a7872f773a3e7cc87e",
-        "Node name for S&R": "Comfly_api_set"
+        "Node name for S&R": "T8Zhenzhen_API_Settings"
       },
       "widgets_values": [
         "zhenzhen",
-        "sk-VyPHLDgymgCPRJ7uFUZTvpw6vfCW5yA2bBvMqMzFeNUcUe22",
+        "",
         ""
       ]
     },

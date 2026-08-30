@@ -64,7 +64,15 @@
       "properties": {
         "Node name for S&R": "Comfly_seedream_v5_pro_layer_decomposition_lowprice"
       },
-      "widgets_values": ["", "auto", "png", false]
+      "widgets_values": [
+        "",
+        "auto",
+        "png",
+        false,
+        0,
+        "fixed",
+        "seedream-v5-pro-layer-decomposition"
+      ]
     },
     {
       "id": 4,

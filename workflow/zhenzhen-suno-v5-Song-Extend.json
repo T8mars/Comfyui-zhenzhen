@@ -808,7 +808,7 @@
 				1735.9779052734375
 			],
 			"widgets_values":[
-				"sk-Cro5LWmiV8OTE5Qdv85vwtXkQuwz0NGE7aBef3BWUTUGW5iS"
+				""
 			],
 			"inputs":[
 				{
@@ -1143,12 +1143,12 @@
 				
 			},
 			"id":31,
-			"type":"Comfly_api_set",
+			"type":"T8Zhenzhen_API_Settings",
 			"properties":{
 				"widget_ue_connectable":{
 					
 				},
-				"Node name for S&R":"Comfly_api_set"
+				"Node name for S&R":"T8Zhenzhen_API_Settings"
 			},
 			"order":13
 		},

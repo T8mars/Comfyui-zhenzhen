@@ -23,7 +23,7 @@
     },
     {
       "id": 2,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "title": "Zhenzhen API Settings（国内版）",
       "pos": [30, 390],
       "size": [340, 174],
@@ -35,7 +35,7 @@
         {"name": "apikey", "type": "STRING", "links": null},
         {"name": "api_config", "type": "ZHENZHEN_SEEDANCE2_CONFIG", "links": [2]}
       ],
-      "properties": {"cnr_id": "zhenzhen", "ver": "2.0.2", "Node name for S&R": "Comfly_api_set"},
+      "properties": {"cnr_id": "zhenzhen", "ver": "2.0.2", "Node name for S&R": "T8Zhenzhen_API_Settings"},
       "widgets_values": ["seedance_low_price", "", "", false]
     },
     {

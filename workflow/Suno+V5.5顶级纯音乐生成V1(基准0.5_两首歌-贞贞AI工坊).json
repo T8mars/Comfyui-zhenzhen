@@ -799,12 +799,12 @@
 				
 			},
 			"id":24,
-			"type":"Comfly_api_set",
+			"type":"T8Zhenzhen_API_Settings",
 			"properties":{
 				"widget_ue_connectable":{
 					
 				},
-				"Node name for S&R":"Comfly_api_set"
+				"Node name for S&R":"T8Zhenzhen_API_Settings"
 			},
 			"order":4
 		}

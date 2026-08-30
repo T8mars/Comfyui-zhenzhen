@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 1,
-      "type": "Comfly_api_set",
+      "type": "T8Zhenzhen_API_Settings",
       "pos": [
         40,
         420
@@ -35,7 +35,7 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "Comfly_api_set",
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
         "aux_id": "T8mars/ComfyUI_Seedance",
         "cnr_id": "zhenzhen"
       },
