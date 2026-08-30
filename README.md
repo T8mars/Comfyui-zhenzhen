@@ -40,182 +40,189 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node">  
-如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！  
-<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/oss.png" width="70%" alt="new node">  
-由于NanoBanana Pro 4K的图像文件过大，在跨境下载时候容易导致失败，新增OSS设置(对象存储服务)  
+### 20260830-1
+
+新增贞贞的平价AI小屋 Omni 1.1 Flash Lowprice 独立视频节点：
+
+- 新增 `zhenzhen-video-g-omni-1.1-flash-lowprice`，按最新 API 文档支持文生、单首帧、1/3 张参考图和参考视频四种模式；原 `zhenzhen-video-g-omni-flash-lowprice` 及旧版兼容节点的 key、控件顺序和模型 ID 均保持不变。
+- 支持 4/6/8/10 秒、720p/1080p/4k、16:9/9:16 和 NSFW 检查；参考视频模式提交 `metadata.video_url` 并自动省略 `seconds`。
+- 节点带标准 fixed/random seed 缓存控件、国内版 ApiKey 获取按钮和动态素材显隐，并自动接入现有 10 路视频并发提交框架。
+- 新增 4 份空 API Key 示例工作流，覆盖文生、首帧、三图参考和参考视频。四种模式均已使用真实 API 完成上传、提交、轮询、下载和 MP4 解码，结果均为 1280×720、24fps、96 帧。
+- 完整离线回归 `220/220` 通过；插件探针确认 165 个普通节点、130 个并发提交节点、297 个合并节点和 32 个并发校验代理。
+
+### 20260825-1
+
+Wan 3.0 节点新增 Prime 高速模型并升级为八合一：
+
+- `zhenzhen-wan-3.0-video-lowprice（8合1）` 新增 `wan-3.0-prime-i2v`、`wan-3.0-prime-r2v`、`wan-3.0-global-prime-i2v`、`wan-3.0-global-prime-r2v`，原四模型顺序、默认模型、节点 key 与输入控件顺序保持不变，兼容旧工作流。
+- Prime I2V 支持首帧和可选尾帧；Prime R2V 保留文档支持的 10 图、5 视频、5 音频输入。Prime 海外模型不提交 `enable_thinking`，前端也只为两个标准版 Global 模型显示该控件。
+- 新增 4 份 Prime 空 API Key 工作流。实测四个 Prime 模型均在 2 秒、480P 下完成生成并下载为可解码 MP4：I2V 为 842×474、30fps、60 帧，R2V 为 832×480、30fps、60 帧。
+- 结果下载新增 Tencent COS 官方新域名回退，仅匹配 `*.cos.*.myqcloud.com`，完整保留签名路径和查询参数且不关闭证书校验；Global Prime 的 TLS 下载问题已通过该路径实测恢复。
+- 完整离线回归 `219/219` 通过；插件探针确认 164 个普通节点、129 个并发提交节点、295 个合并节点，15 份前端脚本和 8 份 WAN 3.0 工作流校验通过。
+
+### 20260824-1
+
+新增贞贞的平价AI小屋 Wan 3.0 四合一视频节点：
+
+- 新增 `zhenzhen-wan-3.0-video-lowprice（4合1）`，统一支持 `wan-3.0-i2v`、`wan-3.0-r2v`、`wan-3.0-global-i2v`、`wan-3.0-global-r2v`。
+- I2V 支持必填首帧和可选尾帧；R2V 支持最多 10 图、5 视频、5 音频，以及互斥的文件 URL / 网页 URL 参考。海外模型额外支持思考模式。
+- 支持 `auto` 或 2～30 秒、480P/720P/1080P、6 种文档画幅、生成音频及原生随机种子；模型切换时只显示有效控件，并同步适配 10 路视频并发提交节点。
+- 新增 4 份逐模型、空 API Key 示例工作流。完整离线回归 `215/215` 通过；插件探针确认 164 个普通节点、129 个并发提交节点、295 个合并节点。
+- 四模型均完成真实上传、提交和轮询。国内 I2V/R2V 已下载并解码有效 MP4；两个 Global 任务当时返回的香港 COS 旧域名在本机 TLS 握手阶段断开。该线路问题已在 `20260825-1` 通过腾讯 COS 官方新域名回退解决。
+- 视频流式下载发生连接/TLS 中断后会自动切换无环境代理路由；最终错误只显示错误类型，不再泄露完整结果地址。
+
+### 20260822-1
+
+新增贞贞的平价AI小屋 Omni、混元 3D 与 GK V2 区域编辑工具节点：
+
+- 新增真正调用 `zhenzhen-video-g-omni-flash-lowprice` 的统一视频节点，支持文生、单首帧、1/3 张参考图和参考视频四种模式；旧的 `zhenzhen-video-g-omni-flash` 节点 key 与输入输出保持不变，并标记为旧版兼容，已有工作流无需重连。
+- 新增混元 3D v3.1 二合一节点，支持 `hunyuan3d-v3.1-text-to-3d` 与 `hunyuan3d-v3.1-image-to-3d`，图生 3D 可按正、左、右、后、上、下、左前、右前顺序输入最多 8 张视图。
+- 3D 首输出使用 ComfyUI 原生 `FILE_3D_GLB`，可直接连接内置 `Preview3D` 与 `SaveGLB`；下载后会校验 GLB 文件头、版本和完整长度，并在多个附件中优先选择实际 GLB。
+- 新增 `zhenzhen-image-gk-v2-segment` 与 `zhenzhen-image-gk-v2-region-edit` 两个工具节点。分割节点输出 `image_id`、对象 JSON 和完整结果；区域编辑支持对象索引、矩形框和归一化选区三种选择方式，并严格保持三者互斥。
+- 新增 8 份空 API Key 示例工作流，覆盖 Omni 四种模式、文生/图生 3D、智能分割，以及“生成图片 → 分割 → 区域编辑 → 保存图片”的完整串联流程。
+- 真实验证完成 GK V2 生成、分割、区域编辑，Omni 文生、首帧和三图参考，以及混元文生/图生 3D；两种 3D 结果均实际通过 ComfyUI 原生预览和 GLB 保存。Omni 参考视频按最新文档及参考项目协议提交，两次均由上游在任务末端返回失败，节点保留正确协议并透传明确错误。
+- 完整离线回归通过 `199/199`；插件探针确认 163 个普通节点、128 个并发提交节点、293 个合并节点，14 份前端脚本及本次 8 份工作流通过语法、JSON 与敏感信息检查。
+
+### 20260821-1
+
+新增贞贞的平价AI小屋 GK V2 图像编辑与 FlowMusic 节点：
+
+- 新增独立节点 `zhenzhen-image-gk-v2-edit-lowprice`，精确调用 `zhenzhen-image-gk-v2-edit`；支持 1～3 张有序参考图、`auto` 与 13 种固定画幅、`1k / 2k`、一次生成 1～10 张图片及可选 NSFW 检查，不改变原 `zhenzhen-image-gk-v2-lowprice` 文生图节点。
+- 新增 `zhenzhen-flowmusic-lowprice（9合1）`，统一支持音乐生成、歌词生成、上传音频、续写、片段替换、整曲改编、人声/伴奏分离、音频导出和音乐视频；切换操作时只显示当前接口有效的输入。
+- FlowMusic 输出 ComfyUI AUDIO/VIDEO、文本、`clip_id`、主结果 URL/路径、全部结果 URL/路径、任务 ID 和完整响应；多结果保持接口顺序，Stems ZIP 不会被误当成音频解码。
+- 新增 10 份空 API Key 示例工作流。FlowMusic 工作流覆盖全部 9 项操作，并示范使用上游节点输出的 `clip_id` 串联续写、替换、Cover、分轨和导出。
+- 真实验证已完成：GK V2 Edit 上传本地图并返回 `1024×1024 RGB`；FlowMusic 9 项操作均完成提交、轮询和对应文本/音频/ZIP/MP4 下载校验，片段替换按文档使用 `lyria-3.5`。
+- 完整离线回归通过 `184/184`；插件探针确认 159 个普通节点、126 个并发提交节点、287 个合并节点，GK V2 Edit 自动接入图片并发，FlowMusic 保持多媒体串行输出契约。
+
+### 20260818-1
+
+新增贞贞的平价AI小屋视频超分节点并更新 Seedance 2.5：
+
+- 新增 `zhenzhen-FlashVSR-video-upscale-lowprice`，精确调用 `FlashVSR_video_upscale`；只接受一个 480P、3～15 秒的本地视频或公网视频 URL，不发送提示词、时长、分辨率等无关参数。
+- 节点复用国内版 Settings、素材上传、兼容视频任务轮询和稳健下载链路，并自动生成现有 10 路视频并发提交节点。
+- Seedance 2.5 全部 6 个模型的 `resolution` 新增文档枚举 `native1080p`；原分辨率选项、默认值和旧工作流保持不变。
+- 新增空 API Key 的 FlashVSR 示例工作流和 opt-in 真实测试脚本；测试密钥、任务号、结果 URL 和测试媒体不会写入仓库。
+- FlashVSR 视频超分链路此前已通过真实节点全链路验证：854×480、3 秒 H.264 本地输入完成上传、提交、轮询和下载，输出为 1920×1024 H.264 MP4；完整离线回归通过 170 项测试，插件注册 157 个普通节点和 125 个并发提交节点。
+
+### 20260814-1
+
+更新贞贞的平价AI小屋 `zhenzhen-minimax-h3-ow-fast-video-lowprice` 节点：
+
+- Fast 节点由二合一扩展为五合一，新增 `minimax-h3-ow-t2v-fast`、`minimax-h3-ow-fl2va-audio-drive-fast`、`minimax-h3-ow-ref2va-audio-drive-fast`。
+- T2V Fast 仅使用必填提示词；两种 Audio Drive Fast 必须连接一张 `image1` 和一段 `audio`，本地音频转为 WAV 上传并按文档发送到 `metadata.audio_urls`。
+- 原 I2V Fast 单首帧与 R2V Fast 最多 9 张参考图的行为保持不变；旧工作流的图片插槽与 `api_config` 连线索引不变。
+- 前端会按模型显示 0、1 或 9 个图片输入，并只在两种音频驱动模型下显示音频输入；普通节点和 10 路视频并发提交节点同步支持。
+- 新增 3 份逐模型示例工作流，API Key 和运行结果保持空白。三个新模型均以 5 秒、480p 完成真实上传、提交、轮询、下载与 MP4 解码验证。
+- 完整离线回归通过 163 项测试；插件成功注册 156 个原节点和 124 个并发提交节点，全部前端脚本及三份新增工作流通过语法和敏感信息检查。
+
+### 20260812-2
+
+新增贞贞的平价AI小屋图片与音频节点：
+
+- 独立节点 `zhenzhen-image-gk-v2-lowprice`；三合一 `zhenzhen-wan-2.7-global-image-lowprice`；二合一 `zhenzhen-qwen3-tts-lowprice`；四合一 `zhenzhen-minimax-audio-lowprice`；二合一 `zhenzhen-mureka-bgm-lowprice`。
+- Wan 支持文生图和 1～9 张本地图像编辑；Qwen、MiniMax、Mureka 按模型动态显示有效参数，Mureka 会按接口顺序下载全部音频结果。
+- 图片节点接入现有 30 路图片并发提交框架，音频与多结果列表节点保持串行输出契约；新增 12 份逐模型、空 API Key 的示例工作流。
+- 12 个精确模型均通过真实上传、提交、轮询、下载和 ComfyUI 解码验证。MiniMax/Mureka 的 MP3 在 `torchaudio` 无后端时会自动使用一键包内置 FFmpeg 解码，无需新增依赖。
+- 完整离线回归通过 159 项测试；整包成功注册 156 个原节点和 124 个并发提交节点，14 份本次相关工作流通过 JSON 与敏感信息审计。
+
+### 20260812-1
+
+更新贞贞的平价AI小屋图层拆分节点：`zhenzhen-seedream-v5-pro-layer-decomposition-lowprice`。
+
+- 原节点新增海外模型 `dola-seedream-5.0-pro-layer-decomposition`，与国内 `seedream-v5-pro-layer-decomposition` 共用同一节点；国内模型继续作为默认值，旧工作流无需重连。
+- 模型选项追加在原有控件和执行 seed 之后，兼容更新前保存的 `widgets_values`；执行 seed 只控制 ComfyUI 缓存，不会发送给图层拆分 API。
+- 两个模型都完整读取有序 `image_urls`，按相同索引输出 IMAGE/MASK 列表，不排序、不去重、不截断，也不强制统一不同图层的尺寸。
+- 新增 Dola 示例工作流，并更新国内示例工作流；两者均通过 `Join Image with Alpha` 恢复透明通道并由 `Save Image` 保存全部结果，API Key 保持空白。
+- Dola 真实接口验证成功：一次返回 5 张图片，包括 1 张 1024×1024 底图和 4 张不同尺寸图层，全部 5 组 IMAGE/MASK 均成功下载并匹配。
+- 完整离线回归通过 159 项测试；整包成功注册 156 个原节点和 124 个并发提交节点，图层列表节点未被错误包装为单图并发节点。
+
+### 20260811-1
+
+新增贞贞的平价AI小屋三合一提示词增强节点：`zhenzhen-minmax-h3-context-ir-lowprice`。
+
+- 精确支持 `minmax-h3-context-ir-text`、`minmax-h3-context-ir-image`、`minmax-h3-context-ir-multimodal`，保留上游模型名中的 `minmax` 拼写。
+- Text 使用文本和固定画幅；Image 支持 1-2 张首尾帧；Multimodal 支持最多 9 图、3 视频、3 音频，画幅可选 `adaptive` 或交由 API 默认处理。
+- 节点输出增强后的 `result_text`、任务 ID 和完整响应，不下载视频；切换模型时自动显示对应素材入口。
+- 带 ComfyUI `fixed / randomize / increment / decrement` 执行 seed。seed 只控制缓存，不发送给 API；`fixed` 且输入不变时不会重复创建付费任务。
+- 新增文本、图像、多模态 3 份工作流，均使用国内版 Settings 且 API Key 留空。真实接口已逐个验证，三种模式均返回非空增强提示词，多模态实测覆盖图片、H.264 MP4 和 WAV。
+
+### 20260810-2
+
+统一提高生成结果媒体的最低下载超时：
+
+- 图片、视频、音频及其他生成结果的单次连接/读取超时最低为 `120s`，覆盖普通节点和并发节点共用的下载路径。
+- 旧值低于 `120s` 时自动抬到 `120s`；原本为 `120/180/300/600/1200s` 的配置保持不变，不缩短已有长超时。
+- 结果 CDN 因失效的 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量发生 `ConnectionError` 时，会自动用不读取环境代理的独立 Session 直连；正常代理、HTTP 业务错误和媒体解码错误不切换。
+- 只调整生成结果下载，不改变 API 提交、任务轮询、素材上传或 FFmpeg 处理的超时。
+
+### 20260810-1
+
+贞贞的AI工坊（海外版）新增 `.org / .cn` 自动容灾：
+
+- 旧工作流和 API Settings 继续默认使用 `https://ai.t8star.org`，无需增加控件或重新连接节点。
+- 首次请求会检查海外 API 的 DNS、TCP 与 TLS 可达性；`.org` 无法建立连接时自动改用 `https://ai.t8star.cn`，成功结果缓存 10 分钟后重新优先检查 `.org`。
+- TLS 握手、DNS 或连接阶段失败可安全切换一次；轮询 GET 可切换一次。HTTP 参数错误、鉴权失败、余额不足、服务端业务错误及提交后的读取超时均不会跨域重发，避免重复创建付费任务。
+- 切换仅作用于贞贞海外版两个官方域名，不影响贞贞的平价AI小屋、FAL 官方域名、自定义 IP 或结果 CDN；不新增第三方依赖。
+
+### 20260809-3
+
+补齐生成节点的 ComfyUI 随机种子与缓存控制：
+
+- 对当前没有原生 `seed` 的 52 个图片、视频、音频和 3D 生成节点，在原控件末尾追加执行 seed，并支持 `fixed / increment / decrement / randomize`。
+- `fixed` 且其他输入不变时复用 ComfyUI 缓存，不会再次提交 API；切换为 `randomize` 或修改 seed 后才发起新请求。
+- 兼容 seed 只参与 ComfyUI 执行与缓存，不会发送给本来不支持 seed 的上游 API；已有原生 seed 的节点保持原定义。
+- API Settings、素材上传、Upscaler、背景移除、文本样式等非生成节点不增加 seed；并发发射节点同样支持 fixed 缓存，不会重复提交已完成任务。
+- 新字段位于所有旧控件之后，旧工作流缺少该尾部字段时使用默认值，不改变已有 `widgets_values` 的位置。
+
+### 20260809-2
+
+新增贞贞的平价AI小屋独立节点：`zhenzhen-minimax-h3-ow-fast-video-lowprice`。
+
+- 一个节点包含 `minimax-h3-ow-i2v-fast` 与 `minimax-h3-ow-r2v-fast`；支持 5/10/15 秒、480p/720p 和文档列出的 8 种画幅。
+- I2V Fast 只显示并使用 `image1`；R2V Fast 显示 9 个参考图入口，并按已连接槽位顺序提交。
+- 节点自动获得 10 路视频并发提交版本，切换模型时原节点和并发节点会同步调整图片入口。
+- Hailuo H3 的 `hailuo-h3-t2v`、`hailuo-h3-i2v`、`hailuo-h3-multi` 新增并默认使用 `768P`，同时保留 `2K` 兼容旧工作流。
+- 新增 2 份 Fast 模型工作流，国内 Hailuo H3 的 3 份工作流更新为 `768P`；示例 API Key 均为空。
+
+### 20260809-1
+
+新增贞贞的平价AI小屋独立节点：`zhenzhen-seedream-v5-pro-layer-decomposition-lowprice`。
+
+- 单图输入，支持可选提示词、`auto / 1k / 1.5k / 2k` 和 PNG/JPEG；透明图层建议使用 PNG。
+- 完整读取 API 返回的底图和全部图层，按原顺序输出 `IMAGE` 与 `MASK` 列表，不缩放、不拼批、不截断。
+- 配套工作流使用 ComfyUI 原生 `Join Image with Alpha` 与 `Save Image`，会逐项恢复透明通道并保存全部结果，无需额外辅助节点。
+- 真实接口验证一次返回 7 张图片：1 张 1024×1024 底图和 6 张不同尺寸透明图层，URL、IMAGE、MASK 与数量输出完全一致。
+
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/6.jpg" width="70%" alt="new node"><br>
+如果报错了，请查看上面的代码，不一定都是你的问题，或者服务器问题，尤其SORA2，大部分情况是OPENAI的问题，当你发生500报错了，请在跑一次就可以了！<br>
+<img src="https://github.com/T8mars/Comfyui-zhenzhen/blob/main/pic/oss.png" width="70%" alt="new node"><br>
+由于NanoBanana Pro 4K的图像文件过大，在跨境下载时候容易导致失败，新增OSS设置(对象存储服务)<br>
 登录网站-令牌-你使用的APIKEY-编辑-拉到底部-选择CN或者US的OSS即可解决问题，如果报错也可以在comfyui终端检查最后报错代码，其中有下载地址，可以下载图片！
 
 ### 通知
 
-我们是海外服务器，如果打不开贞贞的AI工坊或者连通不上，报443错误，请求API都需要开启魔法，望周知  
-部分人完全是因为用的Vpn软件问题，请用常规软件！开Tun模式  
-开源免费版仓库：https://github.com/2dust/v2rayN/releases  
-下载Windows版本！  
-另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！  
-目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定  
+我们是海外服务器，如果打不开贞贞的AI工坊或者连通不上，报443错误，请求API都需要开启魔法，望周知<br>
+部分人完全是因为用的Vpn软件问题，请用常规软件！开Tun模式<br>
+开源免费版仓库：https://github.com/2dust/v2rayN/releases<br>
+下载Windows版本！<br>
+另外360防火墙这些垃圾软件也可能导致这个问题！请关闭！包括有些人的路由器设置！<br>
+目前由于谷歌风控严重，nano-banana-pro和gemini-3.1-flash-image-preview模型需要用优质分组比较稳定<br>
 由于openai风控严重，暂时可用的分组是sora-vip分组
 
 ### 海外版自动充值说明(暂时关闭注册，后续再开放)
 
 目前充值 方案2种
 
-第一种，下载最新的批量本地整合包：https://pan.quark.cn/s/fa2d15404655 或者免费的无限画布：https://pan.quark.cn/s/e8c19b5c9d2b  
-启动后，右上方就有小额充值  
-第二种，大额充值以及Discord机器人充值  
-目前进下面频道机器人会自动私信发您充值方法  
-手动找机器人和对应教程：  
-自动充值视频教程：https://www.youtube.com/watch?v=VLxEZ7Yw_74  
-自动充值图文教程：https://my.feishu.cn/wiki/XWszwNJsZiULhbk2nbqcTczSnNb?from=from_copylink  
+第一种，下载最新的批量本地整合包：https://pan.quark.cn/s/fa2d15404655 或者免费的无限画布：https://pan.quark.cn/s/e8c19b5c9d2b<br>
+启动后，右上方就有小额充值<br>
+第二种，大额充值以及Discord机器人充值<br>
+目前进下面频道机器人会自动私信发您充值方法<br>
+手动找机器人和对应教程：<br>
+自动充值视频教程：https://www.youtube.com/watch?v=VLxEZ7Yw_74<br>
+自动充值图文教程：https://my.feishu.cn/wiki/XWszwNJsZiULhbk2nbqcTczSnNb?from=from_copylink<br>
 频道链接：https://discord.gg/sAK2THPWhZ
 
 这是海外频道，内地网络打不开注意，如果没有账号，也没有GMAIL老账号可以，可通过海外账号星球：accboy7t8star.acceboy.com，购买一个老的gmail账号，国内邮箱账号或者新邮箱很容易封号，务必注意！请合规使用，网站目前运营正常，每日都在正常更新。注意ID绑定一定要正确，错误无法退回，无法换冲。
-
-### 20260831-2
-
-修正节点冲突，重做全部工作流
-
-### 20260830-1
-
-新增模型：zhenzhen-video-g-omni-1.1-flash-lowprice
-
-### 20260824-2
-
-优化下载
-
-### 20260824-1
-
-新增贞贞的平价AI小屋 Wan 3.0 四合一视频节点：`zhenzhen-wan-3.0-video-lowprice（4合1）`。  
-支持 `wan-3.0-i2v`、`wan-3.0-r2v`、`wan-3.0-global-i2v`、`wan-3.0-global-r2v`。  
-I2V 支持首帧和可选尾帧；R2V 支持最多 10 张图片、5 个视频、5 段音频，以及互斥的文档或网页参考。  
-新增 4 份对应工作流，APIKEY 和运行结果均不写入工作流。  
-
-### 20260822-1
-
-新增模型和节点  
-zhenzhen-video-g-omni-flash-lowprice  
-hunyuan3d-v3.1-image-to-3d  
-hunyuan3d-v3.1-text-to-3d  
-zhenzhen-image-gk-v2-segment  
-zhenzhen-image-gk-v2-region-edit  
-配套工作流已更新  
-
-### 20260821-2
-
-优化节点：Zhenzhen_nano_banana2_edit
-
-### 20260821-1
-
-新增模型及对应节点  
-zhenzhen-image-gk-v2-edit  
-新增音乐模型系列 Lyria 3.5  
-flowmusic-video-clip  
-flowmusic-upload-audio  
-flowmusic-stems  
-flowmusic-replace  
-flowmusic-lyrics  
-flowmusic-generation  
-flowmusic-extend  
-flowmusic-download-audio  
-flowmusic-cover  
-配套工作流已更新
-
-### 20260818-1
-
-seedance2.2新增原生1080P选项：native10180p  
-新增视频放大模型：FlashVSR_video_upscale  
-
-### 20260814-1
-
-新增模型和节点更新
-minimax-h3-ow-ref2va-audio-drive-fast  
-minimax-h3-ow-fl2va-audio-drive-fast  
-minimax-h3-ow-t2v-fast  
-支持音频驱动口型数字人和文生视频低价版  
-
-### 20260812-1
-
-新增图像模型grok-imagine-2(WIP)，目前只支持文生图，功能过于复杂逆天，还没研究明白，后续支持其他功能
-应用户要求新增图像模型：wan-2.7-global-i2i，wan-2.7-global-i2i-pro，wan-2.7-global-t2i
-新增音频模型：qwen3-tts-flash，qwen3-tts-instruct-flash，minimax-music-2.6，minimax-speech-2.8-hd，minimax-speech-2.8-turbo，minimax-voice-clone，mureka-v8-bgm，mureka-v9-bgm
-
-### 20260811-2
-
-新增宽审核模型，图像分解，最多可分解16层：dola-seedream-5.0-pro-layer-decomposition  
-工作流同步更新，贞贞的平价AI小屋渠道  
-
-### 20260811-1
-
-新增节点包含模型：  
-minmax-h3-context-ir-image  
-minmax-h3-context-ir-multimodal  
-minmax-h3-context-ir-text  
-配套工作流已更新，官方minimax h3提示词增强节点和API调用  
-
-### 20260810-2
-
-优化所有生成节点下载逻辑  
-
-### 20260810-1
-
-请求自动检查可达性，.org 连接/TLS 失败时切换至 .cn，缓存 10 分钟。优化网络兼容性  
-
-### 20260809-3
-
-应用户要求，补充生成节点随机种子
-
-### 20260809-2
-
-新增支持minimax-h3-ow-i2v-fast,minimax-h3-ow-r2v-fast  
-新增支持minimax-h3之前官方节点的768P  
-对应工作流  
-
-### 20260809-1
-
-新增seedream-v5-pro-layer-decomposition对应工作流及节点，支持图像分层    
-新增flu3视频模型对应工作流及节点    
-新增minimax h3 海外版模型工作流及节点   
-
-### 20260808-1
-
-新增seedance2.5配套节点  
-新增全套seedance2.5工作流  
-贞贞的平价AI小屋调用  
-
-### 2026087-1
-
-新增统一重试下载器 [media_download.py]  
-支持临时 503、结果未就绪、无效图片内容等情况。    
-修复 [Comfly.py]中 Nano Banana 2 串行、S2A 和并发路径。  
-同步加固 Nano Banana、Qwen、Gemini、GPT Image、Seedream、Flux、Jimeng、FAL 等同类图片节点。  
-失败信息不再泄露签名图片 URL。  
-
-### 2026086-1
-
-新增qwen image 3相关节点  
-新增minimax h3 ow相关节点  
-
-新增模型：  
-qwen-image-3.0-global-i2i  
-qwen-image-3.0-global-pro-i2i  
-qwen-image-3.0-global-pro-t2i  
-qwen-image-3.0-global-t2i  
-qwen-image-3.0-i2i  
-qwen-image-3.0-pro-i2i  
-qwen-image-3.0-pro-t2i  
-qwen-image-3.0-t2i  
-minimax-h3-ow-i2v  
-minimax-h3-ow-r2v  
-minimax-h3-ow-t2v  
-
-新增对应工作流以及并发工作流，以上模型属于贞贞的平价AI小屋
-
-
-### 2026085-1
-
-支持图像30并发以及视频10并发  
-节点搜索：Concurrent，支持所有图像和视频的并发  
-示例工作流在workflow目录下  
 
 ### 20260731-1
 

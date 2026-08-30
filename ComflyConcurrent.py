@@ -178,29 +178,13 @@ def _safe_class_name(mapping_key: str) -> str:
     return re.sub(r"[^0-9A-Za-z_]", "_", mapping_key)
 
 
-def _call_original_validator(
-    target_class,
-    kwargs: Dict[str, Any],
-    strict: bool = False,
-) -> Any:
+def _call_original_validator(target_class, kwargs: Dict[str, Any]) -> Any:
     validator = getattr(target_class, "VALIDATE_INPUTS")
     argspec = inspect.getfullargspec(validator)
-    validation_kwargs = dict(kwargs)
-    accepts_strict = (
-        argspec.varkw is not None
-        or "strict" in argspec.args
-        or "strict" in argspec.kwonlyargs
-    )
-    if strict and accepts_strict:
-        validation_kwargs["strict"] = True
     if argspec.varkw is not None:
-        return validator(**validation_kwargs)
+        return validator(**kwargs)
     accepted = set(argspec.args).union(argspec.kwonlyargs)
-    return validator(**{
-        name: value
-        for name, value in validation_kwargs.items()
-        if name in accepted
-    })
+    return validator(**{name: value for name, value in kwargs.items() if name in accepted})
 
 
 def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: str):
@@ -214,14 +198,6 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
         return copy.deepcopy(target_class.INPUT_TYPES())
 
     def submit(self, **kwargs):
-        if hasattr(target_class, "VALIDATE_INPUTS"):
-            validation = _call_original_validator(
-                target_class,
-                kwargs,
-                strict=True,
-            )
-            if validation is not True and not bool(kwargs.get("skip_error", False)):
-                raise ValueError(str(validation))
         context = contextvars.copy_context()
         future = executor.submit(
             context.run,
@@ -243,6 +219,12 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
         "ORIGINAL_NODE_CLASS": target_class,
         "submit": submit,
     }
+    if hasattr(target_class, "VALIDATE_INPUTS"):
+        @classmethod
+        def validate_inputs(cls, **kwargs):
+            return _call_original_validator(target_class, kwargs)
+
+        attrs["VALIDATE_INPUTS"] = validate_inputs
     if hasattr(target_class, "INPUT_IS_LIST"):
         attrs["INPUT_IS_LIST"] = target_class.INPUT_IS_LIST
 
