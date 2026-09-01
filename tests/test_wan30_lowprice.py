@@ -13,7 +13,7 @@ CONFIG = {"base_url": "https://example.test", "api_key": "sk-test"}
 
 
 class Wan30LowPriceTests(unittest.TestCase):
-    def test_four_models_and_documented_controls(self):
+    def test_eight_models_and_documented_controls(self):
         self.assertEqual(
             nodes.WAN30_MODELS,
             [
@@ -21,6 +21,10 @@ class Wan30LowPriceTests(unittest.TestCase):
                 "wan-3.0-r2v",
                 "wan-3.0-global-i2v",
                 "wan-3.0-global-r2v",
+                "wan-3.0-prime-i2v",
+                "wan-3.0-prime-r2v",
+                "wan-3.0-global-prime-i2v",
+                "wan-3.0-global-prime-r2v",
             ],
         )
         self.assertEqual(nodes.WAN30_SECONDS, ["auto", *map(str, range(2, 31))])
@@ -32,26 +36,29 @@ class Wan30LowPriceTests(unittest.TestCase):
         inputs = nodes.Comfly_wan_3_0_video_lowprice.INPUT_TYPES()
         self.assertTrue(inputs["required"]["seed"][1]["control_after_generate"])
         expected_optional = (
-            [f"image{index}" for index in range(1, 11)]
+            ["api_config"]
+            + [f"image{index}" for index in range(1, 11)]
             + [f"video{index}" for index in range(1, 6)]
             + [f"audio{index}" for index in range(1, 6)]
-            + ["api_config", "skip_error"]
+            + ["skip_error"]
         )
         self.assertEqual(list(inputs["optional"]), expected_optional)
 
     def test_i2v_payload_uses_only_first_and_last_frame(self):
         payload = nodes.build_wan30_payload(
-            "wan-3.0-i2v",
-            "slow cinematic push in",
-            "2",
-            "480P",
-            "adaptive",
-            False,
-            True,
-            "",
-            "",
-            7,
-            ["https://cdn.test/first.png", "https://cdn.test/last.png"],
+            {
+                "model": "wan-3.0-i2v",
+                "prompt": "slow cinematic push in",
+                "seconds": "2",
+                "resolution": "480P",
+                "ratio": "adaptive",
+                "generate_audio": False,
+                "enable_thinking": True,
+                "file_url": "",
+                "link_url": "",
+                "seed": 7,
+            },
+            {"images": ["https://cdn.test/first.png", "https://cdn.test/last.png"]},
         )
         self.assertEqual(
             payload,
@@ -74,36 +81,42 @@ class Wan30LowPriceTests(unittest.TestCase):
 
     def test_global_i2v_sends_enable_thinking(self):
         payload = nodes.build_wan30_payload(
-            "wan-3.0-global-i2v",
-            "",
-            "auto",
-            "720P",
-            "16:9",
-            True,
-            True,
-            "",
-            "",
-            0,
-            ["https://cdn.test/first.png"],
+            {
+                "model": "wan-3.0-global-i2v",
+                "prompt": "",
+                "seconds": "auto",
+                "resolution": "720P",
+                "ratio": "16:9",
+                "generate_audio": True,
+                "enable_thinking": True,
+                "file_url": "",
+                "link_url": "",
+                "seed": 0,
+            },
+            {"images": ["https://cdn.test/first.png"]},
         )
         self.assertTrue(payload["metadata"]["enable_thinking"])
         self.assertNotIn("prompt", payload)
 
     def test_r2v_payload_uses_documented_media_fields_and_caps(self):
         payload = nodes.build_wan30_payload(
-            "wan-3.0-r2v",
-            "Image 1 enters Video 1 while Audio 1 guides the rhythm",
-            "30",
-            "1080P",
-            "9:16",
-            True,
-            True,
-            "https://files.test/reference.pdf",
-            "",
-            2147483647,
-            [f"https://cdn.test/image-{index}.png" for index in range(1, 12)],
-            [f"https://cdn.test/video-{index}.mp4" for index in range(1, 7)],
-            [f"https://cdn.test/audio-{index}.wav" for index in range(1, 7)],
+            {
+                "model": "wan-3.0-r2v",
+                "prompt": "Image 1 enters Video 1 while Audio 1 guides the rhythm",
+                "seconds": "30",
+                "resolution": "1080P",
+                "ratio": "9:16",
+                "generate_audio": True,
+                "enable_thinking": True,
+                "file_url": "https://files.test/reference.pdf",
+                "link_url": "",
+                "seed": 2147483647,
+            },
+            {
+                "images": [f"https://cdn.test/image-{index}.png" for index in range(1, 12)],
+                "video_urls": [f"https://cdn.test/video-{index}.mp4" for index in range(1, 7)],
+                "audio_urls": [f"https://cdn.test/audio-{index}.wav" for index in range(1, 7)],
+            },
         )
         self.assertEqual(len(payload["images"]), 10)
         self.assertEqual(len(payload["metadata"]["video_url"]), 5)
@@ -116,16 +129,19 @@ class Wan30LowPriceTests(unittest.TestCase):
 
     def test_global_r2v_forces_thinking_for_file_or_link(self):
         payload = nodes.build_wan30_payload(
-            "wan-3.0-global-r2v",
-            "Use the referenced webpage as context",
-            "2",
-            "480P",
-            "adaptive",
-            False,
-            False,
-            "",
-            "https://example.test/reference",
-            1,
+            {
+                "model": "wan-3.0-global-r2v",
+                "prompt": "Use the referenced webpage as context",
+                "seconds": "2",
+                "resolution": "480P",
+                "ratio": "adaptive",
+                "generate_audio": False,
+                "enable_thinking": False,
+                "file_url": "",
+                "link_url": "https://example.test/reference",
+                "seed": 1,
+            },
+            {},
         )
         self.assertTrue(payload["metadata"]["enable_thinking"])
         self.assertEqual(
@@ -146,7 +162,7 @@ class Wan30LowPriceTests(unittest.TestCase):
                 0,
                 strict=True,
             )
-        with self.assertRaisesRegex(nodes.SeedanceLowPriceError, "requires a prompt"):
+        with self.assertRaisesRegex(nodes.SeedanceLowPriceError, "prompt is required"):
             nodes.validate_wan30_inputs(
                 "wan-3.0-r2v",
                 "",
@@ -224,7 +240,7 @@ class Wan30LowPriceTests(unittest.TestCase):
         self.assertEqual(payload["metadata"]["audio_url"], ["https://cdn.test/audio.wav"])
 
     def test_api_key_validation_does_not_echo_secret(self):
-        for bad_key in ("bad", "sk-has space", "sk-中文"):
+        for bad_key in ("bad", "sk-has space", " sk-test", "sk-test\n", "sk-中文"):
             with self.subTest(bad_key=bad_key):
                 with self.assertRaises(nodes.SeedanceLowPriceError) as caught:
                     nodes.resolve_config(
@@ -246,16 +262,17 @@ class Wan30LowPriceTests(unittest.TestCase):
                 )
         session.post.assert_called_once()
 
-    def test_four_workflows_are_safe_and_cover_all_models(self):
+    def test_workflows_are_safe_and_cover_all_models(self):
         paths = sorted((ROOT / "workflow").glob("zhenzhen-wan-3.0-*.json"))
-        self.assertEqual(len(paths), 4)
+        self.assertGreaterEqual(len(paths), 8)
         covered = set()
-        expected_inputs = (
+        media_first_inputs = (
             [f"image{index}" for index in range(1, 11)]
             + [f"video{index}" for index in range(1, 6)]
             + [f"audio{index}" for index in range(1, 6)]
             + ["api_config"]
         )
+        config_first_inputs = ["api_config", *media_first_inputs[:-1]]
         for path in paths:
             text = path.read_text(encoding="utf-8")
             self.assertNotIn("sk-", text)
@@ -266,17 +283,26 @@ class Wan30LowPriceTests(unittest.TestCase):
                 if item["type"] == "Comfly_wan_3_0_video_lowprice"
             )
             covered.add(node["widgets_values"][0])
-            self.assertEqual([item["name"] for item in node["inputs"]], expected_inputs)
+            input_names = [item["name"] for item in node["inputs"]]
+            self.assertIn(input_names, (media_first_inputs, config_first_inputs))
             settings = next(
-                item for item in workflow["nodes"] if item["type"] == "Comfly_api_set"
+                item
+                for item in workflow["nodes"]
+                if item["type"] in {"Comfly_api_set", "T8Zhenzhen_API_Settings"}
             )
             self.assertEqual(settings["widgets_values"], ["seedance_low_price", "", "", False])
             incoming = [link for link in workflow["links"] if link[3] == node["id"]]
-            media_slots = {(link[4], link[5]) for link in incoming if link[5] in {"IMAGE", "VIDEO", "AUDIO"}}
+            media_names = {
+                input_names[link[4]]
+                for link in incoming
+                if link[5] in {"IMAGE", "VIDEO", "AUDIO"}
+            }
             if node["widgets_values"][0].endswith("-i2v"):
-                self.assertEqual(media_slots, {(0, "IMAGE"), (1, "IMAGE")})
+                self.assertEqual(media_names, {"image1", "image2"})
+            elif "prime" in node["widgets_values"][0]:
+                self.assertEqual(media_names, {"image1"})
             else:
-                self.assertEqual(media_slots, {(0, "IMAGE"), (10, "VIDEO"), (15, "AUDIO")})
+                self.assertEqual(media_names, {"image1", "video1", "audio1"})
         self.assertEqual(covered, set(nodes.WAN30_MODELS))
 
 

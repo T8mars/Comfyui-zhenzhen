@@ -4141,6 +4141,229 @@ class Comfly_hailuo_h3_video_lowprice:
             )
 
 
+HAILUO_H3_MAX_T2V_MODEL = "hailuo-h3-max-t2v"
+HAILUO_H3_MAX_I2V_MODEL = "hailuo-h3-max-i2v"
+HAILUO_H3_MAX_MODELS = [
+    HAILUO_H3_MAX_T2V_MODEL,
+    HAILUO_H3_MAX_I2V_MODEL,
+]
+HAILUO_H3_MAX_SECONDS = [str(seconds) for seconds in range(5, 16)]
+HAILUO_H3_MAX_RESOLUTIONS = ["480P", "768P"]
+HAILUO_H3_MAX_RATIOS = ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"]
+
+
+def validate_hailuo_h3_max_inputs(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+) -> None:
+    if model not in HAILUO_H3_MAX_MODELS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo H3 Max model: {model}")
+    if str(seconds) not in HAILUO_H3_MAX_SECONDS:
+        raise SeedanceLowPriceError("Hailuo H3 Max seconds must be between 5 and 15")
+    if resolution not in HAILUO_H3_MAX_RESOLUTIONS:
+        raise SeedanceLowPriceError("Hailuo H3 Max resolution must be 480P or 768P")
+    if ratio not in HAILUO_H3_MAX_RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported Hailuo H3 Max ratio: {ratio}")
+
+    prompt_text = str(prompt or "").strip()
+    if not prompt_text:
+        raise SeedanceLowPriceError("Hailuo H3 Max requires a prompt")
+    if len(prompt_text) > PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"Hailuo H3 Max prompt exceeds {PROMPT_MAX_LENGTH} characters"
+        )
+
+
+def build_hailuo_h3_max_payload(
+    model: str,
+    prompt: str,
+    seconds: str,
+    resolution: str,
+    ratio: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    validate_hailuo_h3_max_inputs(model, prompt, seconds, resolution, ratio)
+    metadata: Dict[str, Any] = {"resolution": resolution}
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": str(prompt).strip(),
+        "seconds": str(seconds),
+        "metadata": metadata,
+    }
+
+    if model == HAILUO_H3_MAX_T2V_MODEL:
+        metadata["ratio"] = ratio
+        return payload
+
+    images = list(image_urls or [])
+    if not images:
+        raise SeedanceLowPriceError(
+            "Hailuo H3 Max image-to-video requires image1 as the first frame"
+        )
+    payload["images"] = images[:2]
+    return payload
+
+
+class Comfly_hailuo_h3_max_video_lowprice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    HAILUO_H3_MAX_MODELS,
+                    {"default": HAILUO_H3_MAX_T2V_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "seconds": (HAILUO_H3_MAX_SECONDS, {"default": "5"}),
+                "resolution": (HAILUO_H3_MAX_RESOLUTIONS, {"default": "480P"}),
+                "ratio": (HAILUO_H3_MAX_RATIOS, {"default": "16:9"}),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),
+                "skip_error": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        seconds="5",
+        resolution="480P",
+        ratio="16:9",
+        **kwargs,
+    ):
+        if model is None:
+            return True
+        try:
+            validate_hailuo_h3_max_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        seconds: str,
+        resolution: str,
+        ratio: str,
+        api_config: Any = None,
+        image1: Any = None,
+        image2: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_hailuo_h3_max_inputs(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+            )
+            config = resolve_config(api_config)
+            image_urls: List[str] = []
+
+            if model == HAILUO_H3_MAX_I2V_MODEL:
+                if image1 is None:
+                    raise SeedanceLowPriceError(
+                        "Hailuo H3 Max image-to-video requires image1 as the first frame"
+                    )
+                connected_images = [image for image in (image1, image2) if image is not None]
+                for index, image in enumerate(connected_images, start=1):
+                    image_urls.append(
+                        upload_media(
+                            image_to_png_bytes(image),
+                            f"hailuo_h3_max_frame_{index}.png",
+                            "image/png",
+                            config,
+                        )
+                    )
+                    update_progress(int(index / len(connected_images) * 25))
+
+            payload = build_hailuo_h3_max_payload(
+                model,
+                prompt,
+                seconds,
+                resolution,
+                ratio,
+                image_urls,
+            )
+            print(f"[Hailuo H3 Max Low Price] Submitting model={model}")
+            task_id, submit_response = submit_task(payload, config)
+            update_progress(35)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(35 + int(progress * 0.55))
+
+            final_response = poll_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": model,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": model,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 FLUX3_T2V_MODELS = [
     "flux-3-video-t2v",
     "flux-3-video-global-t2v",
@@ -10715,6 +10938,7 @@ __all__ = [
     "Comfly_kling_o3_edit_lowprice",
     "Comfly_hailuo_2_3_video_lowprice",
     "Comfly_hailuo_h3_video_lowprice",
+    "Comfly_hailuo_h3_max_video_lowprice",
     "Comfly_minimax_h3_ow_video_lowprice",
     "Comfly_minimax_h3_ow_fast_video_lowprice",
     "Comfly_vidu_q3_video_lowprice",
