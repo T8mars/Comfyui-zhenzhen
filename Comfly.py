@@ -26177,7 +26177,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_kling_o3_edit_lowprice": "zhenzhen-kling-o3-edit-lowprice",
     "Comfly_hailuo_2_3_video_lowprice": "zhenzhen-hailuo-2.3-video-lowprice",
     "Comfly_hailuo_h3_video_lowprice": "zhenzhen-hailuo-h3-video-lowprice",
-    "Comfly_hailuo_h3_max_video_lowprice": "zhenzhen-hailuo-h3-max-video-lowprice（2合1）",
+    "Comfly_hailuo_h3_max_video_lowprice": "zhenzhen-hailuo-h3-max-video-lowprice（4合1）",
     "Comfly_flux3_video_lowprice": "zhenzhen-flux-3-video-lowprice",
     "Comfly_minimax_h3_ow_video_lowprice": "zhenzhen-minimax-h3-ow-video-lowprice",
     "Comfly_minimax_h3_ow_fast_video_lowprice": "zhenzhen-minimax-h3-ow-fast-video-lowprice",

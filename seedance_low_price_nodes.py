@@ -4143,12 +4143,33 @@ class Comfly_hailuo_h3_video_lowprice:
 
 HAILUO_H3_MAX_T2V_MODEL = "hailuo-h3-max-t2v"
 HAILUO_H3_MAX_I2V_MODEL = "hailuo-h3-max-i2v"
+HAILUO_H3_MAX_TURBO_T2V_MODEL = "hailuo-h3-max-turbo-t2v"
+HAILUO_H3_MAX_TURBO_I2V_MODEL = "hailuo-h3-max-turbo-i2v"
+HAILUO_H3_MAX_T2V_MODELS = [
+    HAILUO_H3_MAX_T2V_MODEL,
+    HAILUO_H3_MAX_TURBO_T2V_MODEL,
+]
+HAILUO_H3_MAX_I2V_MODELS = [
+    HAILUO_H3_MAX_I2V_MODEL,
+    HAILUO_H3_MAX_TURBO_I2V_MODEL,
+]
+HAILUO_H3_MAX_TURBO_MODELS = [
+    HAILUO_H3_MAX_TURBO_T2V_MODEL,
+    HAILUO_H3_MAX_TURBO_I2V_MODEL,
+]
 HAILUO_H3_MAX_MODELS = [
     HAILUO_H3_MAX_T2V_MODEL,
     HAILUO_H3_MAX_I2V_MODEL,
+    HAILUO_H3_MAX_TURBO_T2V_MODEL,
+    HAILUO_H3_MAX_TURBO_I2V_MODEL,
 ]
 HAILUO_H3_MAX_SECONDS = [str(seconds) for seconds in range(5, 16)]
-HAILUO_H3_MAX_RESOLUTIONS = ["480P", "768P"]
+HAILUO_H3_MAX_STANDARD_RESOLUTIONS = ["480P", "768P"]
+HAILUO_H3_MAX_TURBO_RESOLUTIONS = ["480p", "768p"]
+HAILUO_H3_MAX_RESOLUTIONS = [
+    *HAILUO_H3_MAX_STANDARD_RESOLUTIONS,
+    *HAILUO_H3_MAX_TURBO_RESOLUTIONS,
+]
 HAILUO_H3_MAX_RATIOS = ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"]
 
 
@@ -4163,8 +4184,16 @@ def validate_hailuo_h3_max_inputs(
         raise SeedanceLowPriceError(f"Unsupported Hailuo H3 Max model: {model}")
     if str(seconds) not in HAILUO_H3_MAX_SECONDS:
         raise SeedanceLowPriceError("Hailuo H3 Max seconds must be between 5 and 15")
-    if resolution not in HAILUO_H3_MAX_RESOLUTIONS:
-        raise SeedanceLowPriceError("Hailuo H3 Max resolution must be 480P or 768P")
+    allowed_resolutions = (
+        HAILUO_H3_MAX_TURBO_RESOLUTIONS
+        if model in HAILUO_H3_MAX_TURBO_MODELS
+        else HAILUO_H3_MAX_STANDARD_RESOLUTIONS
+    )
+    if resolution not in allowed_resolutions:
+        raise SeedanceLowPriceError(
+            f"Hailuo H3 Max resolution for {model} must be "
+            f"{' or '.join(allowed_resolutions)}"
+        )
     if ratio not in HAILUO_H3_MAX_RATIOS:
         raise SeedanceLowPriceError(f"Unsupported Hailuo H3 Max ratio: {ratio}")
 
@@ -4194,7 +4223,7 @@ def build_hailuo_h3_max_payload(
         "metadata": metadata,
     }
 
-    if model == HAILUO_H3_MAX_T2V_MODEL:
+    if model in HAILUO_H3_MAX_T2V_MODELS:
         metadata["ratio"] = ratio
         return payload
 
@@ -4293,7 +4322,7 @@ class Comfly_hailuo_h3_max_video_lowprice:
             config = resolve_config(api_config)
             image_urls: List[str] = []
 
-            if model == HAILUO_H3_MAX_I2V_MODEL:
+            if model in HAILUO_H3_MAX_I2V_MODELS:
                 if image1 is None:
                     raise SeedanceLowPriceError(
                         "Hailuo H3 Max image-to-video requires image1 as the first frame"
