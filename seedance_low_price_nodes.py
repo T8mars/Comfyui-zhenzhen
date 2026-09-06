@@ -4393,6 +4393,623 @@ class Comfly_hailuo_h3_max_video_lowprice:
             )
 
 
+MINIMAX_H3_V2_MODEL = "MiniMax-H3"
+MINIMAX_H3_V2_RESOLUTIONS = ["480P", "768P"]
+MINIMAX_H3_V2_FIXED_RATIOS = [
+    "16:9",
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "9:16",
+    "21:9",
+]
+MINIMAX_H3_V2_RATIOS = [
+    *MINIMAX_H3_V2_FIXED_RATIOS,
+    "adaptive",
+    "auto",
+    "api_default",
+]
+MINIMAX_H3_V2_AUDIO_MODES = [
+    "api_default",
+    "lock_source",
+    "remix_source",
+    "reference_only",
+    "native",
+]
+MINIMAX_H3_V2_DRIVE_REFERENCE_CHOICES = ["api_default", "true", "false"]
+MINIMAX_H3_V2_PROMPT_MAX_LENGTH = 10000
+MAX_MINIMAX_H3_V2_IMAGES = 9
+MAX_MINIMAX_H3_V2_VIDEOS = 3
+MAX_MINIMAX_H3_V2_AUDIOS = 3
+MINIMAX_H3_V2_RUNNING_STATUSES = {"queued", "running"}
+MINIMAX_H3_V2_FAILURE_STATUSES = {"failed", "cancelled"}
+
+
+def _minimax_h3_v2_task_id(data: Any) -> str:
+    if not isinstance(data, dict):
+        return ""
+    task_id = data.get("task_id") or data.get("id")
+    task = data.get("task")
+    if not task_id and isinstance(task, dict):
+        task_id = task.get("task_id") or task.get("id")
+    return str(task_id or "").strip()
+
+
+def submit_minimax_h3_v2_task(
+    payload: Dict[str, Any],
+    config: Dict[str, Any],
+) -> Tuple[str, Dict[str, Any]]:
+    """Create one MiniMax V2 task without replaying an ambiguous paid POST."""
+    url = f"{config['base_url']}/v2/video_generation"
+    print("[MiniMax H3 V2 Low Price] POST /v2/video_generation")
+    try:
+        response = _get_session().post(
+            url,
+            headers=_headers(config["api_key"]),
+            json=payload,
+            timeout=config.get("timeout", 60),
+        )
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            "MiniMax H3 submit response was not received and the paid request was "
+            "not retried because the server may already have created it: "
+            f"{type(exc).__name__}"
+        ) from None
+
+    data = _response_json(response)
+    task_id = _minimax_h3_v2_task_id(data)
+    if not task_id and (response.status_code == 408 or response.status_code >= 500):
+        task_id = str(response.headers.get("X-Task-Id", "") or "").strip()
+
+    if not 200 <= response.status_code < 300 and not task_id:
+        message = extract_error_message(data, response.text[:300])
+        raise SeedanceLowPriceError(
+            f"MiniMax H3 submit rejected (HTTP {response.status_code}): {message}"
+        )
+    if not task_id:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 submit response did not contain task_id"
+        )
+
+    if not isinstance(data, dict):
+        data = {}
+    if response.status_code == 408 or response.status_code >= 500:
+        data = {
+            **data,
+            "task_id": task_id,
+            "recovered_from_http_status": response.status_code,
+        }
+    return task_id, data
+
+
+def poll_minimax_h3_v2_task(
+    task_id: str,
+    config: Dict[str, Any],
+    on_progress: Optional[Callable[[int], None]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> Dict[str, Any]:
+    url = f"{config['base_url']}/v2/query/video_generation/{task_id}"
+    poll_interval = max(5.0, float(config.get("poll_interval", 5.0)))
+    start = clock()
+    failures = 0
+
+    while True:
+        if clock() - start > config.get("max_poll_time", 1800):
+            raise RuntimeError(
+                "MiniMax H3 polling timed out; the task may still finish on the "
+                f"provider site [task_id: {task_id}]"
+            )
+        sleep(poll_interval)
+        try:
+            response = _get_session().get(
+                url,
+                headers=_headers(config["api_key"], json_content=False),
+                timeout=30,
+            )
+        except requests.RequestException:
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "MiniMax H3 polling failed after repeated network errors "
+                    f"[task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        if response.status_code != 200:
+            data = _response_json(response)
+            message = extract_error_message(data, response.text[:300])
+            if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
+                raise SeedanceLowPriceError(
+                    f"MiniMax H3 polling rejected (HTTP {response.status_code}): "
+                    f"{message} [task_id: {task_id}]"
+                )
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "MiniMax H3 polling repeatedly returned transient HTTP errors "
+                    f"[task_id: {task_id}]"
+                )
+            sleep(min(failures * 2, 10))
+            continue
+
+        data = _response_json(response)
+        task = data.get("task") if isinstance(data, dict) else None
+        if not isinstance(task, dict):
+            failures += 1
+            if failures >= 6:
+                raise RuntimeError(
+                    "MiniMax H3 polling response repeatedly omitted task "
+                    f"[task_id: {task_id}]"
+                )
+            continue
+
+        failures = 0
+        status = str(task.get("status") or "").strip().lower()
+        if on_progress:
+            on_progress(100 if status == "succeeded" else 40 if status == "running" else 10)
+        if status == "succeeded":
+            return data
+        if status in MINIMAX_H3_V2_FAILURE_STATUSES:
+            message = extract_error_message(
+                task.get("error"),
+                "MiniMax H3 generation failed",
+            )
+            raise SeedanceLowPriceError(
+                f"MiniMax H3 task {status}: {message} [task_id: {task_id}]"
+            )
+        if status and status not in MINIMAX_H3_V2_RUNNING_STATUSES:
+            print(f"[MiniMax H3 V2 Low Price] Unknown status={status}; polling continues")
+
+
+def extract_minimax_h3_v2_video_url(response: Dict[str, Any]) -> str:
+    task = response.get("task") if isinstance(response, dict) else None
+    content = task.get("content") if isinstance(task, dict) else None
+    if isinstance(content, dict) and content.get("url"):
+        return str(content["url"])
+    raise SeedanceLowPriceError(
+        "MiniMax H3 task succeeded but task.content.url is missing"
+    )
+
+
+def _minimax_h3_v2_slots(
+    values: Dict[str, Any],
+    base_name: str,
+    count: int,
+) -> List[Tuple[int, Any]]:
+    slots = [
+        (index, values.get(f"{base_name}{index}"))
+        for index in range(1, count + 1)
+        if values.get(f"{base_name}{index}") is not None
+    ]
+    connected = [index for index, _value in slots]
+    if connected and connected != list(range(1, len(connected) + 1)):
+        print(
+            f"[MiniMax H3 V2 Low Price] {base_name} slots {connected} contain "
+            "gaps; connected inputs will be compacted in slot order"
+        )
+    return slots
+
+
+def validate_minimax_h3_v2_inputs(
+    model: str,
+    prompt: str,
+    duration: Any,
+    resolution: str,
+    ratio: str,
+    audio_mode: str,
+    denoise_strength: Any,
+    add_drive_as_reference: str,
+    strict: bool = False,
+    **kwargs,
+) -> None:
+    if model != MINIMAX_H3_V2_MODEL:
+        raise SeedanceLowPriceError(f"Unsupported MiniMax H3 V2 model: {model}")
+    prompt_text = str(prompt or "")
+    if len(prompt_text) > MINIMAX_H3_V2_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            f"MiniMax H3 prompt exceeds {MINIMAX_H3_V2_PROMPT_MAX_LENGTH} characters"
+        )
+    if strict and not prompt_text.strip():
+        raise SeedanceLowPriceError("MiniMax-H3 requires a non-empty prompt")
+
+    try:
+        duration_value = int(duration)
+    except (TypeError, ValueError):
+        raise SeedanceLowPriceError("MiniMax H3 duration must be an integer") from None
+    if not 4 <= duration_value <= 60:
+        raise SeedanceLowPriceError("MiniMax H3 duration must be between 4 and 60 seconds")
+    if strict and duration_value > 15 and kwargs.get("drive_audio") is None:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 duration above 15 seconds requires drive_audio"
+        )
+
+    if str(resolution).upper() not in MINIMAX_H3_V2_RESOLUTIONS:
+        raise SeedanceLowPriceError("MiniMax H3 resolution must be 480P or 768P")
+    if ratio not in MINIMAX_H3_V2_RATIOS:
+        raise SeedanceLowPriceError(f"Unsupported MiniMax H3 ratio: {ratio}")
+    if audio_mode not in MINIMAX_H3_V2_AUDIO_MODES:
+        raise SeedanceLowPriceError(f"Unsupported MiniMax H3 audio mode: {audio_mode}")
+    if add_drive_as_reference not in MINIMAX_H3_V2_DRIVE_REFERENCE_CHOICES:
+        raise SeedanceLowPriceError(
+            "add_drive_as_reference must be api_default, true, or false"
+        )
+    try:
+        denoise_value = float(denoise_strength)
+    except (TypeError, ValueError):
+        raise SeedanceLowPriceError("denoise_strength must be a number") from None
+    if not 0.0 <= denoise_value <= 1.0:
+        raise SeedanceLowPriceError("denoise_strength must be between 0 and 1")
+
+    for index in range(1, MAX_MINIMAX_H3_V2_VIDEOS + 1):
+        try:
+            start_seconds = float(kwargs.get(f"video{index}_start_seconds", 0.0))
+        except (TypeError, ValueError):
+            raise SeedanceLowPriceError(
+                f"video{index}_start_seconds must be a number"
+            ) from None
+        if not 0.0 <= start_seconds <= 3600.0:
+            raise SeedanceLowPriceError(
+                f"video{index}_start_seconds must be between 0 and 3600"
+            )
+
+    if not strict:
+        return
+
+    has_keyframe = any(
+        kwargs.get(name) is not None for name in ("first_frame", "last_frame")
+    )
+    has_reference = any(
+        kwargs.get(f"image{index}") is not None
+        for index in range(1, MAX_MINIMAX_H3_V2_IMAGES + 1)
+    ) or any(
+        kwargs.get(f"video{index}") is not None
+        for index in range(1, MAX_MINIMAX_H3_V2_VIDEOS + 1)
+    ) or any(
+        kwargs.get(f"audio{index}") is not None
+        for index in range(1, MAX_MINIMAX_H3_V2_AUDIOS + 1)
+    )
+    has_drive = kwargs.get("drive_audio") is not None
+    pure_text = not (has_keyframe or has_reference or has_drive)
+
+    if ratio == "api_default" and pure_text:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 pure text generation requires a fixed ratio"
+        )
+    if ratio in ("adaptive", "auto") and not has_keyframe:
+        raise SeedanceLowPriceError(
+            "MiniMax H3 adaptive/auto ratio requires first_frame or last_frame"
+        )
+    if not has_drive and audio_mode in (
+        "lock_source",
+        "remix_source",
+        "reference_only",
+    ):
+        raise SeedanceLowPriceError(f"audio_mode={audio_mode} requires drive_audio")
+    if not has_drive and add_drive_as_reference != "api_default":
+        raise SeedanceLowPriceError("add_drive_as_reference requires drive_audio")
+    if audio_mode == "reference_only" and add_drive_as_reference == "false":
+        raise SeedanceLowPriceError(
+            "reference_only does not allow add_drive_as_reference=false"
+        )
+
+
+def build_minimax_h3_v2_payload(
+    values: Dict[str, Any],
+    media: Dict[str, Any],
+) -> Dict[str, Any]:
+    validate_minimax_h3_v2_inputs(strict=True, **values)
+    content: List[Dict[str, Any]] = [
+        {"type": "text", "text": str(values["prompt"]).strip()}
+    ]
+
+    def media_item(media_type: str, role: str, media_url: str) -> Dict[str, Any]:
+        return {
+            "type": media_type,
+            media_type: {"url": media_url},
+            "role": role,
+        }
+
+    if media.get("first_frame"):
+        content.append(media_item("image_url", "first_frame", media["first_frame"]))
+    if media.get("last_frame"):
+        content.append(media_item("image_url", "last_frame", media["last_frame"]))
+    for _slot, media_url in media.get("reference_images") or []:
+        content.append(media_item("image_url", "reference_image", media_url))
+    for slot, media_url in media.get("reference_videos") or []:
+        item = media_item("video_url", "reference_video", media_url)
+        start_seconds = float(values.get(f"video{slot}_start_seconds", 0.0))
+        if start_seconds > 0:
+            item["start_time_seconds"] = start_seconds
+        content.append(item)
+    for _slot, media_url in media.get("reference_audios") or []:
+        content.append(media_item("audio_url", "reference_audio", media_url))
+    if media.get("drive_audio"):
+        content.append(media_item("audio_url", "drive_audio", media["drive_audio"]))
+
+    payload: Dict[str, Any] = {
+        "model": MINIMAX_H3_V2_MODEL,
+        "content": content,
+        "resolution": str(values["resolution"]).upper(),
+        "duration": int(values["duration"]),
+    }
+    ratio = str(values.get("ratio") or "16:9")
+    if ratio != "api_default":
+        payload["ratio"] = ratio
+
+    audio_mode = str(values.get("audio_mode") or "api_default")
+    add_drive = str(values.get("add_drive_as_reference") or "api_default")
+    if audio_mode != "api_default" or add_drive != "api_default":
+        effective_mode = audio_mode
+        if effective_mode == "api_default":
+            effective_mode = "lock_source" if media.get("drive_audio") else "native"
+        audio_control: Dict[str, Any] = {
+            "mode": effective_mode,
+            "denoise_strength": (
+                0.0
+                if effective_mode == "lock_source"
+                else float(values.get("denoise_strength", 0.35))
+            ),
+        }
+        if add_drive != "api_default":
+            audio_control["add_drive_as_reference"] = add_drive == "true"
+        payload["audio_control"] = audio_control
+    return payload
+
+
+class T8ZhenzhenMiniMaxH3V2VideoLowPrice:
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, Tuple[Any, ...]] = {
+            "api_config": (CONFIG_TYPE,),
+            "first_frame": ("IMAGE",),
+            "last_frame": ("IMAGE",),
+        }
+        for index in range(1, MAX_MINIMAX_H3_V2_IMAGES + 1):
+            optional[f"image{index}"] = ("IMAGE",)
+        for index in range(1, MAX_MINIMAX_H3_V2_VIDEOS + 1):
+            optional[f"video{index}"] = (VIDEO_TYPE,)
+        for index in range(1, MAX_MINIMAX_H3_V2_AUDIOS + 1):
+            optional[f"audio{index}"] = (AUDIO_TYPE,)
+        optional["drive_audio"] = (AUDIO_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        return {
+            "required": {
+                "model": ([MINIMAX_H3_V2_MODEL], {"default": MINIMAX_H3_V2_MODEL}),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "duration": ("INT", {"default": 4, "min": 4, "max": 60, "step": 1}),
+                "resolution": (MINIMAX_H3_V2_RESOLUTIONS, {"default": "480P"}),
+                "ratio": (MINIMAX_H3_V2_RATIOS, {"default": "16:9"}),
+                "audio_mode": (MINIMAX_H3_V2_AUDIO_MODES, {"default": "api_default"}),
+                "denoise_strength": (
+                    "FLOAT",
+                    {"default": 0.35, "min": 0.0, "max": 1.0, "step": 0.01},
+                ),
+                "add_drive_as_reference": (
+                    MINIMAX_H3_V2_DRIVE_REFERENCE_CHOICES,
+                    {"default": "api_default"},
+                ),
+                "video1_start_seconds": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 3600.0, "step": 0.1},
+                ),
+                "video2_start_seconds": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 3600.0, "step": 0.1},
+                ),
+                "video3_start_seconds": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 3600.0, "step": 0.1},
+                ),
+            },
+            "optional": optional,
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+    SEEDANCE_CACHE_ONLY_SEED = True
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, strict: bool = False, **kwargs):
+        if kwargs.get("model") is None:
+            return True
+        try:
+            validate_minimax_h3_v2_inputs(strict=strict, **kwargs)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    @staticmethod
+    def _empty_media() -> Dict[str, Any]:
+        return {
+            "first_frame": None,
+            "last_frame": None,
+            "reference_images": [],
+            "reference_videos": [],
+            "reference_audios": [],
+            "drive_audio": None,
+        }
+
+    def _collect_media(
+        self,
+        values: Dict[str, Any],
+        config: Dict[str, Any],
+        update_progress: Callable[[int], None],
+    ) -> Dict[str, Any]:
+        jobs: List[Tuple[str, int, Any]] = []
+        if values.get("first_frame") is not None:
+            jobs.append(("first_frame", 0, values["first_frame"]))
+        if values.get("last_frame") is not None:
+            jobs.append(("last_frame", 0, values["last_frame"]))
+        jobs.extend(
+            ("reference_image", slot, value)
+            for slot, value in _minimax_h3_v2_slots(
+                values,
+                "image",
+                MAX_MINIMAX_H3_V2_IMAGES,
+            )
+        )
+        jobs.extend(
+            ("reference_video", slot, value)
+            for slot, value in _minimax_h3_v2_slots(
+                values,
+                "video",
+                MAX_MINIMAX_H3_V2_VIDEOS,
+            )
+        )
+        jobs.extend(
+            ("reference_audio", slot, value)
+            for slot, value in _minimax_h3_v2_slots(
+                values,
+                "audio",
+                MAX_MINIMAX_H3_V2_AUDIOS,
+            )
+        )
+        if values.get("drive_audio") is not None:
+            jobs.append(("drive_audio", 0, values["drive_audio"]))
+
+        result = self._empty_media()
+        for completed, (role, slot, value) in enumerate(jobs, start=1):
+            if role in ("first_frame", "last_frame", "reference_image"):
+                filename = (
+                    f"minimax_h3_{role}.png"
+                    if slot == 0
+                    else f"minimax_h3_image_{slot}.png"
+                )
+                media_url = upload_media(
+                    image_to_png_bytes(value),
+                    filename,
+                    "image/png",
+                    config,
+                )
+            elif role == "reference_video":
+                media_url = upload_media(
+                    video_to_mp4_bytes(value),
+                    f"minimax_h3_video_{slot}.mp4",
+                    "video/mp4",
+                    config,
+                )
+            else:
+                filename = (
+                    "minimax_h3_drive_audio.wav"
+                    if role == "drive_audio"
+                    else f"minimax_h3_audio_{slot}.wav"
+                )
+                media_url = upload_media(
+                    audio_to_wav_bytes(value),
+                    filename,
+                    "audio/wav",
+                    config,
+                )
+
+            if role in ("first_frame", "last_frame", "drive_audio"):
+                result[role] = media_url
+            elif role == "reference_image":
+                result["reference_images"].append((slot, media_url))
+            elif role == "reference_video":
+                result["reference_videos"].append((slot, media_url))
+            else:
+                result["reference_audios"].append((slot, media_url))
+            update_progress(int(completed / max(1, len(jobs)) * 25))
+        return result
+
+    def generate(
+        self,
+        model: str,
+        prompt: str,
+        duration: int,
+        resolution: str,
+        ratio: str,
+        audio_mode: str,
+        denoise_strength: float,
+        add_drive_as_reference: str,
+        video1_start_seconds: float,
+        video2_start_seconds: float,
+        video3_start_seconds: float,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        values = {
+            "model": model,
+            "prompt": prompt,
+            "duration": duration,
+            "resolution": resolution,
+            "ratio": ratio,
+            "audio_mode": audio_mode,
+            "denoise_strength": denoise_strength,
+            "add_drive_as_reference": add_drive_as_reference,
+            "video1_start_seconds": video1_start_seconds,
+            "video2_start_seconds": video2_start_seconds,
+            "video3_start_seconds": video3_start_seconds,
+            **kwargs,
+        }
+        try:
+            validate_minimax_h3_v2_inputs(strict=True, **values)
+            config = resolve_config(api_config)
+            media = self._collect_media(values, config, update_progress)
+            payload = build_minimax_h3_v2_payload(values, media)
+            task_id, submit_response = submit_minimax_h3_v2_task(payload, config)
+            update_progress(35)
+
+            def on_poll_progress(progress: int) -> None:
+                update_progress(35 + int(progress * 0.55))
+
+            final_response = poll_minimax_h3_v2_task(
+                task_id,
+                config,
+                on_progress=on_poll_progress,
+            )
+            video_url = extract_minimax_h3_v2_video_url(final_response)
+            video = download_video(video_url)
+            update_progress(100)
+            response = {
+                "status": "succeeded",
+                "model": MINIMAX_H3_V2_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                video_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": MINIMAX_H3_V2_MODEL,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
 FLUX3_T2V_MODELS = [
     "flux-3-video-t2v",
     "flux-3-video-global-t2v",

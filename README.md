@@ -40,17 +40,23 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260906-1
+
+新增节点支持Minimax H3模型  
+配套对应工作流  
+贞贞的平价AI小屋渠道  
+
 ### 20260904-1
 
-新增节点支持Minimax H3 Max turbo模型
-配套对应工作流
-贞贞的平价AI小屋渠道
+新增节点支持Minimax H3 Max turbo模型  
+配套对应工作流  
+贞贞的平价AI小屋渠道  
 
 ### 20260901-1
 
-新增节点支持Minimax H3 Max模型
-配套对应工作流
-贞贞的平价AI小屋渠道
+新增节点支持Minimax H3 Max模型  
+配套对应工作流  
+贞贞的平价AI小屋渠道 
 
 ### 20260830-1
 
