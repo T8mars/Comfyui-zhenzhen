@@ -34,6 +34,7 @@ ALLOWED_MODULES = {
     "latest_image_audio_low_price_nodes",
     "seedance_low_price_nodes",
     "midjourney_low_price_nodes",
+    "gpt_image_25_nodes",
 }
 
 

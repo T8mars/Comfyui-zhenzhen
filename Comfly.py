@@ -114,6 +114,8 @@ from .seedance_low_price_nodes import (
     Comfly_vidu_q3_video_lowprice,
     Comfly_vidu_q3_short_play_lowprice,
     Comfly_fashvsr_video_upscale_lowprice,
+    T8ZhenzhenVOSR2ImageUpscaleLowPrice,
+    T8ZhenzhenVOSR2VideoUpscaleLowPrice,
     Comfly_zhenzhen_upscaler_lowprice,
     Comfly_doubao_seed_audio_1_0_lowprice,
     Comfly_qwen_image_3_0_lowprice,
@@ -136,6 +138,7 @@ from .aug22_low_price_nodes import (
     Comfly_zhenzhen_video_g_omni_flash_lowprice_v2,
 )
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
+from .gpt_image_25_nodes import T8ZhenzhenGPTImage25Workshop
 
 # For LLM API functionality
 try:
@@ -26014,6 +26017,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_vidu_q3_video_lowprice": Comfly_vidu_q3_video_lowprice,
     "Comfly_vidu_q3_short_play_lowprice": Comfly_vidu_q3_short_play_lowprice,
     "Comfly_fashvsr_video_upscale_lowprice": Comfly_fashvsr_video_upscale_lowprice,
+    "T8Zhenzhen_VOSR2_Image_Upscale_LowPrice": T8ZhenzhenVOSR2ImageUpscaleLowPrice,
+    "T8Zhenzhen_VOSR2_Video_Upscale_LowPrice": T8ZhenzhenVOSR2VideoUpscaleLowPrice,
     "Comfly_zhenzhen_upscaler_lowprice": Comfly_zhenzhen_upscaler_lowprice,
     "Comfly_doubao_seed_audio_1_0_lowprice": Comfly_doubao_seed_audio_1_0_lowprice,
     "Comfly_qwen_image_3_0_lowprice": Comfly_qwen_image_3_0_lowprice,
@@ -26098,6 +26103,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0_AssetIdBundle":Comfly_Doubao_Seedance2_0_AssetIdBundle,
     "Comfly_gpt_image_2_official":Comfly_gpt_image_2_official,
     "Comfly_gpt_image_2_official_ratio":Comfly_gpt_image_2_official_ratio,
+    "T8Zhenzhen_GPT_Image_2_5_Workshop": T8ZhenzhenGPTImage25Workshop,
     "Comfly_wan2_6_API": Comfly_wan2_6_API,
     "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal,
     "Comfly_veo3_1_fal": Comfly_veo3_1_fal,
@@ -26188,6 +26194,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_vidu_q3_video_lowprice": "zhenzhen-vidu-q3-video-lowprice",
     "Comfly_vidu_q3_short_play_lowprice": "zhenzhen-vidu-q3-short-play-lowprice",
     "Comfly_fashvsr_video_upscale_lowprice": "zhenzhen-FlashVSR-video-upscale-lowprice",
+    "T8Zhenzhen_VOSR2_Image_Upscale_LowPrice": "zhenzhen-VOSR2-4K-image-upscale-lowprice",
+    "T8Zhenzhen_VOSR2_Video_Upscale_LowPrice": "zhenzhen-VOSR2-2K-video-upscale-lowprice",
     "Comfly_zhenzhen_upscaler_lowprice": "zhenzhen-upscaler-lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice": "zhenzhen-doubao-seed-audio-1.0-lowprice",
     "Comfly_qwen_image_3_0_lowprice": "zhenzhen-qwen-image-3.0-lowprice",
@@ -26272,6 +26280,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_Doubao_Seedance2_0_AssetIdBundle": "Zhenzhen Doubao_Seedance2_0_AssetIdBundle",
     "Comfly_gpt_image_2_official":"zhenzhen-gpt-image-2-official",
     "Comfly_gpt_image_2_official_ratio":"zhenzhen-gpt-image-2-official_ratio",
+    "T8Zhenzhen_GPT_Image_2_5_Workshop": "zhenzhen-gpt-image-2.5（6合1·AI工坊）",
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video",
     "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal",
     "Comfly_veo3_1_fal": "Zhenzhen Veo 3.1 Fast Ref2Video Fal",

@@ -40,6 +40,19 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260909-1
+
+新增独立节点 zhenzhen-gpt-image-2.5（6合1·AI工坊），支持全部 6 个模型  
+贞贞的AI工坊海外版渠道  
+gpt-image-2.5-flare  
+gpt-image-2.5-flare-2k  
+gpt-image-2.5-flare-4k  
+gpt-image-2.5-sunburst  
+gpt-image-2.5-sunburst-2k  
+gpt-image-2.5-sunburst-4k  
+新增vosr2图像和视频超分节点  
+贞贞的平价AI小屋国内渠道  
+
 ### 20260906-1
 
 新增节点支持Minimax H3模型  

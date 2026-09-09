@@ -608,6 +608,50 @@ def video_to_mp4_bytes(value: Any) -> bytes:
     return data
 
 
+def video_to_upload_bytes(value: Any) -> Tuple[bytes, str]:
+    """Read one supported upload video while preserving its container extension."""
+    data: Optional[bytes] = None
+    extension = ""
+    if isinstance(value, str) and os.path.isfile(value):
+        data, extension = _read_path(value)
+    elif isinstance(value, dict):
+        path = value.get("file_path") or value.get("path")
+        if isinstance(path, str) and os.path.isfile(path):
+            data, extension = _read_path(path)
+    elif hasattr(value, "get_stream_source"):
+        source = value.get_stream_source()
+        if isinstance(source, str) and os.path.isfile(source):
+            data, extension = _read_path(source)
+        elif hasattr(source, "read"):
+            data = source.read()
+            source_name = str(getattr(source, "name", "") or "")
+            extension = Path(source_name).suffix.lower().lstrip(".") or "mp4"
+            try:
+                source.seek(0)
+            except Exception:
+                pass
+    if data is None:
+        for attribute in ("path", "file_path"):
+            path = getattr(value, attribute, None)
+            if isinstance(path, str) and os.path.isfile(path):
+                data, extension = _read_path(path)
+                break
+    if data is None:
+        raise SeedanceLowPriceError(
+            f"Cannot read VIDEO input of type {type(value).__name__}; connect a Load Video node"
+        )
+    if extension not in {"mp4", "mov", "avi", "mkv"}:
+        raise SeedanceLowPriceError(
+            "VOSR2 video supports MP4, MOV, AVI, or MKV input; "
+            f"received .{extension or 'unknown'}"
+        )
+    if not data:
+        raise SeedanceLowPriceError("VOSR2 video input is empty")
+    if len(data) > MEDIA_MAX_BYTES:
+        raise SeedanceLowPriceError("Video exceeds the 50MB upload limit")
+    return data, extension
+
+
 def audio_to_wav_bytes(audio: Any) -> bytes:
     if not isinstance(audio, dict) or "waveform" not in audio:
         raise SeedanceLowPriceError("Expected ComfyUI AUDIO with waveform/sample_rate")
@@ -5979,6 +6023,8 @@ MINMAX_H3_CONTEXT_IR_TEXT_MODEL = "minmax-h3-context-ir-text"
 MINMAX_H3_CONTEXT_IR_IMAGE_MODEL = "minmax-h3-context-ir-image"
 MINMAX_H3_CONTEXT_IR_MULTIMODAL_MODEL = "minmax-h3-context-ir-multimodal"
 FLASHVSR_VIDEO_UPSCALE_MODEL = "FlashVSR_video_upscale"
+VOSR2_IMAGE_UPSCALE_MODEL = "vosr2-image-upscale"
+VOSR2_VIDEO_UPSCALE_MODEL = "vosr2-video-upscale"
 MINMAX_H3_CONTEXT_IR_MODELS = [
     MINMAX_H3_CONTEXT_IR_TEXT_MODEL,
     MINMAX_H3_CONTEXT_IR_IMAGE_MODEL,
@@ -7344,6 +7390,313 @@ class Comfly_fashvsr_video_upscale_lowprice:
             response = {
                 "status": "error",
                 "model": FLASHVSR_VIDEO_UPSCALE_MODEL,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                make_error_video(message),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+def validate_vosr2_video_url(video_url: str) -> None:
+    url = str(video_url or "").strip()
+    if url and not url.startswith(("http://", "https://")):
+        raise SeedanceLowPriceError(
+            "VOSR2 video_url must be an http(s) URL"
+        )
+
+
+def build_vosr2_image_upscale_payload(image_url: str) -> Dict[str, Any]:
+    url = str(image_url or "").strip()
+    if not url:
+        raise SeedanceLowPriceError(
+            "VOSR2 image requires exactly one uploaded image URL"
+        )
+    return {
+        "model": VOSR2_IMAGE_UPSCALE_MODEL,
+        "images": [url],
+    }
+
+
+def build_vosr2_video_upscale_payload(video_url: str) -> Dict[str, Any]:
+    validate_vosr2_video_url(video_url)
+    url = str(video_url or "").strip()
+    if not url:
+        raise SeedanceLowPriceError(
+            "VOSR2 video requires metadata.video_url"
+        )
+    return {
+        "model": VOSR2_VIDEO_UPSCALE_MODEL,
+        "metadata": {"video_url": url},
+    }
+
+
+class T8ZhenzhenVOSR2ImageUpscaleLowPrice:
+    """Upscale exactly one image to 4K through the image task endpoint."""
+
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "input_image": (
+                    "IMAGE",
+                    {
+                        "tooltip": (
+                            "Exactly one source image. VOSR2 returns one 4K image."
+                        ),
+                    },
+                ),
+            },
+            "optional": {
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+                "seed": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 0xFFFFFFFFFFFFFFFF,
+                        "step": 1,
+                        "control_after_generate": True,
+                        "tooltip": (
+                            "ComfyUI cache seed only; it is not sent to VOSR2. "
+                            "Fixed reuses the cached result."
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, input_image=None, **kwargs):
+        shape = getattr(input_image, "shape", ())
+        if len(shape) == 4 and int(shape[0]) != 1:
+            return "VOSR2 image accepts exactly one input image, not an image batch"
+        return True
+
+    def generate(
+        self,
+        input_image: Any,
+        api_config: Any = None,
+        skip_error: bool = False,
+        seed: int = 0,
+    ):
+        del seed
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            shape = getattr(input_image, "shape", ())
+            if len(shape) == 4 and int(shape[0]) != 1:
+                raise SeedanceLowPriceError(
+                    "VOSR2 image accepts exactly one input image, not an image batch"
+                )
+            config = resolve_config(api_config)
+            source_url = upload_media(
+                image_to_png_bytes(input_image),
+                "vosr2_image_input.png",
+                "image/png",
+                config,
+            )
+            update_progress(15)
+
+            payload = build_vosr2_image_upscale_payload(source_url)
+            task_id, submit_response = submit_image_task(payload, config)
+            update_progress(25)
+            final_response = poll_image_task(
+                task_id,
+                config,
+                on_progress=lambda progress: update_progress(
+                    25 + int(progress * 0.7)
+                ),
+            )
+            result_url = extract_image_url(final_response)
+            image = download_image(result_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": VOSR2_IMAGE_UPSCALE_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                image,
+                result_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": VOSR2_IMAGE_UPSCALE_MODEL,
+                "task_id": task_id,
+                "message": message,
+            }
+            return (
+                torch.ones((1, 512, 512, 3), dtype=torch.float32),
+                "",
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+
+
+class T8ZhenzhenVOSR2VideoUpscaleLowPrice:
+    """Upscale exactly one local or public video to 2K."""
+
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "video_url": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": (
+                            "Optional public video URL. Leave empty when input_video is connected."
+                        ),
+                    },
+                ),
+            },
+            "optional": {
+                "input_video": (VIDEO_TYPE,),
+                "api_config": (CONFIG_TYPE,),
+                "skip_error": ("BOOLEAN", {"default": False}),
+                "seed": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 0xFFFFFFFFFFFFFFFF,
+                        "step": 1,
+                        "control_after_generate": True,
+                        "tooltip": (
+                            "ComfyUI cache seed only; it is not sent to VOSR2. "
+                            "Fixed reuses the cached result."
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = (VIDEO_TYPE, "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("video", "video_url", "task_id", "response")
+    FUNCTION = "generate"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, video_url="", **kwargs):
+        try:
+            validate_vosr2_video_url(video_url)
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate(
+        self,
+        video_url: str,
+        input_video: Any = None,
+        api_config: Any = None,
+        skip_error: bool = False,
+        seed: int = 0,
+    ):
+        del seed
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+
+        def update_progress(value: int) -> None:
+            if pbar is not None:
+                try:
+                    pbar.update_absolute(value, 100)
+                except Exception:
+                    pass
+
+        try:
+            validate_vosr2_video_url(video_url)
+            source_url = str(video_url or "").strip()
+            if source_url and input_video is not None:
+                raise SeedanceLowPriceError(
+                    "VOSR2 video accepts exactly one source: input_video or video_url"
+                )
+            if not source_url and input_video is None:
+                raise SeedanceLowPriceError(
+                    "Connect input_video or provide video_url for VOSR2 video"
+                )
+
+            config = resolve_config(api_config)
+            if not source_url:
+                video_bytes, extension = video_to_upload_bytes(input_video)
+                mime_type = {
+                    "mp4": "video/mp4",
+                    "mov": "video/quicktime",
+                    "avi": "video/x-msvideo",
+                    "mkv": "video/x-matroska",
+                }[extension]
+                source_url = upload_media(
+                    video_bytes,
+                    f"vosr2_video_input.{extension}",
+                    mime_type,
+                    config,
+                )
+            update_progress(20)
+
+            payload = build_vosr2_video_upscale_payload(source_url)
+            task_id, submit_response = submit_legacy_video_task(payload, config)
+            update_progress(30)
+            final_response = poll_legacy_video_task(
+                task_id,
+                config,
+                on_progress=lambda progress: update_progress(
+                    30 + int(progress * 0.6)
+                ),
+            )
+            result_url = extract_legacy_video_url(final_response)
+            video = download_video(result_url)
+            update_progress(100)
+            response = {
+                "status": "completed",
+                "model": VOSR2_VIDEO_UPSCALE_MODEL,
+                "task_id": task_id,
+                "submit": submit_response,
+                "result": final_response,
+            }
+            return (
+                video,
+                result_url,
+                task_id,
+                json.dumps(response, ensure_ascii=False, indent=2),
+            )
+        except Exception as exc:
+            if not skip_error:
+                raise
+            message = f"{type(exc).__name__}: {exc}"
+            response = {
+                "status": "error",
+                "model": VOSR2_VIDEO_UPSCALE_MODEL,
                 "task_id": task_id,
                 "message": message,
             }
@@ -11590,6 +11943,8 @@ __all__ = [
     "Comfly_vidu_q3_video_lowprice",
     "Comfly_vidu_q3_short_play_lowprice",
     "Comfly_fashvsr_video_upscale_lowprice",
+    "T8ZhenzhenVOSR2ImageUpscaleLowPrice",
+    "T8ZhenzhenVOSR2VideoUpscaleLowPrice",
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
     "Comfly_qwen_image_3_0_lowprice",
