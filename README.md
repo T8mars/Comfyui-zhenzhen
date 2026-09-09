@@ -40,6 +40,15 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+
+### 20260909-2  
+
+新增以下模型及工作流  
+zhenzhen-image-g-v2.5-lowprice  
+zhenzhen-image-g-v2.5-flare  
+zhenzhen-image-g-v2.5-sunburst  
+渠道：贞贞的平价AI小屋  
+
 ### 20260909-1
 
 新增独立节点 zhenzhen-gpt-image-2.5（6合1·AI工坊），支持全部 6 个模型  

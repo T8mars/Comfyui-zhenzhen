@@ -9119,6 +9119,32 @@ ZHENZHEN_IMAGE_G_V2_SIZES = [
 ]
 ZHENZHEN_IMAGE_G_V2_SIZE_OPTIONS = [*ZHENZHEN_IMAGE_G_V2_SIZES, "custom"]
 ZHENZHEN_IMAGE_G_V2_MAX_IMAGES = 16
+ZHENZHEN_IMAGE_G25_LOWPRICE_MODEL = "zhenzhen-image-g-v2.5-lowprice"
+ZHENZHEN_IMAGE_G25_FLARE_MODEL = "zhenzhen-image-g-v2.5-flare"
+ZHENZHEN_IMAGE_G25_SUNBURST_MODEL = "zhenzhen-image-g-v2.5-sunburst"
+ZHENZHEN_IMAGE_G25_OFFICIAL_MODELS = [
+    ZHENZHEN_IMAGE_G25_FLARE_MODEL,
+    ZHENZHEN_IMAGE_G25_SUNBURST_MODEL,
+]
+ZHENZHEN_IMAGE_G25_RESOLUTIONS = ["1k", "2k", "4k"]
+ZHENZHEN_IMAGE_G25_LOWPRICE_SIZES = [
+    "auto", "1:1", "1:3", "3:1", "16:9", "9:16", "4:3", "3:4",
+    "3:2", "2:3", "5:4", "4:5", "2:1", "1:2", "21:9", "9:21",
+]
+ZHENZHEN_IMAGE_G25_OFFICIAL_SIZES = [
+    "preserve_reference", "auto", "1:1", "3:2", "2:3", "4:3", "3:4",
+    "5:4", "4:5", "16:9", "9:16", "2:1", "1:2", "21:9", "9:21",
+    "3:1", "1:3", "custom",
+]
+ZHENZHEN_IMAGE_G25_QUALITIES = ["auto", "low", "medium", "high", "xhigh", "max"]
+ZHENZHEN_IMAGE_G25_OUTPUT_FORMATS = ["png", "jpeg", "webp"]
+ZHENZHEN_IMAGE_G25_BACKGROUNDS = ["auto", "transparent", "opaque"]
+ZHENZHEN_IMAGE_G25_MODERATION_LEVELS = ["low", "auto"]
+ZHENZHEN_IMAGE_G25_PROMPT_MAX_LENGTH = 5000
+ZHENZHEN_IMAGE_G25_LOWPRICE_MAX_IMAGES = 15
+ZHENZHEN_IMAGE_G25_OFFICIAL_MAX_IMAGES = 16
+ZHENZHEN_IMAGE_G25_MIN_CUSTOM_PIXELS = 655360
+ZHENZHEN_IMAGE_G25_MAX_CUSTOM_PIXELS = 8294400
 ZHENZHEN_IMAGE_GK_V15_MODEL = "zhenzhen-image-gk-v15"
 ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL = "zhenzhen-image-gk-v15-edit"
 ZHENZHEN_IMAGE_GK_V15_MODELS = [
@@ -9504,6 +9530,577 @@ class Comfly_zhenzhen_image_g_v2_lowprice:
             }
             blank = torch.ones((1, 512, 512, 3), dtype=torch.float32)
             return (blank, "", task_id, json.dumps(response, ensure_ascii=False, indent=2))
+
+
+class _T8ZhenzhenImageG25Base:
+    """Shared domestic upload, task polling, and complete result download flow."""
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("image", "image_url", "task_id", "response")
+    FUNCTION = "generate_image"
+    CATEGORY = "zhenzhen/Seedance2 Low Price"
+    OUTPUT_NODE = True
+    MAX_IMAGES = 0
+    FILE_PREFIX = "zhenzhen_image_g25"
+
+    @staticmethod
+    def _update_progress(pbar: Any, value: int) -> None:
+        if pbar is not None:
+            try:
+                pbar.update_absolute(int(value), 100)
+            except Exception:
+                pass
+
+    def _upload_references(
+        self,
+        kwargs: Dict[str, Any],
+        config: Dict[str, Any],
+        pbar: Any,
+    ) -> List[str]:
+        slots = _connected_slots(
+            kwargs,
+            "image",
+            self.MAX_IMAGES,
+            self.__class__.__name__,
+        )
+        return _upload_image_slots(
+            slots,
+            config,
+            self.FILE_PREFIX,
+            on_progress=lambda value: self._update_progress(pbar, value),
+        )
+
+    def _submit_poll_download(
+        self,
+        model: str,
+        payload: Dict[str, Any],
+        config: Dict[str, Any],
+        pbar: Any,
+    ):
+        task_id, submit_response = submit_image_task(payload, config)
+        self._update_progress(pbar, 25)
+        final_response = poll_image_task(
+            task_id,
+            config,
+            on_progress=lambda value: self._update_progress(
+                pbar, 25 + int(value * 0.65)
+            ),
+        )
+        self._update_progress(pbar, 90)
+
+        image_urls = extract_image_urls(final_response)
+        images = []
+        for index, image_url in enumerate(image_urls, start=1):
+            images.append(download_image(image_url))
+            self._update_progress(
+                pbar,
+                90 + int(index / max(1, len(image_urls)) * 10),
+            )
+        if not images:
+            raise SeedanceLowPriceError(
+                "Image G v2.5 completed without downloadable images"
+            )
+        try:
+            image_batch = images[0] if len(images) == 1 else torch.cat(images, dim=0)
+        except RuntimeError as exc:
+            raise SeedanceLowPriceError(
+                "Image G v2.5 returned images with incompatible dimensions"
+            ) from exc
+
+        response = {
+            "status": "SUCCESS",
+            "model": model,
+            "task_id": task_id,
+            "submit": submit_response,
+            "result": final_response,
+            "image_urls": image_urls,
+        }
+        return (
+            image_batch,
+            image_urls[0],
+            task_id,
+            json.dumps(response, ensure_ascii=False, indent=2),
+        )
+
+    @staticmethod
+    def _error_result(model: str, task_id: str, exc: Exception):
+        response = {
+            "status": "error",
+            "model": model,
+            "task_id": task_id,
+            "message": f"{type(exc).__name__}: {exc}",
+        }
+        return (
+            torch.ones((1, 512, 512, 3), dtype=torch.float32),
+            "",
+            task_id,
+            json.dumps(response, ensure_ascii=False, indent=2),
+        )
+
+
+def validate_zhenzhen_image_g25_lowprice_inputs(
+    prompt: str,
+    resolution: str,
+    size: str,
+    strict: bool = True,
+) -> str:
+    prompt_text = str(prompt or "").strip()
+    if strict and not prompt_text:
+        raise SeedanceLowPriceError("Image G v2.5 LowPrice prompt is required")
+    if len(prompt_text) > ZHENZHEN_IMAGE_G25_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 LowPrice prompt cannot exceed 5000 characters"
+        )
+    if resolution not in ZHENZHEN_IMAGE_G25_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 LowPrice resolution must be 1k, 2k, or 4k"
+        )
+    if size not in ZHENZHEN_IMAGE_G25_LOWPRICE_SIZES:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 LowPrice size")
+    return prompt_text
+
+
+def build_zhenzhen_image_g25_lowprice_payload(
+    prompt: str,
+    resolution: str,
+    size: str,
+    nsfw_check: bool,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    prompt_text = validate_zhenzhen_image_g25_lowprice_inputs(
+        prompt,
+        resolution,
+        size,
+        strict=True,
+    )
+    urls = list(image_urls or [])
+    if len(urls) > ZHENZHEN_IMAGE_G25_LOWPRICE_MAX_IMAGES:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 LowPrice accepts at most 15 reference images"
+        )
+    payload: Dict[str, Any] = {
+        "model": ZHENZHEN_IMAGE_G25_LOWPRICE_MODEL,
+        "prompt": prompt_text,
+        "n": 1,
+        "size": size,
+        "resolution": resolution,
+        "nsfw_check": bool(nsfw_check),
+    }
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class T8ZhenzhenImageG25LowPrice(_T8ZhenzhenImageG25Base):
+    """Image G v2.5 LowPrice text generation and ordered reference editing."""
+
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
+    MAX_IMAGES = ZHENZHEN_IMAGE_G25_LOWPRICE_MAX_IMAGES
+    FILE_PREFIX = "zhenzhen_image_g25_lowprice_reference"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            f"image{index}": ("IMAGE",)
+            for index in range(1, cls.MAX_IMAGES + 1)
+        }
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        optional["seed"] = (
+            "INT",
+            {
+                "default": 0,
+                "min": 0,
+                "max": 0xFFFFFFFFFFFFFFFF,
+                "step": 1,
+                "control_after_generate": True,
+                "tooltip": (
+                    "ComfyUI cache seed only; it is not sent to Image G v2.5. "
+                    "Fixed reuses the cached result."
+                ),
+            },
+        )
+        return {
+            "required": {
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "resolution": (ZHENZHEN_IMAGE_G25_RESOLUTIONS, {"default": "1k"}),
+                "size": (ZHENZHEN_IMAGE_G25_LOWPRICE_SIZES, {"default": "16:9"}),
+                "nsfw_check": ("BOOLEAN", {"default": False}),
+            },
+            "optional": optional,
+        }
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        prompt="",
+        resolution=None,
+        size=None,
+        strict=False,
+        **kwargs,
+    ):
+        if resolution is None or size is None:
+            return True
+        try:
+            validate_zhenzhen_image_g25_lowprice_inputs(
+                prompt,
+                resolution,
+                size,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        prompt: str,
+        resolution: str,
+        size: str,
+        nsfw_check: bool,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        try:
+            validate_zhenzhen_image_g25_lowprice_inputs(
+                prompt,
+                resolution,
+                size,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls = self._upload_references(kwargs, config, pbar)
+            payload = build_zhenzhen_image_g25_lowprice_payload(
+                prompt,
+                resolution,
+                size,
+                nsfw_check,
+                image_urls,
+            )
+            result = self._submit_poll_download(
+                ZHENZHEN_IMAGE_G25_LOWPRICE_MODEL,
+                payload,
+                config,
+                pbar,
+            )
+            task_id = result[2]
+            return result
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(
+                ZHENZHEN_IMAGE_G25_LOWPRICE_MODEL,
+                task_id,
+                exc,
+            )
+
+
+def normalize_zhenzhen_image_g25_custom_size(value: Any) -> str:
+    return str(value or "").strip().lower().replace(" ", "")
+
+
+def validate_zhenzhen_image_g25_custom_size(value: Any) -> str:
+    normalized = normalize_zhenzhen_image_g25_custom_size(value)
+    parts = normalized.split("x")
+    if len(parts) != 2 or not all(part.isdigit() for part in parts):
+        raise SeedanceLowPriceError(
+            "Image G v2.5 custom_size must use WIDTHxHEIGHT, for example 1536x864"
+        )
+    width, height = (int(part) for part in parts)
+    if width <= 0 or height <= 0 or width % 16 or height % 16:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 custom width and height must be positive multiples of 16"
+        )
+    if width > 3840 or height > 3840:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 custom width and height must not exceed 3840"
+        )
+    if max(width, height) / min(width, height) > 3:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 custom aspect ratio must be between 1:3 and 3:1"
+        )
+    pixels = width * height
+    if not (
+        ZHENZHEN_IMAGE_G25_MIN_CUSTOM_PIXELS
+        <= pixels
+        <= ZHENZHEN_IMAGE_G25_MAX_CUSTOM_PIXELS
+    ):
+        raise SeedanceLowPriceError(
+            "Image G v2.5 custom pixels must be between 655360 and 8294400"
+        )
+    return f"{width}x{height}"
+
+
+def validate_zhenzhen_image_g25_official_inputs(
+    model: str,
+    prompt: str,
+    size: str,
+    custom_size: str,
+    resolution: str,
+    quality: str,
+    n: int,
+    output_format: str,
+    output_compression: int,
+    background: str,
+    moderation: str,
+    strict: bool = True,
+) -> str:
+    if model not in ZHENZHEN_IMAGE_G25_OFFICIAL_MODELS:
+        raise SeedanceLowPriceError(
+            f"Unsupported Image G v2.5 Official model: {model}"
+        )
+    prompt_text = str(prompt or "").strip()
+    if strict and not prompt_text:
+        raise SeedanceLowPriceError("Image G v2.5 Official prompt is required")
+    if len(prompt_text) > ZHENZHEN_IMAGE_G25_PROMPT_MAX_LENGTH:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 Official prompt cannot exceed 5000 characters"
+        )
+    if size not in ZHENZHEN_IMAGE_G25_OFFICIAL_SIZES:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 Official size")
+    if size == "custom":
+        validate_zhenzhen_image_g25_custom_size(custom_size)
+    if resolution not in ZHENZHEN_IMAGE_G25_RESOLUTIONS:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 Official resolution must be 1k, 2k, or 4k"
+        )
+    if quality not in ZHENZHEN_IMAGE_G25_QUALITIES:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 Official quality")
+    if not 1 <= int(n) <= 4:
+        raise SeedanceLowPriceError("Image G v2.5 Official n must be between 1 and 4")
+    if output_format not in ZHENZHEN_IMAGE_G25_OUTPUT_FORMATS:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 output format")
+    if not 0 <= int(output_compression) <= 100:
+        raise SeedanceLowPriceError("output_compression must be between 0 and 100")
+    if background not in ZHENZHEN_IMAGE_G25_BACKGROUNDS:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 background")
+    if moderation not in ZHENZHEN_IMAGE_G25_MODERATION_LEVELS:
+        raise SeedanceLowPriceError("Unsupported Image G v2.5 moderation")
+    if background == "transparent" and output_format == "jpeg":
+        raise SeedanceLowPriceError(
+            "Image G v2.5 transparent background requires png or webp"
+        )
+    return prompt_text
+
+
+def build_zhenzhen_image_g25_official_payload(
+    model: str,
+    prompt: str,
+    size: str,
+    custom_size: str,
+    resolution: str,
+    quality: str,
+    n: int,
+    output_format: str,
+    output_compression: int,
+    background: str,
+    moderation: str,
+    image_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    prompt_text = validate_zhenzhen_image_g25_official_inputs(
+        model,
+        prompt,
+        size,
+        custom_size,
+        resolution,
+        quality,
+        n,
+        output_format,
+        output_compression,
+        background,
+        moderation,
+        strict=True,
+    )
+    urls = list(image_urls or [])
+    if len(urls) > ZHENZHEN_IMAGE_G25_OFFICIAL_MAX_IMAGES:
+        raise SeedanceLowPriceError(
+            "Image G v2.5 Official accepts at most 16 reference images"
+        )
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": prompt_text,
+        "n": int(n),
+        "quality": quality,
+        "output_format": output_format,
+        "background": background,
+        "moderation": moderation,
+    }
+    if size == "custom":
+        payload["size"] = validate_zhenzhen_image_g25_custom_size(custom_size)
+    else:
+        payload["resolution"] = resolution
+        if size != "preserve_reference":
+            payload["size"] = size
+    if output_format in {"jpeg", "webp"}:
+        payload["output_compression"] = int(output_compression)
+    if urls:
+        payload["images"] = urls
+    return payload
+
+
+class T8ZhenzhenImageG25Official(_T8ZhenzhenImageG25Base):
+    """Official Flare/Sunburst generation and ordered reference editing."""
+
+    SEEDANCE_EXPLICIT_CACHE_ONLY_SEED = True
+    MAX_IMAGES = ZHENZHEN_IMAGE_G25_OFFICIAL_MAX_IMAGES
+    FILE_PREFIX = "zhenzhen_image_g25_official_reference"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        optional: Dict[str, tuple] = {
+            f"image{index}": ("IMAGE",)
+            for index in range(1, cls.MAX_IMAGES + 1)
+        }
+        optional["api_config"] = (CONFIG_TYPE,)
+        optional["skip_error"] = ("BOOLEAN", {"default": False})
+        optional["seed"] = (
+            "INT",
+            {
+                "default": 0,
+                "min": 0,
+                "max": 0xFFFFFFFFFFFFFFFF,
+                "step": 1,
+                "control_after_generate": True,
+                "tooltip": (
+                    "ComfyUI cache seed only; it is not sent to Image G v2.5. "
+                    "Fixed reuses the cached result."
+                ),
+            },
+        )
+        return {
+            "required": {
+                "model": (
+                    ZHENZHEN_IMAGE_G25_OFFICIAL_MODELS,
+                    {"default": ZHENZHEN_IMAGE_G25_FLARE_MODEL},
+                ),
+                "prompt": ("STRING", {"multiline": True, "default": ""}),
+                "size": (ZHENZHEN_IMAGE_G25_OFFICIAL_SIZES, {"default": "auto"}),
+                "custom_size": ("STRING", {"default": "1024x1024"}),
+                "resolution": (ZHENZHEN_IMAGE_G25_RESOLUTIONS, {"default": "1k"}),
+                "quality": (ZHENZHEN_IMAGE_G25_QUALITIES, {"default": "auto"}),
+                "n": ("INT", {"default": 1, "min": 1, "max": 4, "step": 1}),
+                "output_format": (ZHENZHEN_IMAGE_G25_OUTPUT_FORMATS, {"default": "png"}),
+                "output_compression": (
+                    "INT",
+                    {"default": 90, "min": 0, "max": 100, "step": 1},
+                ),
+                "background": (ZHENZHEN_IMAGE_G25_BACKGROUNDS, {"default": "auto"}),
+                "moderation": (ZHENZHEN_IMAGE_G25_MODERATION_LEVELS, {"default": "low"}),
+            },
+            "optional": optional,
+        }
+
+    @classmethod
+    def VALIDATE_INPUTS(
+        cls,
+        model=None,
+        prompt="",
+        size=None,
+        custom_size="1024x1024",
+        resolution=None,
+        quality=None,
+        n=1,
+        output_format=None,
+        output_compression=90,
+        background=None,
+        moderation=None,
+        strict=False,
+        **kwargs,
+    ):
+        if None in (
+            model,
+            size,
+            resolution,
+            quality,
+            output_format,
+            background,
+            moderation,
+        ):
+            return True
+        try:
+            validate_zhenzhen_image_g25_official_inputs(
+                model,
+                prompt,
+                size,
+                custom_size,
+                resolution,
+                quality,
+                n,
+                output_format,
+                output_compression,
+                background,
+                moderation,
+                strict=bool(strict),
+            )
+        except Exception as exc:
+            return str(exc)
+        return True
+
+    def generate_image(
+        self,
+        model: str,
+        prompt: str,
+        size: str,
+        custom_size: str,
+        resolution: str,
+        quality: str,
+        n: int,
+        output_format: str,
+        output_compression: int,
+        background: str,
+        moderation: str,
+        api_config: Any = None,
+        skip_error: bool = False,
+        **kwargs,
+    ):
+        task_id = ""
+        pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
+        try:
+            validate_zhenzhen_image_g25_official_inputs(
+                model,
+                prompt,
+                size,
+                custom_size,
+                resolution,
+                quality,
+                n,
+                output_format,
+                output_compression,
+                background,
+                moderation,
+                strict=True,
+            )
+            config = resolve_config(api_config)
+            image_urls = self._upload_references(kwargs, config, pbar)
+            payload = build_zhenzhen_image_g25_official_payload(
+                model,
+                prompt,
+                size,
+                custom_size,
+                resolution,
+                quality,
+                n,
+                output_format,
+                output_compression,
+                background,
+                moderation,
+                image_urls,
+            )
+            result = self._submit_poll_download(
+                model,
+                payload,
+                config,
+                pbar,
+            )
+            task_id = result[2]
+            return result
+        except Exception as exc:
+            if not skip_error:
+                raise
+            return self._error_result(model, task_id, exc)
 
 
 def validate_zhenzhen_image_nb_inputs(
