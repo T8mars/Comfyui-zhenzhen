@@ -15,6 +15,7 @@ const SETTINGS_NODE_NAMES = new Set([
 const ZHENZHEN_CHANNELS = new Set(["zhenzhen", "seedance_low_price", "ip"]);
 const API_BASE_WIDGET_NAME = "api_base";
 const SIGNUP_BUTTON_MARKER = "zhenzhenApiSettingsSignupLink";
+const SERIALIZE_GUARD_MARKER = "zhenzhenApiSettingsSerializeGuard";
 const DEFAULT_CHANNEL = "seedance_low_price";
 
 const CHANNEL_SIGNUP = Object.freeze({
@@ -149,8 +150,28 @@ function installSignupButton(node) {
             window.open(signup.url, "_blank", "noopener,noreferrer");
         }
     });
+    button.options = { ...(button.options ?? {}), serialize: false };
     button.serialize = false;
+    button.serializeValue = () => undefined;
     button[SIGNUP_BUTTON_MARKER] = true;
+}
+
+function installSerializationGuard(node) {
+    if (node[SERIALIZE_GUARD_MARKER]) {
+        return;
+    }
+
+    const originalOnSerialize = node.onSerialize;
+    node.onSerialize = function (serializedNode) {
+        const result = originalOnSerialize?.apply(this, arguments);
+        const button = this.widgets?.find((widget) => widget[SIGNUP_BUTTON_MARKER]);
+        const index = button ? this.widgets?.indexOf(button) ?? -1 : -1;
+        if (index >= 0 && Array.isArray(serializedNode?.widgets_values)) {
+            serializedNode.widgets_values.splice(index, 1);
+        }
+        return result;
+    };
+    node[SERIALIZE_GUARD_MARKER] = true;
 }
 
 app.registerExtension({
@@ -167,6 +188,7 @@ app.registerExtension({
         nodeType.prototype.onNodeCreated = function () {
             const result = originalOnNodeCreated?.apply(this, arguments);
             installSignupButton(this);
+            installSerializationGuard(this);
             installChannelCallback(this);
             syncSignupButton(this);
             return result;

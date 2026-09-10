@@ -40,6 +40,9 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260910-1  
+
+优化所有节点，更容易识别贞贞平价AI小屋和贞贞的AI工坊
 
 ### 20260909-2  
 

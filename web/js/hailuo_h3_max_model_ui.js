@@ -17,7 +17,7 @@ function widgetByName(node, name) {
 
 function refresh(node) {
     const model = String(widgetByName(node, "model")?.value ?? DEFAULT_MODEL);
-    const isI2V = model === "hailuo-h3-max-i2v";
+    const isI2V = model.endsWith("-i2v");
     setSeedanceWidgetVisible(widgetByName(node, "ratio"), !isI2V);
     for (const input of node.inputs ?? []) {
         if (input.name === "api_config") {
