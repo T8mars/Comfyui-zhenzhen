@@ -37,6 +37,12 @@ from .zhenzhen_http import (
     choose_zhenzhen_base_url,
     rewrite_zhenzhen_url,
 )
+from .suno_workshop import (
+    SUNO_WORKSHOP_V6_MAX_DURATION_SECONDS,
+    SUNO_WORKSHOP_VERSION_OPTIONS,
+    resolve_suno_workshop_mv,
+    validate_suno_workshop_text_limits,
+)
 from comfy.utils import common_upscale
 from comfy.comfy_types import IO
 from typing import Optional, Any
@@ -15086,8 +15092,8 @@ class Comfly_suno_description:
         return {
             "required": {
                 "title": ("STRING", {"default": ""}),
-                "description_prompt": ("STRING", {"multiline": True}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
+                "description_prompt": ("STRING", {"multiline": True, "tooltip": "Suno V6 系列最多 5000 字符。"}),
+                "version": (SUNO_WORKSHOP_VERSION_OPTIONS, {"default": "v5.5"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
@@ -15127,19 +15133,10 @@ class Comfly_suno_description:
                 raise RuntimeError(f"[Comfly_suno_description] {error_message}")
             return (empty_audio, empty_audio, "", "", "", "", error_message, "", "", "", "")
         
-        mv_mapping = {
-            "v3.0": "chirp-v3.0",
-            "v3.5": "chirp-v3.5", 
-            "v4": "chirp-v4",
-            "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow",
-            "v5.5": "chirp-fenix"           
-        }
-        
-        mv = mv_mapping.get(version, "chirp-auk")
+        mv = resolve_suno_workshop_mv(version, fallback="chirp-auk")
             
         try:
+            validate_suno_workshop_text_limits(version, description_prompt)
             payload = {
                 "gpt_description_prompt": description_prompt,
                 "make_instrumental": make_instrumental,
@@ -15467,9 +15464,9 @@ class Comfly_suno_custom:
         return {
             "required": {
                 "title": ("STRING", {"default": ""}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
-                "prompt": ("STRING", {"multiline": True}), 
-                "tags": ("STRING", {"default": ""}),  
+                "version": (SUNO_WORKSHOP_VERSION_OPTIONS, {"default": "v5.5"}),
+                "prompt": ("STRING", {"multiline": True, "tooltip": "Suno V6 系列最多 5000 字符。"}),
+                "tags": ("STRING", {"default": "", "tooltip": "Suno V6 系列最多 1000 字符。"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 2147483647}),
             },
             "optional": {
@@ -15511,19 +15508,10 @@ class Comfly_suno_custom:
             return (empty_audio, empty_audio, "", "", "", error_message, 
                 "", "", "", "", "", "")
         
-        mv_mapping = {
-            "v3.0": "chirp-v3.0",
-            "v3.5": "chirp-v3.5", 
-            "v4": "chirp-v4",
-            "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow",
-            "v5.5": "chirp-fenix" 
-        }
-        
-        mv = mv_mapping.get(version, "chirp-auk")
+        mv = resolve_suno_workshop_mv(version, fallback="chirp-auk")
             
         try:
+            validate_suno_workshop_text_limits(version, prompt, tags)
             payload = {
                 "prompt": prompt,
                 "tags": tags,
@@ -15943,11 +15931,11 @@ class Comfly_suno_upload_extend:
         return {
             "required": {
                 "clip_id": ("STRING", {"forceInput": True}),
-                "prompt": ("STRING", {"multiline": True}),
-                "tags": ("STRING", {"default": ""}),
+                "prompt": ("STRING", {"multiline": True, "tooltip": "Suno V6 系列最多 5000 字符。"}),
+                "tags": ("STRING", {"default": "", "tooltip": "Suno V6 系列最多 1000 字符。"}),
                 "title": ("STRING", {"default": ""}),
-                "continue_at": ("INT", {"default": 28, "min": 0, "max": 120}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
+                "continue_at": ("INT", {"default": 28, "min": 0, "max": SUNO_WORKSHOP_V6_MAX_DURATION_SECONDS, "tooltip": "V6 最长支持 8 分钟歌曲。"}),
+                "version": (SUNO_WORKSHOP_VERSION_OPTIONS, {"default": "v5.5"}),
             },
             "optional": {
                 "api_key": ("STRING", {"default": ""}),
@@ -15986,19 +15974,10 @@ class Comfly_suno_upload_extend:
                 raise RuntimeError(f"[Comfly_suno_upload_extend] {error_message}")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "")
 
-        mv_mapping = {
-            "v3.0": "chirp-v3.0",
-            "v3.5": "chirp-v3.5", 
-            "v4": "chirp-v4",
-            "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow",
-            "v5.5": "chirp-fenix" 
-        }
-        
-        mv = mv_mapping.get(version, "chirp-crow")
+        mv = resolve_suno_workshop_mv(version, fallback="chirp-crow")
             
         try:
+            validate_suno_workshop_text_limits(version, prompt, tags)
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
 
@@ -16185,10 +16164,10 @@ class Comfly_suno_cover:
         return {
             "required": {
                 "cover_clip_id": ("STRING", {"forceInput": True}),
-                "prompt": ("STRING", {"multiline": True}),
+                "prompt": ("STRING", {"multiline": True, "tooltip": "Suno V6 系列最多 5000 字符。"}),
                 "title": ("STRING", {"default": ""}),
-                "tags": ("STRING", {"default": ""}),
-                "version": (["v3.0", "v3.5", "v4", "v4.5", "v4.5+", "v5","v5.5"], {"default": "v5.5"}),
+                "tags": ("STRING", {"default": "", "tooltip": "Suno V6 系列最多 1000 字符。"}),
+                "version": (SUNO_WORKSHOP_VERSION_OPTIONS, {"default": "v5.5"}),
                 "make_instrumental": ("BOOLEAN", {"default": False}),
             },
             "optional": {
@@ -16226,19 +16205,14 @@ class Comfly_suno_cover:
             print(error_message)
             empty_audio = create_audio_object("")
             return (empty_audio, empty_audio, "", "", "", error_message, "", "", "", "")
-        mv_mapping = {
-            "v3.0": "chirp-v3.0",
-            "v3.5": "chirp-v3.5", 
-            "v4": "chirp-v4-tau",
-            "v4.5": "chirp-auk",
-            "v4.5+": "chirp-bluejay",
-            "v5": "chirp-crow",
-            "v5.5": "chirp-fenix"
-        }
-        
-        mv = mv_mapping.get(version, "chirp-v4-tau")
+        mv = resolve_suno_workshop_mv(
+            version,
+            fallback="chirp-v4-tau",
+            cover=True,
+        )
             
         try:
+            validate_suno_workshop_text_limits(version, prompt, tags)
             pbar = comfy.utils.ProgressBar(100)
             pbar.update_absolute(10)
             payload = {

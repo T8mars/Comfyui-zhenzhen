@@ -40,6 +40,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260912-1 
+
+支持双渠道suno v6及配套工作流
+
 ### 20260910-1  
 
 优化所有节点，更容易识别贞贞平价AI小屋和贞贞的AI工坊

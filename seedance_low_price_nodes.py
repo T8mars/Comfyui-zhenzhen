@@ -11168,12 +11168,18 @@ class Comfly_whisper_1_lowprice:
             return ("", json.dumps(response, ensure_ascii=False, indent=2))
 
 
-SUNO_VERSIONS = ["v3.5", "v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5"]
-SUNO_INSPO_VERSIONS = ["v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5"]
-SUNO_REPLACE_VERSIONS = ["v4", "v4.5+", "v5", "v5.5"]
-SUNO_REMASTER_VERSIONS = ["v4.5+", "v5", "v5.5"]
-SUNO_V5_VERSIONS = ["v5", "v5.5"]
-MAX_SUNO_REFERENCE_AUDIOS = 4
+SUNO_V6_VERSIONS = ["v6", "v6-wild", "v6-mini"]
+SUNO_VERSIONS = SUNO_V6_VERSIONS + [
+    "v3.5", "v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5",
+]
+SUNO_INSPO_VERSIONS = SUNO_V6_VERSIONS + [
+    "v4", "v4.5", "v4.5+", "v4.5-all", "v5", "v5.5",
+]
+SUNO_REPLACE_VERSIONS = SUNO_V6_VERSIONS + ["v4", "v4.5+", "v5", "v5.5"]
+SUNO_REMASTER_VERSIONS = SUNO_V6_VERSIONS + ["v4.5+", "v5", "v5.5"]
+SUNO_V5_VERSIONS = SUNO_V6_VERSIONS + ["v5", "v5.5"]
+MAX_SUNO_REFERENCE_AUDIOS = 24
+MAX_SUNO_INSPO_AUDIOS = 4
 SUNO_UPLOAD_MIN_SECONDS = 6.0
 SUNO_CREATE_VOICE_MIN_SECONDS = 10.0
 SUNO_CREATE_VOICE_MAX_SECONDS = 240.0
@@ -11194,6 +11200,73 @@ SUNO_ACTION_SPECS: Dict[str, Dict[str, Any]] = {
             "vocal_gender",
         ),
         "allowed_versions": tuple(SUNO_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-create-model": {
+        "action": "create-model",
+        "sync": False,
+        "reference_type": "model_audios",
+        "required_fields": ("name", "audio_urls"),
+        "allowed_fields": ("name", "audio_urls"),
+        "allowed_versions": (),
+        "result_family": "model",
+    },
+    "suno-upload-cover": {
+        "action": "upload-cover",
+        "sync": False,
+        "reference_type": "url",
+        "required_fields": ("audio_url",),
+        "allowed_fields": (
+            "audio_url",
+            "version",
+            "custom_model_id",
+            "custom",
+            "instrumental",
+            "gpt_description",
+            "prompt",
+            "tags",
+            "title",
+            "negative_tags",
+            "style_weight",
+            "weirdness",
+            "audio_weight",
+            "auto_lyrics",
+            "vocal_gender",
+            "persona_id",
+            "duration_s",
+            "variety",
+            "max_mode",
+            "audio_format",
+        ),
+        "allowed_versions": tuple(SUNO_V6_VERSIONS),
+        "result_family": "audio",
+    },
+    "suno-upload-extend": {
+        "action": "upload-extend",
+        "sync": False,
+        "reference_type": "url",
+        "required_fields": ("audio_url", "continue_at"),
+        "allowed_fields": (
+            "audio_url",
+            "continue_at",
+            "version",
+            "custom_model_id",
+            "prompt",
+            "tags",
+            "title",
+            "negative_tags",
+            "style_weight",
+            "weirdness",
+            "audio_weight",
+            "auto_lyrics",
+            "vocal_gender",
+            "persona_id",
+            "duration_s",
+            "variety",
+            "max_mode",
+            "audio_format",
+        ),
+        "allowed_versions": tuple(SUNO_V6_VERSIONS),
         "result_family": "audio",
     },
     "suno-lyrics": {
@@ -11476,7 +11549,7 @@ SUNO_ACTION_SPECS: Dict[str, Dict[str, Any]] = {
         "reference_type": "task_audio",
         "required_fields": ("task_id", "prompt"),
         "allowed_fields": ("task_id", "audio_index", "prompt", "version"),
-        "allowed_versions": ("v5.5",),
+        "allowed_versions": tuple(SUNO_V6_VERSIONS + ["v5.5"]),
         "result_family": "audio",
     },
 }
@@ -11731,6 +11804,27 @@ def _extract_suno_text(value: Any) -> str:
     return ""
 
 
+def _collect_suno_string_values(value: Any, key_name: str) -> List[str]:
+    values: List[str] = []
+    seen: Set[str] = set()
+
+    def visit(item: Any) -> None:
+        if isinstance(item, dict):
+            for key, child in item.items():
+                if key == key_name and isinstance(child, str) and child.strip():
+                    normalized = child.strip()
+                    if normalized not in seen:
+                        seen.add(normalized)
+                        values.append(normalized)
+                visit(child)
+        elif isinstance(item, list):
+            for child in item:
+                visit(child)
+
+    visit(value)
+    return values
+
+
 def extract_suno_results(final_response: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(final_response, dict):
         raise SeedanceLowPriceError("Suno response must be a JSON object")
@@ -11758,6 +11852,7 @@ def extract_suno_results(final_response: Dict[str, Any]) -> Dict[str, Any]:
             else ""
         ),
         "result": result_data,
+        "model_ids": _collect_suno_string_values(result_data, "model_id"),
         "artifacts": artifacts,
         "all_urls": buckets["all"],
         "text": _extract_suno_text(result_data),
@@ -11961,6 +12056,7 @@ class Comfly_suno_music_lowprice:
         "STRING",
         "STRING",
         "STRING",
+        "STRING",
     )
     RETURN_NAMES = (
         "audio1",
@@ -11973,18 +12069,19 @@ class Comfly_suno_music_lowprice:
         "result_paths",
         "task_id",
         "response",
+        "model_id",
     )
 
     @classmethod
     def INPUT_TYPES(cls):
         optional: Dict[str, tuple] = {}
-        for index in range(1, MAX_SUNO_REFERENCE_AUDIOS + 1):
+        for index in range(1, MAX_SUNO_INSPO_AUDIOS + 1):
             optional[f"audio{index}"] = (
                 AUDIO_TYPE,
                 {
                     "tooltip": (
-                        f"本地音频素材 {index}，用于 upload、create-voice 或 inspo；"
-                        "upload 至少 6 秒，create-voice 需要 10-240 秒。"
+                        f"本地音频素材 {index}，用于 upload、create-model、"
+                        "upload-cover、upload-extend、create-voice 或 inspo。"
                     )
                 },
             )
@@ -11999,6 +12096,89 @@ class Comfly_suno_music_lowprice:
             )
         optional["api_config"] = (CONFIG_TYPE,)
         optional["skip_error"] = ("BOOLEAN", {"default": False})
+        # Preserve all legacy sockets/widgets above; V6 additions stay appended.
+        for index in range(
+            MAX_SUNO_INSPO_AUDIOS + 1,
+            MAX_SUNO_REFERENCE_AUDIOS + 1,
+        ):
+            optional[f"audio{index}"] = (
+                AUDIO_TYPE,
+                {
+                    "tooltip": (
+                        f"创建自定义模型的附加本地音频素材 {index}。"
+                    )
+                },
+            )
+            optional[f"audio_url{index}"] = (
+                "STRING",
+                {
+                    "default": "",
+                    "tooltip": (
+                        f"创建模型公网音频 URL {index}，不能与同槽本地音频同时使用。"
+                    ),
+                },
+            )
+        optional.update(
+            {
+                "custom_model_id": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": (
+                            "create-model 返回的模型 UUID；填写后不发送 version，"
+                            "且不能同时填写 persona_id。"
+                        ),
+                    },
+                ),
+                "gpt_description": (
+                    "STRING",
+                    {
+                        "multiline": True,
+                        "default": "",
+                        "tooltip": (
+                            "upload-cover 在 custom=false 时必填，最多 3000 字符。"
+                        ),
+                    },
+                ),
+                "negative_tags": (
+                    "STRING",
+                    {"default": "", "tooltip": "不希望出现的风格。"},
+                ),
+                "style_weight": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05},
+                ),
+                "weirdness": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05},
+                ),
+                "audio_weight": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05},
+                ),
+                "auto_lyrics": ("BOOLEAN", {"default": False}),
+                "persona_id": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": "可选 Persona ID，不能与 custom_model_id 同时使用。",
+                    },
+                ),
+                "target_duration_s": (
+                    "INT",
+                    {"default": 10, "min": 10, "max": 360, "step": 1},
+                ),
+                "variety": (
+                    ["normal", "off", "high", "extra", "max"],
+                    {"default": "normal"},
+                ),
+                "max_mode": ("BOOLEAN", {"default": False}),
+                "audio_format": (
+                    ["mp3", "m4a", "wav"],
+                    {"default": "mp3"},
+                ),
+            }
+        )
         return {
             "required": {
                 "operation": (
@@ -12080,13 +12260,19 @@ class Comfly_suno_music_lowprice:
         cls,
         operation=None,
         version=None,
+        custom_model_id=None,
         audio_index=None,
         **kwargs,
     ):
         if operation not in SUNO_ACTION_SPECS:
             return f"Unsupported Suno operation: {operation}"
-        allowed_versions = SUNO_ACTION_SPECS[operation]["allowed_versions"]
-        if allowed_versions and version not in allowed_versions:
+        spec = SUNO_ACTION_SPECS[operation]
+        allowed_versions = spec["allowed_versions"]
+        has_custom_model = bool(
+            str(custom_model_id or "").strip()
+            and "custom_model_id" in spec["allowed_fields"]
+        )
+        if allowed_versions and not has_custom_model and version not in allowed_versions:
             return (
                 f"{operation} does not support version '{version}'; "
                 f"allowed: {', '.join(allowed_versions)}"
@@ -12128,7 +12314,15 @@ class Comfly_suno_music_lowprice:
         config: Dict[str, Any],
         progress_cb: Callable[[float], None],
     ) -> List[str]:
-        if operation not in {"suno-upload", "suno-create-voice", "suno-inspo"}:
+        audio_operations = {
+            "suno-upload",
+            "suno-create-model",
+            "suno-upload-cover",
+            "suno-upload-extend",
+            "suno-create-voice",
+            "suno-inspo",
+        }
+        if operation not in audio_operations:
             return []
         slots: List[Tuple[int, Any, str]] = []
         for index in range(1, MAX_SUNO_REFERENCE_AUDIOS + 1):
@@ -12147,7 +12341,13 @@ class Comfly_suno_music_lowprice:
             if audio is not None or url:
                 slots.append((index, audio, url))
 
-        if operation in {"suno-upload", "suno-create-voice"}:
+        single_audio_operations = {
+            "suno-upload",
+            "suno-upload-cover",
+            "suno-upload-extend",
+            "suno-create-voice",
+        }
+        if operation in single_audio_operations:
             if any(index != 1 for index, _audio, _url in slots):
                 raise SeedanceLowPriceError(
                     f"{operation} only accepts audio slot 1"
@@ -12156,9 +12356,19 @@ class Comfly_suno_music_lowprice:
                 raise SeedanceLowPriceError(
                     f"{operation} requires exactly one local audio or URL"
                 )
-        elif not 1 <= len(slots) <= MAX_SUNO_REFERENCE_AUDIOS:
+        elif operation == "suno-inspo" and (
+            not 1 <= len(slots) <= MAX_SUNO_INSPO_AUDIOS
+            or any(
+                index > MAX_SUNO_INSPO_AUDIOS
+                for index, _audio, _url in slots
+            )
+        ):
             raise SeedanceLowPriceError(
                 "suno-inspo requires 1-4 local audios or URLs"
+            )
+        elif operation == "suno-create-model" and not 6 <= len(slots) <= 24:
+            raise SeedanceLowPriceError(
+                "suno-create-model requires 6-24 local audios or URLs"
             )
 
         resolved: List[str] = []
@@ -12187,6 +12397,14 @@ class Comfly_suno_music_lowprice:
                     raise SeedanceLowPriceError(
                         "suno-create-voice local audio must be 10-240 seconds"
                     )
+                if (
+                    operation == "suno-upload-extend"
+                    and duration is not None
+                    and float(values.get("continue_at") or 0) >= duration
+                ):
+                    raise SeedanceLowPriceError(
+                        "continue_at must be shorter than the local source audio"
+                    )
                 url = upload_media(
                     audio_to_wav_bytes(audio),
                     f"suno_reference_{index}.wav",
@@ -12212,9 +12430,21 @@ class Comfly_suno_music_lowprice:
         allowed_fields = set(spec["allowed_fields"])
         payload: Dict[str, Any] = {"model": "suno"}
 
+        custom_model_id = self._text(values.get("custom_model_id"))
+        persona_id = self._text(values.get("persona_id"))
+        uses_custom_model = bool(
+            custom_model_id and "custom_model_id" in allowed_fields
+        )
+        if uses_custom_model and persona_id:
+            raise SeedanceLowPriceError(
+                "custom_model_id and persona_id are mutually exclusive"
+            )
+        if uses_custom_model:
+            payload["custom_model_id"] = custom_model_id
+
         version = self._text(values.get("version"))
         allowed_versions = spec["allowed_versions"]
-        if allowed_versions:
+        if allowed_versions and not uses_custom_model:
             if version not in allowed_versions:
                 raise SeedanceLowPriceError(
                     f"{operation} does not support version '{version}'; "
@@ -12261,16 +12491,118 @@ class Comfly_suno_music_lowprice:
 
         if operation == "suno-upload" and audio_urls:
             payload["audioFilePath"] = audio_urls[0]
+        elif operation == "suno-create-model" and audio_urls:
+            payload["audio_urls"] = audio_urls
+        elif operation in {"suno-upload-cover", "suno-upload-extend"} and audio_urls:
+            payload["audio_url"] = audio_urls[0]
         elif operation == "suno-create-voice" and audio_urls:
             payload["audio_url"] = audio_urls[0]
         elif operation == "suno-inspo" and audio_urls:
             payload["audio_urls"] = audio_urls
 
-        for field in ("continue_at", "start_s", "end_s", "duration_s", "speed"):
-            if field in allowed_fields:
+        if operation in {"suno-upload-cover", "suno-upload-extend"}:
+            title = self._text(values.get("title"))
+            if title:
+                payload["title"] = title
+            vocal_gender = self._text(values.get("vocal_gender"))
+            if vocal_gender in {"Male", "Female"}:
+                payload["vocal_gender"] = vocal_gender
+            for field in (
+                "negative_tags",
+                "persona_id",
+                "variety",
+                "audio_format",
+            ):
+                value = self._text(values.get(field))
+                if value and field in allowed_fields:
+                    payload[field] = value
+            for field in ("style_weight", "weirdness", "audio_weight"):
                 raw_value = values.get(field)
                 if raw_value not in (None, ""):
                     payload[field] = float(raw_value)
+            payload["auto_lyrics"] = bool(values.get("auto_lyrics", False))
+            if bool(values.get("max_mode", False)):
+                payload["max_mode"] = True
+
+        if operation == "suno-upload-cover":
+            custom = bool(values.get("custom", False))
+            instrumental = bool(values.get("instrumental", False))
+            payload["custom"] = custom
+            payload["instrumental"] = instrumental
+            if custom:
+                if not instrumental and not self._text(values.get("prompt")):
+                    raise SeedanceLowPriceError(
+                        "suno-upload-cover requires prompt when custom=true and "
+                        "instrumental=false"
+                    )
+                payload["duration_s"] = int(
+                    values.get("target_duration_s") or 10
+                )
+            else:
+                description = self._text(values.get("gpt_description"))
+                if not description:
+                    raise SeedanceLowPriceError(
+                        "suno-upload-cover requires gpt_description when custom=false"
+                    )
+                payload["gpt_description"] = description
+                for field in (
+                    "prompt",
+                    "tags",
+                    "title",
+                    "negative_tags",
+                    "style_weight",
+                    "weirdness",
+                    "audio_weight",
+                    "auto_lyrics",
+                    "persona_id",
+                    "max_mode",
+                ):
+                    payload.pop(field, None)
+
+        if operation == "suno-upload-extend":
+            payload["duration_s"] = int(values.get("target_duration_s") or 10)
+
+        for field in ("continue_at", "start_s", "end_s", "duration_s", "speed"):
+            if field in allowed_fields:
+                if field == "duration_s" and operation in {
+                    "suno-upload-cover",
+                    "suno-upload-extend",
+                }:
+                    continue
+                raw_value = values.get(field)
+                if raw_value not in (None, ""):
+                    payload[field] = float(raw_value)
+
+        text_limits = {
+            "gpt_description": 3000,
+            "prompt": 5000,
+            "tags": 1000,
+            "title": 80,
+        }
+        for field, limit in text_limits.items():
+            value = payload.get(field)
+            if isinstance(value, str) and len(value) > limit:
+                raise SeedanceLowPriceError(
+                    f"{field} must not exceed {limit} characters"
+                )
+        for field in ("style_weight", "weirdness", "audio_weight"):
+            if field in payload and not 0.0 <= float(payload[field]) <= 1.0:
+                raise SeedanceLowPriceError(f"{field} must be between 0 and 1")
+        if "duration_s" in payload and operation in {
+            "suno-upload-cover",
+            "suno-upload-extend",
+        }:
+            if not 10 <= int(payload["duration_s"]) <= 360:
+                raise SeedanceLowPriceError(
+                    "duration_s must be between 10 and 360"
+                )
+        if operation == "suno-upload-extend" and payload.get("continue_at", 0) < 1:
+            raise SeedanceLowPriceError("continue_at must be at least 1 second")
+        if payload.get("max_mode") and operation == "suno-upload-cover":
+            if not payload.get("custom"):
+                raise SeedanceLowPriceError(
+                    "max_mode requires custom=true for suno-upload-cover"
+                )
 
         missing = [
             field
@@ -12288,8 +12620,20 @@ class Comfly_suno_music_lowprice:
             raise SeedanceLowPriceError(
                 "suno-mashup requires exactly two task IDs"
             )
-        if "audio_urls" in payload and not 1 <= len(payload["audio_urls"]) <= 4:
+        if (
+            operation == "suno-inspo"
+            and "audio_urls" in payload
+            and not 1 <= len(payload["audio_urls"]) <= 4
+        ):
             raise SeedanceLowPriceError("suno-inspo requires 1-4 audio URLs")
+        if (
+            operation == "suno-create-model"
+            and "audio_urls" in payload
+            and not 6 <= len(payload["audio_urls"]) <= 24
+        ):
+            raise SeedanceLowPriceError(
+                "suno-create-model requires 6-24 audio URLs"
+            )
         if payload.get("audio_index", 1) < 1:
             raise SeedanceLowPriceError("audio_index must be at least 1")
         if "start_s" in payload and "end_s" in payload:
@@ -12319,6 +12663,7 @@ class Comfly_suno_music_lowprice:
                 "[]",
                 "",
                 response,
+                "",
             ),
         }
 
@@ -12384,6 +12729,7 @@ class Comfly_suno_music_lowprice:
         validation = self.VALIDATE_INPUTS(
             operation=operation,
             version=values.get("version"),
+            custom_model_id=values.get("custom_model_id"),
             audio_index=values.get("audio_index"),
         )
         if validation is not True:
@@ -12423,6 +12769,8 @@ class Comfly_suno_music_lowprice:
 
         extracted = extract_suno_results(final_response)
         result_task_id = submitted_task_id or extracted["task_id"]
+        model_ids = extracted.get("model_ids") or []
+        model_id = model_ids[0] if model_ids else ""
         artifacts = extracted["artifacts"]
         result_paths: List[str] = []
         audio_objects: List[Dict[str, Any]] = []
@@ -12497,6 +12845,7 @@ class Comfly_suno_music_lowprice:
                     primary_path,
                     result_task_id,
                     response,
+                    model_id,
                 ]
             },
             "result": (
@@ -12510,6 +12859,7 @@ class Comfly_suno_music_lowprice:
                 json.dumps(result_paths, ensure_ascii=False),
                 result_task_id,
                 response,
+                model_id,
             ),
         }
 

@@ -1,15 +1,225 @@
 {
-  "id": "6f351bc4-193d-59a8-a731-e96ac0e97b43",
+  "id": "b55a0a13-5d4d-5760-a68a-47994893b49e",
   "revision": 0,
-  "last_node_id": 4,
-  "last_link_id": 4,
+  "last_node_id": 9,
+  "last_link_id": 8,
   "nodes": [
     {
       "id": 1,
-      "type": "Comfly_suno_music_lowprice",
-      "title": "生成源音乐",
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
       "pos": [
         40,
+        80
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
+      "pos": [
+        340,
+        80
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 4,
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
+      "pos": [
+        340,
+        260
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 5,
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 6,
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
+      "pos": [
+        340,
+        440
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Comfly_suno_music_lowprice",
+      "title": "Suno - suno-create-model",
+      "pos": [
+        700,
         100
       ],
       "size": [
@@ -17,32 +227,32 @@
         520
       ],
       "flags": {},
-      "order": 0,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
           "name": "audio1",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 2
         },
         {
           "name": "audio2",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 3
         },
         {
           "name": "audio3",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 4
         },
         {
           "name": "audio4",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 5
         },
         {
           "name": "api_config",
@@ -54,13 +264,13 @@
           "name": "audio5",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 6
         },
         {
           "name": "audio6",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 7
         },
         {
           "name": "audio7",
@@ -215,9 +425,7 @@
         {
           "name": "task_id",
           "type": "STRING",
-          "links": [
-            3
-          ]
+          "links": null
         },
         {
           "name": "response",
@@ -227,7 +435,9 @@
         {
           "name": "model_id",
           "type": "STRING",
-          "links": null
+          "links": [
+            8
+          ]
         }
       ],
       "properties": {
@@ -236,16 +446,16 @@
         "Node name for S&R": "Comfly_suno_music_lowprice"
       },
       "widgets_values": [
-        "suno-generation",
-        "short cinematic instrumental with piano and soft percussion",
+        "suno-create-model",
+        "",
         "v5.5",
         false,
-        true,
+        false,
         "",
         "",
         "unspecified",
         "cinematic, emotional, piano",
-        "Studio Persona",
+        "V6 Custom Model",
         "",
         "",
         1,
@@ -294,304 +504,7 @@
       ]
     },
     {
-      "id": 2,
-      "type": "Comfly_suno_music_lowprice",
-      "title": "Suno - suno-remaster",
-      "pos": [
-        580,
-        100
-      ],
-      "size": [
-        470,
-        520
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "audio1",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio2",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio3",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio4",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "api_config",
-          "shape": 7,
-          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
-          "link": 2
-        },
-        {
-          "name": "audio5",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio6",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio7",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio8",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio9",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio10",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio11",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio12",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio13",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio14",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio15",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio16",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio17",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio18",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio19",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio20",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio21",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio22",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio23",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio24",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "task_id",
-          "type": "STRING",
-          "widget": {
-            "name": "task_id"
-          },
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "audio1",
-          "type": "AUDIO",
-          "links": [
-            4
-          ]
-        },
-        {
-          "name": "audio2",
-          "type": "AUDIO",
-          "links": null
-        },
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": null
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "primary_url",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "result_urls",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "primary_path",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "result_paths",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "task_id",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "response",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "model_id",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "1.9.4",
-        "Node name for S&R": "Comfly_suno_music_lowprice"
-      },
-      "widgets_values": [
-        "suno-remaster",
-        "",
-        "v5.5",
-        false,
-        false,
-        "",
-        "",
-        "unspecified",
-        "cinematic, emotional, piano",
-        "Studio Persona",
-        "",
-        "",
-        1,
-        30.0,
-        0.0,
-        4.0,
-        2.0,
-        1.1,
-        "",
-        "",
-        "",
-        "",
-        false,
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "turn this reference into a calm cinematic instrumental",
-        "harsh vocals",
-        0.5,
-        0.5,
-        0.5,
-        false,
-        "",
-        10,
-        "normal",
-        false,
-        "mp3"
-      ]
-    },
-    {
-      "id": 3,
+      "id": 8,
       "type": "T8Zhenzhen_API_Settings",
       "title": "Zhenzhen API Settings（国内版）",
       "pos": [
@@ -603,7 +516,7 @@
         174
       ],
       "flags": {},
-      "order": 2,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -616,8 +529,7 @@
           "name": "api_config",
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
           "links": [
-            1,
-            2
+            1
           ]
         }
       ],
@@ -634,74 +546,105 @@
       ]
     },
     {
-      "id": 4,
-      "type": "SaveAudio",
+      "id": 9,
+      "type": "easy showAnything",
       "pos": [
-        1120,
+        940,
         180
       ],
       "size": [
-        270,
-        112
+        220,
+        80
       ],
       "flags": {},
-      "order": 3,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
-          "name": "audio",
-          "type": "AUDIO",
-          "link": 4
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 8
         }
       ],
       "outputs": [
         {
-          "name": "audio",
-          "type": "AUDIO",
+          "name": "output",
+          "type": "*",
           "links": null
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "Node name for S&R": "SaveAudio"
+        "cnr_id": "comfyui-easy-use",
+        "Node name for S&R": "easy showAnything"
       },
-      "widgets_values": [
-        "audio/suno-remaster"
-      ]
+      "widgets_values": []
     }
   ],
   "links": [
     [
       1,
-      3,
-      1,
-      1,
-      4,
-      "ZHENZHEN_SEEDANCE2_CONFIG"
-    ],
-    [
-      2,
-      3,
-      1,
-      2,
-      4,
-      "ZHENZHEN_SEEDANCE2_CONFIG"
-    ],
-    [
-      3,
-      1,
       8,
-      2,
-      25,
-      "STRING"
+      1,
+      7,
+      4,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
     ],
     [
-      4,
       2,
+      1,
       0,
-      4,
+      7,
       0,
       "AUDIO"
+    ],
+    [
+      3,
+      2,
+      0,
+      7,
+      1,
+      "AUDIO"
+    ],
+    [
+      4,
+      3,
+      0,
+      7,
+      2,
+      "AUDIO"
+    ],
+    [
+      5,
+      4,
+      0,
+      7,
+      3,
+      "AUDIO"
+    ],
+    [
+      6,
+      5,
+      0,
+      7,
+      5,
+      "AUDIO"
+    ],
+    [
+      7,
+      6,
+      0,
+      7,
+      6,
+      "AUDIO"
+    ],
+    [
+      8,
+      7,
+      10,
+      9,
+      0,
+      "STRING"
     ]
   ],
   "groups": [],

@@ -1,15 +1,50 @@
 {
-  "id": "6f351bc4-193d-59a8-a731-e96ac0e97b43",
+  "id": "ef804744-429c-5529-b8ee-db74b01a86e5",
   "revision": 0,
   "last_node_id": 4,
-  "last_link_id": 4,
+  "last_link_id": 3,
   "nodes": [
     {
       "id": 1,
-      "type": "Comfly_suno_music_lowprice",
-      "title": "生成源音乐",
+      "type": "LoadAudio",
+      "title": "选择至少 6 秒的音频素材",
       "pos": [
         40,
+        80
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Comfly_suno_music_lowprice",
+      "title": "Suno - suno-upload-cover",
+      "pos": [
+        400,
         100
       ],
       "size": [
@@ -17,14 +52,14 @@
         520
       ],
       "flags": {},
-      "order": 0,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
           "name": "audio1",
           "shape": 7,
           "type": "AUDIO",
-          "link": null
+          "link": 2
         },
         {
           "name": "audio2",
@@ -175,308 +210,11 @@
         {
           "name": "audio1",
           "type": "AUDIO",
-          "links": null
-        },
-        {
-          "name": "audio2",
-          "type": "AUDIO",
-          "links": null
-        },
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": null
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "primary_url",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "result_urls",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "primary_path",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "result_paths",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "task_id",
-          "type": "STRING",
           "links": [
             3
           ]
         },
         {
-          "name": "response",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "name": "model_id",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "zhenzhen",
-        "ver": "1.9.4",
-        "Node name for S&R": "Comfly_suno_music_lowprice"
-      },
-      "widgets_values": [
-        "suno-generation",
-        "short cinematic instrumental with piano and soft percussion",
-        "v5.5",
-        false,
-        true,
-        "",
-        "",
-        "unspecified",
-        "cinematic, emotional, piano",
-        "Studio Persona",
-        "",
-        "",
-        1,
-        30.0,
-        0.0,
-        4.0,
-        2.0,
-        1.1,
-        "",
-        "",
-        "",
-        "",
-        false,
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "turn this reference into a calm cinematic instrumental",
-        "harsh vocals",
-        0.5,
-        0.5,
-        0.5,
-        false,
-        "",
-        10,
-        "normal",
-        false,
-        "mp3"
-      ]
-    },
-    {
-      "id": 2,
-      "type": "Comfly_suno_music_lowprice",
-      "title": "Suno - suno-remaster",
-      "pos": [
-        580,
-        100
-      ],
-      "size": [
-        470,
-        520
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "audio1",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio2",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio3",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio4",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "api_config",
-          "shape": 7,
-          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
-          "link": 2
-        },
-        {
-          "name": "audio5",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio6",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio7",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio8",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio9",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio10",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio11",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio12",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio13",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio14",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio15",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio16",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio17",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio18",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio19",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio20",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio21",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio22",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio23",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "audio24",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": null
-        },
-        {
-          "name": "task_id",
-          "type": "STRING",
-          "widget": {
-            "name": "task_id"
-          },
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "audio1",
-          "type": "AUDIO",
-          "links": [
-            4
-          ]
-        },
-        {
           "name": "audio2",
           "type": "AUDIO",
           "links": null
@@ -533,11 +271,11 @@
         "Node name for S&R": "Comfly_suno_music_lowprice"
       },
       "widgets_values": [
-        "suno-remaster",
+        "suno-upload-cover",
         "",
-        "v5.5",
-        false,
-        false,
+        "v6",
+        true,
+        true,
         "",
         "",
         "unspecified",
@@ -616,8 +354,7 @@
           "name": "api_config",
           "type": "ZHENZHEN_SEEDANCE2_CONFIG",
           "links": [
-            1,
-            2
+            1
           ]
         }
       ],
@@ -637,7 +374,7 @@
       "id": 4,
       "type": "SaveAudio",
       "pos": [
-        1120,
+        940,
         180
       ],
       "size": [
@@ -651,7 +388,7 @@
         {
           "name": "audio",
           "type": "AUDIO",
-          "link": 4
+          "link": 3
         }
       ],
       "outputs": [
@@ -666,7 +403,7 @@
         "Node name for S&R": "SaveAudio"
       },
       "widgets_values": [
-        "audio/suno-remaster"
+        "audio/suno-upload-cover"
       ]
     }
   ],
@@ -675,28 +412,20 @@
       1,
       3,
       1,
-      1,
-      4,
-      "ZHENZHEN_SEEDANCE2_CONFIG"
-    ],
-    [
-      2,
-      3,
-      1,
       2,
       4,
       "ZHENZHEN_SEEDANCE2_CONFIG"
     ],
     [
-      3,
-      1,
-      8,
       2,
-      25,
-      "STRING"
+      1,
+      0,
+      2,
+      0,
+      "AUDIO"
     ],
     [
-      4,
+      3,
       2,
       0,
       4,
