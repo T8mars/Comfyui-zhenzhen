@@ -40,6 +40,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260915-1 
+
+修复gpt image 2.5节点返回卡住的问题
+
 ### 20260912-1 
 
 支持双渠道suno v6及配套工作流

@@ -304,8 +304,10 @@ def _comfly_poll_image_task(node, task_id, pbar):
     query_url = f"{baseurl}/v1/images/tasks/{task_id}"
     last_result = None
 
-    print(f"Image edit task accepted: {task_id}")
-    for attempt in range(60):
+    max_wait_seconds = max(600, min(int(getattr(node, "timeout", 600)), 3600))
+    max_attempts = max(60, max_wait_seconds // 10)
+    print(f"Image task accepted: {task_id}")
+    for attempt in range(max_attempts):
         if attempt:
             time.sleep(10)
         query_response = requests.get(
@@ -326,7 +328,7 @@ def _comfly_poll_image_task(node, task_id, pbar):
         last_result = query_response.json()
         image_items = _comfly_collect_image_items(last_result)
         status = _comfly_image_task_status(last_result)
-        pbar.update_absolute(min(90, 50 + ((attempt + 1) * 40 // 60)))
+        pbar.update_absolute(min(90, 50 + ((attempt + 1) * 40 // max_attempts)))
 
         if image_items:
             return last_result, image_items, status or "success"
@@ -344,9 +346,37 @@ def _comfly_poll_image_task(node, task_id, pbar):
             print(f"Image edit task {task_id} returned unknown status: {status}")
 
     raise RuntimeError(
-        f"Image edit task {task_id} polling timed out after 600 seconds. "
+        f"Image task {task_id} polling timed out after {max_wait_seconds} seconds. "
         f"Last response: {last_result}"
     )
+
+
+def _comfly_resolve_image_result(node, result, pbar):
+    """Resolve either a normal Images API response or an async task response."""
+    image_items = _comfly_collect_image_items(result)
+    task_id = _comfly_image_task_id(result)
+    task_status = ""
+
+    if task_id and not image_items:
+        result, image_items, task_status = _comfly_poll_image_task(
+            node, task_id, pbar
+        )
+
+    if not image_items:
+        return result
+
+    # Existing nodes expect the OpenAI-compatible top-level data[] shape. Keep
+    # that interface even when the provider returns nested async task results.
+    if isinstance(result, dict) and isinstance(result.get("data"), list):
+        normalized = dict(result)
+    else:
+        normalized = dict(result) if isinstance(result, dict) else {}
+        normalized["data"] = image_items
+    if task_id:
+        normalized["task_id"] = task_id
+    if task_status:
+        normalized["task_status"] = task_status
+    return normalized
 
 
 def _comfly_image_items_to_tensors(node, image_items, pbar):
@@ -4502,6 +4532,7 @@ class Comfly_Doubao_Seedream:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -4516,7 +4547,7 @@ class Comfly_Doubao_Seedream:
                     raise RuntimeError(f"[Comfly_Doubao_Seedream] {error_message}")
                 return (blank_tensor, error_message)
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             pbar.update_absolute(50)
             
@@ -4777,6 +4808,7 @@ class Comfly_Doubao_Seedream_4:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -4791,7 +4823,7 @@ class Comfly_Doubao_Seedream_4:
                     raise RuntimeError(f"[Comfly_Doubao_Seedream_4] {error_message}")
                 return (blank_tensor, error_message, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             pbar.update_absolute(50)
             
@@ -5038,6 +5070,7 @@ class Comfly_Doubao_Seedream_4_5:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -5052,7 +5085,7 @@ class Comfly_Doubao_Seedream_4_5:
                     raise RuntimeError(f"[Comfly_Doubao_Seedream_4_5] {error_message}")
                 return (blank_tensor, error_message, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             pbar.update_absolute(50)
             
@@ -5219,6 +5252,7 @@ class Comfly_Doubao_Seededit:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -5231,7 +5265,7 @@ class Comfly_Doubao_Seededit:
                     raise RuntimeError(f"[Comfly_Doubao_Seededit] {error_message}")
                 return (image, error_message)
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             pbar.update_absolute(50)
             
@@ -6464,7 +6498,7 @@ class Comfly_gpt_image_1_edit:
                             image_files.append(('mask', mask_tuple))
 
                     response = self.make_request_with_retry(
-                        f"{baseurl}/v1/images/edits",
+                        f"{baseurl}/v1/images/edits?async=true",
                         data=data,
                         files=image_files,
                         max_retries=max_retries,
@@ -6479,7 +6513,7 @@ class Comfly_gpt_image_1_edit:
                         request_files.append(('mask', files['mask']))
 
                     response = self.make_request_with_retry(
-                        f"{baseurl}/v1/images/edits",
+                        f"{baseurl}/v1/images/edits?async=true",
                         data=data,
                         files=request_files,
                         max_retries=max_retries,
@@ -6500,7 +6534,7 @@ class Comfly_gpt_image_1_edit:
                 return (original_image, error_message, self.format_conversation_history())
 
             pbar.update_absolute(50)
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             if "data" not in result or not result["data"]:
                 error_message = "No image data in response"
@@ -6672,6 +6706,7 @@ class Comfly_gpt_image_1:
                 "background": background,
                 "output_format": output_format,
                 "moderation": moderation,
+                "response_format": "url",
             }
 
             if size != "auto":
@@ -6681,6 +6716,7 @@ class Comfly_gpt_image_1:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -6694,7 +6730,7 @@ class Comfly_gpt_image_1:
                     raise RuntimeError(f"[Comfly_gpt_image_1] {error_message}")
                 return (blank_tensor, error_message)
 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             response_info = f"**GPT-image-1 Generation ({timestamp})**\n\n"
@@ -8536,10 +8572,10 @@ class Comfly_gpt_image_2_S2A:
             result = response.json()
             print(f"[Comfly_gpt_image_2_S2A] API response: {result}")
 
-            # 智能判断：API返回异步task_id还是同步data
-            if "task_id" in result:
+            # 兼容 task_id 以及服务商文档中的 {"data": "task-id"}。
+            returned_task_id = _comfly_image_task_id(result)
+            if returned_task_id:
                 # 异步模式：返回task_id
-                returned_task_id = result["task_id"]
 
                 result_info = {
                     "status": "pending",
@@ -11430,7 +11466,8 @@ class Comfly_Flux_Kontext:
                 "prompt": final_prompt,
                 "model": model,
                 "n": num_of_images,  
-                "guidance_scale": guidance  
+                "guidance_scale": guidance,
+                "response_format": "url",
             }
 
             if custom_dimensions and aspect_ratio == "match_input_image":
@@ -11445,6 +11482,7 @@ class Comfly_Flux_Kontext:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -11461,7 +11499,7 @@ class Comfly_Flux_Kontext:
                     return (blank_tensor, "")
                 return (input_image, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             if not result.get("data") or not result["data"]:
                 error_message = "No image data in response"
@@ -11604,7 +11642,8 @@ class Comfly_Flux_Kontext_Edit:
                 
                 data = {
                     'prompt': prompt,
-                    'model': model
+                    'model': model,
+                    'response_format': 'url',
                 }
 
                 if aspect_ratio != "Default":
@@ -11622,13 +11661,15 @@ class Comfly_Flux_Kontext_Edit:
                     headers=self.get_headers(),
                     data=data,
                     files=files,
+                    params={"async": "true"},
                     timeout=self.timeout
                 )
             else:
                 payload = {
                     "prompt": prompt,
                     "model": model,
-                    "n": num_of_images
+                    "n": num_of_images,
+                    "response_format": "url",
                 }
                 
                 if aspect_ratio != "Default":
@@ -11644,6 +11685,7 @@ class Comfly_Flux_Kontext_Edit:
                     f"{baseurl}/v1/images/generations",
                     headers=headers,
                     json=payload,
+                    params={"async": "true"},
                     timeout=self.timeout
                 )
             
@@ -11660,7 +11702,7 @@ class Comfly_Flux_Kontext_Edit:
                     return (blank_tensor, "")
                 return (image, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             if not result.get("data") or not result["data"]:
                 error_message = "No image data in response"
@@ -13517,7 +13559,7 @@ class Comfly_nano_banana2_edit:
 
                 if seed > 0:
                     payload["seed"] = seed
-                           
+
                 response = requests.post(
                     f"{baseurl}/v1/images/generations",
                     headers=headers,
@@ -13744,6 +13786,7 @@ class Comfly_nano_banana_edit:
                     f"{baseurl}/v1/images/generations",
                     headers=headers,
                     json=payload,
+                    params={"async": "true"},
                     timeout=self.timeout
                 )
             else:
@@ -13775,6 +13818,7 @@ class Comfly_nano_banana_edit:
                     headers=headers,
                     data=data,
                     files=files,
+                    params={"async": "true"},
                     timeout=self.timeout
                 )
             
@@ -13789,7 +13833,7 @@ class Comfly_nano_banana_edit:
                     raise RuntimeError(f"[Comfly_nano_banana_edit] {error_message}")
                 return (blank_tensor, error_message)
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
             
             if "data" not in result or not result["data"]:
                 error_message = "No image data in response"
@@ -14134,6 +14178,7 @@ class Comfly_nano_banana2_edit_async_compatible(Comfly_nano_banana2_edit):
                     f"{baseurl}/v1/images/generations",
                     headers=headers,
                     json=payload,
+                    params={"async": "true"},
                     timeout=self.timeout,
                 )
             else:
@@ -14350,6 +14395,7 @@ class Comfly_qwen_image:
                 f"{baseurl}/v1/images/generations", 
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -14364,7 +14410,7 @@ class Comfly_qwen_image:
                     raise RuntimeError(f"[Comfly_qwen_image] {error_message}")
                 return (blank_tensor, error_message, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             response_info = f"**Qwen Image Generation ({timestamp})**\n\n"
@@ -14554,6 +14600,7 @@ class Comfly_qwen_image_edit:
                 headers=headers,
                 files=files,
                 data=data,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -14566,7 +14613,7 @@ class Comfly_qwen_image_edit:
                     raise RuntimeError(f"[Comfly_qwen_image_edit] {error_message}")
                 return (image, error_message, "")
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             response_info = f"**Qwen Image Edit ({timestamp})**\n\n"
@@ -14746,6 +14793,7 @@ class Comfly_Z_image_turbo:
                 f"{baseurl}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             
@@ -14760,7 +14808,7 @@ class Comfly_Z_image_turbo:
                     raise RuntimeError(f"[Comfly_Z_image_turbo] {error_message}")
                 return (blank_tensor, "", error_message)
                 
-            result = response.json()
+            result = _comfly_resolve_image_result(self, response.json(), pbar)
 
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             response_info = f"**Z Image Turbo Generation ({timestamp})**\n\n"
@@ -18740,10 +18788,10 @@ class Comfly_nano_banana2_edit_S2A:
             result = response.json()
             print(f"API response: {result}")
             
-            # 智能判断：API返回异步task_id还是同步data
-            if "task_id" in result:
+            # 兼容 task_id 以及服务商文档中的 {"data": "task-id"}。
+            returned_task_id = _comfly_image_task_id(result)
+            if returned_task_id:
                 # 异步模式：返回task_id
-                returned_task_id = result["task_id"]
                 
                 # 构建结构化JSON响应
                 result_info = {
@@ -20863,10 +20911,10 @@ class Comfly_gemini_3_1_flash_image_edit_S2A:
             result = response.json()
             print(f"API response: {result}")
             
-            # 智能判断：API返回异步task_id还是同步data
-            if "task_id" in result:
+            # 兼容 task_id 以及服务商文档中的 {"data": "task-id"}。
+            returned_task_id = _comfly_image_task_id(result)
+            if returned_task_id:
                 # 异步模式：返回task_id
-                returned_task_id = result["task_id"]
                 
                 # 构建结构化JSON响应
                 result_info = {
@@ -25305,6 +25353,7 @@ class Comfly_seedream_v5_pro:
                 f"{baseurl.rstrip('/')}/v1/images/generations",
                 headers=self.get_headers(),
                 json=payload,
+                params={"async": "true"},
                 timeout=self.timeout
             )
             result = response.json() if response.text else {}
@@ -25317,6 +25366,7 @@ class Comfly_seedream_v5_pro:
             if error_message:
                 raise RuntimeError(f"API Error: {error_message}")
 
+            result = _comfly_resolve_image_result(self, result, pbar)
             pbar.update_absolute(50)
             items = self._extract_image_items(result)
             output_tensor, urls = self._items_to_tensor(items)

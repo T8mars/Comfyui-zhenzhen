@@ -6,6 +6,7 @@ import base64
 import copy
 import io
 import json
+import time
 from typing import Any, Iterable
 
 import numpy as np
@@ -56,6 +57,8 @@ GPT_IMAGE_25_MODERATION = ("auto", "low")
 GPT_IMAGE_25_MAX_IMAGES = 14
 GPT_IMAGE_25_PROMPT_MAX_LENGTH = 32_000
 GPT_IMAGE_25_ENDPOINT_TIMEOUT = (30, 900)
+GPT_IMAGE_25_POLL_REQUEST_TIMEOUT = (30, 90)
+GPT_IMAGE_25_MAX_POLL_FAILURES = 8
 
 
 class GPTImage25Error(RuntimeError):
@@ -152,6 +155,9 @@ def build_gpt_image_25_generation_payload(
         "size": size,
         "n": int(n),
         "moderation": moderation,
+        # Async task results are returned as URLs. Request URLs explicitly as a
+        # compatibility guard for providers that otherwise default to base64.
+        "response_format": "url",
     }
     if background != "auto":
         payload["background"] = background
@@ -295,11 +301,13 @@ def _post_gpt_image_25(
     api_key: str,
     payload: dict[str, Any],
     files: list[tuple[str, tuple[str, bytes, str]]],
+    async_mode: bool = False,
 ) -> dict[str, Any]:
     headers = {"Authorization": f"Bearer {api_key}"}
+    suffix = "?async=true" if async_mode else ""
     if files:
         response = requests.post(
-            f"{PRIMARY_BASE_URL}/v1/images/edits",
+            f"{PRIMARY_BASE_URL}/v1/images/edits{suffix}",
             headers=headers,
             data={key: str(value) for key, value in payload.items()},
             files=files,
@@ -307,7 +315,7 @@ def _post_gpt_image_25(
         )
     else:
         response = requests.post(
-            f"{PRIMARY_BASE_URL}/v1/images/generations",
+            f"{PRIMARY_BASE_URL}/v1/images/generations{suffix}",
             headers={**headers, "Content-Type": "application/json"},
             json=payload,
             timeout=GPT_IMAGE_25_ENDPOINT_TIMEOUT,
@@ -321,6 +329,164 @@ def _post_gpt_image_25(
     if not isinstance(result, dict):
         raise GPTImage25Error("GPT Image 2.5 returned an invalid response object")
     return result
+
+
+def _extract_task_id(result: Any) -> str:
+    """Extract the task id, including the documented {data: "id"} shape."""
+    if not isinstance(result, dict):
+        return ""
+    for key in ("task_id", "taskId", "request_id", "requestId", "id"):
+        value = result.get(key)
+        if isinstance(value, (str, int)) and str(value).strip():
+            return str(value).strip()
+    data = result.get("data")
+    if isinstance(data, (str, int)) and str(data).strip():
+        return str(data).strip()
+    for key in ("data", "result", "output", "task"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            task_id = _extract_task_id(value)
+            if task_id:
+                return task_id
+        elif isinstance(value, list):
+            for item in value:
+                task_id = _extract_task_id(item)
+                if task_id:
+                    return task_id
+    return ""
+
+
+def _find_image_result(result: Any) -> dict[str, Any] | None:
+    """Normalize immediate and async SUCCESS payloads to Images API data[]."""
+    if not isinstance(result, dict):
+        return None
+    data = result.get("data")
+    if isinstance(data, list) and data:
+        return result
+    if isinstance(data, dict):
+        nested = data.get("data")
+        if isinstance(nested, dict):
+            nested_data = nested.get("data")
+            if isinstance(nested_data, list) and nested_data:
+                return nested
+        if isinstance(nested, list) and nested:
+            return {"data": nested}
+    return None
+
+
+def _poll_gpt_image_25_task(
+    *,
+    api_key: str,
+    task_id: str,
+    poll_interval: int,
+    max_poll_time: int,
+    update_progress=None,
+    sleep=time.sleep,
+    clock=time.monotonic,
+) -> dict[str, Any]:
+    headers = {"Authorization": f"Bearer {api_key}"}
+    url = f"{PRIMARY_BASE_URL}/v1/images/tasks/{task_id}"
+    started = clock()
+    failures = 0
+
+    while clock() - started < max_poll_time:
+        sleep(poll_interval)
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=GPT_IMAGE_25_POLL_REQUEST_TIMEOUT,
+            )
+        except requests.RequestException as exc:
+            failures += 1
+            if failures >= GPT_IMAGE_25_MAX_POLL_FAILURES:
+                raise GPTImage25Error(
+                    f"polling repeatedly failed [task_id: {task_id}]: {exc}"
+                ) from exc
+            continue
+
+        if int(response.status_code) != 200:
+            failures += 1
+            if int(response.status_code) not in (408, 429) and int(response.status_code) < 500:
+                raise _response_error(response)
+            if failures >= GPT_IMAGE_25_MAX_POLL_FAILURES:
+                raise GPTImage25Error(
+                    f"polling repeatedly returned HTTP {response.status_code} "
+                    f"[task_id: {task_id}]"
+                )
+            continue
+
+        try:
+            status_result = response.json()
+        except Exception:
+            failures += 1
+            continue
+        failures = 0
+
+        completed = _find_image_result(status_result)
+        inner = status_result.get("data", {}) if isinstance(status_result, dict) else {}
+        status = str(
+            (inner.get("status") if isinstance(inner, dict) else "")
+            or status_result.get("status", "")
+        ).upper()
+        if update_progress is not None and isinstance(inner, dict):
+            progress = str(inner.get("progress", "")).rstrip("%")
+            try:
+                update_progress(min(94, 20 + int(float(progress) * 0.74)))
+            except (TypeError, ValueError):
+                pass
+        if completed is not None and status in ("", "SUCCESS", "COMPLETED", "SUCCEEDED"):
+            print(f"[GPT Image 2.5] Task SUCCESS: {task_id}", flush=True)
+            return completed
+        if status in ("FAILURE", "FAILED", "ERROR", "CANCELLED", "CANCELED"):
+            reason = ""
+            if isinstance(inner, dict):
+                reason = str(inner.get("fail_reason") or inner.get("error") or inner.get("message") or "")
+            raise GPTImage25Error(
+                f"task {status}: {reason or 'unknown error'} [task_id: {task_id}]"
+            )
+
+    raise GPTImage25Error(
+        f"polling timed out after {max_poll_time}s [task_id: {task_id}]"
+    )
+
+
+def _submit_and_wait_gpt_image_25(
+    *,
+    api_key: str,
+    payload: dict[str, Any],
+    files: list[tuple[str, tuple[str, bytes, str]]],
+    async_mode: bool,
+    poll_interval: int,
+    max_poll_time: int,
+    update_progress=None,
+) -> tuple[dict[str, Any], str]:
+    result = _post_gpt_image_25(
+        api_key=api_key,
+        payload=payload,
+        files=files,
+        async_mode=async_mode,
+    )
+    completed = _find_image_result(result)
+    if completed is not None:
+        return completed, ""
+    if not async_mode:
+        return result, ""
+    task_id = _extract_task_id(result)
+    if not task_id:
+        preview = json.dumps(result, ensure_ascii=False)[:1000]
+        raise GPTImage25Error(f"async response contains no task id: {preview}")
+    print(f"[GPT Image 2.5] Task submitted: {task_id}", flush=True)
+    if update_progress is not None:
+        update_progress(20)
+    completed = _poll_gpt_image_25_task(
+        api_key=api_key,
+        task_id=task_id,
+        poll_interval=poll_interval,
+        max_poll_time=max_poll_time,
+        update_progress=update_progress,
+    )
+    return completed, task_id
 
 
 def _decode_result_item(item: Any) -> tuple[torch.Tensor, str]:
@@ -367,12 +533,14 @@ def decode_gpt_image_25_result(
     return torch.cat(tensors, dim=0), urls
 
 
-def _safe_response_json(result: dict[str, Any], mode: str) -> str:
+def _safe_response_json(result: dict[str, Any], mode: str, task_id: str = "") -> str:
     safe = copy.deepcopy(result)
     for item in safe.get("data", []) if isinstance(safe.get("data"), list) else []:
         if isinstance(item, dict) and item.get("b64_json"):
             item["b64_json"] = "[base64 image omitted]"
     safe["request_mode"] = mode
+    if task_id:
+        safe["task_id"] = task_id
     return json.dumps(safe, ensure_ascii=False, indent=2)
 
 
@@ -426,6 +594,21 @@ class T8ZhenzhenGPTImage25Workshop:
                         ),
                     },
                 ),
+                "async_mode": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                        "tooltip": "Submit text-to-image and reference-image edits asynchronously, then poll the returned task ID.",
+                    },
+                ),
+                "poll_interval": (
+                    "INT",
+                    {"default": 5, "min": 2, "max": 60, "step": 1},
+                ),
+                "max_poll_time": (
+                    "INT",
+                    {"default": 3600, "min": 60, "max": 7200, "step": 60},
+                ),
             }
         )
         return {
@@ -462,6 +645,23 @@ class T8ZhenzhenGPTImage25Workshop:
         moderation="auto",
         **kwargs,
     ):
+        # During ComfyUI's preflight validation, values supplied by links have
+        # not executed yet and are represented as None.  Defer content checks
+        # until generate(), which validates the resolved runtime values again.
+        preflight_values = (
+            prompt,
+            model,
+            quality,
+            size,
+            custom_width,
+            custom_height,
+            n,
+            background,
+            moderation,
+            *kwargs.values(),
+        )
+        if any(value is None for value in preflight_values):
+            return True
         try:
             validate_gpt_image_25_request(
                 model,
@@ -511,6 +711,9 @@ class T8ZhenzhenGPTImage25Workshop:
         moderation: str = "auto",
         skip_error: bool = False,
         seed: int = 0,
+        async_mode: bool = True,
+        poll_interval: int = 5,
+        max_poll_time: int = 3600,
     ):
         del seed
         pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
@@ -566,22 +769,40 @@ class T8ZhenzhenGPTImage25Workshop:
                 background=background,
                 moderation=moderation,
             )
-            mode = "image_edit" if files else "text_to_image"
+            # The provider documents async=true for both generations and edits.
+            # Keeping edits asynchronous also makes them visible in its task
+            # dashboard and avoids holding a long-lived multipart connection.
+            use_async = bool(async_mode)
+            mode = (
+                "text_to_image_async" if use_async
+                and not files
+                else "image_edit_async" if use_async
+                else "image_edit" if files
+                else "text_to_image"
+            )
             update_progress(10)
-            result = _post_gpt_image_25(
+            result, task_id = _submit_and_wait_gpt_image_25(
                 api_key=key,
                 payload=payload,
                 files=files,
+                async_mode=use_async,
+                poll_interval=max(2, int(poll_interval)),
+                max_poll_time=max(60, int(max_poll_time)),
+                update_progress=update_progress,
             )
-            update_progress(60)
+            update_progress(95)
             images, urls = decode_gpt_image_25_result(result)
             update_progress(100)
             return (
                 images,
                 "\n".join(urls),
-                _safe_response_json(result, mode),
+                _safe_response_json(result, mode, task_id),
             )
         except Exception as exc:
+            print(
+                f"[GPT Image 2.5] {type(exc).__name__}: {exc}",
+                flush=True,
+            )
             if not skip_error:
                 raise
             response = {
