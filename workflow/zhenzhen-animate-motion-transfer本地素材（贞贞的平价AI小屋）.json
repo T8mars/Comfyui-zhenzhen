@@ -1,0 +1,291 @@
+{
+  "id": "543678e0-4126-53bf-9d27-0b88c0e81a22",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "请选择角色或参考图片.png",
+        "image"
+      ],
+      "title": "角色图片"
+    },
+    {
+      "id": 3,
+      "type": "LoadVideo",
+      "pos": [
+        40,
+        20
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "请选择动作参考视频.mp4",
+        "image"
+      ],
+      "title": "动作参考视频"
+    },
+    {
+      "id": 4,
+      "type": "T8Zhenzhen_Animate_Motion_Transfer_LowPrice",
+      "pos": [
+        430,
+        80
+      ],
+      "size": [
+        590,
+        720
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "input_video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 2
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Animate_Motion_Transfer_LowPrice",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "480p",
+        "adaptive",
+        "16:9",
+        30,
+        60,
+        0,
+        "vitpose",
+        true,
+        false,
+        1.0,
+        false,
+        1.0,
+        false,
+        0.8,
+        0.2,
+        false,
+        0,
+        "fixed"
+      ],
+      "title": "Animate 动作迁移（本地素材）"
+    },
+    {
+      "id": 5,
+      "type": "SaveVideo",
+      "pos": [
+        1100,
+        120
+      ],
+      "size": [
+        320,
+        220
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/zhenzhen-animate-motion-transfer",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      1,
+      "VIDEO"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      2,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

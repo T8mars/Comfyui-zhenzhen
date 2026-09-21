@@ -40,6 +40,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20260922-1 
+
+新增模型及工作流  
+qwen-image-global-2.1  
+animate-motion-transfer  
+
 ### 20260915-1 
 
 修复gpt image 2.5节点返回卡住的问题

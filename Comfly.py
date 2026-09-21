@@ -129,6 +129,10 @@ from .seedance_low_price_nodes import (
     Comfly_qwen_image_3_0_lowprice,
     Comfly_suno_music_lowprice,
 )
+from .qwen21_animate_low_price_nodes import (
+    T8ZhenzhenQwenImageGlobal21LowPrice,
+    T8ZhenzhenAnimateMotionTransferLowPrice,
+)
 from .latest_image_audio_low_price_nodes import (
     Comfly_flowmusic_lowprice,
     Comfly_minimax_audio_lowprice,
@@ -26050,6 +26054,8 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_zhenzhen_upscaler_lowprice": Comfly_zhenzhen_upscaler_lowprice,
     "Comfly_doubao_seed_audio_1_0_lowprice": Comfly_doubao_seed_audio_1_0_lowprice,
     "Comfly_qwen_image_3_0_lowprice": Comfly_qwen_image_3_0_lowprice,
+    "T8Zhenzhen_Qwen_Image_Global_21_LowPrice": T8ZhenzhenQwenImageGlobal21LowPrice,
+    "T8Zhenzhen_Animate_Motion_Transfer_LowPrice": T8ZhenzhenAnimateMotionTransferLowPrice,
     "Comfly_suno_music_lowprice": Comfly_suno_music_lowprice,
     "Comfly_zhenzhen_image_gk_v2_lowprice": Comfly_zhenzhen_image_gk_v2_lowprice,
     "Comfly_zhenzhen_image_gk_v2_edit_lowprice": Comfly_zhenzhen_image_gk_v2_edit_lowprice,
@@ -26229,6 +26235,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_zhenzhen_upscaler_lowprice": "zhenzhen-upscaler-lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice": "zhenzhen-doubao-seed-audio-1.0-lowprice",
     "Comfly_qwen_image_3_0_lowprice": "zhenzhen-qwen-image-3.0-lowprice",
+    "T8Zhenzhen_Qwen_Image_Global_21_LowPrice": "zhenzhen-qwen-image-global-2.1（文生/图像编辑）",
+    "T8Zhenzhen_Animate_Motion_Transfer_LowPrice": "zhenzhen-animate-motion-transfer",
     "Comfly_suno_music_lowprice": "zhenzhen-suno-music-lowprice",
     "Comfly_zhenzhen_image_gk_v2_lowprice": "zhenzhen-image-gk-v2-lowprice",
     "Comfly_zhenzhen_image_gk_v2_edit_lowprice": "zhenzhen-image-gk-v2-edit-lowprice",

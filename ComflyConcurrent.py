@@ -35,6 +35,7 @@ ALLOWED_MODULES = {
     "seedance_low_price_nodes",
     "midjourney_low_price_nodes",
     "gpt_image_25_nodes",
+    "qwen21_animate_low_price_nodes",
 }
 
 
