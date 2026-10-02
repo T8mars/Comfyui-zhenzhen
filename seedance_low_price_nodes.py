@@ -1400,7 +1400,14 @@ class Comfly_seedance25_standard_low_price:
 SEEDREAM_MODES = ["text_to_image", "image_edit"]
 SEEDREAM_FAMILY_DOMESTIC = "seedream-v5-pro (domestic)"
 SEEDREAM_FAMILY_DOLA = "dola-seedream-5.0-pro (overseas)"
-SEEDREAM_MODEL_FAMILIES = [SEEDREAM_FAMILY_DOMESTIC, SEEDREAM_FAMILY_DOLA]
+SEEDREAM_FLASH_FAMILY_DOMESTIC = "seedream-v5-flash (domestic)"
+SEEDREAM_FLASH_FAMILY_DOLA = "dola-seedream-5.0-flash (overseas)"
+SEEDREAM_MODEL_FAMILIES = [
+    SEEDREAM_FAMILY_DOMESTIC,
+    SEEDREAM_FAMILY_DOLA,
+    SEEDREAM_FLASH_FAMILY_DOMESTIC,
+    SEEDREAM_FLASH_FAMILY_DOLA,
+]
 SEEDREAM_MODEL_PAIRS = {
     SEEDREAM_FAMILY_DOMESTIC: {
         "text_to_image": "seedream-v5-pro-t2i",
@@ -1410,20 +1417,46 @@ SEEDREAM_MODEL_PAIRS = {
         "text_to_image": "dola-seedream-5.0-pro-t2i",
         "image_edit": "dola-seedream-5.0-pro-i2i",
     },
+    SEEDREAM_FLASH_FAMILY_DOMESTIC: {
+        "text_to_image": "seedream-v5-flash-t2i",
+        "image_edit": "seedream-v5-flash-i2i",
+    },
+    SEEDREAM_FLASH_FAMILY_DOLA: {
+        "text_to_image": "dola-seedream-5.0-flash-t2i",
+        "image_edit": "dola-seedream-5.0-flash-i2i",
+    },
 }
 SEEDREAM_MODELS = SEEDREAM_MODEL_PAIRS[SEEDREAM_FAMILY_DOMESTIC]
-SEEDREAM_RESOLUTIONS = ["1k", "2k", "custom"]
+SEEDREAM_PRO_RESOLUTIONS = ["1k", "2k", "custom"]
+SEEDREAM_FLASH_RESOLUTIONS = ["1k", "1.5k", "2k", "custom"]
+SEEDREAM_RESOLUTIONS = SEEDREAM_FLASH_RESOLUTIONS
 SEEDREAM_OUTPUT_FORMATS = ["png", "jpeg"]
 SEEDREAM_PROMPT_MIN_LENGTH = 5
-SEEDREAM_PROMPT_MAX_LENGTH = 2000
-SEEDREAM_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+SEEDREAM_PRO_PROMPT_MAX_LENGTH = 2000
+SEEDREAM_FLASH_PROMPT_MAX_LENGTH = 5000
+SEEDREAM_LAYER_PROMPT_MAX_LENGTH = 2000
+SEEDREAM_PROMPT_MAX_LENGTH = SEEDREAM_PRO_PROMPT_MAX_LENGTH
+SEEDREAM_FLASH_FAMILIES = {
+    SEEDREAM_FLASH_FAMILY_DOMESTIC,
+    SEEDREAM_FLASH_FAMILY_DOLA,
+}
+SEEDREAM_PRO_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+SEEDREAM_FLASH_IMAGE_MAX_BYTES = 30 * 1024 * 1024
 SEEDREAM_LAYER_DECOMPOSITION_MODEL = "seedream-v5-pro-layer-decomposition"
 DOLA_SEEDREAM_LAYER_DECOMPOSITION_MODEL = (
     "dola-seedream-5.0-pro-layer-decomposition"
 )
+SEEDREAM_FLASH_LAYER_DECOMPOSITION_MODEL = (
+    "seedream-v5-flash-layer-decomposition"
+)
+DOLA_SEEDREAM_FLASH_LAYER_DECOMPOSITION_MODEL = (
+    "dola-seedream-5.0-flash-layer-decomposition"
+)
 SEEDREAM_LAYER_DECOMPOSITION_MODELS = [
     SEEDREAM_LAYER_DECOMPOSITION_MODEL,
     DOLA_SEEDREAM_LAYER_DECOMPOSITION_MODEL,
+    SEEDREAM_FLASH_LAYER_DECOMPOSITION_MODEL,
+    DOLA_SEEDREAM_FLASH_LAYER_DECOMPOSITION_MODEL,
 ]
 SEEDREAM_LAYER_RESOLUTIONS = ["auto", "1k", "1.5k", "2k"]
 SEEDREAM_LAYER_SOURCE_MAX_BYTES = 30 * 1024 * 1024
@@ -1448,22 +1481,32 @@ def validate_seedream_inputs(
     output_format: str,
     model_family: str = SEEDREAM_FAMILY_DOMESTIC,
 ) -> None:
-    if mode not in SEEDREAM_MODELS:
+    if mode not in SEEDREAM_MODES:
         raise SeedanceLowPriceError(f"Unsupported Seedream mode: {mode}")
-    prompt_length = len(str(prompt or "").strip())
-    if not SEEDREAM_PROMPT_MIN_LENGTH <= prompt_length <= SEEDREAM_PROMPT_MAX_LENGTH:
-        raise SeedanceLowPriceError(
-            f"Seedream prompt length must be {SEEDREAM_PROMPT_MIN_LENGTH}-"
-            f"{SEEDREAM_PROMPT_MAX_LENGTH} characters"
-        )
-    if resolution not in SEEDREAM_RESOLUTIONS:
-        raise SeedanceLowPriceError(f"Unsupported Seedream resolution: {resolution}")
-    if output_format not in SEEDREAM_OUTPUT_FORMATS:
-        raise SeedanceLowPriceError(f"Unsupported Seedream output_format: {output_format}")
     if model_family not in SEEDREAM_MODEL_PAIRS:
         raise SeedanceLowPriceError(
             f"Unsupported Seedream model_family: {model_family}"
         )
+    prompt_max_length = (
+        SEEDREAM_FLASH_PROMPT_MAX_LENGTH
+        if model_family in SEEDREAM_FLASH_FAMILIES
+        else SEEDREAM_PRO_PROMPT_MAX_LENGTH
+    )
+    prompt_length = len(str(prompt or "").strip())
+    if not SEEDREAM_PROMPT_MIN_LENGTH <= prompt_length <= prompt_max_length:
+        raise SeedanceLowPriceError(
+            f"Seedream prompt length must be {SEEDREAM_PROMPT_MIN_LENGTH}-"
+            f"{prompt_max_length} characters"
+        )
+    allowed_resolutions = (
+        SEEDREAM_FLASH_RESOLUTIONS
+        if model_family in SEEDREAM_FLASH_FAMILIES
+        else SEEDREAM_PRO_RESOLUTIONS
+    )
+    if resolution not in allowed_resolutions:
+        raise SeedanceLowPriceError(f"Unsupported Seedream resolution: {resolution}")
+    if output_format not in SEEDREAM_OUTPUT_FORMATS:
+        raise SeedanceLowPriceError(f"Unsupported Seedream output_format: {output_format}")
     if resolution == "custom":
         if not 240 <= int(width) <= 8192 or not 240 <= int(height) <= 8192:
             raise SeedanceLowPriceError("Seedream custom width/height must be 240-8192")
@@ -1769,6 +1812,7 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
     def _upload_reference_images(
         self,
         mode: str,
+        model_family: str,
         config: Dict[str, Any],
         kwargs: Dict[str, Any],
         on_progress: Optional[Callable[[int], None]] = None,
@@ -1781,12 +1825,23 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
         if not references:
             raise SeedanceLowPriceError("image_edit requires 1-10 reference images")
 
+        source_limit = (
+            SEEDREAM_FLASH_IMAGE_MAX_BYTES
+            if model_family in SEEDREAM_FLASH_FAMILIES
+            else SEEDREAM_PRO_IMAGE_MAX_BYTES
+        )
         urls = []
         for position, (slot, image) in enumerate(references, start=1):
-            image_bytes = image_to_png_bytes(image)
-            if len(image_bytes) > SEEDREAM_IMAGE_MAX_BYTES:
+            shape = getattr(image, "shape", ())
+            if len(shape) != 4 or int(shape[0]) != 1:
                 raise SeedanceLowPriceError(
-                    f"Seedream reference image{slot} exceeds the 10MB limit"
+                    "Each Seedream reference input must contain exactly one image"
+                )
+            image_bytes = image_to_png_bytes(image)
+            if len(image_bytes) > source_limit:
+                limit_mb = source_limit // (1024 * 1024)
+                raise SeedanceLowPriceError(
+                    f"Seedream reference image{slot} exceeds the {limit_mb}MB limit"
                 )
             print(
                 f"[Seedream Low Price] Uploading image{slot}.png "
@@ -1833,7 +1888,7 @@ class Comfly_sd2_seedream_v5_pro_lowprice:
             )
             config = resolve_config(api_config)
             image_urls = self._upload_reference_images(
-                mode, config, kwargs, on_progress=update_progress
+                mode, model_family, config, kwargs, on_progress=update_progress
             )
             payload = build_seedream_payload(
                 mode,
@@ -8946,8 +9001,11 @@ class Comfly_seedream_v5_pro_layer_decomposition_lowprice:
         **kwargs,
     ):
         prompt_text = str(prompt or "").strip()
-        if len(prompt_text) > SEEDREAM_PROMPT_MAX_LENGTH:
-            return f"Layer decomposition prompt cannot exceed {SEEDREAM_PROMPT_MAX_LENGTH} characters"
+        if len(prompt_text) > SEEDREAM_LAYER_PROMPT_MAX_LENGTH:
+            return (
+                "Layer decomposition prompt cannot exceed "
+                f"{SEEDREAM_LAYER_PROMPT_MAX_LENGTH} characters"
+            )
         if resolution not in SEEDREAM_LAYER_RESOLUTIONS:
             return f"Unsupported layer decomposition resolution: {resolution}"
         if output_format not in SEEDREAM_OUTPUT_FORMATS:

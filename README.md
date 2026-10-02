@@ -1,3 +1,4 @@
+
 # ComfyUI_zhenzhen
 
 ## 入口导航
@@ -39,6 +40,16 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 
 # 更新 Update：
+
+### 20261002-1
+
+新增模型及工作流  
+dola-seedream-5.0-flash-i2i  
+dola-seedream-5.0-flash-layer-decomposition  
+dola-seedream-5.0-flash-t2i  
+dola-seedream-5.0-flash-i2i  
+seedream-v5-flash-layer-decomposition  
+seedream-v5-flash-t2i  
 
 ### 20260922-1 
 
