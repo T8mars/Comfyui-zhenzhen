@@ -41,6 +41,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261007-1
+
+新增模型及工作流   
+gemini-nano-banana-2.1  
+
 ### 20261002-1
 
 新增模型及工作流  
