@@ -36,6 +36,7 @@ ALLOWED_MODULES = {
     "midjourney_low_price_nodes",
     "gpt_image_25_nodes",
     "qwen21_animate_low_price_nodes",
+    "nb21_flux_vidu_low_price_nodes",
 }
 
 

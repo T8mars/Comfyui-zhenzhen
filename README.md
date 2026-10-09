@@ -41,6 +41,13 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261009-1
+
+新增vidu q4配套模型及工作流  
+新增nano-banana-2.1配套模型及工作流  
+新增flux3配套模型及工作流  
+以上均为贞贞的平价AI小屋节点  
+
 ### 20261007-1
 
 新增模型及工作流   
