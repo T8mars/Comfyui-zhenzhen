@@ -41,6 +41,14 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 202610012-1
+
+新增以下模型及工作流  
+zhenzhen-image-nb-pro-lowprice  
+zhenzhen-image-nb-2.1-lowprice  
+doubao-voice-clone  
+doubao-seed-icl-2.0  
+
 ### 20261009-1
 
 新增vidu q4配套模型及工作流  

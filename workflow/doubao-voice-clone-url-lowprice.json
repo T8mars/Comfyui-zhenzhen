@@ -1,0 +1,215 @@
+{
+  "id": "390372d8-cc77-5652-bd2b-8d8ce12a3d1b",
+  "revision": 0,
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 3,
+      "type": "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice",
+      "pos": [
+        460,
+        60
+      ],
+      "size": [
+        580,
+        760
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "audio_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "audio_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "speaker",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "doubao-voice-clone",
+        "你好，欢迎来到今天的节目。",
+        "",
+        "https://example.com/replace-with-your-voice.wav",
+        "",
+        "0",
+        "",
+        "api_default",
+        "api_default",
+        "seed-tts-2.0-standard",
+        "mp3",
+        "24000",
+        0.0,
+        0.0,
+        0.0,
+        "api_default",
+        "",
+        false,
+        "",
+        0,
+        "api_default",
+        0,
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "SaveAudio",
+      "pos": [
+        1140,
+        60
+      ],
+      "size": [
+        340,
+        230
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveAudio",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "audio/doubao-clone-url"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      3,
+      1,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.55.14"
+  },
+  "version": 0.4
+}

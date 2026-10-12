@@ -37,6 +37,9 @@ ALLOWED_MODULES = {
     "gpt_image_25_nodes",
     "qwen21_animate_low_price_nodes",
     "nb21_flux_vidu_low_price_nodes",
+    "topaz_low_price_nodes",
+    "mai_image_low_price_nodes",
+    "nb_lowprice_doubao_nodes",
 }
 
 

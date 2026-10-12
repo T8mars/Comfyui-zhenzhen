@@ -138,6 +138,9 @@ from .nb21_flux_vidu_low_price_nodes import (
     T8ZhenzhenFlux3ImageLowPrice,
     T8ZhenzhenViduQ4PreviewLowPrice,
 )
+from .topaz_low_price_nodes import T8ZhenzhenTopazVideoUpscaleLowPrice
+from .mai_image_low_price_nodes import T8ZhenzhenMAIImage26LowPrice
+from .nb_lowprice_doubao_nodes import T8ZhenzhenNBLowPrice, T8ZhenzhenDoubaoVoiceCloneICL
 from .latest_image_audio_low_price_nodes import (
     Comfly_flowmusic_lowprice,
     Comfly_minimax_audio_lowprice,
@@ -26080,6 +26083,10 @@ NODE_CLASS_MAPPINGS = {
     "T8Zhenzhen_NB_21_LowPrice": T8ZhenzhenNB21LowPrice,
     "T8Zhenzhen_Flux_3_Image_LowPrice": T8ZhenzhenFlux3ImageLowPrice,
     "T8Zhenzhen_Vidu_Q4_Preview_LowPrice": T8ZhenzhenViduQ4PreviewLowPrice,
+    "T8Zhenzhen_Topaz_Video_Upscale_LowPrice": T8ZhenzhenTopazVideoUpscaleLowPrice,
+    "T8Zhenzhen_MAI_Image_26_LowPrice": T8ZhenzhenMAIImage26LowPrice,
+    "T8Zhenzhen_NB_Dual_LowPrice": T8ZhenzhenNBLowPrice,
+    "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice": T8ZhenzhenDoubaoVoiceCloneICL,
     "Comfly_suno_music_lowprice": Comfly_suno_music_lowprice,
     "Comfly_zhenzhen_image_gk_v2_lowprice": Comfly_zhenzhen_image_gk_v2_lowprice,
     "Comfly_zhenzhen_image_gk_v2_edit_lowprice": Comfly_zhenzhen_image_gk_v2_edit_lowprice,
@@ -26264,6 +26271,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_NB_21_LowPrice": "zhenzhen-image-nb-2.1（文生/图像编辑）",
     "T8Zhenzhen_Flux_3_Image_LowPrice": "zhenzhen-flux-3-image（文生/图像编辑）",
     "T8Zhenzhen_Vidu_Q4_Preview_LowPrice": "zhenzhen-vidu-q4-preview（4合1）",
+    "T8Zhenzhen_Topaz_Video_Upscale_LowPrice": "zhenzhen-Topaz 视频高清修复（平价小屋）",
+    "T8Zhenzhen_MAI_Image_26_LowPrice": "zhenzhen-MAI Image 2.6 / Flash（生成/编辑·平价小屋）",
+    "T8Zhenzhen_NB_Dual_LowPrice": "zhenzhen-NB Pro / 2.1 Lowprice（生成/编辑·平价小屋）",
+    "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice": "zhenzhen-Doubao Voice Clone / ICL 2.0（平价小屋）",
     "Comfly_suno_music_lowprice": "zhenzhen-suno-music-lowprice",
     "Comfly_zhenzhen_image_gk_v2_lowprice": "zhenzhen-image-gk-v2-lowprice",
     "Comfly_zhenzhen_image_gk_v2_edit_lowprice": "zhenzhen-image-gk-v2-edit-lowprice",

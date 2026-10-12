@@ -1,0 +1,797 @@
+{
+  "id": "cb42e3df-b3e2-5146-8365-d5e9267d62a0",
+  "revision": 0,
+  "last_node_id": 7,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "请选择角色或参考图片.png",
+        "image"
+      ],
+      "title": "Reference image"
+    },
+    {
+      "id": 3,
+      "type": "ComflyConcurrent_T8Zhenzhen_Flux_3_Image_LowPrice_Submit",
+      "pos": [
+        450,
+        60
+      ],
+      "size": [
+        560,
+        530
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        },
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_Flux_3_Image_LowPrice_Submit",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "Product photo of a red ceramic teapot on a white table, soft light",
+        "768sq",
+        "1:1",
+        true,
+        2,
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ComflyConcurrent_T8Zhenzhen_Flux_3_Image_LowPrice_Submit",
+      "pos": [
+        450,
+        640
+      ],
+      "size": [
+        560,
+        530
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        },
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 4
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_Flux_3_Image_LowPrice_Submit",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "Keep the subject and make the teapot blue on a white table",
+        "768sq",
+        "1:1",
+        true,
+        2,
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "ComflyConcurrent_Image_Await",
+      "pos": [
+        1100,
+        120
+      ],
+      "size": [
+        370,
+        720
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "task_1",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": 5
+        },
+        {
+          "name": "task_2",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": 6
+        },
+        {
+          "name": "task_3",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_4",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_5",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_6",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_7",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_8",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_9",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_10",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_11",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_12",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_13",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_14",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_15",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_16",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_17",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_18",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_19",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_20",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_21",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_22",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_23",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_24",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_25",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_26",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_27",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_28",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_29",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_30",
+          "shape": 7,
+          "type": "COMFLY_IMAGE_FUTURE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_1",
+          "type": "IMAGE",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "image_2",
+          "type": "IMAGE",
+          "links": [
+            8
+          ]
+        },
+        {
+          "name": "image_3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_5",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_6",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_7",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_8",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_9",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_10",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_11",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_12",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_13",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_14",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_15",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_16",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_17",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_18",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_19",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_20",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_21",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_22",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_23",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_24",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_25",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_26",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_27",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_28",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_29",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_30",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_Image_Await",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "raise"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "SaveImage",
+      "pos": [
+        1550,
+        100
+      ],
+      "size": [
+        320,
+        240
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "zhenzhen-T8Zhenzhen_Flux_3_Image_LowPrice-slot1"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveImage",
+      "pos": [
+        1550,
+        500
+      ],
+      "size": [
+        320,
+        240
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "zhenzhen-T8Zhenzhen_Flux_3_Image_LowPrice-slot2"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      3,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      1,
+      4,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      5,
+      3,
+      0,
+      5,
+      0,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      4,
+      2,
+      0,
+      4,
+      1,
+      "IMAGE"
+    ],
+    [
+      6,
+      4,
+      0,
+      5,
+      1,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      7,
+      5,
+      0,
+      6,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      5,
+      1,
+      7,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}
