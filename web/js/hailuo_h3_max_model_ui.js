@@ -1,8 +1,8 @@
 import { app } from "../../../scripts/app.js";
 import {
-    resizeSeedanceNode,
-    setSeedanceInputVisible,
-    setSeedanceWidgetVisible,
+    resizeZhenzhenNode,
+    setZhenzhenInputVisible,
+    setZhenzhenWidgetVisible,
 } from "./dynamic_widget_ui.js";
 
 const HAILUO_H3_MAX_NODE_NAMES = new Set([
@@ -18,15 +18,15 @@ function widgetByName(node, name) {
 function refresh(node) {
     const model = String(widgetByName(node, "model")?.value ?? DEFAULT_MODEL);
     const isI2V = model.endsWith("-i2v");
-    setSeedanceWidgetVisible(widgetByName(node, "ratio"), !isI2V);
+    setZhenzhenWidgetVisible(widgetByName(node, "ratio"), !isI2V);
     for (const input of node.inputs ?? []) {
         if (input.name === "api_config") {
-            setSeedanceInputVisible(node, input, true);
+            setZhenzhenInputVisible(node, input, true);
         } else if (input.name === "image1" || input.name === "image2") {
-            setSeedanceInputVisible(node, input, isI2V);
+            setZhenzhenInputVisible(node, input, isI2V);
         }
     }
-    resizeSeedanceNode(node);
+    resizeZhenzhenNode(node);
 }
 
 function scheduleRefresh(node) {

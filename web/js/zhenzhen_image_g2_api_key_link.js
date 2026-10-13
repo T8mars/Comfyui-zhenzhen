@@ -41,6 +41,15 @@ const LOW_PRICE_NODE_NAMES = new Set([
     "Comfly_zhenzhen_upscaler_lowprice",
     "Comfly_doubao_seed_audio_1_0_lowprice",
     "Comfly_qwen_image_3_0_lowprice",
+    "T8Zhenzhen_Qwen_Image_Global_21_LowPrice",
+    "T8Zhenzhen_Animate_Motion_Transfer_LowPrice",
+    "T8Zhenzhen_NB_21_LowPrice",
+    "T8Zhenzhen_Flux_3_Image_LowPrice",
+    "T8Zhenzhen_Vidu_Q4_Preview_LowPrice",
+    "T8Zhenzhen_Topaz_Video_Upscale_LowPrice",
+    "T8Zhenzhen_MAI_Image_26_LowPrice",
+    "T8Zhenzhen_NB_Dual_LowPrice",
+    "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice",
     "Comfly_suno_music_lowprice",
     "Comfly_zhenzhen_image_gk_v2_lowprice",
     "Comfly_zhenzhen_image_gk_v2_edit_lowprice",
@@ -297,7 +306,7 @@ function installApiKeyButton(node, channel) {
 app.registerExtension({
     name: "ComfyuiZhenzhen.ApiKeyLinks",
     nodeCreated(node) {
-        const channel = channelForNodeName(node?.type ?? node?.comfyClass);
+        const channel = channelForNodeName(node?.comfyClass ?? node?.type);
         if (channel) {
             installApiKeyButton(node, channel);
         }
