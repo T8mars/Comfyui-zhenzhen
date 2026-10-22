@@ -39,6 +39,7 @@ ALLOWED_MODULES = {
     "nb21_flux_vidu_low_price_nodes",
     "topaz_low_price_nodes",
     "mai_image_low_price_nodes",
+    "moss_image_low_price_nodes",
     "nb_lowprice_doubao_nodes",
 }
 

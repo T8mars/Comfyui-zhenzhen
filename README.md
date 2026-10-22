@@ -41,6 +41,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261023-1
+
+新增以下模型及工作流  
+moss-image 
+
 ### 202610012-1
 
 新增以下模型及工作流  
