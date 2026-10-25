@@ -41,6 +41,12 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261025-1
+
+新增以下模型及工作流,代码动画模型  
+zhenzhen/motion-video  
+zhenzhen/motion-video-pro  
+
 ### 20261023-1
 
 新增以下模型及工作流  

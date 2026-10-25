@@ -1,0 +1,394 @@
+{
+  "id": "1dea578e-1b7a-5a7c-a9e6-90f3aa29e338",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 2,
+      "type": "T8Zhenzhen_Motion_Video_LowPrice",
+      "pos": [
+        430,
+        40
+      ],
+      "size": [
+        580,
+        1100
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "cover_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "preview_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "html_preview_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "subtitle_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "storyboard",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "fallback_scenes",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Motion_Video_LowPrice",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "zhenzhen/motion-video-pro",
+        "generate",
+        "Create a simple 15-second Canvas 2D motion graphic. Three short scenes show emerald circles and coral squares moving smoothly on black. Use only the short title T8 in a main content scene, centered with generous margins. No other text, no counters. Use layer='2d' for every scene.",
+        15,
+        "16:9",
+        "720p",
+        "swiss-minimal",
+        "T8",
+        "",
+        "",
+        "",
+        "en",
+        "auto",
+        "",
+        "",
+        "",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveVideo",
+      "pos": [
+        1100,
+        100
+      ],
+      "size": [
+        320,
+        220
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/motion-pro",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "T8Zhenzhen_Motion_Video_LowPrice",
+      "pos": [
+        1500,
+        40
+      ],
+      "size": [
+        580,
+        1100
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 3
+        },
+        {
+          "name": "revise_from",
+          "shape": 7,
+          "type": "STRING",
+          "link": 4,
+          "widget": {
+            "name": "revise_from"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "cover_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "preview_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "html_preview_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "subtitle_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "storyboard",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "fallback_scenes",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Motion_Video_LowPrice",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "zhenzhen/motion-video-pro",
+        "revise",
+        "Create a simple 15-second Canvas 2D motion graphic. Three short scenes show emerald circles and coral squares moving smoothly on black. Use only the short title T8 in a main content scene, centered with generous margins. No other text, no counters. Use layer='2d' for every scene.",
+        15,
+        "16:9",
+        "720p",
+        "swiss-minimal",
+        "T8",
+        "",
+        "",
+        "",
+        "en",
+        "auto",
+        "",
+        "",
+        "Revise only the main content scene displaying the title T8, not the end-card: replace T8 with OK. Keep short centered text, generous margins, 2d layers and all other scenes unchanged.",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "SaveVideo",
+      "pos": [
+        2180,
+        100
+      ],
+      "size": [
+        320,
+        220
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/motion-pro-revised",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "VIDEO"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      4,
+      2,
+      2,
+      4,
+      1,
+      "STRING"
+    ],
+    [
+      5,
+      4,
+      0,
+      5,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.57.1"
+  },
+  "version": 0.4
+}
