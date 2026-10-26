@@ -41,6 +41,15 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261027-1
+
+新增以下模型及工作流
+kling-v4-custom-element
+kling-v4-custom-voice
+kling-v4-i2v
+kling-v4-omni
+kling-v4-t2v
+
 ### 20261025-1
 
 新增以下模型及工作流,代码动画模型  

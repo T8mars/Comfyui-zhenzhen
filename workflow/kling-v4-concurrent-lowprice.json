@@ -1,0 +1,703 @@
+{
+  "id": "052b81d1-1773-5dcd-b8de-473f3722b8a2",
+  "revision": 0,
+  "last_node_id": 9,
+  "last_link_id": 11,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 2,
+      "type": "ComflyConcurrent_T8Zhenzhen_Kling_V4_T2V_LowPrice_Submit",
+      "pos": [
+        440,
+        40
+      ],
+      "size": [
+        550,
+        640
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_VIDEO_FUTURE",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_Kling_V4_T2V_LowPrice_Submit",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "A small original blue toy robot waves once in a mint studio. Locked camera, gentle motion.",
+        3,
+        "720p",
+        "16:9",
+        "api_default",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "ComflyConcurrent_T8Zhenzhen_Kling_V4_I2V_LowPrice_Submit",
+      "pos": [
+        440,
+        1040
+      ],
+      "size": [
+        550,
+        640
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 4
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_VIDEO_FUTURE",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_Kling_V4_I2V_LowPrice_Submit",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "A small original blue toy robot waves once in a mint studio. Locked camera, gentle motion.",
+        3,
+        "720p",
+        "api_default",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ComflyConcurrent_T8Zhenzhen_Kling_V4_Omni_LowPrice_Submit",
+      "pos": [
+        440,
+        2040
+      ],
+      "size": [
+        550,
+        640
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image6",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image7",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image8",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image9",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image10",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "video1",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video2",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video3",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video4",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "video5",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "shape": 7,
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_VIDEO_FUTURE",
+          "links": [
+            10
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_Kling_V4_Omni_LowPrice_Submit",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "A small original blue toy robot waves once in a mint studio. Locked camera, gentle motion.",
+        3,
+        "720p",
+        "16:9",
+        "api_default",
+        "",
+        "",
+        "",
+        "",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "LoadImage",
+      "pos": [
+        30,
+        40
+      ],
+      "size": [
+        300,
+        280
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4,
+            5
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "select_reference.png",
+        "image"
+      ],
+      "title": "First frame and Omni reference"
+    },
+    {
+      "id": 6,
+      "type": "ComflyConcurrent_Video_Await",
+      "pos": [
+        1100,
+        40
+      ],
+      "size": [
+        340,
+        420
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "task_1",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": 6
+        },
+        {
+          "name": "task_2",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": 8
+        },
+        {
+          "name": "task_3",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": 10
+        },
+        {
+          "name": "task_4",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_5",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_6",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_7",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_8",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_9",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        },
+        {
+          "name": "task_10",
+          "shape": 7,
+          "type": "COMFLY_VIDEO_FUTURE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_1",
+          "type": "VIDEO",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "video_2",
+          "type": "VIDEO",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "video_3",
+          "type": "VIDEO",
+          "links": [
+            11
+          ]
+        },
+        {
+          "name": "video_4",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_5",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_6",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_7",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_8",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_9",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "video_10",
+          "type": "VIDEO",
+          "links": null
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_Video_Await",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "fail_fast"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveVideo",
+      "pos": [
+        1530,
+        40
+      ],
+      "size": [
+        310,
+        230
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/concurrent",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "SaveVideo",
+      "pos": [
+        1530,
+        390
+      ],
+      "size": [
+        310,
+        230
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/concurrent",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "SaveVideo",
+      "pos": [
+        1530,
+        740
+      ],
+      "size": [
+        310,
+        230
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "shape": 7,
+          "type": "VIDEO",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "video/concurrent",
+        "auto",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      0,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      1,
+      3,
+      2,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      15,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      4,
+      5,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      5,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      2,
+      0,
+      6,
+      0,
+      "COMFLY_VIDEO_FUTURE"
+    ],
+    [
+      7,
+      6,
+      0,
+      7,
+      0,
+      "VIDEO"
+    ],
+    [
+      8,
+      3,
+      0,
+      6,
+      1,
+      "COMFLY_VIDEO_FUTURE"
+    ],
+    [
+      9,
+      6,
+      1,
+      8,
+      0,
+      "VIDEO"
+    ],
+    [
+      10,
+      4,
+      0,
+      6,
+      2,
+      "COMFLY_VIDEO_FUTURE"
+    ],
+    [
+      11,
+      6,
+      2,
+      9,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.57.1"
+  },
+  "version": 0.4
+}

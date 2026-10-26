@@ -142,6 +142,10 @@ from .topaz_low_price_nodes import T8ZhenzhenTopazVideoUpscaleLowPrice
 from .mai_image_low_price_nodes import T8ZhenzhenMAIImage26LowPrice
 from .moss_image_low_price_nodes import T8ZhenzhenMossImageLowPrice
 from .motion_video_low_price_nodes import T8ZhenzhenMotionVideoLowPrice
+from .kling_v4_low_price_nodes import (
+    T8ZhenzhenKling4T2V, T8ZhenzhenKling4I2V, T8ZhenzhenKling4Omni,
+    T8ZhenzhenKling4CustomElement, T8ZhenzhenKling4CustomVoice,
+)
 from .nb_lowprice_doubao_nodes import T8ZhenzhenNBLowPrice, T8ZhenzhenDoubaoVoiceCloneICL
 from .latest_image_audio_low_price_nodes import (
     Comfly_flowmusic_lowprice,
@@ -26089,6 +26093,11 @@ NODE_CLASS_MAPPINGS = {
     "T8Zhenzhen_MAI_Image_26_LowPrice": T8ZhenzhenMAIImage26LowPrice,
     "T8Zhenzhen_Moss_Image_LowPrice": T8ZhenzhenMossImageLowPrice,
     "T8Zhenzhen_Motion_Video_LowPrice": T8ZhenzhenMotionVideoLowPrice,
+    "T8Zhenzhen_Kling_V4_T2V_LowPrice": T8ZhenzhenKling4T2V,
+    "T8Zhenzhen_Kling_V4_I2V_LowPrice": T8ZhenzhenKling4I2V,
+    "T8Zhenzhen_Kling_V4_Omni_LowPrice": T8ZhenzhenKling4Omni,
+    "T8Zhenzhen_Kling_V4_Custom_Element_LowPrice": T8ZhenzhenKling4CustomElement,
+    "T8Zhenzhen_Kling_V4_Custom_Voice_LowPrice": T8ZhenzhenKling4CustomVoice,
     "T8Zhenzhen_NB_Dual_LowPrice": T8ZhenzhenNBLowPrice,
     "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice": T8ZhenzhenDoubaoVoiceCloneICL,
     "Comfly_suno_music_lowprice": Comfly_suno_music_lowprice,
@@ -26279,6 +26288,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_MAI_Image_26_LowPrice": "zhenzhen-MAI Image 2.6 / Flash（生成/编辑·平价小屋）",
     "T8Zhenzhen_Moss_Image_LowPrice": "zhenzhen-moss-image（生成/编辑·平价小屋）",
     "T8Zhenzhen_Motion_Video_LowPrice": "zhenzhen-Motion Video / Pro（动效生成/修订·平价小屋）",
+    "T8Zhenzhen_Kling_V4_T2V_LowPrice": "zhenzhen-Kling 4 文生视频（平价小屋）",
+    "T8Zhenzhen_Kling_V4_I2V_LowPrice": "zhenzhen-Kling 4 首尾帧图生视频（平价小屋）",
+    "T8Zhenzhen_Kling_V4_Omni_LowPrice": "zhenzhen-Kling 4 Omni 全能参考视频（平价小屋）",
+    "T8Zhenzhen_Kling_V4_Custom_Element_LowPrice": "zhenzhen-Kling 4 主体创建（平价小屋）",
+    "T8Zhenzhen_Kling_V4_Custom_Voice_LowPrice": "zhenzhen-Kling 4 音色创建（平价小屋）",
     "T8Zhenzhen_NB_Dual_LowPrice": "zhenzhen-NB Pro / 2.1 Lowprice（生成/编辑·平价小屋）",
     "T8Zhenzhen_Doubao_Voice_Clone_ICL_LowPrice": "zhenzhen-Doubao Voice Clone / ICL 2.0（平价小屋）",
     "Comfly_suno_music_lowprice": "zhenzhen-suno-music-lowprice",

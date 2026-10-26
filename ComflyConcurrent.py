@@ -41,6 +41,7 @@ ALLOWED_MODULES = {
     "mai_image_low_price_nodes",
     "moss_image_low_price_nodes",
     "motion_video_low_price_nodes",
+    "kling_v4_low_price_nodes",
     "nb_lowprice_doubao_nodes",
 }
 
