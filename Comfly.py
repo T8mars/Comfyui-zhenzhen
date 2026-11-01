@@ -142,6 +142,9 @@ from .topaz_low_price_nodes import T8ZhenzhenTopazVideoUpscaleLowPrice
 from .mai_image_low_price_nodes import T8ZhenzhenMAIImage26LowPrice
 from .moss_image_low_price_nodes import T8ZhenzhenMossImageLowPrice
 from .motion_video_low_price_nodes import T8ZhenzhenMotionVideoLowPrice
+from .preview_muse_flux_low_price_nodes import (
+    T8ZhenzhenHY35Preview, T8ZhenzhenMuseImage, T8ZhenzhenMuseVideo, T8ZhenzhenFlux3ImageVariants,
+)
 from .kling_v4_low_price_nodes import (
     T8ZhenzhenKling4T2V, T8ZhenzhenKling4I2V, T8ZhenzhenKling4Omni,
     T8ZhenzhenKling4CustomElement, T8ZhenzhenKling4CustomVoice,
@@ -26093,6 +26096,10 @@ NODE_CLASS_MAPPINGS = {
     "T8Zhenzhen_MAI_Image_26_LowPrice": T8ZhenzhenMAIImage26LowPrice,
     "T8Zhenzhen_Moss_Image_LowPrice": T8ZhenzhenMossImageLowPrice,
     "T8Zhenzhen_Motion_Video_LowPrice": T8ZhenzhenMotionVideoLowPrice,
+    "T8Zhenzhen_HY_Image_35_Preview_LowPrice": T8ZhenzhenHY35Preview,
+    "T8Zhenzhen_Muse_Image_LowPrice": T8ZhenzhenMuseImage,
+    "T8Zhenzhen_Muse_Video_LowPrice": T8ZhenzhenMuseVideo,
+    "T8Zhenzhen_Flux_3_Image_Variants_LowPrice": T8ZhenzhenFlux3ImageVariants,
     "T8Zhenzhen_Kling_V4_T2V_LowPrice": T8ZhenzhenKling4T2V,
     "T8Zhenzhen_Kling_V4_I2V_LowPrice": T8ZhenzhenKling4I2V,
     "T8Zhenzhen_Kling_V4_Omni_LowPrice": T8ZhenzhenKling4Omni,
@@ -26288,6 +26295,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_MAI_Image_26_LowPrice": "zhenzhen-MAI Image 2.6 / Flash（生成/编辑·平价小屋）",
     "T8Zhenzhen_Moss_Image_LowPrice": "zhenzhen-moss-image（生成/编辑·平价小屋）",
     "T8Zhenzhen_Motion_Video_LowPrice": "zhenzhen-Motion Video / Pro（动效生成/修订·平价小屋）",
+    "T8Zhenzhen_HY_Image_35_Preview_LowPrice": "zhenzhen-HY 3.5 Preview（生成/编辑·平价小屋）",
+    "T8Zhenzhen_Muse_Image_LowPrice": "zhenzhen-Muse Image（生成/合成·平价小屋）",
+    "T8Zhenzhen_Muse_Video_LowPrice": "zhenzhen-Muse Video（文生/参考视频·平价小屋）",
+    "T8Zhenzhen_Flux_3_Image_Variants_LowPrice": "zhenzhen-FLUX 3 Image / Klein（四模型·平价小屋）",
     "T8Zhenzhen_Kling_V4_T2V_LowPrice": "zhenzhen-Kling 4 文生视频（平价小屋）",
     "T8Zhenzhen_Kling_V4_I2V_LowPrice": "zhenzhen-Kling 4 首尾帧图生视频（平价小屋）",
     "T8Zhenzhen_Kling_V4_Omni_LowPrice": "zhenzhen-Kling 4 Omni 全能参考视频（平价小屋）",

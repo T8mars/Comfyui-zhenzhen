@@ -15,6 +15,7 @@ except ImportError:
 
 
 MOTION_MODELS = ["zhenzhen/motion-video", "zhenzhen/motion-video-pro"]
+# Rechecked 2026-11-01: provider backing-model changes do not alter the public request schema.
 MOTION_TEMPLATES = ["api_default", "hype-kinetic", "cyber-glitch", "blueprint-tech", "synthwave",
                     "swiss-minimal", "code-cinema", "data-story", "chalk-hand", "voxel-world", "cinematic-trailer"]
 

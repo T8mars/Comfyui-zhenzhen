@@ -41,14 +41,27 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261101
+
+新增单独节点和模型及工作流  
+zhenzhen-image-hy-v3.5-preview  
+zhenzhen-video-muse  
+zhenzhen-image-muse  
+flux-3-image-i2i  
+flux-3-image-klein-i2i  
+flux-3-image-klein-t2i  
+flux-3-image-t2i  
+强化下面模型  
+zhenzhen/motion-video  
+
 ### 20261027-1
 
-新增以下模型及工作流
-kling-v4-custom-element
-kling-v4-custom-voice
-kling-v4-i2v
-kling-v4-omni
-kling-v4-t2v
+新增以下模型及工作流  
+kling-v4-custom-element  
+kling-v4-custom-voice  
+kling-v4-i2v  
+kling-v4-omni  
+kling-v4-t2v  
 
 ### 20261025-1
 
