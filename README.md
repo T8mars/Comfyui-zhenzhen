@@ -41,6 +41,22 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261105
+
+新增模型及工作流
+hitem3d-v2-multi-image-to-3d  
+hitem3d-v2-image-to-3d  
+hitem3d-portrait-v2.1-multi-image-to-3d  
+hitem3d-portrait-v2.1-image-to-3d  
+meshy-6-global-text-to-3d  
+meshy-6-global-image-to-3d  
+zhenzhen-image-g-v2.6-lowprice  
+zhenzhen-image-g-v2.6-flare  
+zhenzhen-image-g-v2.6-sunburst  
+z-image-t2i  
+krea-v3-i2i  
+krea-v3-t2i  
+
 ### 20261101
 
 新增单独节点和模型及工作流  

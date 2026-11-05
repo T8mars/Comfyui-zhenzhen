@@ -42,6 +42,7 @@ ALLOWED_MODULES = {
     "moss_image_low_price_nodes",
     "motion_video_low_price_nodes",
     "preview_muse_flux_low_price_nodes",
+    "nov05_low_price_nodes",
     "kling_v4_low_price_nodes",
     "nb_lowprice_doubao_nodes",
 }
@@ -152,6 +153,8 @@ class ConcurrentTask:
 
 
 def _invoke_original(target_class, kwargs: Dict[str, Any]) -> Any:
+    if getattr(target_class, "ZHENZHEN_DEFER_CONCURRENT_ERRORS", False):
+        kwargs = {**kwargs, "skip_error": False}
     node = target_class()
     function = getattr(node, target_class.FUNCTION)
     result = function(**kwargs)
@@ -319,6 +322,7 @@ def _throw_if_interrupted(tasks: Iterable[ConcurrentTask]) -> None:
 
 def _collect(kind: str, slot_count: int, failure_mode: str, kwargs: Dict[str, Any]):
     placeholder = _empty_image if kind == "image" else _empty_video
+    animated_entries = {}
     outputs = [placeholder() for _ in range(slot_count)]
     statuses = [
         {"slot": index + 1, "status": "not_connected"}
@@ -358,12 +362,17 @@ def _collect(kind: str, slot_count: int, failure_mode: str, kwargs: Dict[str, An
         for future in done:
             index, task = pending.pop(future)
             try:
-                primary = _unwrap_node_result(future.result())
+                result = future.result()
+                primary = _unwrap_node_result(result)
                 if kind == "image":
                     primary = _normalize_image(primary)
                 elif primary is None:
                     raise RuntimeError("Video task returned an empty primary output.")
                 outputs[index] = primary
+                if kind == "image" and isinstance(result, dict):
+                    entries = result.get("ui", {}).get("zhenzhen_gifs")
+                    if entries:
+                        animated_entries[index] = entries
                 statuses[index] = {
                     "slot": index + 1,
                     "status": "success",
@@ -392,7 +401,11 @@ def _collect(kind: str, slot_count: int, failure_mode: str, kwargs: Dict[str, An
         {"kind": kind, "completed": completed, "slots": statuses},
         ensure_ascii=False,
     )
-    return tuple(outputs) + (summary,)
+    result = tuple(outputs) + (summary,)
+    if animated_entries:
+        entries = [entry for index in sorted(animated_entries) for entry in animated_entries[index]]
+        return {"ui": {"zhenzhen_gifs": entries}, "result": result}
+    return result
 
 
 def _collector_input_types(task_type: str, slot_count: int):

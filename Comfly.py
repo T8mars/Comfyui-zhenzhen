@@ -150,6 +150,10 @@ from .kling_v4_low_price_nodes import (
     T8ZhenzhenKling4CustomElement, T8ZhenzhenKling4CustomVoice,
 )
 from .nb_lowprice_doubao_nodes import T8ZhenzhenNBLowPrice, T8ZhenzhenDoubaoVoiceCloneICL
+from .nov05_low_price_nodes import (
+    T8ZhenzhenImageG26, T8ZhenzhenZImage, T8ZhenzhenKreaV3,
+    T8ZhenzhenHitem3DV2, T8ZhenzhenHitem3DPortrait21, T8ZhenzhenMeshy6Global,
+)
 from .latest_image_audio_low_price_nodes import (
     Comfly_flowmusic_lowprice,
     Comfly_minimax_audio_lowprice,
@@ -26097,6 +26101,12 @@ NODE_CLASS_MAPPINGS = {
     "T8Zhenzhen_Moss_Image_LowPrice": T8ZhenzhenMossImageLowPrice,
     "T8Zhenzhen_Motion_Video_LowPrice": T8ZhenzhenMotionVideoLowPrice,
     "T8Zhenzhen_HY_Image_35_Preview_LowPrice": T8ZhenzhenHY35Preview,
+    "T8Zhenzhen_Image_G26_LowPrice": T8ZhenzhenImageG26,
+    "T8Zhenzhen_Z_Image_T2I_LowPrice": T8ZhenzhenZImage,
+    "T8Zhenzhen_Krea_V3_Image_LowPrice": T8ZhenzhenKreaV3,
+    "T8Zhenzhen_Hitem3D_V2_LowPrice": T8ZhenzhenHitem3DV2,
+    "T8Zhenzhen_Hitem3D_Portrait_21_LowPrice": T8ZhenzhenHitem3DPortrait21,
+    "T8Zhenzhen_Meshy_6_Global_LowPrice": T8ZhenzhenMeshy6Global,
     "T8Zhenzhen_Muse_Image_LowPrice": T8ZhenzhenMuseImage,
     "T8Zhenzhen_Muse_Video_LowPrice": T8ZhenzhenMuseVideo,
     "T8Zhenzhen_Flux_3_Image_Variants_LowPrice": T8ZhenzhenFlux3ImageVariants,
@@ -26296,6 +26306,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_Moss_Image_LowPrice": "zhenzhen-moss-image（生成/编辑·平价小屋）",
     "T8Zhenzhen_Motion_Video_LowPrice": "zhenzhen-Motion Video / Pro（动效生成/修订·平价小屋）",
     "T8Zhenzhen_HY_Image_35_Preview_LowPrice": "zhenzhen-HY 3.5 Preview（生成/编辑·平价小屋）",
+    "T8Zhenzhen_Image_G26_LowPrice": "zhenzhen-Image G 2.6（图像/GIF·平价小屋）",
+    "T8Zhenzhen_Z_Image_T2I_LowPrice": "zhenzhen-Z-image 文生图（平价小屋）",
+    "T8Zhenzhen_Krea_V3_Image_LowPrice": "zhenzhen-Krea V3（生成/编辑·平价小屋）",
+    "T8Zhenzhen_Hitem3D_V2_LowPrice": "zhenzhen-Hitem3D V2（平价小屋）",
+    "T8Zhenzhen_Hitem3D_Portrait_21_LowPrice": "zhenzhen-Hitem3D Portrait 2.1（平价小屋）",
+    "T8Zhenzhen_Meshy_6_Global_LowPrice": "zhenzhen-Meshy 6 Global（图生3D·平价小屋）",
     "T8Zhenzhen_Muse_Image_LowPrice": "zhenzhen-Muse Image（生成/合成·平价小屋）",
     "T8Zhenzhen_Muse_Video_LowPrice": "zhenzhen-Muse Video（文生/参考视频·平价小屋）",
     "T8Zhenzhen_Flux_3_Image_Variants_LowPrice": "zhenzhen-FLUX 3 Image / Klein（四模型·平价小屋）",
