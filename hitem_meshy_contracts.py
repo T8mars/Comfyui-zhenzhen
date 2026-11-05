@@ -1,4 +1,4 @@
-"""Documented Hitem3D and available Meshy 6 image generation contracts."""
+"""Documented Hitem3D and Meshy 6 text/image generation contracts."""
 
 import json
 import os
@@ -15,7 +15,7 @@ except ImportError:
 
 HITEM_MODELS = ["hitem3d-v2-image-to-3d", "hitem3d-v2-multi-image-to-3d"]
 PORTRAIT_MODELS = ["hitem3d-portrait-v2.1-image-to-3d", "hitem3d-portrait-v2.1-multi-image-to-3d"]
-MESHY_MODELS = ["meshy-6-global-image-to-3d"]
+MESHY_MODELS = ["meshy-6-global-image-to-3d", "meshy-6-global-text-to-3d"]
 VIEWS = ["front", "back", "left", "right"]
 BOOLEAN_FIELDS = ("should_remesh", "enable_pbr", "ta_pose", "should_texture")
 OPTIONAL_BOOLEAN = ["api_default", "true", "false"]
@@ -52,9 +52,24 @@ def validate(family, kwargs, strict=False):
         count = kwargs.get("target_polycount", 0)
         if not integer(count, 0, 300000) or 0 < count < 100:
             return "target_polycount must be 0 (API default) or an integer from 100 to 300000"
+        text = model.endswith("-text-to-3d")
         for name in BOOLEAN_FIELDS:
+            if text and name == "should_texture":
+                continue
             if kwargs.get(name, "api_default") not in OPTIONAL_BOOLEAN:
                 return f"{name} must be api_default, true or false"
+        if text:
+            prompt = kwargs.get("prompt")
+            if prompt is not None and not isinstance(prompt, str):
+                return "Meshy prompt must be text"
+            if isinstance(prompt, str) and len(prompt.strip()) > 600:
+                return "Meshy text-to-3D prompt must be 1-600 characters"
+            if strict and not (prompt or "").strip():
+                return "Meshy text-to-3D requires a non-empty prompt"
+            if kwargs.get("art_style", "realistic") not in ("realistic", "sculpture"):
+                return "Meshy art_style must be realistic or sculpture"
+            if not isinstance(kwargs.get("enable_prompt_expansion", False), bool):
+                return "enable_prompt_expansion must be a boolean"
     else:
         if kwargs.get("request_type", "both") not in ("mesh", "both"):
             return "request_type must be mesh or both"
@@ -67,7 +82,10 @@ def validate(family, kwargs, strict=False):
         slots = image_slots(kwargs)
     except SeedanceAPIError as exc:
         return str(exc)
-    if strict:
+    if family == "meshy" and model.endswith("-text-to-3d"):
+        if slots:
+            return "Meshy text-to-3D does not accept reference images"
+    elif strict:
         multi = "multi-image" in model
         if multi and not 2 <= len(slots) <= 4:
             return "Multi-image generation requires 2-4 views: front, back, left, right"
@@ -84,11 +102,22 @@ def payload(family, kwargs, images):
         raise SeedanceAPIError(valid)
     model = kwargs.get("model", models(family)[0])
     multi = "multi-image" in model
-    if not (2 <= len(images) <= 4 if multi else len(images) == 1):
+    text = family == "meshy" and model.endswith("-text-to-3d")
+    if not (len(images) == 0 if text else 2 <= len(images) <= 4 if multi else len(images) == 1):
         raise SeedanceAPIError("Incorrect reference image count for the selected 3D model")
-    result = {"model": model, "images": list(images)}
+    result = {"model": model}
+    if text:
+        prompt = kwargs.get("prompt")
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise SeedanceAPIError("Meshy text-to-3D requires a non-empty prompt")
+        result.update(prompt=prompt.strip(), art_style=kwargs.get("art_style", "realistic"),
+                      enable_prompt_expansion=kwargs.get("enable_prompt_expansion", False))
+    else:
+        result["images"] = list(images)
     if family == "meshy":
         for name in ("topology", "symmetry_mode", *BOOLEAN_FIELDS):
+            if text and name == "should_texture":
+                continue
             value = kwargs.get(name, "api_default")
             if value != "api_default":
                 result[name] = value == "true" if name in BOOLEAN_FIELDS else value

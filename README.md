@@ -41,6 +41,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261106
+
+修复meshy-6-global-text-to-3d  
+
 ### 20261105
 
 新增模型及工作流

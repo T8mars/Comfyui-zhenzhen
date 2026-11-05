@@ -30,7 +30,10 @@ function refresh(node, name) {
         show(["width", "height"], value("size") === "custom");
         maximum = String(value("model")).endsWith("-i2i") ? 8 : 0;
     } else {
-        maximum = String(value("model")).includes("multi-image") ? 4 : 1;
+        const text = name === "T8Zhenzhen_Meshy_6_Global_LowPrice" && String(value("model")).endsWith("-text-to-3d");
+        show(["prompt", "art_style", "enable_prompt_expansion"], text);
+        if (name === "T8Zhenzhen_Meshy_6_Global_LowPrice") show(["should_texture"], !text);
+        maximum = text ? 0 : String(value("model")).includes("multi-image") ? 4 : 1;
     }
     const highest = Math.max(0, ...(node.inputs ?? []).filter((item) => /^image\d+$/.test(item.name) && item.link != null).map((item) => Number(item.name.slice(5))));
     const minimum = name !== G26 && name !== KREA && maximum === 4 ? 2 : 1;

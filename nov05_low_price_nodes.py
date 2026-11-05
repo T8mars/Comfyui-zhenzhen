@@ -255,6 +255,11 @@ class _Image3D:
         maximum = 1 if cls.FAMILY == "meshy" else 4
         optional = {f"image{i}": ("IMAGE", {"tooltip": geometry_contract.VIEWS[i - 1]}) for i in range(1, maximum + 1)}
         optional.update(api_config=(api.CONFIG_TYPE,), skip_error=("BOOLEAN", {"default": False}), seed=EXECUTION_SEED_SPEC)
+        if cls.FAMILY == "meshy":
+            # Append after the legacy seed controls to keep saved widget positions.
+            optional.update(prompt=("STRING", {"default": "", "multiline": True}),
+                art_style=(["realistic", "sculpture"], {"default": "realistic"}),
+                enable_prompt_expansion=("BOOLEAN", {"default": False}))
         return {"required": required, "optional": optional}
 
     @classmethod

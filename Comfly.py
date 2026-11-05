@@ -26311,7 +26311,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_Krea_V3_Image_LowPrice": "zhenzhen-Krea V3（生成/编辑·平价小屋）",
     "T8Zhenzhen_Hitem3D_V2_LowPrice": "zhenzhen-Hitem3D V2（平价小屋）",
     "T8Zhenzhen_Hitem3D_Portrait_21_LowPrice": "zhenzhen-Hitem3D Portrait 2.1（平价小屋）",
-    "T8Zhenzhen_Meshy_6_Global_LowPrice": "zhenzhen-Meshy 6 Global（图生3D·平价小屋）",
+    "T8Zhenzhen_Meshy_6_Global_LowPrice": "zhenzhen-Meshy 6 Global（文生/图生3D·平价小屋）",
     "T8Zhenzhen_Muse_Image_LowPrice": "zhenzhen-Muse Image（生成/合成·平价小屋）",
     "T8Zhenzhen_Muse_Video_LowPrice": "zhenzhen-Muse Video（文生/参考视频·平价小屋）",
     "T8Zhenzhen_Flux_3_Image_Variants_LowPrice": "zhenzhen-FLUX 3 Image / Klein（四模型·平价小屋）",
