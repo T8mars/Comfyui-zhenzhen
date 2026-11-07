@@ -200,7 +200,7 @@ class T8ZhenzhenImageG26:
                 raise Error(valid)
             prefix = values.get("filename_prefix", "zhenzhen/g26")
             artifacts.output_target(prefix)
-            maximum = 2 if values.get("model", image_contract.G26_MODELS[0]) == image_contract.G26_MODELS[0] else 16
+            maximum = image_contract.G26_LOWPRICE_MAX_REFERENCES if values.get("model", image_contract.G26_MODELS[0]) == image_contract.G26_MODELS[0] else 16
             encoded = common.encode_references(values, maximum)
             config = api.resolve_config(api_config)
             refs = [api.upload_media(data, f"reference_{index}.png", "image/png", config) for index, data in encoded]

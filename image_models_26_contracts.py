@@ -11,6 +11,7 @@ except ImportError:
 
 
 G26_MODELS = ["zhenzhen-image-g-v2.6-lowprice", "zhenzhen-image-g-v2.6-flare", "zhenzhen-image-g-v2.6-sunburst"]
+G26_LOWPRICE_MAX_REFERENCES = 10
 KREA_MODELS = ["krea-v3-t2i", "krea-v3-i2i"]
 Z_MODEL = "z-image-t2i"
 RATIOS = ["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"]
@@ -141,7 +142,7 @@ def validate_g26(kwargs, strict=False):
     if not lowprice and prompt is not None and len(prompt) > 32000:
         return "Official Image G 2.6 prompt must not exceed 32000 characters"
     try:
-        refs = references(kwargs, 2 if lowprice else 16)
+        refs = references(kwargs, G26_LOWPRICE_MAX_REFERENCES if lowprice else 16)
     except SeedanceAPIError as exc:
         return str(exc)
     if not lowprice and mode == "gif" and refs:
@@ -218,7 +219,7 @@ def g26_payload(kwargs, images):
     model = kwargs.get("model", G26_MODELS[0])
     lowprice = model == G26_MODELS[0]
     mode = kwargs.get("mode", "image")
-    if len(images) > (2 if lowprice else 16) or (not lowprice and mode == "gif" and images):
+    if len(images) > (G26_LOWPRICE_MAX_REFERENCES if lowprice else 16) or (not lowprice and mode == "gif" and images):
         raise SeedanceAPIError("Unsupported reference count for this output mode")
     prompt = kwargs["prompt"].strip()
     if lowprice and mode == "gif":

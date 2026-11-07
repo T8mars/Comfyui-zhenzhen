@@ -41,6 +41,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261107
+
+zhenzhen-image-g-v2.6-lowprice 从2个参考图改为10个参考图
+
 ### 20261106
 
 修复meshy-6-global-text-to-3d  
