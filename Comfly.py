@@ -150,6 +150,7 @@ from .kling_v4_low_price_nodes import (
     T8ZhenzhenKling4CustomElement, T8ZhenzhenKling4CustomVoice,
 )
 from .nb_lowprice_doubao_nodes import T8ZhenzhenNBLowPrice, T8ZhenzhenDoubaoVoiceCloneICL
+from .flash_video_low_price_nodes import T8ZhenzhenOmni12FlashLowPrice
 from .nov05_low_price_nodes import (
     T8ZhenzhenImageG26, T8ZhenzhenZImage, T8ZhenzhenKreaV3,
     T8ZhenzhenHitem3DV2, T8ZhenzhenHitem3DPortrait21, T8ZhenzhenMeshy6Global,
@@ -26113,6 +26114,7 @@ NODE_CLASS_MAPPINGS = {
     "T8Zhenzhen_Kling_V4_T2V_LowPrice": T8ZhenzhenKling4T2V,
     "T8Zhenzhen_Kling_V4_I2V_LowPrice": T8ZhenzhenKling4I2V,
     "T8Zhenzhen_Kling_V4_Omni_LowPrice": T8ZhenzhenKling4Omni,
+    "T8Zhenzhen_Video_G_Omni_12_Flash_LowPrice": T8ZhenzhenOmni12FlashLowPrice,
     "T8Zhenzhen_Kling_V4_Custom_Element_LowPrice": T8ZhenzhenKling4CustomElement,
     "T8Zhenzhen_Kling_V4_Custom_Voice_LowPrice": T8ZhenzhenKling4CustomVoice,
     "T8Zhenzhen_NB_Dual_LowPrice": T8ZhenzhenNBLowPrice,
@@ -26318,6 +26320,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "T8Zhenzhen_Kling_V4_T2V_LowPrice": "zhenzhen-Kling 4 文生视频（平价小屋）",
     "T8Zhenzhen_Kling_V4_I2V_LowPrice": "zhenzhen-Kling 4 首尾帧图生视频（平价小屋）",
     "T8Zhenzhen_Kling_V4_Omni_LowPrice": "zhenzhen-Kling 4 Omni 全能参考视频（平价小屋）",
+    "T8Zhenzhen_Video_G_Omni_12_Flash_LowPrice": "zhenzhen-Video G Omni 1.2 Flash（平价小屋）",
     "T8Zhenzhen_Kling_V4_Custom_Element_LowPrice": "zhenzhen-Kling 4 主体创建（平价小屋）",
     "T8Zhenzhen_Kling_V4_Custom_Voice_LowPrice": "zhenzhen-Kling 4 音色创建（平价小屋）",
     "T8Zhenzhen_NB_Dual_LowPrice": "zhenzhen-NB Pro / 2.1 Lowprice（生成/编辑·平价小屋）",

@@ -17,15 +17,16 @@ function refresh(node, name) {
         const size = widget("size"), sizes = ["auto", "1:1", "3:2", "2:3", "4:3", "3:4", "16:9", "9:16", "2:1", "1:2", "21:9", "9:21"];
         if (size?.options) size.options.values = low ? sizes : [...sizes, "custom"];
         if (low && custom && !node.inputs?.some((item) => item.name === "size" && item.link != null)) size.value = "1:1";
-        show(["size"], low || !gif);
+        show(["size"], !gif);
         show(["width", "height"], !low && !gif && custom);
-        show(["resolution"], !low && !gif && !custom);
-        show(["quality"], !low);
-        show(["complexity", "n", "output_format", "mask_url", "markup_url"], !low && !gif);
+        show(["resolution"], low || (!gif && !custom));
+        show(["quality"], true);
+        show(["output_format"], !gif);
+        show(["complexity", "n", "mask_url", "markup_url"], !low && !gif);
         show(["output_compression"], !low && !gif && ["jpeg", "webp"].includes(value("output_format")));
         show(["frame_size", "frame_count", "frame_duration_ms"], !low && gif);
         show(["frame_width", "frame_height"], !low && gif && value("frame_size") === "custom");
-        maximum = low ? 2 : gif ? 0 : 16;
+        maximum = gif ? 0 : 16;
     } else if (name === KREA) {
         show(["width", "height"], value("size") === "custom");
         maximum = String(value("model")).endsWith("-i2i") ? 8 : 0;

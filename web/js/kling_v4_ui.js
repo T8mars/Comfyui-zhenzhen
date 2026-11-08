@@ -5,6 +5,8 @@ const PREFIX = "T8Zhenzhen_Kling_V4_";
 const NAMES = new Set(["T2V", "I2V", "Omni", "Custom_Element", "Custom_Voice"].map((kind) => `${PREFIX}${kind}_LowPrice`));
 const INSTALLED = Symbol("zhenzhenKling4UI");
 const originalName = (value) => String(value ?? "").replace(/^ComflyConcurrent_(.*)_Submit$/, "$1");
+const OMNI12 = "T8Zhenzhen_Video_G_Omni_12_Flash_LowPrice";
+NAMES.add(OMNI12);
 
 function progressive(node, prefix, max, minimum = 1) {
     const pattern = new RegExp(`^${prefix}[1-9][0-9]*$`);
@@ -33,9 +35,30 @@ function refresh(node, name) {
         for (const input of node.inputs ?? []) {
             if (input.name === "audio") setZhenzhenInputVisible(node, input, audio);
         }
-    } else if (name === `${PREFIX}Omni_LowPrice`) {
-        progressive(node, "image", 10);
-        progressive(node, "video", 5);
+    } else if (name === `${PREFIX}Omni_LowPrice` || name === OMNI12) {
+        const flash = name === OMNI12 || widget("model")?.value === "zhenzhen-video-kling-v4-flash";
+        const imageLinked = node.inputs?.some((input) => /^image\d+$/.test(input.name) && input.link != null);
+        const videoLinked = node.inputs?.some((input) => /^video\d+$/.test(input.name) && input.link != null)
+            || String(widget("video_urls")?.value ?? "").trim().length > 0;
+        progressive(node, "image", flash && videoLinked ? 0 : 10);
+        progressive(node, "video", flash && imageLinked ? 0 : name === OMNI12 ? 1 : 5);
+        if (name !== OMNI12) {
+            for (const key of ["watermark", "image_element_ids", "video_element_ids", "voice_ids"]) setZhenzhenWidgetVisible(widget(key), !flash);
+            const linked = (key) => node.inputs?.some((input) => input.name === key && input.link != null);
+            const resolution = widget("resolution"), ratio = widget("ratio"), seconds = widget("seconds");
+            if (resolution?.options) resolution.options.values = flash ? ["720p"] : ["720p", "1080p"];
+            if (flash && resolution?.value !== "720p" && !linked("resolution")) resolution.value = "720p";
+            if (ratio?.options) ratio.options.values = flash ? ["21:9", "16:9", "1:1", "9:16"] : ["21:9", "16:9", "1:1", "9:16", "adaptive"];
+            if (flash && ratio?.value === "adaptive" && !linked("ratio")) ratio.value = "16:9";
+            if (seconds?.options) seconds.options.max = flash ? 20 : 30;
+            if (flash && seconds?.value > 20 && !linked("seconds")) seconds.value = 20;
+            const urls = widget("video_urls");
+            if (urls) {
+                urls.tooltip = flash ? "Up to 5 public video URLs, after local videos; image OR video references."
+                    : "Public URLs after local videos. At most 5 videos, 30 seconds combined, 300 MB each. API validates remote media.";
+                if (urls.options) urls.options.tooltip = urls.tooltip;
+            }
+        }
     }
     let row = 0;
     const start = Number(node.constructor?.slot_start_y) || 0;
@@ -69,7 +92,7 @@ function install(node, name) {
             this.inputs = all;
         }
     };
-    for (const key of ["reference_type", "source_mode"]) {
+    for (const key of ["reference_type", "source_mode", "model", "video_urls"]) {
         const widget = node.widgets?.find((item) => item.name === key);
         if (!widget) continue;
         const previous = widget.callback;

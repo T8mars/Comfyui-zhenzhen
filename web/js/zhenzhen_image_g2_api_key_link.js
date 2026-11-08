@@ -63,6 +63,7 @@ const LOW_PRICE_NODE_NAMES = new Set([
     "T8Zhenzhen_Kling_V4_T2V_LowPrice",
     "T8Zhenzhen_Kling_V4_I2V_LowPrice",
     "T8Zhenzhen_Kling_V4_Omni_LowPrice",
+    "T8Zhenzhen_Video_G_Omni_12_Flash_LowPrice",
     "T8Zhenzhen_Kling_V4_Custom_Element_LowPrice",
     "T8Zhenzhen_Kling_V4_Custom_Voice_LowPrice",
     "T8Zhenzhen_NB_Dual_LowPrice",

@@ -11,7 +11,7 @@ except ImportError:
 
 
 G26_MODELS = ["zhenzhen-image-g-v2.6-lowprice", "zhenzhen-image-g-v2.6-flare", "zhenzhen-image-g-v2.6-sunburst"]
-G26_LOWPRICE_MAX_REFERENCES = 10
+G26_LOWPRICE_MAX_REFERENCES = 16
 KREA_MODELS = ["krea-v3-t2i", "krea-v3-i2i"]
 Z_MODEL = "z-image-t2i"
 RATIOS = ["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"]
@@ -145,8 +145,10 @@ def validate_g26(kwargs, strict=False):
         refs = references(kwargs, G26_LOWPRICE_MAX_REFERENCES if lowprice else 16)
     except SeedanceAPIError as exc:
         return str(exc)
-    if not lowprice and mode == "gif" and refs:
-        return "Flare/Sunburst GIF mode is text-only; disconnect image references"
+    if mode == "gif" and refs:
+        return "Image G 2.6 GIF mode is text-only; disconnect image references"
+    if lowprice and kwargs.get("resolution", "1k") not in ("1k", "2k", "4k"):
+        return "Unsupported resolution"
     if not lowprice and mode == "gif":
         count, duration = kwargs.get("frame_count", 9), kwargs.get("frame_duration_ms", 200)
         if not integer(count, 2, 16):
@@ -171,7 +173,7 @@ def validate_g26(kwargs, strict=False):
             fits |= max(w, h) <= 3840 and w * h <= 8294400 and max(w, h) <= min(w, h) * 3
         if not fits:
             return "GIF contact-sheet dimensions exceed the documented limits"
-    else:
+    elif mode == "image":
         size = kwargs.get("size", "1:1")
         if size not in IMAGE_SIZES or (lowprice and size == "custom"):
             return "Unsupported Image G 2.6 size"
@@ -184,11 +186,11 @@ def validate_g26(kwargs, strict=False):
             if width is not None and height is not None:
                 if not 655360 <= width * height <= 8294400 or max(width, height) > 3 * min(width, height):
                     return "Static canvas area or aspect ratio exceeds the documented limits"
+        if kwargs.get("output_format", "png") not in ("png", "jpeg", "webp"):
+            return "Unsupported static output format"
         if not lowprice:
             if kwargs.get("resolution", "1k") not in ("1k", "2k", "4k"):
                 return "Unsupported resolution"
-            if kwargs.get("output_format", "png") not in ("png", "jpeg", "webp"):
-                return "Unsupported static output format"
             if not integer(kwargs.get("n", 1), 1, 4):
                 return "Static n must be an integer from 1 to 4"
             if kwargs.get("complexity", "api_default") not in ("api_default", "low", "medium", "high"):
@@ -196,7 +198,7 @@ def validate_g26(kwargs, strict=False):
             compression = kwargs.get("output_compression", -1)
             if not integer(compression, -1, 100):
                 return "output_compression must be -1 (omit) or 0-100"
-    if not lowprice and kwargs.get("quality", "auto") not in QUALITIES:
+    if kwargs.get("quality", "auto") not in QUALITIES:
         return "Unsupported quality"
     mask, markup = kwargs.get("mask_url", ""), kwargs.get("markup_url", "")
     if not lowprice and mode == "image":
@@ -219,14 +221,16 @@ def g26_payload(kwargs, images):
     model = kwargs.get("model", G26_MODELS[0])
     lowprice = model == G26_MODELS[0]
     mode = kwargs.get("mode", "image")
-    if len(images) > (G26_LOWPRICE_MAX_REFERENCES if lowprice else 16) or (not lowprice and mode == "gif" and images):
+    if len(images) > (G26_LOWPRICE_MAX_REFERENCES if lowprice else 16) or (mode == "gif" and images):
         raise SeedanceAPIError("Unsupported reference count for this output mode")
     prompt = kwargs["prompt"].strip()
     if lowprice and mode == "gif":
         prompt += "\nGenerate an animated looping GIF with visible motion and a seamless loop."
     result = {"model": model, "prompt": prompt, "n": 1 if lowprice or mode == "gif" else kwargs.get("n", 1)}
     if lowprice:
-        result.update(size=kwargs.get("size", "1:1"), resolution="1k")
+        result.update(size="auto" if mode == "gif" else kwargs.get("size", "1:1"),
+                      resolution=kwargs.get("resolution", "1k"), quality=kwargs.get("quality", "auto"),
+                      output_format="gif" if mode == "gif" else kwargs.get("output_format", "png"))
     else:
         result["quality"] = kwargs.get("quality", "auto")
         if mode == "gif":

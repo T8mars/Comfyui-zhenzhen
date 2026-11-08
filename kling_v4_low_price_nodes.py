@@ -27,6 +27,14 @@ TAGS = [f"o_{number}" for number in range(101, 109)]
 Error = api.SeedanceLowPriceError
 
 
+def _flash_video():
+    try:
+        from . import flash_video_low_price_nodes
+    except ImportError:
+        import flash_video_low_price_nodes
+    return flash_video_low_price_nodes
+
+
 def string_list(value, name):
     if not isinstance(value, str):
         raise Error(f"Kling 4 {name} requires one item per line or a JSON string array")
@@ -300,10 +308,10 @@ def named_results(final):
     raise Error("Kling 4 auxiliary response has no result_text")
 
 
-def submit_kling_task(payload, config):
+def submit_kling_task(payload, config, endpoint="video/generations"):
     # A lost creation response must not replay generation or reusable-ID creation.
     try:
-        response = api._get_session().post(f"{config['base_url']}/v1/video/generations",
+        response = api._get_session().post(f"{config['base_url']}/v1/{endpoint}",
             headers=api._headers(config["api_key"]), json=payload, timeout=config.get("timeout", 60))
     except api.requests.RequestException as error:
         raise Error(f"Kling 4 submission could not be confirmed ({type(error).__name__}); not retried. Check the website task list.") from None
@@ -323,7 +331,7 @@ def submit_kling_task(payload, config):
         response.close()
 
 
-def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=time.monotonic):
+def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=time.monotonic, endpoint="video/generations"):
     started, failures = clock(), 0
     while True:
         if clock() - started >= config.get("max_poll_time", 1800):
@@ -331,7 +339,7 @@ def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=t
         sleep(config.get("poll_interval", 4))
         response = None
         try:
-            response = api._get_session().get(f"{config['base_url']}/v1/video/generations/{task_id}",
+            response = api._get_session().get(f"{config['base_url']}/v1/{endpoint}/{task_id}",
                 headers=api._headers(config["api_key"], json_content=False), timeout=30)
             if response.status_code != 200:
                 if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
@@ -421,6 +429,12 @@ class _Kling4Base:
     def error_result(self, message, response):
         return (api.make_error_video(message), "", "", response)
 
+    def run_task(self, payload, config, progress):
+        task_id, submitted = submit_kling_task(payload, config)
+        progress(25)
+        final = poll_kling_task(task_id, config, on_progress=lambda value: progress(25 + value * .65))
+        return task_id, submitted, final
+
     def generate(self, api_config=None, skip_error=False, seed=0, **values):
         del seed
         try:
@@ -437,9 +451,7 @@ class _Kling4Base:
             progress(0)
             media = upload_prepared(prepared, config, lambda value: progress(value * 20))
             payload = self.build_payload(values, media)
-            task_id, submitted = submit_kling_task(payload, config)
-            progress(25)
-            final = poll_kling_task(task_id, config, on_progress=lambda value: progress(25 + value * .65))
+            task_id, submitted, final = self.run_task(payload, config, progress)
             progress(95)
             response = json.dumps({"status": "SUCCESS", "model": payload["model"], "task_id": task_id,
                                    "submit": submitted, "result": final}, ensure_ascii=False, indent=2)
@@ -513,6 +525,42 @@ class T8ZhenzhenKling4I2V(_Kling4Video):
 
 class T8ZhenzhenKling4Omni(_Kling4Video):
     KIND = "omni"
+    ZHENZHEN_VALIDATE_CONCURRENT_AT_EXECUTION = True
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        schema = super().INPUT_TYPES()
+        schema["optional"]["model"] = (["kling-v4-omni", "zhenzhen-video-kling-v4-flash"], {"default": "kling-v4-omni"})
+        return schema
+
+    @classmethod
+    def validate(cls, values, strict):
+        model = values.get("model", "kling-v4-omni")
+        if model == "kling-v4-omni":
+            return super().validate(values, strict)
+        flash = _flash_video()
+        if model != flash.KLING_MODEL:
+            raise Error("Unsupported Kling 4 model")
+        flash.validate(model, values, strict)
+
+    def prepare_media(self, values):
+        if values.get("model", "kling-v4-omni") == "kling-v4-omni":
+            return super().prepare_media(values)
+        flash = _flash_video()
+        return flash.prepare_media(flash.KLING_MODEL, values)
+
+    @classmethod
+    def build_payload(cls, values, media):
+        if values.get("model", "kling-v4-omni") == "kling-v4-omni":
+            return super().build_payload(values, media)
+        flash = _flash_video()
+        return flash.payload(values.get("model"), values, media)
+
+    def run_task(self, payload, config, progress):
+        if payload["model"] == "kling-v4-omni":
+            return super().run_task(payload, config, progress)
+        flash = _flash_video()
+        return flash.run_task(payload, config, progress)
 
 
 class T8ZhenzhenKling4CustomElement(_Kling4Base):

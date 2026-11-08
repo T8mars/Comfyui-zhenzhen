@@ -43,6 +43,7 @@ ALLOWED_MODULES = {
     "motion_video_low_price_nodes",
     "preview_muse_flux_low_price_nodes",
     "nov05_low_price_nodes",
+    "flash_video_low_price_nodes",
     "kling_v4_low_price_nodes",
     "nb_lowprice_doubao_nodes",
 }
@@ -211,6 +212,10 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
         return copy.deepcopy(target_class.INPUT_TYPES())
 
     def submit(self, **kwargs):
+        if getattr(target_class, "ZHENZHEN_VALIDATE_CONCURRENT_AT_EXECUTION", False):
+            valid = _call_original_validator(target_class, {**kwargs, "strict": True})
+            if valid is not True:
+                raise ValueError(valid)
         context = contextvars.copy_context()
         future = executor.submit(
             context.run,
@@ -232,7 +237,7 @@ def _make_submit_class(mapping_key: str, display_name: str, target_class, kind: 
         "ORIGINAL_NODE_CLASS": target_class,
         "submit": submit,
     }
-    if hasattr(target_class, "VALIDATE_INPUTS"):
+    if hasattr(target_class, "VALIDATE_INPUTS") and not getattr(target_class, "ZHENZHEN_VALIDATE_CONCURRENT_AT_EXECUTION", False):
         @classmethod
         def validate_inputs(cls, **kwargs):
             return _call_original_validator(target_class, kwargs)

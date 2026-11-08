@@ -41,6 +41,14 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261108（v2.5.6）
+
+- **Image G 2.6 LowPrice 更新**：`zhenzhen-image-g-v2.6-lowprice` 支持1K/2K/4K、质量档位及PNG/JPEG/WebP，参考图最多16张。按 [最新 API 文档](https://api.seedance.nz/docs/llms.txt)，GIF改为仅文生，保留原文件自动保存与预览。
+- **Kling 4 Flash**：在原 `zhenzhen-Kling 4 Omni 全能参考视频（平价小屋）` 节点中选择 `zhenzhen-video-kling-v4-flash`，支持3-20秒、720p、四种比例，以及最多10张图片或5段视频。原Omni仍为默认模型，原主体、音色及混合素材流程不变。
+- **Omni 1.2 Flash 独立节点**：新增 `zhenzhen-Video G Omni 1.2 Flash（平价小屋）` 及并发版，对应 `zhenzhen-video-g-omni-1.2-flash-lowprice`，支持3-15秒、360p/720p/1080p/4k，以及最多10张图片或1段视频。新入口均保留平价小屋APIKEY获取按钮。
+- **11份新工作流**：G2.6的2K/4K、两种视频模型的文生/双图/本地视频/视频URL，以及双模型并发示例，均已保存到 [工作流目录](workflow)，APIKEY留空。
+- **兼容与验证**：旧注册名、插口索引、控件顺序和已有工作流保留。九条真实生成路径、16项专项测试和23份新旧示例画布检查通过；实际尺寸与时长以返回结果为准。无新增依赖，不保存测试密钥，不生成Comflyapi.json。全仓既有测试问题及完整实测结果见 [验证记录](docs/models-20261108.md)。更新后请重启ComfyUI并刷新页面。
+
 ### 20261107
 
 zhenzhen-image-g-v2.6-lowprice 从2个参考图改为10个参考图

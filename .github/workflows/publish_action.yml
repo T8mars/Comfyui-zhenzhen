@@ -14,7 +14,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Preserve Unicode workflow filenames
+        run: git config core.quotepath false
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@main
         with:
+          skip_checkout: 'true'
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }} ## Add your own personal access token to your Github Repository secrets and reference it here.
