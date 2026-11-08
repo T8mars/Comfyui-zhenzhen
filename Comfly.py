@@ -173,6 +173,7 @@ from .aug22_low_price_nodes import (
 )
 from .midjourney_low_price_nodes import Comfly_midjourney_lowprice
 from .gpt_image_25_nodes import T8ZhenzhenGPTImage25Workshop
+from .gpt_image_26_workshop_nodes import T8ZhenzhenGPTImage26Workshop
 
 # For LLM API functionality
 try:
@@ -26201,6 +26202,7 @@ NODE_CLASS_MAPPINGS = {
     "Comfly_gpt_image_2_official":Comfly_gpt_image_2_official,
     "Comfly_gpt_image_2_official_ratio":Comfly_gpt_image_2_official_ratio,
     "T8Zhenzhen_GPT_Image_2_5_Workshop": T8ZhenzhenGPTImage25Workshop,
+    "T8Zhenzhen_GPT_Image_2_6_Workshop": T8ZhenzhenGPTImage26Workshop,
     "Comfly_wan2_6_API": Comfly_wan2_6_API,
     "Comfly_gpt_image_2_fal": Comfly_gpt_image_2_fal,
     "Comfly_veo3_1_fal": Comfly_veo3_1_fal,
@@ -26407,6 +26409,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfly_gpt_image_2_official":"zhenzhen-gpt-image-2-official",
     "Comfly_gpt_image_2_official_ratio":"zhenzhen-gpt-image-2-official_ratio",
     "T8Zhenzhen_GPT_Image_2_5_Workshop": "zhenzhen-gpt-image-2.5（6合1·AI工坊）",
+    "T8Zhenzhen_GPT_Image_2_6_Workshop": "zhenzhen-gpt-image-2.6（生成/编辑·6合1·AI工坊）",
     "Comfly_wan2_6_API": "Zhenzhen WanX 2.6 Video",
     "Comfly_gpt_image_2_fal": "Zhenzhen GPT Image 2 Fal",
     "Comfly_veo3_1_fal": "Zhenzhen Veo 3.1 Fast Ref2Video Fal",

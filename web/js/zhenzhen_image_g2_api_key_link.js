@@ -151,6 +151,7 @@ const WORKSHOP_NODE_NAMES = new Set([
     "Comfly_gpt_image_2_official",
     "Comfly_gpt_image_2_official_ratio",
     "T8Zhenzhen_GPT_Image_2_5_Workshop",
+    "T8Zhenzhen_GPT_Image_2_6_Workshop",
     "Comfly_gpt_image_2_fal",
     "Comfly_veo3_1_fal",
     "Comfly_seedance2_fal",

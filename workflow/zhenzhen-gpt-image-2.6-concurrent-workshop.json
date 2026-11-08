@@ -1,0 +1,872 @@
+{
+  "id": "75e84a8a-7fd2-5c7a-a4db-360fc4a0e329",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        30,
+        400
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": [
+            1,
+            4
+          ]
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "zhenzhen",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings (AI Workshop)"
+    },
+    {
+      "id": 4,
+      "type": "ComflyConcurrent_Image_Await",
+      "pos": [
+        1100,
+        40
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "task_1",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": 2
+        },
+        {
+          "name": "task_2",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": 5
+        },
+        {
+          "name": "task_3",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_4",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_5",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_6",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_7",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_8",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_9",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_10",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_11",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_12",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_13",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_14",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_15",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_16",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_17",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_18",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_19",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_20",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_21",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_22",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_23",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_24",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_25",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_26",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_27",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_28",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_29",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "task_30",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "shape": 7,
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_1",
+          "type": "IMAGE",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "image_2",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "image_3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_5",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_6",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_7",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_8",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_9",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_10",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_11",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_12",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_13",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_14",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_15",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_16",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_17",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_18",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_19",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_20",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_21",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_22",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_23",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_24",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_25",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_26",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_27",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_28",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_29",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "image_30",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "status",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_Image_Await",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "fail_fast"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "ComflyConcurrent_T8Zhenzhen_GPT_Image_2_6_Workshop_Submit",
+      "pos": [
+        450,
+        40
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image5",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image6",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image7",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image8",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image9",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image10",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image11",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image12",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image13",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image14",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image15",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image16",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "markup",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "type": "STRING",
+          "shape": 7,
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_GPT_Image_2_6_Workshop_Submit",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "A blue ceramic teapot on a light gray studio table, soft light.",
+        "",
+        "gpt-image-2.6-flare",
+        "auto",
+        "1024x1024",
+        1024,
+        1024,
+        1,
+        "auto",
+        "auto",
+        "png",
+        -1,
+        "api_default",
+        false,
+        0,
+        "fixed",
+        true,
+        5,
+        3600
+      ]
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [
+        1730,
+        40
+      ],
+      "size": [
+        300,
+        280
+      ],
+      "flags": {},
+      "mode": 0,
+      "order": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "zhenzhen/gpt-image-2.6-flare"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "ComflyConcurrent_T8Zhenzhen_GPT_Image_2_6_Workshop_Submit",
+      "pos": [
+        450,
+        840
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image5",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image6",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image7",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image8",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image9",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image10",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image11",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image12",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image13",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image14",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image15",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image16",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "markup",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "api_key",
+          "type": "STRING",
+          "shape": 7,
+          "widget": {
+            "name": "api_key"
+          },
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "task",
+          "type": "COMFLY_IMAGE_FUTURE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComflyConcurrent_T8Zhenzhen_GPT_Image_2_6_Workshop_Submit",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "A blue ceramic teapot on a light gray studio table, soft light.",
+        "",
+        "gpt-image-2.6-sunburst",
+        "auto",
+        "1024x1024",
+        1024,
+        1024,
+        1,
+        "auto",
+        "auto",
+        "png",
+        -1,
+        "api_default",
+        false,
+        0,
+        "fixed",
+        true,
+        5,
+        3600
+      ]
+    },
+    {
+      "id": 6,
+      "type": "SaveImage",
+      "pos": [
+        1730,
+        370
+      ],
+      "size": [
+        300,
+        280
+      ],
+      "flags": {},
+      "mode": 0,
+      "order": 5,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "zhenzhen/gpt-image-2.6-sunburst"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      18,
+      "STRING"
+    ],
+    [
+      2,
+      2,
+      0,
+      4,
+      0,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      1,
+      0,
+      3,
+      18,
+      "STRING"
+    ],
+    [
+      5,
+      3,
+      0,
+      4,
+      1,
+      "COMFLY_IMAGE_FUTURE"
+    ],
+    [
+      6,
+      4,
+      1,
+      6,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [
+        20,
+        20
+      ]
+    }
+  },
+  "version": 0.4
+}

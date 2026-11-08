@@ -41,6 +41,13 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261109（v2.5.7）
+
+- 新增 **GPT Image 2.6 生成/编辑·6合1（贞贞的AI工坊）** 及并发版，包含 Flare/Sunburst 各基础、2K、4K 模型；搜索 `gpt-image-2.6`。支持静态PNG/JPEG/WebP、蒙版、透明标注及透明结果，不提供GIF，底部保留工坊APIKEY获取按钮。
+- 已保存 **16份空密钥工作流**：六模型各文生/双图编辑，以及蒙版、标注、透明保存和并发示例，位于 [工作流目录](workflow)，文件名前缀 `zhenzhen-gpt-image-2.6-`。
+- 六模型文生/编辑共12条真实路径已返回并解码图片。工坊大数量参考图仍有上游超限/超时问题，不能称为16张实测通过；编辑请使用默认压缩值。具体渠道差异、测试结果与使用方式见 [验证记录](docs/gpt-image-26-workshop.md)。旧2.5节点及已有工作流不变。
+- 更新后请重启ComfyUI并刷新页面。新节点无新增依赖，APIKEY仅使用工作流当前输入，不读取或生成Comflyapi.json。
+
 ### 20261108（v2.5.6）
 
 - **Image G 2.6 LowPrice 更新**：`zhenzhen-image-g-v2.6-lowprice` 支持1K/2K/4K、质量档位及PNG/JPEG/WebP，参考图最多16张。按 [最新 API 文档](https://api.seedance.nz/docs/llms.txt)，GIF改为仅文生，保留原文件自动保存与预览。
