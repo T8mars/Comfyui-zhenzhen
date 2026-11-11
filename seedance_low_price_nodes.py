@@ -466,7 +466,10 @@ def download_video(
     url: str,
     max_retries: int = 5,
     attempt_timeout: float = 180.0,
+    file_extension: str = "mp4",
 ) -> Any:
+    if file_extension not in {"mp4", "mov"}:
+        raise ValueError("Video file extension must be mp4 or mov")
     try:
         import folder_paths
 
@@ -474,7 +477,7 @@ def download_video(
     except ImportError:
         output_dir = os.environ.get("SEEDANCE_OUTPUT_DIR") or tempfile.gettempdir()
     os.makedirs(output_dir, exist_ok=True)
-    path = os.path.join(output_dir, f"seedance_low_price_{uuid.uuid4().hex[:12]}.mp4")
+    path = os.path.join(output_dir, f"seedance_low_price_{uuid.uuid4().hex[:12]}.{file_extension}")
     part_path = f"{path}.part"
     last_error: Optional[Exception] = None
     force_direct = False
@@ -1123,6 +1126,7 @@ class Comfly_seedance25_standard_low_price:
             "return_last_frame": ("BOOLEAN", {"default": False}),
             "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647, "step": 1}),
             "skip_error": ("BOOLEAN", {"default": False}),
+            "draft": ("BOOLEAN", {"default": False}),
         })
         return {
             "required": {
@@ -1150,10 +1154,13 @@ class Comfly_seedance25_standard_low_price:
         resolution="480p",
         ratio="adaptive",
         seed=-1,
+        draft=False,
         **kwargs,
     ):
         try:
             cls._validate(model, prompt or "", seconds, resolution, ratio, seed)
+            if draft is not None and type(draft) is not bool:
+                raise SeedanceLowPriceError("draft must be boolean")
         except Exception as exc:
             return str(exc)
         return True
@@ -1285,11 +1292,16 @@ class Comfly_seedance25_standard_low_price:
     @staticmethod
     def build_payload(kwargs: Dict[str, Any], media: Dict[str, Any]) -> Dict[str, Any]:
         model = kwargs["model"]
+        draft = kwargs.get("draft", False)
+        if type(draft) is not bool:
+            raise SeedanceLowPriceError("draft must be boolean")
         metadata: Dict[str, Any] = {
-            "resolution": kwargs["resolution"],
+            "resolution": "480p" if draft else kwargs["resolution"],
             "ratio": "adaptive" if model in SEEDANCE25_I2V_MODELS else kwargs["ratio"],
             "generate_audio": bool(kwargs.get("generate_audio", True)),
         }
+        if draft:
+            metadata["draft"] = True
         if kwargs.get("return_last_frame", False):
             metadata["return_last_frame"] = True
         seed = int(kwargs.get("seed", -1))
@@ -1322,6 +1334,7 @@ class Comfly_seedance25_standard_low_price:
         return_last_frame: bool = False,
         seed: int = -1,
         skip_error: bool = False,
+        draft: bool = False,
         **kwargs,
     ):
         task_id = ""
@@ -1336,6 +1349,8 @@ class Comfly_seedance25_standard_low_price:
                         pass
 
             self._validate(model, prompt, seconds, resolution, ratio, seed)
+            if type(draft) is not bool:
+                raise SeedanceLowPriceError("draft must be boolean")
             config = resolve_config(api_config)
             request = {
                 "model": model,
@@ -1346,6 +1361,7 @@ class Comfly_seedance25_standard_low_price:
                 "generate_audio": generate_audio,
                 "return_last_frame": return_last_frame,
                 "seed": seed,
+                "draft": draft,
                 **kwargs,
             }
             media = self.collect_media(

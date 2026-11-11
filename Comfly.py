@@ -133,6 +133,9 @@ from .qwen21_animate_low_price_nodes import (
     T8ZhenzhenQwenImageGlobal21LowPrice,
     T8ZhenzhenAnimateMotionTransferLowPrice,
 )
+from .h3_turbo_low_price_nodes import (
+    KEYS as H3_TURBO_KEYS, CLASSES as H3_TURBO_CLASSES,
+)
 from .nb21_flux_vidu_low_price_nodes import (
     T8ZhenzhenNB21LowPrice,
     T8ZhenzhenFlux3ImageLowPrice,
@@ -155,6 +158,8 @@ from .nov05_low_price_nodes import (
     T8ZhenzhenImageG26, T8ZhenzhenZImage, T8ZhenzhenKreaV3,
     T8ZhenzhenHitem3DV2, T8ZhenzhenHitem3DPortrait21, T8ZhenzhenMeshy6Global,
 )
+from .tripo_low_price_nodes import TRIPO_CLASSES, TRIPO_KEYS
+from .seedream55_low_price_nodes import T8ZhenzhenSeedream55Image, T8ZhenzhenSeedream55Layers, T8ZhenzhenSeedance25DraftToVideo
 from .latest_image_audio_low_price_nodes import (
     Comfly_flowmusic_lowprice,
     Comfly_minimax_audio_lowprice,
@@ -26049,6 +26054,11 @@ class Comfly_gpt_image_2_official_ratio_stable:
 
 
 NODE_CLASS_MAPPINGS = {
+    **{H3_TURBO_KEYS[kind]: cls for kind, cls in H3_TURBO_CLASSES.items()},
+    "T8Zhenzhen_Seedream_55_Image_LowPrice": T8ZhenzhenSeedream55Image,
+    "T8Zhenzhen_Seedream_55_Layers_LowPrice": T8ZhenzhenSeedream55Layers,
+    "T8Zhenzhen_Seedance_25_Draft_To_Video_LowPrice": T8ZhenzhenSeedance25DraftToVideo,
+    **{TRIPO_KEYS[family]: cls for family, cls in TRIPO_CLASSES.items()},
     "T8Zhenzhen_API_Settings": T8Zhenzhen_API_Settings,
     "Zhenzhen_api_set": Zhenzhen_api_set,
     "Comfly_api_set": Comfly_api_set,
@@ -26256,6 +26266,18 @@ NODE_CLASS_MAPPINGS = {
 
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "T8Zhenzhen_Minimax_H3_ComfyUI_Max_LowPrice": "zhenzhen-MiniMax H3 ComfyUI Max 视频（平价小屋）",
+    "T8Zhenzhen_Minimax_H3_Image_LowPrice": "zhenzhen-MiniMax H3 Image 生成/编辑（平价小屋）",
+    "T8Zhenzhen_Qwen_Image_21_Turbo_LowPrice": "zhenzhen-Qwen Image 2.1 Turbo 生成/编辑（平价小屋）",
+    "T8Zhenzhen_Seedream_55_Image_LowPrice": "zhenzhen-Seedream / Dola 5.5 生成/编辑（平价小屋）",
+    "T8Zhenzhen_Seedream_55_Layers_LowPrice": "zhenzhen-Seedream / Dola 5.5 图像分层（平价小屋）",
+    "T8Zhenzhen_Seedance_25_Draft_To_Video_LowPrice": "zhenzhen-Seedance 2.5 草稿转高清（平价小屋）",
+    TRIPO_KEYS["generate"]: "zhenzhen-Tripo 3D生成（文本/单图/多视图·15合1·平价小屋）",
+    TRIPO_KEYS["texture"]: "zhenzhen-Tripo 重新贴图（v3.0/v2.5·平价小屋）",
+    TRIPO_KEYS["retopology"]: "zhenzhen-Tripo 重拓扑（v2/v1·平价小屋）",
+    TRIPO_KEYS["mesh"]: "zhenzhen-Tripo 网格分割/智能分割/补全（平价小屋）",
+    TRIPO_KEYS["convert"]: "zhenzhen-Tripo 格式转换（平价小屋）",
+    TRIPO_KEYS["splat"]: "zhenzhen-Tripo 图片转Splat（平价小屋）",
     "T8Zhenzhen_API_Settings": "Zhenzhen API Settings",
     "Zhenzhen_api_set": "Zhenzhen API Settings (Legacy)",
     "Comfly_api_set": "Zhenzhen API Settings (Legacy)",

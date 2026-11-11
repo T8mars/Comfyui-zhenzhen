@@ -28,6 +28,8 @@ from . import Comfly as _comfly
 IMAGE_TASK_TYPE = "COMFLY_IMAGE_FUTURE"
 VIDEO_TASK_TYPE = "COMFLY_VIDEO_FUTURE"
 ALLOWED_MODULES = {
+    "h3_turbo_low_price_nodes",
+    "seedream55_low_price_nodes",
     "Comfly",
     "aug22_low_price_nodes",
     "fal_batch_nodes",

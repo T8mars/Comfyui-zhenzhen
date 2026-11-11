@@ -1,0 +1,550 @@
+{
+  "id": "62e4982f-586b-5f8a-b40a-0cd796b41d26",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "T8Zhenzhen_API_Settings",
+      "pos": [
+        30,
+        1400
+      ],
+      "size": [
+        350,
+        174
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "apikey",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "links": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_API_Settings",
+        "cnr_id": "zhenzhen",
+        "ver": "2.3.8"
+      },
+      "widgets_values": [
+        "seedance_low_price",
+        "",
+        "",
+        false
+      ],
+      "title": "Zhenzhen API Settings（平价AI小屋）"
+    },
+    {
+      "id": 2,
+      "type": "T8Zhenzhen_Tripo_Generate_LowPrice",
+      "pos": [
+        450,
+        40
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "shape": 7,
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": null
+        },
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "local_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "tripo_task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "files_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "part_names_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Tripo_Generate_LowPrice",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "tripo-p-p1-text-to-3d",
+        "A simple low-poly toy robot with a square head, two arms and two legs.",
+        1000,
+        "false",
+        "false",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "api_default",
+        "views",
+        "",
+        "api_default",
+        "",
+        -1,
+        -1,
+        -1,
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "T8Zhenzhen_Tripo_Mesh_LowPrice",
+      "pos": [
+        1100,
+        40
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "shape": 7,
+          "link": 2
+        },
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "widget": {
+            "name": "model_url"
+          },
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": null
+        },
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "local_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "tripo_task_id",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "files_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "part_names_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Tripo_Mesh_LowPrice",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "tripo-mesh-segment-v1",
+        "",
+        "image",
+        "",
+        "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1",
+        "api_default",
+        "",
+        "api_default",
+        "api_default",
+        "",
+        "",
+        "quick_cap",
+        "",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "T8Zhenzhen_Tripo_Mesh_LowPrice",
+      "pos": [
+        1750,
+        40
+      ],
+      "size": [
+        550,
+        650
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "image4",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "api_config",
+          "type": "ZHENZHEN_SEEDANCE2_CONFIG",
+          "shape": 7,
+          "link": 3
+        },
+        {
+          "name": "tripo_segment_task_id",
+          "type": "STRING",
+          "widget": {
+            "name": "tripo_segment_task_id"
+          },
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": [
+            6,
+            7
+          ]
+        },
+        {
+          "name": "model_url",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "local_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "tripo_task_id",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "files_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "part_names_json",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "response",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "T8Zhenzhen_Tripo_Mesh_LowPrice",
+        "cnr_id": "zhenzhen"
+      },
+      "widgets_values": [
+        "tripo-mesh-complete",
+        "",
+        "image",
+        "",
+        "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1",
+        "api_default",
+        "",
+        "api_default",
+        "api_default",
+        "",
+        "",
+        "quick_cap",
+        "",
+        false,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Preview3D",
+      "pos": [
+        2400,
+        40
+      ],
+      "size": [
+        520,
+        440
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "shape": 7,
+          "type": "FILE_3D",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Preview3D",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 6,
+      "type": "SaveGLB",
+      "pos": [
+        2400,
+        760
+      ],
+      "size": [
+        370,
+        210
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "shape": 7,
+          "type": "FILE_3D",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveGLB",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "3d/tripo"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      1,
+      2,
+      4,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      2,
+      1,
+      1,
+      3,
+      4,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      4,
+      "ZHENZHEN_SEEDANCE2_CONFIG"
+    ],
+    [
+      4,
+      2,
+      1,
+      3,
+      5,
+      "STRING"
+    ],
+    [
+      5,
+      3,
+      4,
+      4,
+      5,
+      "STRING"
+    ],
+    [
+      6,
+      4,
+      0,
+      5,
+      0,
+      "FILE_3D"
+    ],
+    [
+      7,
+      4,
+      0,
+      6,
+      0,
+      "FILE_3D"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [
+        20,
+        20
+      ]
+    }
+  },
+  "version": 0.4
+}

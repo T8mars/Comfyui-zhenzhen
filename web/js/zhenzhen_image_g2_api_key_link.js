@@ -1,6 +1,18 @@
 import { app } from "../../../scripts/app.js";
 
 const LOW_PRICE_NODE_NAMES = new Set([
+    "T8Zhenzhen_Minimax_H3_ComfyUI_Max_LowPrice",
+    "T8Zhenzhen_Minimax_H3_Image_LowPrice",
+    "T8Zhenzhen_Qwen_Image_21_Turbo_LowPrice",
+    "T8Zhenzhen_Seedream_55_Image_LowPrice",
+    "T8Zhenzhen_Seedream_55_Layers_LowPrice",
+    "T8Zhenzhen_Seedance_25_Draft_To_Video_LowPrice",
+    "T8Zhenzhen_Tripo_Generate_LowPrice",
+    "T8Zhenzhen_Tripo_Texture_LowPrice",
+    "T8Zhenzhen_Tripo_Retopology_LowPrice",
+    "T8Zhenzhen_Tripo_Mesh_LowPrice",
+    "T8Zhenzhen_Tripo_Convert_LowPrice",
+    "T8Zhenzhen_Tripo_Splat_LowPrice",
     "Comfly_seedance2_low_price",
     "Comfly_seedance25_standard_low_price",
     "Comfly_sd2_seedream_v5_pro_lowprice",
