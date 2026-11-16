@@ -1,4 +1,5 @@
 import { app } from "../../../scripts/app.js";
+import { setZhenzhenInputVisible, setZhenzhenWidgetVisible } from "./dynamic_widget_ui.js";
 
 const G_V2_NODE_NAME = "Comfly_zhenzhen_image_g_v2_lowprice";
 const NB_NODE_NAME = "Comfly_zhenzhen_image_nb_lowprice";
@@ -78,25 +79,7 @@ function updateInteger(widget, maximum) {
 }
 
 function setWidgetVisible(widget, visible) {
-    if (!widget) {
-        return;
-    }
-    if (visible) {
-        if (widget.zhenzhenOriginalType !== undefined) {
-            widget.type = widget.zhenzhenOriginalType;
-            widget.computeSize = widget.zhenzhenOriginalComputeSize;
-            delete widget.zhenzhenOriginalType;
-            delete widget.zhenzhenOriginalComputeSize;
-        }
-        return;
-    }
-    if (widget.type === "hidden") {
-        return;
-    }
-    widget.zhenzhenOriginalType = widget.type;
-    widget.zhenzhenOriginalComputeSize = widget.computeSize;
-    widget.type = "hidden";
-    widget.computeSize = () => [0, -4];
+    setZhenzhenWidgetVisible(widget, visible);
 }
 
 function resizeNode(node) {
@@ -148,7 +131,7 @@ function refreshV31Node(node) {
             model !== "zhenzhen-video-v31-lite"
             && !(model === "zhenzhen-video-v31-quality" && input.name === "image3")
         );
-        input.hidden = !allowed && input.link == null;
+        setZhenzhenInputVisible(node, input, allowed);
     }
     node.setDirtyCanvas?.(true, true);
 }

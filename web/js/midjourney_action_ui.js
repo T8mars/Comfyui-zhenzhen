@@ -1,7 +1,7 @@
 import { app } from "../../../scripts/app.js";
+import { setZhenzhenInputVisible, setZhenzhenWidgetVisible } from "./dynamic_widget_ui.js";
 
 const NODE_NAME = "Comfly_midjourney_lowprice";
-const CONVERTED_WIDGET_PREFIX = "converted-widget";
 const ALWAYS_VISIBLE = new Set(["operation", "skip_error"]);
 const IMAGE_FIELDS = [
     "image1", "image_url1",
@@ -87,31 +87,11 @@ const MANAGED_FIELDS = new Set(
     Object.values(ACTION_FIELDS).flat().concat([...ALWAYS_VISIBLE]),
 );
 
-function isConvertedWidget(widget) {
-    return (
-        String(widget?.type ?? "").startsWith(CONVERTED_WIDGET_PREFIX)
-        || Object.prototype.hasOwnProperty.call(widget ?? {}, "origType")
-    );
-}
-
 function setWidgetVisible(widget, visible) {
-    if (!widget || !MANAGED_FIELDS.has(widget.name) || isConvertedWidget(widget)) {
+    if (!widget || !MANAGED_FIELDS.has(widget.name)) {
         return;
     }
-    if (!widget.zhenzhenMidjourneyOriginal) {
-        widget.zhenzhenMidjourneyOriginal = {
-            type: widget.type,
-            computeSize: widget.computeSize,
-        };
-    }
-    const original = widget.zhenzhenMidjourneyOriginal;
-    if (visible) {
-        widget.type = original.type;
-        widget.computeSize = original.computeSize;
-    } else {
-        widget.type = "hidden";
-        widget.computeSize = () => [0, -4];
-    }
+    setZhenzhenWidgetVisible(widget, visible);
 }
 
 function activeFields(node) {
@@ -146,8 +126,7 @@ function refreshNode(node) {
         if (!MANAGED_FIELDS.has(input.name)) {
             continue;
         }
-        const connected = input.link != null;
-        input.hidden = !fields.has(input.name) && !connected;
+        setZhenzhenInputVisible(node, input, fields.has(input.name));
     }
     requestAnimationFrame(() => {
         const computed = node.computeSize?.();

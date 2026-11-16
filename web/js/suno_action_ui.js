@@ -1,7 +1,7 @@
 import { app } from "../../../scripts/app.js";
+import { setZhenzhenInputVisible, setZhenzhenWidgetVisible } from "./dynamic_widget_ui.js";
 
 const SUNO_NODE_NAME = "Comfly_suno_music_lowprice";
-const CONVERTED_WIDGET_PREFIX = "converted-widget";
 const ALWAYS_VISIBLE = new Set(["operation", "skip_error"]);
 const AUDIO_FIELDS = [
     "audio1",
@@ -101,26 +101,7 @@ function setWidgetVisible(widget, visible) {
     if (!widget || !MANAGED_FIELDS.has(widget.name)) {
         return;
     }
-    const isConvertedInput = (
-        String(widget.type ?? "").startsWith(CONVERTED_WIDGET_PREFIX)
-        || Object.prototype.hasOwnProperty.call(widget, "origType")
-    );
-    if (isConvertedInput) {
-        return;
-    }
-    if (!widget.zhenzhenSunoOriginal) {
-        widget.zhenzhenSunoOriginal = {
-            type: widget.type,
-            computeSize: widget.computeSize,
-        };
-    }
-    if (visible) {
-        widget.type = widget.zhenzhenSunoOriginal.type;
-        widget.computeSize = widget.zhenzhenSunoOriginal.computeSize;
-    } else {
-        widget.type = "hidden";
-        widget.computeSize = () => [0, -4];
-    }
+    setZhenzhenWidgetVisible(widget, visible);
 }
 
 function widgetByName(node, name) {
@@ -188,7 +169,7 @@ function refreshSunoNode(node) {
         if (!MANAGED_FIELDS.has(input.name)) {
             continue;
         }
-        input.hidden = !visibleFields.has(input.name) && input.link == null;
+        setZhenzhenInputVisible(node, input, visibleFields.has(input.name));
     }
 
     requestAnimationFrame(() => {

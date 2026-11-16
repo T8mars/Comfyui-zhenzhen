@@ -57,12 +57,6 @@ function install(node, name) {
     if (node[INSTALLED]) return;
     node[INSTALLED] = true;
     enableZhenzhenConcreteInputVisibility(node);
-    const compute = node.computeSize;
-    node.computeSize = function () {
-        const inputs = [...(this.inputs ?? [])];
-        try { this.inputs = inputs.filter((input) => !input.hidden || input.link != null); return compute?.apply(this, arguments); }
-        finally { this.inputs = inputs; }
-    };
     for (const key of ["model", "mode", "size", "frame_size", "output_format"]) {
         const widget = node.widgets?.find((item) => item.name === key);
         if (!widget) continue;

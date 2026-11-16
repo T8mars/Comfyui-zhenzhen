@@ -81,17 +81,6 @@ function install(node, name) {
     if (node[INSTALLED]) return;
     node[INSTALLED] = true;
     enableZhenzhenConcreteInputVisibility(node);
-    const compute = node.computeSize;
-    node.computeSize = function () {
-        // Modern input setters mutate arrays, so restore a separate complete copy.
-        const all = [...(this.inputs ?? [])];
-        try {
-            this.inputs = all.filter((input) => !input.hidden || input.link != null);
-            return compute?.apply(this, arguments);
-        } finally {
-            this.inputs = all;
-        }
-    };
     for (const key of ["reference_type", "source_mode", "model", "video_urls"]) {
         const widget = node.widgets?.find((item) => item.name === key);
         if (!widget) continue;

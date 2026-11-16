@@ -60,17 +60,6 @@ function schedule(node, kind) {
 function install(node, kind) {
     if (node[INSTALLED]) return;
     node[INSTALLED] = true;
-    const compute = node.computeSize;
-    node.computeSize = function () {
-        // The modern inputs setter mutates arrays, so retain a complete copy.
-        const all = [...(this.inputs ?? [])];
-        try {
-            this.inputs = all.filter((input) => !input.hidden || input.link != null);
-            return compute?.apply(this, arguments);
-        } finally {
-            this.inputs = all;
-        }
-    };
     for (const name of ["model", "advanced_mode", "voice_model"]) {
         const widget = node.widgets?.find((item) => item.name === name);
         if (!widget) continue;
