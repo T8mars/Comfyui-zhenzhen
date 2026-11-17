@@ -96,6 +96,14 @@ SEEDANCE25_MODELS = [
     "seedance-2.5-global-standard-i2v",
     "seedance-2.5-global-standard-multi",
 ]
+SEEDANCE25_FLASH_MODELS = [
+    f"seedance-2.5-{region}flash-{mode}"
+    for region in ("", "global-") for mode in ("t2v", "i2v", "multi")
+]
+SEEDANCE25_MODELS += SEEDANCE25_FLASH_MODELS
+SEEDANCE25_T2V_MODELS += [model for model in SEEDANCE25_FLASH_MODELS if model.endswith("-t2v")]
+SEEDANCE25_I2V_MODELS += [model for model in SEEDANCE25_FLASH_MODELS if model.endswith("-i2v")]
+SEEDANCE25_MULTI_MODELS += [model for model in SEEDANCE25_FLASH_MODELS if model.endswith("-multi")]
 SEEDANCE25_SECONDS = ["-1"] + [str(value) for value in range(4, 31)]
 SEEDANCE25_RESOLUTIONS = ["480p", "720p", "1080p", "2k", "4k", "native1080p"]
 SEEDANCE25_MAX_IMAGES = 30
@@ -1109,6 +1117,14 @@ class Comfly_seedance2_low_price:
             )
 
 
+def _seedance25_flash_contract():
+    if __package__:
+        from . import seedance25_flash_contracts
+    else:
+        import seedance25_flash_contracts
+    return seedance25_flash_contracts
+
+
 class Comfly_seedance25_standard_low_price:
     @classmethod
     def INPUT_TYPES(cls):
@@ -1127,6 +1143,7 @@ class Comfly_seedance25_standard_low_price:
             "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647, "step": 1}),
             "skip_error": ("BOOLEAN", {"default": False}),
             "draft": ("BOOLEAN", {"default": False}),
+            "omni_reference_task_type": (["auto", "reference", "edit", "extend"], {"default": "auto"}),
         })
         return {
             "required": {
@@ -1158,9 +1175,11 @@ class Comfly_seedance25_standard_low_price:
         **kwargs,
     ):
         try:
-            cls._validate(model, prompt or "", seconds, resolution, ratio, seed)
+            cls._validate(model, prompt or "", seconds, resolution, ratio, seed, require_prompt=prompt is not None)
             if draft is not None and type(draft) is not bool:
                 raise SeedanceLowPriceError("draft must be boolean")
+            if model in SEEDANCE25_FLASH_MODELS:
+                _seedance25_flash_contract().validate({"model": model, "resolution": resolution, "ratio": ratio, "draft": draft, **kwargs})
         except Exception as exc:
             return str(exc)
         return True
@@ -1173,6 +1192,7 @@ class Comfly_seedance25_standard_low_price:
         resolution: str,
         ratio: str,
         seed: Any,
+        require_prompt: bool = True,
     ) -> None:
         if model not in SEEDANCE25_MODELS:
             raise SeedanceLowPriceError(f"Unsupported Seedance 2.5 model: {model}")
@@ -1187,7 +1207,7 @@ class Comfly_seedance25_standard_low_price:
             raise SeedanceLowPriceError(
                 f"Seedance prompt must not exceed {PROMPT_MAX_LENGTH} characters"
             )
-        if model in SEEDANCE25_T2V_MODELS + SEEDANCE25_MULTI_MODELS and not text:
+        if require_prompt and model in SEEDANCE25_T2V_MODELS + SEEDANCE25_MULTI_MODELS and not text:
             raise SeedanceLowPriceError("prompt is required for Seedance 2.5 T2V and Multi")
         if int(seed) < -1 or int(seed) > 2147483647:
             raise SeedanceLowPriceError("seed must be between -1 and 2147483647")
@@ -1219,6 +1239,19 @@ class Comfly_seedance25_standard_low_price:
         on_progress: Optional[Callable[[float], None]] = None,
     ) -> Dict[str, Any]:
         model = kwargs.get("model")
+        if model in SEEDANCE25_FLASH_MODELS:
+            encoded = _seedance25_flash_contract().encode_media(kwargs)
+            media = {"images": []} if model.endswith("-i2v") else {"content": []}
+            for completed, (family, index, data, extension, mime) in enumerate(encoded, start=1):
+                url = self._upload(data, f"seedance25_flash_{family}_{index}.{extension}", mime, config)
+                if model.endswith("-i2v"):
+                    media["images"].append(url)
+                else:
+                    field = family + "_url"
+                    media["content"].append({"type": field, field: {"url": url}})
+                if on_progress:
+                    on_progress(completed / len(encoded))
+            return media
         image_slots = self._connected(kwargs, "image", SEEDANCE25_MAX_IMAGES)
         video_slots = self._connected(kwargs, "video", SEEDANCE25_MAX_VIDEOS)
         audio_slots = self._connected(kwargs, "audio", SEEDANCE25_MAX_AUDIOS)
@@ -1295,6 +1328,8 @@ class Comfly_seedance25_standard_low_price:
         draft = kwargs.get("draft", False)
         if type(draft) is not bool:
             raise SeedanceLowPriceError("draft must be boolean")
+        if model in SEEDANCE25_FLASH_MODELS:
+            _seedance25_flash_contract().validate(kwargs)
         metadata: Dict[str, Any] = {
             "resolution": "480p" if draft else kwargs["resolution"],
             "ratio": "adaptive" if model in SEEDANCE25_I2V_MODELS else kwargs["ratio"],
@@ -1320,6 +1355,11 @@ class Comfly_seedance25_standard_low_price:
             payload["images"] = media["images"][:2]
         elif model in SEEDANCE25_MULTI_MODELS:
             metadata["content"] = media["content"]
+            task_type = kwargs.get("omni_reference_task_type", "auto")
+            if task_type not in ("auto", "reference", "edit", "extend"):
+                raise SeedanceLowPriceError("Unsupported omni_reference_task_type")
+            if task_type != "auto":
+                metadata["omni_reference_task_type"] = task_type
         return payload
 
     def generate(

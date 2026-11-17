@@ -32,7 +32,7 @@ function mediaInput(name) {
     return { family: match[1], index: Number(match[2]) };
 }
 
-function nextVisibleSlots(node) {
+function nextVisibleSlots(node, limits) {
     const highestConnected = { image: 0, video: 0, audio: 0 };
     for (const input of node.inputs ?? []) {
         const media = mediaInput(input.name);
@@ -44,14 +44,14 @@ function nextVisibleSlots(node) {
         }
     }
     return Object.fromEntries(
-        Object.entries(MEDIA_LIMITS).map(([family, limit]) => [
+        Object.entries(limits).map(([family, limit]) => [
             family,
             Math.min(highestConnected[family] + 1, limit),
         ]),
     );
 }
 
-function inputAllowed(model, name, nextVisible) {
+function inputAllowed(model, name, nextVisible, limits) {
     if (name === "api_config") {
         return true;
     }
@@ -62,7 +62,7 @@ function inputAllowed(model, name, nextVisible) {
         const media = mediaInput(name);
         return Boolean(
             media
-            && media.index <= MEDIA_LIMITS[media.family]
+            && media.index <= limits[media.family]
             && media.index <= nextVisible[media.family]
         );
     }
@@ -71,13 +71,28 @@ function inputAllowed(model, name, nextVisible) {
 
 function refreshNode(node) {
     const model = String(widgetByName(node, "model")?.value ?? DEFAULT_MODEL);
-    const nextVisible = nextVisibleSlots(node);
+    const flash = model.includes("-flash-");
+    const limits = flash ? { image: 10, video: 5, audio: 5 } : MEDIA_LIMITS;
+    const nextVisible = nextVisibleSlots(node, limits);
+    const resolution = widgetByName(node, "resolution");
+    if (resolution) {
+        const values = flash ? ["480p", "720p"] : ["480p", "720p", "1080p", "2k", "4k", "native1080p"];
+        resolution.options ??= {};
+        resolution.options.values = values;
+        if (!values.includes(resolution.value) && !Object.hasOwn(resolution, "origType") && !node.inputs?.some((input) => input.name === "resolution" && input.link != null)) resolution.value = "480p";
+    }
+    const draft = widgetByName(node, "draft");
+    if (flash && draft && !Object.hasOwn(draft, "origType") && !node.inputs?.some((input) => input.name === "draft" && input.link != null)) draft.value = false;
+    setZhenzhenWidgetVisible(draft, !flash);
+    setZhenzhenWidgetVisible(widgetByName(node, "omni_reference_task_type"), model.endsWith("-multi"));
+    const ratio = widgetByName(node, "ratio");
+    if (model.endsWith("-i2v") && ratio && !Object.hasOwn(ratio, "origType") && !node.inputs?.some((input) => input.name === "ratio" && input.link != null)) ratio.value = "adaptive";
     setZhenzhenWidgetVisible(widgetByName(node, "ratio"), !model.endsWith("-i2v"));
     for (const input of node.inputs ?? []) {
         setZhenzhenInputVisible(
             node,
             input,
-            inputAllowed(model, input.name, nextVisible),
+            inputAllowed(model, input.name, nextVisible, limits),
         );
     }
     resizeZhenzhenNode(node, 430);

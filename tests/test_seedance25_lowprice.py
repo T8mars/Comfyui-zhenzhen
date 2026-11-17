@@ -22,7 +22,7 @@ IMAGE = torch.zeros((1, 8, 8, 3), dtype=torch.float32)
 
 class Seedance25LowPriceContractTests(unittest.TestCase):
     def test_exact_model_catalog_and_material_capacity(self):
-        self.assertEqual(nodes.SEEDANCE25_MODELS, [
+        self.assertEqual(nodes.SEEDANCE25_MODELS[:6], [
             "seedance-2.5-standard-t2v",
             "seedance-2.5-standard-i2v",
             "seedance-2.5-standard-multi",
@@ -94,7 +94,7 @@ class Seedance25LowPriceContractTests(unittest.TestCase):
         )
 
     def test_native1080p_is_forwarded_for_all_six_models(self):
-        for model in nodes.SEEDANCE25_MODELS:
+        for model in nodes.SEEDANCE25_MODELS[:6]:
             with self.subTest(model=model):
                 media = {}
                 prompt = "valid prompt"
@@ -463,7 +463,7 @@ class Seedance25LowPriceWorkflowTests(unittest.TestCase):
             self.assertEqual(node["widgets_values"][2:5], ["4", "480p", expected_ratio])
             self.assertEqual(len(node["inputs"]), 51)
             self.assertIsNotNone(next(value for value in node["inputs"] if value["name"] == "api_config")["link"])
-        self.assertEqual(covered, set(nodes.SEEDANCE25_MODELS))
+        self.assertEqual(covered, set(nodes.SEEDANCE25_MODELS[:6]))
 
     def test_examples_connect_mode_specific_materials(self):
         for path in self.paths:
@@ -490,7 +490,7 @@ class Seedance25LowPriceWorkflowTests(unittest.TestCase):
         self.assertIn('const NODE_NAME = "Comfly_seedance25_standard_low_price"', dynamic_ui)
         self.assertIn("const MEDIA_LIMITS = { image: 30, video: 10, audio: 10 }", dynamic_ui)
         self.assertIn('widgetByName(node, "ratio")', dynamic_ui)
-        self.assertIn("function nextVisibleSlots(node)", dynamic_ui)
+        self.assertIn("function nextVisibleSlots(node, limits)", dynamic_ui)
         self.assertIn("media.index <= nextVisible[media.family]", dynamic_ui)
         self.assertIn('"Comfly_seedance25_standard_low_price"', api_link)
 

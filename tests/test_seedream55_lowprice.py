@@ -189,11 +189,11 @@ class Seedream55Tests(unittest.TestCase):
 class DraftTests(unittest.TestCase):
     def test_legacy_prefix_catalog_and_default_false_remain_compatible(self):
         schema = legacy.Comfly_seedance25_standard_low_price.INPUT_TYPES()
-        self.assertEqual(list(schema["optional"])[-5:], ["generate_audio","return_last_frame","seed","skip_error","draft"])
+        self.assertEqual(list(schema["optional"])[-6:-1], ["generate_audio","return_last_frame","seed","skip_error","draft"])
         self.assertFalse(schema["optional"]["draft"][1]["default"])
-        self.assertEqual(len(legacy.SEEDANCE25_MODELS),6)
+        self.assertEqual(len(legacy.SEEDANCE25_MODELS),12)
         self.assertEqual(legacy.Comfly_seedance25_standard_low_price.RETURN_NAMES,("video","video_url","task_id","response"))
-        for model in legacy.SEEDANCE25_MODELS:
+        for model in legacy.SEEDANCE25_MODELS[:6]:
             values = {"model":model,"prompt":"valid prompt","seconds":"4","resolution":"native1080p","ratio":"16:9","seed":-1}
             media = {"images":[URL]} if model.endswith("i2v") else {"content":[]} if model.endswith("multi") else {}
             original = legacy.Comfly_seedance25_standard_low_price.build_payload(values,media)

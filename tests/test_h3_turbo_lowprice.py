@@ -179,7 +179,7 @@ class H3TurboTests(unittest.TestCase):
             submit.assert_not_called()
 
     def test_eight_blank_key_workflows_cover_native_saving_and_all_modes(self):
-        paths=[p for p in (ROOT/"workflow").glob("*.json") if p.name.startswith(("zhenzhen-minimax-h3-comfyui-max-","zhenzhen-minimax-h3-image-","zhenzhen-qwen-image-2.1-turbo-"))]
+        paths=[p for p in (ROOT/"workflow").glob("*.json") if p.name.startswith(("zhenzhen-minimax-h3-comfyui-max-","zhenzhen-minimax-h3-image-","zhenzhen-qwen-image-2.1-turbo-")) and "-10020-" not in p.name and "-10021-" not in p.name]
         self.assertEqual(len(paths),8)
         for path in paths:
             graph=json.loads(path.read_text(encoding="utf-8"))

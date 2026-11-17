@@ -39,7 +39,7 @@ function refresh(node, key) {
             if (!allowed.includes(format.value)) { format.value = "png"; format.callback?.("png"); }
         }
     } else if (key === "Comfly_seedance25_standard_low_price") {
-        setZhenzhenWidgetVisible(widget("resolution"), !value("draft"));
+        setZhenzhenWidgetVisible(widget("resolution"), String(value("model")).includes("-flash-") || !value("draft"));
     }
     resizeZhenzhenNode(node, key === "T8Zhenzhen_Seedance_25_Draft_To_Video_LowPrice" ? 430 : key === "Comfly_seedance25_standard_low_price" ? 440 : 500);
 }
