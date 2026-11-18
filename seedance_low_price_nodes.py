@@ -1613,6 +1613,8 @@ def submit_image_task(
     payload: Dict[str, Any],
     config: Dict[str, Any],
     sleep: Callable[[float], None] = time.sleep,
+    *,
+    retry_server_errors: bool = True,
 ) -> Tuple[str, Dict[str, Any]]:
     url = f"{config['base_url']}/v1/image/generations"
     last_error = "unknown error"
@@ -1638,6 +1640,8 @@ def submit_image_task(
 
         data = _response_json(response)
         message = extract_error_message(data, response.text[:300])
+        if response.status_code >= 500 and not retry_server_errors:
+            raise SeedanceLowPriceError(f"Image submit returned HTTP {response.status_code}; check the provider task list before retrying: {message}")
         if response.status_code == 429 or response.status_code >= 500:
             last_error = f"HTTP {response.status_code}: {message}"
             continue
@@ -8111,6 +8115,8 @@ def submit_audio_task(
     payload: Dict[str, Any],
     config: Dict[str, Any],
     sleep: Callable[[float], None] = time.sleep,
+    *,
+    retry_server_errors: bool = True,
 ) -> Tuple[str, Dict[str, Any]]:
     url = f"{config['base_url']}/v1/audio/generations"
     last_error = "unknown error"
@@ -8136,6 +8142,8 @@ def submit_audio_task(
 
         data = _response_json(response)
         message = extract_error_message(data, response.text[:300])
+        if response.status_code >= 500 and not retry_server_errors:
+            raise SeedanceLowPriceError(f"Audio submit returned HTTP {response.status_code}; check the provider task list before retrying: {message}")
         if response.status_code == 429 or response.status_code >= 500:
             last_error = f"HTTP {response.status_code}: {message}"
             continue
@@ -8264,10 +8272,17 @@ def extract_audio_url(response: Dict[str, Any]) -> str:
 
 
 def audio_bytes_to_comfy(
-    data: bytes, output_format: str, expected_sample_rate: int
+    data: bytes, output_format: str, expected_sample_rate: int, pcm_channels: Optional[int] = None
 ) -> Dict[str, Any]:
     if not data:
         raise SeedanceLowPriceError("Downloaded Seed Audio result is empty")
+
+    if output_format == "pcm" and pcm_channels is not None:
+        if pcm_channels not in (1, 2) or len(data) % (2 * pcm_channels):
+            raise SeedanceLowPriceError("Invalid signed 16-bit PCM channel layout")
+        samples = np.frombuffer(data, dtype="<i2").astype(np.float32) / 32768.0
+        waveform = torch.from_numpy(samples.reshape(-1, pcm_channels).T.copy()).unsqueeze(0)
+        return {"waveform": waveform, "sample_rate": int(expected_sample_rate)}
 
     if output_format == "wav":
         try:
@@ -8355,6 +8370,7 @@ def download_audio(
     output_format: str,
     expected_sample_rate: int,
     max_retries: int = 3,
+    pcm_channels: Optional[int] = None,
 ) -> Dict[str, Any]:
     last_error: Optional[Exception] = None
     for attempt in range(max_retries):
@@ -8369,9 +8385,9 @@ def download_audio(
                 timeout=media_download_timeout(300),
             )
             response.raise_for_status()
-            return audio_bytes_to_comfy(
-                response.content, output_format, expected_sample_rate
-            )
+            if output_format == "pcm" and pcm_channels is not None:
+                return audio_bytes_to_comfy(response.content, output_format, expected_sample_rate, pcm_channels=pcm_channels)
+            return audio_bytes_to_comfy(response.content, output_format, expected_sample_rate)
         except Exception as exc:
             last_error = exc
         finally:

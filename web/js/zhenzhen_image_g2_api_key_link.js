@@ -1,6 +1,9 @@
 import { app } from "../../../scripts/app.js";
 
 const LOW_PRICE_NODE_NAMES = new Set([
+    "T8Zhenzhen_Kling_V4_Image_LowPrice",
+    "T8Zhenzhen_MAI_Image_27_LowPrice",
+    "T8Zhenzhen_Qwen_Audio_31_TTS_LowPrice",
     "T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_LowPrice",
     "T8Zhenzhen_Minimax_H3_ComfyUI_Wuxi_LowPrice",
     "T8Zhenzhen_Minimax_H3_ComfyUI_Max_10020_LowPrice",

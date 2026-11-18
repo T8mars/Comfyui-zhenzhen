@@ -138,6 +138,8 @@ from .h3_turbo_low_price_nodes import (
 )
 from .h3_comfy_low_price_nodes import KEYS as H3_COMFY_KEYS, CLASSES as H3_COMFY_CLASSES
 from .doubao_tts_low_price_nodes import KEY as DOUBAO_TTS_KEY, T8ZhenzhenDoubaoSeedTTS20
+from .nov19_low_price_nodes import KEYS as NOV19_KEYS, CLASSES as NOV19_CLASSES
+from .llm_low_price_presets import PRESETS as LOW_PRICE_LLM_PRESETS
 from .nb21_flux_vidu_low_price_nodes import (
     T8ZhenzhenNB21LowPrice,
     T8ZhenzhenFlux3ImageLowPrice,
@@ -20337,12 +20339,16 @@ class Comfly_LLm_API:
                 "role": ("STRING", {"multiline": True, "default": "You are a helpful assistant"}),
                 "prompt": ("STRING", {"multiline": True, "default": "describe the image"}),
                 "temperature": ("FLOAT", {"default": 0.6}),
-                "seed": ("INT", {"default": 100}),
+                "seed": ("INT", {"default": 100, "control_after_generate": True}),
             },
             "optional": {
                 "ref_image": ("IMAGE",),
                 "video": ("VIDEO",),
-                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"})
+                "skip_error": ("BOOLEAN", {"default": False, "tooltip": "开启后，节点失败时不报错、按旧行为返回默认空结果；关闭时（默认）失败直接抛出错误。"}),
+                "model_preset": (LOW_PRICE_LLM_PRESETS, {"default": "custom"}),
+                "api_config": ("ZHENZHEN_SEEDANCE2_CONFIG",),
+                "stream": ("BOOLEAN", {"default": False}),
+                "max_tokens": ("INT", {"default": 512, "min": 1, "max": 32768}),
             }
         }
 
@@ -20351,7 +20357,15 @@ class Comfly_LLm_API:
     FUNCTION = "Zhenzhen_run_llmapi"
     CATEGORY = "zhenzhen/LLM"
 
-    def Zhenzhen_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None, skip_error=False):
+    def Zhenzhen_run_llmapi(self, api_baseurl, api_key, model, role, prompt, temperature, seed, ref_image=None, video=None, skip_error=False, model_preset="custom", api_config=None, stream=False, max_tokens=512):
+        if model_preset != "custom":
+            from .llm_low_price_presets import call_g62
+            try:
+                return (call_g62(model_preset, prompt, role, api_key, api_config, ref_image, video, stream, max_tokens),)
+            except Exception:
+                if not skip_error:
+                    raise
+                return ("",)
         if OpenAI is None:
             if not skip_error:
                 raise RuntimeError(f"[Comfly_LLm_API] Error: OpenAI package not installed. Please install it with ")
@@ -26056,6 +26070,7 @@ class Comfly_gpt_image_2_official_ratio_stable:
 
 
 NODE_CLASS_MAPPINGS = {
+    **{NOV19_KEYS[kind]: cls for kind, cls in NOV19_CLASSES.items()},
     **{H3_COMFY_KEYS[kind]: cls for kind, cls in H3_COMFY_CLASSES.items()},
     DOUBAO_TTS_KEY: T8ZhenzhenDoubaoSeedTTS20,
     **{H3_TURBO_KEYS[kind]: cls for kind, cls in H3_TURBO_CLASSES.items()},
@@ -26270,6 +26285,9 @@ NODE_CLASS_MAPPINGS = {
 
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    NOV19_KEYS["kling"]: "zhenzhen-Kling 4 图片/组图（平价小屋）",
+    NOV19_KEYS["mai"]: "zhenzhen-MAI Image 2.7/Flash 生成/编辑（平价小屋）",
+    NOV19_KEYS["audio"]: "zhenzhen-Qwen Audio 3.1 TTS（平价小屋）",
     H3_COMFY_KEYS["charswap"]: "zhenzhen-MiniMax H3 角色替换（平价小屋）",
     H3_COMFY_KEYS["wuxi"]: "zhenzhen-MiniMax H3 武戏（平价小屋）",
     H3_COMFY_KEYS["wf"]: "zhenzhen-MiniMax H3 WF漫剧 10020（平价小屋）",

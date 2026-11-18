@@ -41,6 +41,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261119（v2.6.1）
+
+- 新增平价小屋独立节点：Kling 4 图片／组图、MAI Image 2.7／Flash 生成与编辑、Qwen Audio 3.1 TTS。Kling 返回的图片逐张输出，MAI 提供并发版，Qwen 的音色与参考音频入口按模型切换。
+- 原 Zhenzhen LLM API 追加 G6.2 Astra／Sol 小屋预设，保留手填模型和原工作流默认行为。本次 8 个模型共 9 次实际请求验证通过，附 15 份空密钥示例。详见 [模型与工作流说明](docs/nov19-lowprice.md)。
+
 ### 20261117（v2.6.0）
 
 - 原Seedance 2.5节点追加国内／海外Flash的t2v、i2v、multi六个模型；按模型切换分辨率、样片开关和素材数量，保留Standard原有控件顺序与30图／10视频／10音频上限。
