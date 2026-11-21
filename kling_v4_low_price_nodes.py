@@ -308,34 +308,34 @@ def named_results(final):
     raise Error("Kling 4 auxiliary response has no result_text")
 
 
-def submit_kling_task(payload, config, endpoint="video/generations"):
+def submit_kling_task(payload, config, endpoint="video/generations", *, label="Kling 4"):
     # A lost creation response must not replay generation or reusable-ID creation.
     try:
         response = api._get_session().post(f"{config['base_url']}/v1/{endpoint}",
             headers=api._headers(config["api_key"]), json=payload, timeout=config.get("timeout", 60))
     except api.requests.RequestException as error:
-        raise Error(f"Kling 4 submission could not be confirmed ({type(error).__name__}); not retried. Check the website task list.") from None
+        raise Error(f"{label} submission could not be confirmed ({type(error).__name__}); not retried. Check the website task list.") from None
     try:
         data = api._response_json(response)
         if not 200 <= response.status_code < 300:
             message = api.extract_error_message(data, "request rejected")
-            raise Error(f"Kling 4 submit rejected (HTTP {response.status_code}): {message}; not retried")
+            raise Error(f"{label} submit rejected (HTTP {response.status_code}): {message}; not retried")
         task = data.get("data") if isinstance(data, dict) else None
         task_id = (data.get("id") or data.get("task_id")) if isinstance(data, dict) else None
         if not task_id and isinstance(task, dict):
             task_id = task.get("id") or task.get("task_id")
         if not task_id:
-            raise Error("Kling 4 submit response has no task ID; not retried. Check the website task list.")
+            raise Error(f"{label} submit response has no task ID; not retried. Check the website task list.")
         return str(task_id), data
     finally:
         response.close()
 
 
-def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=time.monotonic, endpoint="video/generations"):
+def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=time.monotonic, endpoint="video/generations", *, label="Kling 4"):
     started, failures = clock(), 0
     while True:
         if clock() - started >= config.get("max_poll_time", 1800):
-            raise Error("Kling 4 polling timed out; the upstream task may still be running")
+            raise Error(f"{label} polling timed out; the upstream task may still be running")
         sleep(config.get("poll_interval", 4))
         response = None
         try:
@@ -343,7 +343,7 @@ def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=t
                 headers=api._headers(config["api_key"], json_content=False), timeout=30)
             if response.status_code != 200:
                 if 400 <= response.status_code < 500 and response.status_code not in (408, 429):
-                    raise Error(f"Kling 4 polling rejected (HTTP {response.status_code})")
+                    raise Error(f"{label} polling rejected (HTTP {response.status_code})")
                 raise api.requests.RequestException("Transient task query failure")
             data = api._response_json(response)
             record = data.get("data") if isinstance(data, dict) else None
@@ -354,7 +354,7 @@ def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=t
         except api.requests.RequestException:
             failures += 1
             if failures >= 6:
-                raise Error("Kling 4 polling repeatedly failed; no new task was submitted") from None
+                raise Error(f"{label} polling repeatedly failed; no new task was submitted") from None
             sleep(min(failures * 2, 10))
             continue
         finally:
@@ -369,7 +369,7 @@ def poll_kling_task(task_id, config, on_progress=None, sleep=time.sleep, clock=t
             return data
         if status in {"FAILURE", "FAILED", "CANCELED", "CANCELLED"}:
             reason = record.get("fail_reason") or api.extract_error_message(record, "upstream task failed")
-            raise Error(f"Kling 4 task failed: {reason}")
+            raise Error(f"{label} task failed: {reason}")
 
 
 def upload_prepared(prepared, config, progress):

@@ -76,7 +76,7 @@ def poll_3d(identifier, config, sleep=time.sleep, clock=time.monotonic):
         if status.strip().upper() in {"SUCCESS", "SUCCEEDED", "COMPLETED"}:
             return data
         if status.strip().upper() in {"FAILURE", "FAILED", "CANCELED", "CANCELLED"}:
-            raise Error(api.extract_error_message(record, "3D generation failed"))
+            raise Error(record.get("fail_reason") or api.extract_error_message(record, "3D generation failed"))
     raise Error("3D polling timed out; the upstream task may still be running")
 
 

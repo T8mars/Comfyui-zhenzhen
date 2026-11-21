@@ -121,7 +121,12 @@ class Nov17Contracts(unittest.TestCase):
 
     def test_26_examples_have_blank_keys_and_registered_sinks(self):
         from generate_nov08_workflows import MAPPINGS
-        paths = [path for path in (ROOT / "workflow").glob("*.json") if any(token in path.name for token in ("2.5-flash-", "2.5-global-flash-", "comfyui-charswap-", "comfyui-wuxi-", "comfyui-max-10020-", "comfyui-max-10021-", "doubao-seed-tts-2.0-"))]
+        prefixes = ("seedance-2.5-flash-", "seedance-2.5-global-flash-", "minimax-h3-comfyui-charswap-",
+                    "minimax-h3-comfyui-wuxi-", "minimax-h3-comfyui-max-10020-", "minimax-h3-comfyui-max-10021-",
+                    "doubao-seed-tts-2.0-")
+        paths = [path for path in (ROOT / "workflow").glob("*.json")
+                 if path.name.startswith("zhenzhen-") and path.name.removeprefix("zhenzhen-").startswith(prefixes)
+                 and "-token-" not in path.name]
         self.assertEqual(len(paths), 26)
         models = set()
         for path in paths:

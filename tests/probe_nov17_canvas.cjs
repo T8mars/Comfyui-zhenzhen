@@ -15,7 +15,9 @@ const ROOT = path.join(__dirname, "..");
         await page.goto("http://127.0.0.1:8298", { waitUntil: "networkidle" });
         await page.evaluate(async () => { window.__nov17 = (await import("/scripts/app.js")).app; });
         await page.keyboard.press("Escape");
-        const files = fs.readdirSync(path.join(ROOT, "workflow")).filter((name) => /2\.5-(global-)?flash-|comfyui-(charswap|wuxi|max-1002[01])-|doubao-seed-tts-2\.0-/.test(name));
+        const files = fs.readdirSync(path.join(ROOT, "workflow")).filter((name) =>
+            /^zhenzhen-(seedance-2\.5-(global-)?flash-|minimax-h3-comfyui-(charswap|wuxi|max-1002[01])-|doubao-seed-tts-2\.0-)/.test(name)
+            && !name.includes("-token-"));
         assert.equal(files.length, 26);
         for (const file of files) {
             const report = await page.evaluate(async (data) => {

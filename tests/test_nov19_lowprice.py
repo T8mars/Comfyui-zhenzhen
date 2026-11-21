@@ -22,7 +22,7 @@ class Nov19Contracts(unittest.TestCase):
         self.assertEqual(images.MAI_MODELS, ["mai-image-2-7", "mai-image-2-7-flash"])
         self.assertEqual([len(speech.VOICES[key]) for key in (speech.FLASH, speech.PLUS)], [69, 4])
         self.assertEqual(len(set(speech.VOICES[speech.FLASH])), 69)
-        self.assertEqual(llm.PRESETS, ["custom", "zhenzhen/g6.2-astra", "zhenzhen/g6.2-sol"])
+        self.assertEqual(llm.PRESETS[:3], ["custom", "zhenzhen/g6.2-astra", "zhenzhen/g6.2-sol"])
 
     def test_kling_image_limits(self):
         images.payload("kling", {"prompt": "a" * 50000})

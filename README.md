@@ -41,6 +41,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261122（v2.6.2）
+
+- 平价小屋新增 Kling 4 长图、Gemini 2.5 Pro／Flash TTS、MiniMax H3 四款 Token 节点、HeyGen Avatar 6／Turbo 和 Miora 3D；原 LLM 节点增加四个预设，原用法不变。
+- 随附 26 份空密钥示例，涵盖电商长图／网页、素材生视频、口播、3D 预览与保存，以及适用的并发入口。详见 [节点与工作流说明](docs/nov21-lowprice.md)。
+
 ### 20261119（v2.6.1）
 
 - 新增平价小屋独立节点：Kling 4 图片／组图、MAI Image 2.7／Flash 生成与编辑、Qwen Audio 3.1 TTS。Kling 返回的图片逐张输出，MAI 提供并发版，Qwen 的音色与参考音频入口按模型切换。

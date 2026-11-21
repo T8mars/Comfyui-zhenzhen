@@ -1,6 +1,14 @@
 import { app } from "../../../scripts/app.js";
 
 const LOW_PRICE_NODE_NAMES = new Set([
+    "T8Zhenzhen_Kling_V4_Long_Image_LowPrice",
+    "T8Zhenzhen_Gemini_25_TTS_LowPrice",
+    "T8Zhenzhen_Minimax_H3_ComfyUI_Max_10020_Token_LowPrice",
+    "T8Zhenzhen_Minimax_H3_ComfyUI_Max_10021_Token_LowPrice",
+    "T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_Token_LowPrice",
+    "T8Zhenzhen_Minimax_H3_ComfyUI_Digital_Human_Token_LowPrice",
+    "T8Zhenzhen_HeyGen_Avatar_6_LowPrice",
+    "T8Zhenzhen_Miora_3D_LowPrice",
     "T8Zhenzhen_Kling_V4_Image_LowPrice",
     "T8Zhenzhen_MAI_Image_27_LowPrice",
     "T8Zhenzhen_Qwen_Audio_31_TTS_LowPrice",
