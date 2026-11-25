@@ -41,6 +41,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261125（v2.6.3）
+
+- 平价小屋新增独立 Magi 2 视频节点，支持国内 `magi-2`、海外 `magi-2-global`，提供文生、首尾帧、混合参考及并发工作流。详见 [Magi 2 节点说明](docs/magi2-lowprice.md)。
+
 ### 20261122（v2.6.2）
 
 - 平价小屋新增 Kling 4 长图、Gemini 2.5 Pro／Flash TTS、MiniMax H3 四款 Token 节点、HeyGen Avatar 6／Turbo 和 Miora 3D；原 LLM 节点增加四个预设，原用法不变。

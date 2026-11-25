@@ -60,7 +60,8 @@ class _LowPriceNode:
             return str(error)
 
     def execute(self, api_config=None, skip_error=False, seed=0, **values):
-        del seed
+        if not self.SEEDANCE_EXPLICIT_CACHE_ONLY_SEED:
+            values["seed"] = seed
         config = None
         try:
             prepared = self.prepare(values)
