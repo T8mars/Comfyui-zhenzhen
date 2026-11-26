@@ -6,6 +6,8 @@ const kindOf = (name) => {
     if (key === "T8Zhenzhen_Kling_V4_Long_Image_LowPrice") return "long";
     if (key === "T8Zhenzhen_Miora_3D_LowPrice") return "miora";
     if (key === "T8Zhenzhen_HeyGen_Avatar_6_LowPrice") return "heygen";
+    if (key === "Comfly_zhenzhen_image_gk_v15_lowprice") return "gk-v15";
+    if (key === "T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_Token_LowPrice") return "h3-charswap";
     if (/^T8Zhenzhen_Minimax_H3_ComfyUI_.*_Token_LowPrice$/.test(key)) return "h3";
     return null;
 };
@@ -16,12 +18,14 @@ function refresh(node, kind) {
     const input = (name) => node.inputs?.find((item) => item.name === name);
     const connected = (name) => input(name)?.link != null;
     const show = (name, visible) => setZhenzhenWidgetVisible(widget(name), visible);
-    const progressive = (family, enabled = true) => {
+    const progressive = (family, enabled = true, limit = Infinity) => {
         const slots = (node.inputs ?? []).filter((slot) => new RegExp(`^${family}\\d+$`).test(slot.name));
         const index = (slot) => Number(slot.name.slice(family.length));
-        const last = Math.max(0, ...slots.filter((slot) => slot.link != null).map(index));
-        for (const slot of slots) setZhenzhenInputVisible(node, slot, enabled && index(slot) <= last + 1);
-        return last > 0;
+        const linked = slots.filter((slot) => slot.link != null);
+        const last = Math.max(0, ...linked.map(index).filter((i) => i <= limit));
+        for (const slot of slots) setZhenzhenInputVisible(node, slot,
+            enabled && linked.length < limit && index(slot) <= Math.min(limit, last + 1));
+        return linked.length > 0;
     };
     if (kind === "long") {
         const webpage = widget("skill")?.value === "webpage";
@@ -30,8 +34,12 @@ function refresh(node, kind) {
             setZhenzhenInputVisible(node, input(name), webpage || connected("skill"));
         }
         show("length", !webpage || connected("skill"));
-    } else if (kind === "h3") {
-        for (const family of ["image", "audio", "video"]) progressive(family);
+    } else if (kind === "gk-v15") {
+        progressive("image", widget("model")?.value === "zhenzhen-image-gk-v15-edit" || connected("model"));
+    } else if (kind === "h3" || kind === "h3-charswap") {
+        for (const family of ["image", "audio", "video"]) {
+            progressive(family, true, kind === "h3-charswap" && family === "image" ? 3 : Infinity);
+        }
         if (widget("duration_mode")) {
             const frames = widget("duration_mode").value === "frames";
             show("seconds", !frames || connected("duration_mode"));
@@ -56,7 +64,7 @@ function install(node, kind) {
         if (frame != null) cancelAnimationFrame(frame);
         frame = requestAnimationFrame(() => { frame = null; refresh(node, kind); });
     };
-    for (const name of ["skill", "duration_mode", "audio_url", "generate_type"]) {
+    for (const name of ["skill", "duration_mode", "audio_url", "generate_type", ...(kind === "gk-v15" ? ["model"] : [])]) {
         const widget = node.widgets?.find((item) => item.name === name);
         if (!widget) continue;
         const previous = widget.callback;

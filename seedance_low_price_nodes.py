@@ -9277,6 +9277,7 @@ ZHENZHEN_IMAGE_G25_MIN_CUSTOM_PIXELS = 655360
 ZHENZHEN_IMAGE_G25_MAX_CUSTOM_PIXELS = 8294400
 ZHENZHEN_IMAGE_GK_V15_MODEL = "zhenzhen-image-gk-v15"
 ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL = "zhenzhen-image-gk-v15-edit"
+ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES = 5
 ZHENZHEN_IMAGE_GK_V15_MODELS = [
     ZHENZHEN_IMAGE_GK_V15_MODEL,
     ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL,
@@ -10460,7 +10461,7 @@ def validate_zhenzhen_image_gk_v15_inputs(
     prompt: str,
     size: str,
     n: int,
-    has_image: bool = False,
+    image_count: int = 0,
     strict: bool = True,
 ) -> None:
     if model not in ZHENZHEN_IMAGE_GK_V15_MODELS:
@@ -10475,13 +10476,15 @@ def validate_zhenzhen_image_gk_v15_inputs(
         raise SeedanceLowPriceError(f"Unsupported Zhenzhen Image GK V1.5 size: {size}")
     if not 1 <= int(n) <= 10:
         raise SeedanceLowPriceError("Zhenzhen Image GK V1.5 n must be between 1 and 10")
-    if strict and model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL and not has_image:
+    if model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL and (
+        image_count > ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES or strict and not image_count
+    ):
         raise SeedanceLowPriceError(
-            "zhenzhen-image-gk-v15-edit requires image1"
+            f"zhenzhen-image-gk-v15-edit requires 1-{ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES} reference images"
         )
-    if model == ZHENZHEN_IMAGE_GK_V15_MODEL and has_image:
+    if model == ZHENZHEN_IMAGE_GK_V15_MODEL and image_count:
         raise SeedanceLowPriceError(
-            "zhenzhen-image-gk-v15 is text-to-image and does not accept image1"
+            "zhenzhen-image-gk-v15 is text-to-image and does not accept reference images"
         )
 
 
@@ -10494,7 +10497,7 @@ def build_zhenzhen_image_gk_v15_payload(
 ) -> Dict[str, Any]:
     urls = list(image_urls or [])
     validate_zhenzhen_image_gk_v15_inputs(
-        model, prompt, size, n, has_image=bool(urls), strict=True
+        model, prompt, size, n, image_count=len(urls), strict=True
     )
     payload: Dict[str, Any] = {
         "model": model,
@@ -10503,7 +10506,7 @@ def build_zhenzhen_image_gk_v15_payload(
         "size": size,
     }
     if model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL:
-        payload["images"] = urls[:1]
+        payload["images"] = urls
     return payload
 
 
@@ -10524,6 +10527,7 @@ class Comfly_zhenzhen_image_gk_v15_lowprice:
                 "image1": ("IMAGE",),
                 "api_config": (CONFIG_TYPE,),
                 "skip_error": ("BOOLEAN", {"default": False}),
+                **{f"image{i}": ("IMAGE",) for i in range(2, ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES + 1)},
             },
         }
 
@@ -10547,12 +10551,15 @@ class Comfly_zhenzhen_image_gk_v15_lowprice:
         if None in (model, size):
             return True
         try:
+            slots = _connected_slots(
+                {"image1": image1, **kwargs}, "image", ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES, "Image GK V1.5"
+            )
             validate_zhenzhen_image_gk_v15_inputs(
                 model,
                 prompt,
                 size,
                 n,
-                has_image=image1 is not None,
+                image_count=len(slots),
                 strict=bool(strict),
             )
         except Exception as exc:
@@ -10568,6 +10575,10 @@ class Comfly_zhenzhen_image_gk_v15_lowprice:
         image1: Any = None,
         api_config: Any = None,
         skip_error: bool = False,
+        image2: Any = None,
+        image3: Any = None,
+        image4: Any = None,
+        image5: Any = None,
     ):
         task_id = ""
         pbar = comfy.utils.ProgressBar(100) if COMFYUI_AVAILABLE else None
@@ -10580,25 +10591,20 @@ class Comfly_zhenzhen_image_gk_v15_lowprice:
                     pass
 
         try:
+            slots = _connected_slots(
+                {"image1": image1, "image2": image2, "image3": image3, "image4": image4, "image5": image5},
+                "image", ZHENZHEN_IMAGE_GK_V15_MAX_REFERENCES, "Image GK V1.5",
+            )
             validate_zhenzhen_image_gk_v15_inputs(
                 model,
                 prompt,
                 size,
                 n,
-                has_image=image1 is not None,
+                image_count=len(slots),
                 strict=True,
             )
             config = resolve_config(api_config)
-            image_urls: List[str] = []
-            if model == ZHENZHEN_IMAGE_GK_V15_EDIT_MODEL:
-                image_urls.append(
-                    upload_media(
-                        image_to_png_bytes(image1),
-                        "zhenzhen_image_gk_v15_reference.png",
-                        "image/png",
-                        config,
-                    )
-                )
+            image_urls = _upload_image_slots(slots, config, "zhenzhen_image_gk_v15_reference", update_progress)
             update_progress(20)
             payload = build_zhenzhen_image_gk_v15_payload(
                 model, prompt, size, n, image_urls

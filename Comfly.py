@@ -141,6 +141,7 @@ from .doubao_tts_low_price_nodes import KEY as DOUBAO_TTS_KEY, T8ZhenzhenDoubaoS
 from .nov19_low_price_nodes import KEYS as NOV19_KEYS, CLASSES as NOV19_CLASSES
 from .nov21_low_price_nodes import KEYS as NOV21_KEYS, CLASSES as NOV21_CLASSES, DISPLAY_NAMES as NOV21_NAMES
 from .magi2_low_price_nodes import KEY as MAGI2_KEY, DISPLAY_NAME as MAGI2_NAME, T8ZhenzhenMagi2Video
+from .anima_low_price_nodes import KEY as ANIMA_KEY, T8ZhenzhenAnimaV1
 from .llm_low_price_presets import PRESETS as LOW_PRICE_LLM_PRESETS
 from .nb21_flux_vidu_low_price_nodes import (
     T8ZhenzhenNB21LowPrice,
@@ -26075,6 +26076,7 @@ NODE_CLASS_MAPPINGS = {
     **{NOV19_KEYS[kind]: cls for kind, cls in NOV19_CLASSES.items()},
     **{NOV21_KEYS[kind]: cls for kind, cls in NOV21_CLASSES.items()},
     MAGI2_KEY: T8ZhenzhenMagi2Video,
+    ANIMA_KEY: T8ZhenzhenAnimaV1,
     **{H3_COMFY_KEYS[kind]: cls for kind, cls in H3_COMFY_CLASSES.items()},
     DOUBAO_TTS_KEY: T8ZhenzhenDoubaoSeedTTS20,
     **{H3_TURBO_KEYS[kind]: cls for kind, cls in H3_TURBO_CLASSES.items()},
@@ -26294,6 +26296,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     NOV19_KEYS["audio"]: "zhenzhen-Qwen Audio 3.1 TTS（平价小屋）",
     **{NOV21_KEYS[kind]: title for kind, title in NOV21_NAMES.items()},
     MAGI2_KEY: MAGI2_NAME,
+    ANIMA_KEY: "zhenzhen-Anima v1 文生图（平价小屋）",
     H3_COMFY_KEYS["charswap"]: "zhenzhen-MiniMax H3 角色替换（平价小屋）",
     H3_COMFY_KEYS["wuxi"]: "zhenzhen-MiniMax H3 武戏（平价小屋）",
     H3_COMFY_KEYS["wf"]: "zhenzhen-MiniMax H3 WF漫剧 10020（平价小屋）",

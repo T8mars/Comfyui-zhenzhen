@@ -11,7 +11,7 @@
 
 | 模型 | 图像上限 | 视频上限 | 音频上限 | 特殊要求 |
 | --- | --- | --- | --- | --- |
-| minimax-h3-comfyui-charswap | 9 | 1 | 0 | 必须有图片及恰好一个源视频；5–15秒或22–362帧、步长17，二者互斥 |
+| minimax-h3-comfyui-charswap | 3 | 1 | 0 | 必须有1–3张图片及恰好一个源视频；5–15秒或22–362帧、步长17，二者互斥 |
 | minimax-h3-comfyui-wuxi | 9 | 3 | 3 | 5–15秒；有视频时必须有图片 |
 | minimax-h3-comfyui-max-10020 | 6 | 0 | 3 | 3–15秒；支持Picture及Audio编号标签 |
 | minimax-h3-comfyui-max-10021 | 9 | 0 | 3 | 3–15秒；有音频时必须有图片；支持Picture及Audio编号标签 |

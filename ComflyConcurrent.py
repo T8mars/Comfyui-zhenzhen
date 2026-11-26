@@ -28,6 +28,7 @@ from . import Comfly as _comfly
 IMAGE_TASK_TYPE = "COMFLY_IMAGE_FUTURE"
 VIDEO_TASK_TYPE = "COMFLY_VIDEO_FUTURE"
 ALLOWED_MODULES = {
+    "anima_low_price_nodes",
     "magi2_low_price_nodes",
     "nov21_low_price_nodes",
     "nov19_low_price_nodes",

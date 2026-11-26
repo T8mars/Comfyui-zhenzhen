@@ -41,6 +41,11 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261127（v2.6.4）
+
+- 平价小屋新增独立 Anima v1 文生图节点（`Anima-v1-t2i`）及并发入口，附 2 份空密钥工作流。实际提交已返回可解码的 1920×1088 PNG。
+- 平价小屋 GK V1.5 编辑支持 1–5 张参考图；MiniMax H3 角色替换（普通和 Token）最多 3 张。示例见 `workflow/` 下的 `5refs` 和 `3refs` 工作流。H3 旧工作流的既有连线保留，超过上限时需断开多余参考图。
+
 ### 20261125（v2.6.3）
 
 - 平价小屋新增独立 Magi 2 视频节点，支持国内 `magi-2`、海外 `magi-2-global`，提供文生、首尾帧、混合参考及并发工作流。详见 [Magi 2 节点说明](docs/magi2-lowprice.md)。

@@ -55,8 +55,8 @@ class November21Tests(TestCase):
 
     def test_h3_token_profiles_duration_constraints(self):
         for kind, cls in ((kind, nodes.CLASSES[kind]) for kind in h3.PROFILES):
-            _, images, audio, video, _ = h3.PROFILES[kind]
-            self.assertEqual(len([key for key in cls.INPUT_TYPES()["optional"] if key.startswith("image")]), images)
+            _, _, audio, video, _ = h3.PROFILES[kind]
+            self.assertEqual(len([key for key in cls.INPUT_TYPES()["optional"] if key.startswith("image")]), h3.image_socket_count(kind))
             self.assertTrue(cls.VALIDATE_INPUTS(prompt=None, image1=None))
             kwargs = {"prompt": "<Picture 1> smiles", "image1": object(), "seed": 12345}
             if kind == "digital":

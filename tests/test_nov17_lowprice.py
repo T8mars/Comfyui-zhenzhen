@@ -55,7 +55,7 @@ class Nov17Contracts(unittest.TestCase):
 
     def test_h3_distinct_limits_frames_and_seed(self):
         c = h3.contracts
-        self.assertEqual([c.PROFILES[k]["images"] for k in ("charswap", "wuxi", "wf", "selflift")], [9, 9, 6, 9])
+        self.assertEqual([c.PROFILES[k]["images"] for k in ("charswap", "wuxi", "wf", "selflift")], [3, 9, 6, 9])
         self.assertEqual([c.PROFILES[k]["videos"] for k in ("charswap", "wuxi", "wf", "selflift")], [1, 3, 0, 0])
         values = {"prompt": "Replace <Picture 1>", "image1": image, "video_urls": "https://example.test/source.mp4", "duration_mode": "frames", "frames": 124, "seed": 0}
         body = c.payload("charswap", values, ["https://example.test/reference.png"], [], ["https://example.test/source.mp4"])

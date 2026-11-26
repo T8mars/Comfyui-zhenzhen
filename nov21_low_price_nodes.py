@@ -171,13 +171,14 @@ class _LegacyVideoNode(_LowPriceNode):
 class _H3Token(_LegacyVideoNode):
     @classmethod
     def INPUT_TYPES(cls):
-        _, images, audio, video, minimum = h3.PROFILES[cls.KIND]
+        _, _, audio, video, minimum = h3.PROFILES[cls.KIND]
         charswap = cls.KIND == "charswap"
         required = {"prompt": PROMPT, "seconds": combo([str(i) for i in range(minimum, 16)], "5"),
                     "ratio": combo(["auto"] if charswap else h3.RATIOS)}
         if charswap:
             required.update(duration_mode=combo(["seconds", "frames"]), frames=combo(h3.FRAMES, 124))
-        optional = {**slots("image", images, "IMAGE"), **slots("audio", audio, api.AUDIO_TYPE), **slots("video", video, api.VIDEO_TYPE)}
+        optional = {**slots("image", h3.image_socket_count(cls.KIND), "IMAGE"),
+                    **slots("audio", audio, api.AUDIO_TYPE), **slots("video", video, api.VIDEO_TYPE)}
         if video:
             optional["video_urls"] = ("STRING", {"default": "", "tooltip": "One public MP4 URL instead of the local VIDEO input"})
         return {"required": required, "optional": {**optional, **OPTIONS}}

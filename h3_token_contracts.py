@@ -3,25 +3,28 @@
 import re
 
 from .seedance_low_price_nodes import SeedanceLowPriceError as SeedanceAPIError, video_to_upload_bytes as video_to_bytes
-from .h3_comfy_contracts import FRAMES, MIB, slots, video_urls
+from .h3_comfy_contracts import CHARSWAP_MAX_IMAGES, FRAMES, MIB, image_references, slots, video_urls
 from .nov21_contracts import audio_bytes, choice, image_bytes, text
-from .preview_muse_flux_low_price_nodes import references
 
 
 PROFILES = {
     "wf": ("minimax-h3-comfyui-max-10020-token", 6, 3, 0, 5),
     "jy": ("minimax-h3-comfyui-max-10021-token", 6, 3, 1, 5),
-    "charswap": ("minimax-h3-comfyui-charswap-token", 5, 0, 1, 5),
+    "charswap": ("minimax-h3-comfyui-charswap-token", CHARSWAP_MAX_IMAGES, 0, 1, 5),
     "digital": ("minimax-h3-comfyui-digital-human-token", 1, 1, 0, 3),
 }
 RATIOS = ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9"]
+
+
+def image_socket_count(kind):
+    return 5 if kind == "charswap" else PROFILES[kind][1]
 
 
 def plan(kind, kwargs, strict=False):
     model, n_images, n_audio, n_video, min_seconds = PROFILES[kind]
     prompt = text(kwargs, "prompt", required=strict).strip()
     inputs = {
-        "images": references(kwargs, n_images),
+        "images": image_references(kwargs, n_images, image_socket_count(kind)),
         "audio_urls": slots(kwargs, "audio", n_audio),
         "video_url": slots(kwargs, "video", n_video),
     }

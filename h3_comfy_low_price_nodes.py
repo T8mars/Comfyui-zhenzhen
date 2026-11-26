@@ -32,7 +32,7 @@ class _H3ComfyVideo:
         if cls.KIND == "charswap":
             required.update(duration_mode=(["seconds", "frames"], {"default": "seconds"}),
                             frames=(contracts.FRAMES, {"default": 124}))
-        optional = {f"image{i}": ("IMAGE",) for i in range(1, spec["images"] + 1)}
+        optional = {f"image{i}": ("IMAGE",) for i in range(1, spec.get("image_sockets", spec["images"]) + 1)}
         optional.update({f"audio{i}": (api.AUDIO_TYPE,) for i in range(1, spec["audios"] + 1)})
         optional.update({f"video{i}": (api.VIDEO_TYPE,) for i in range(1, spec["videos"] + 1)})
         if spec["videos"]:

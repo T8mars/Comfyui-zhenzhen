@@ -13,8 +13,9 @@ from .preview_muse_flux_low_price_nodes import references
 
 
 MIB = 1024 * 1024
+CHARSWAP_MAX_IMAGES = 3
 PROFILES = {
-    "charswap": {"model": "minimax-h3-comfyui-charswap", "images": 9, "audios": 0, "videos": 1,
+    "charswap": {"model": "minimax-h3-comfyui-charswap", "images": CHARSWAP_MAX_IMAGES, "image_sockets": 9, "audios": 0, "videos": 1,
                  "resolutions": ["480p", "768p", "1088p", "auto"], "default": "768p", "min_seconds": 5,
                  "image_mb": 10, "total_mb": 50, "seed": True},
     "wuxi": {"model": "minimax-h3-comfyui-wuxi", "images": 9, "audios": 3, "videos": 3,
@@ -55,6 +56,14 @@ def slots(kwargs, family, maximum):
     return sorted(result)
 
 
+def image_references(values, maximum, socket_count):
+    # Legacy high-numbered sockets retain their links; the API limit is a count.
+    images = references(values, socket_count)
+    if len(images) > maximum:
+        raise SeedanceAPIError(f"At most {maximum} reference images are supported")
+    return images
+
+
 def video_urls(value):
     if not isinstance(value, str):
         raise SeedanceAPIError("video_urls must contain one public HTTP(S) URL per line")
@@ -91,7 +100,7 @@ def validate(kind, kwargs, strict=False):
         seed = kwargs.get("seed", -1)
         if type(seed) is not int or not -1 <= seed <= 2147483647:
             raise SeedanceAPIError("seed must be -1 (omit) or 0..2147483647")
-    images = references(kwargs, spec["images"])
+    images = image_references(kwargs, spec["images"], spec.get("image_sockets", spec["images"]))
     audios = slots(kwargs, "audio", spec["audios"])
     videos = slots(kwargs, "video", spec["videos"])
     urls = video_urls(kwargs.get("video_urls", ""))
@@ -99,7 +108,7 @@ def validate(kind, kwargs, strict=False):
         raise SeedanceAPIError(f"At most {spec['videos']} video references are supported")
     if strict:
         if kind == "charswap" and (not images or len(videos) + len(urls) != 1):
-            raise SeedanceAPIError("Character replacement requires 1-9 images and exactly one source video")
+            raise SeedanceAPIError(f"Character replacement requires 1-{spec['images']} images and exactly one source video")
         if kind == "wuxi" and (videos or urls) and not images:
             raise SeedanceAPIError("Wuxi video references require at least one image")
         if kind == "selflift" and audios and not images:
@@ -116,7 +125,7 @@ def validate(kind, kwargs, strict=False):
 def encode_media(kind, kwargs):
     validate(kind, kwargs, strict=True)
     spec, encoded = PROFILES[kind], []
-    for index, image in references(kwargs, spec["images"]):
+    for index, image in image_references(kwargs, spec["images"], spec.get("image_sockets", spec["images"])):
         if not isinstance(image, torch.Tensor) or image.ndim != 4 or image.shape[0] != 1 or image.shape[-1] not in (3, 4) or min(image.shape[1:3]) < 1:
             raise SeedanceAPIError("Each image reference requires one RGB/RGBA IMAGE")
         if not torch.isfinite(image).all():

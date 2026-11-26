@@ -8,7 +8,7 @@
 | Gemini 2.5 Pro/Flash TTS | `zhenzhen/gm-2.5-pro-tts` 和 `zhenzhen/gm-2.5-flash-tts`。有 30 个音色，可另填朗读指令。输出可直接连 SaveAudio。 |
 | MiniMax H3 WF 漫剧 Token | `minimax-h3-comfyui-max-10020-token`。1–6 张图，可选最多 3 段音频。 |
 | MiniMax H3 JY 特调 Token | `minimax-h3-comfyui-max-10021-token`。1–6 张图，可选最多 3 段音频和 1 段 MP4。 |
-| MiniMax H3 角色替换 Token | `minimax-h3-comfyui-charswap-token`。1–5 张新角色图加 1 段源 MP4，可按秒数或帧数选时长。 |
+| MiniMax H3 角色替换 Token | `minimax-h3-comfyui-charswap-token`。1–3 张新角色图加 1 段源 MP4，可按秒数或帧数选时长。 |
 | MiniMax H3 数字人 Token | `minimax-h3-comfyui-digital-human-token`。接 1 张人物图和 1 段语音，设置的视频时长应覆盖音频。 |
 | HeyGen Avatar 6 / Turbo | `heygen-avatar-6` 和 `heygen-avatar-6-turbo`。从文稿加音色、本地音频、公开 HTTPS 音频地址三种输入中选一种。形象名称请参照渠道的 Playground。 |
 | Miora 3D | `miora-3d`。不接图时为文生 3D；接图时从正面起，可依次接左、右、后、上、下、左前、右前视图。首个可预览的 GLB／OBJ 可连原生 Preview3D 和 Save 3D Model；`files_json` 列出服务返回的各文件及保存位置。 |

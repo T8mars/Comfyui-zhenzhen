@@ -7,12 +7,16 @@ const INSTALLED = Symbol("seedanceH3ComfyUI");
 
 function refresh(node, key) {
     const widget = (name) => node.widgets?.find((item) => item.name === name);
+    const charswap = key === "T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_LowPrice";
     for (const family of ["image", "video", "audio"]) {
         const inputs = (node.inputs ?? []).filter((input) => new RegExp(`^${family}\\d+$`).test(input.name));
-        const last = Math.max(0, ...inputs.filter((input) => input.link != null).map((input) => Number(input.name.slice(family.length))));
-        for (const input of inputs) setZhenzhenInputVisible(node, input, Number(input.name.slice(family.length)) <= last + 1);
+        const index = (input) => Number(input.name.slice(family.length));
+        const limit = charswap && family === "image" ? 3 : Infinity;
+        const linked = inputs.filter((input) => input.link != null);
+        const last = Math.max(0, ...linked.map(index).filter((i) => i <= limit));
+        for (const input of inputs) setZhenzhenInputVisible(node, input, linked.length < limit && index(input) <= Math.min(limit, last + 1));
     }
-    if (key === "T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_LowPrice") {
+    if (charswap) {
         const frames = widget("duration_mode")?.value === "frames";
         setZhenzhenWidgetVisible(widget("seconds"), !frames);
         setZhenzhenWidgetVisible(widget("frames"), frames);

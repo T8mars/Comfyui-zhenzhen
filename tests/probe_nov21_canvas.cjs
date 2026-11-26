@@ -59,6 +59,26 @@ const { chromium } = require("playwright");
         }
         console.log("PASS 26 workflows loaded, resized and round-tripped with links and Low Price footers intact");
 
+        for (const filename of [
+            "zhenzhen-image-gk-v15图像编辑（贞贞的平价AI小屋）.json",
+            "zhenzhen-image-gk-v15-edit-5refs-lowprice.json",
+            "zhenzhen-h3-charswap-3refs-lowprice.json",
+            "zhenzhen-h3-charswap-token-3refs-lowprice.json",
+        ]) {
+            const workflow = JSON.parse(fs.readFileSync(path.join(folder, filename), "utf8"));
+            const result = await page.evaluate(async (data) => {
+                const app = window.__nov21;
+                await app.loadGraphData(data);
+                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                const node = app.graph._nodes.find((item) => /(?:image_gk_v15|CharSwap)/.test(item.comfyClass));
+                return { config: node.inputs.find((item) => item.name === "api_config")?.link,
+                    images: node.inputs.filter((item) => /^image\d+$/.test(item.name) && item.link != null).length,
+                    imageSockets: node.inputs.filter((item) => /^image\d+$/.test(item.name)).length };
+            }, workflow);
+            assert.ok(result.config != null, filename);
+            assert.equal(result.images, filename.includes("5refs") ? 5 : filename.includes("3refs") ? 3 : 1, filename);
+            if (filename.includes("gk-v15")) assert.equal(result.imageSockets, 5, filename);
+        }
         const count = await page.evaluate(async () => {
             const app = window.__nov21;
             const settle = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -68,14 +88,25 @@ const { chromium } = require("playwright");
                 ["ComflyConcurrent_T8Zhenzhen_Kling_V4_Long_Image_LowPrice_Submit", 3],
                 ["T8Zhenzhen_Minimax_H3_ComfyUI_Max_10020_Token_LowPrice", 6],
                 ["ComflyConcurrent_T8Zhenzhen_Minimax_H3_ComfyUI_Max_10021_Token_LowPrice_Submit", 6],
-                ["T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_Token_LowPrice", 5],
+                ["Comfly_zhenzhen_image_gk_v15_lowprice", 5],
+                ["ComflyConcurrent_Comfly_zhenzhen_image_gk_v15_lowprice_Submit", 5],
+                ["T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_LowPrice", 3],
+                ["ComflyConcurrent_T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_LowPrice_Submit", 3],
+                ["T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_Token_LowPrice", 3],
+                ["ComflyConcurrent_T8Zhenzhen_Minimax_H3_ComfyUI_CharSwap_Token_LowPrice_Submit", 3],
                 ["T8Zhenzhen_Miora_3D_LowPrice", 8],
             ]) {
                 app.graph.clear();
-                const node = LiteGraph.createNode(key), source = LiteGraph.createNode("EmptyImage");
+                let node = LiteGraph.createNode(key);
+                const source = LiteGraph.createNode("EmptyImage");
                 app.graph.add(node); node.pos = [550, 100];
                 app.graph.add(source); source.pos = [100, 100];
                 await settle();
+                if (key.includes("gk_v15")) {
+                    if (!node.inputs.find((input) => input.name === "image1").hidden) throw Error("GK text mode shows reference inputs");
+                    const model = node.widgets.find((item) => item.name === "model");
+                    model.value = "zhenzhen-image-gk-v15-edit"; model.callback?.(model.value); await settle();
+                }
                 for (let i = 1; i <= max; i++) {
                     const field = "image" + i, slot = node.inputs.findIndex((input) => input.name === field);
                     const where = node.getConnectionPos(true, slot);
@@ -87,8 +118,22 @@ const { chromium } = require("playwright");
                     await settle();
                     count++;
                 }
+                if (key.includes("CharSwap") && !node.inputs.find((input) => input.name === "image4").hidden)
+                    throw Error("CharSwap exposed a fourth reference socket");
                 node.disconnectInput(node.findInputSlot("image" + max)); await settle();
                 if (node.inputs.find((input) => input.name === "image" + max).hidden) throw Error("Disconnect hid the next usable socket");
+                if (key.includes("CharSwap")) {
+                    const legacy = "image" + (key.includes("Token") ? 5 : 9);
+                    if (!source.connect(0, node, node.findInputSlot(legacy))) throw Error("Legacy link not retained");
+                    await settle();
+                    const id = node.id;
+                    const link = node.inputs.find((input) => input.name === legacy).link;
+                    await app.loadGraphData(app.graph.serialize()); await settle();
+                    node = app.graph.getNodeById(id);
+                    const slot = node.inputs.find((input) => input.name === legacy);
+                    if (slot.hidden || slot.link !== link || !node.inputs.find((item) => item.name === "image3").hidden)
+                        throw Error("Legacy image link was lost or no longer counts toward the maximum");
+                }
                 const mode = node.widgets.find((widget) => widget.name === "skill");
                 if (mode) {
                     mode.value = "webpage"; mode.callback?.(mode.value); await settle();
@@ -100,7 +145,7 @@ const { chromium } = require("playwright");
             }
             return count;
         });
-        assert.equal(count, 31);
+        assert.equal(count, 48);
         if (process.env.ZHENZHEN_MIORA_SAMPLE) {
             const previewId = await page.evaluate(() => {
                 const app = window.__nov21;
@@ -177,6 +222,6 @@ const { chromium } = require("playwright");
             console.log("PASS actual Miora GLB saved byte-for-byte and rendered interactively at desktop and mobile sizes");
         }
         assert.deepEqual(errors, []);
-        console.log("PASS 31 progressive connections, hit testing, disconnection and mode switching; zero page errors");
+        console.log("PASS 48 progressive connections, legacy references, mode switching and reload; zero page errors");
     } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });
