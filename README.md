@@ -41,6 +41,10 @@ https://www.youtube.com/playlist?list=PLNYA7C10cIXdrKL7TZnMSVjoyMtKADQlh
 
 # 更新 Update：
 
+### 20261128（v2.6.5）
+
+- 平价小屋新增独立 Seed TTS 3.0 语音合成节点（`bytedance-seed/seed-tts-3-0`），内置 502 个音色，支持表达指令和语速。实测合成并解码 24 kHz 单声道 WAV，附 [空密钥示例工作流](workflow/zhenzhen-seed-tts-30-lowprice.json)。
+
 ### 20261127（v2.6.4）
 
 - 平价小屋新增独立 Anima v1 文生图节点（`Anima-v1-t2i`）及并发入口，附 2 份空密钥工作流。实际提交已返回可解码的 1920×1088 PNG。

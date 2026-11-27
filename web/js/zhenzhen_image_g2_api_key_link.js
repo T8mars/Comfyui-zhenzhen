@@ -19,6 +19,7 @@ const LOW_PRICE_NODE_NAMES = new Set([
     "T8Zhenzhen_Minimax_H3_ComfyUI_Max_10020_LowPrice",
     "T8Zhenzhen_Minimax_H3_ComfyUI_Max_10021_LowPrice",
     "T8Zhenzhen_Doubao_Seed_TTS_20_LowPrice",
+    "T8Zhenzhen_Seed_TTS_30_LowPrice",
     "T8Zhenzhen_Minimax_H3_ComfyUI_Max_LowPrice",
     "T8Zhenzhen_Minimax_H3_Image_LowPrice",
     "T8Zhenzhen_Qwen_Image_21_Turbo_LowPrice",

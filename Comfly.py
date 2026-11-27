@@ -138,6 +138,7 @@ from .h3_turbo_low_price_nodes import (
 )
 from .h3_comfy_low_price_nodes import KEYS as H3_COMFY_KEYS, CLASSES as H3_COMFY_CLASSES
 from .doubao_tts_low_price_nodes import KEY as DOUBAO_TTS_KEY, T8ZhenzhenDoubaoSeedTTS20
+from .seed_tts_30_low_price_nodes import KEY as SEED_TTS_30_KEY, T8ZhenzhenSeedTTS30
 from .nov19_low_price_nodes import KEYS as NOV19_KEYS, CLASSES as NOV19_CLASSES
 from .nov21_low_price_nodes import KEYS as NOV21_KEYS, CLASSES as NOV21_CLASSES, DISPLAY_NAMES as NOV21_NAMES
 from .magi2_low_price_nodes import KEY as MAGI2_KEY, DISPLAY_NAME as MAGI2_NAME, T8ZhenzhenMagi2Video
@@ -26079,6 +26080,7 @@ NODE_CLASS_MAPPINGS = {
     ANIMA_KEY: T8ZhenzhenAnimaV1,
     **{H3_COMFY_KEYS[kind]: cls for kind, cls in H3_COMFY_CLASSES.items()},
     DOUBAO_TTS_KEY: T8ZhenzhenDoubaoSeedTTS20,
+    SEED_TTS_30_KEY: T8ZhenzhenSeedTTS30,
     **{H3_TURBO_KEYS[kind]: cls for kind, cls in H3_TURBO_CLASSES.items()},
     "T8Zhenzhen_Seedream_55_Image_LowPrice": T8ZhenzhenSeedream55Image,
     "T8Zhenzhen_Seedream_55_Layers_LowPrice": T8ZhenzhenSeedream55Layers,
@@ -26302,6 +26304,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     H3_COMFY_KEYS["wf"]: "zhenzhen-MiniMax H3 WF漫剧 10020（平价小屋）",
     H3_COMFY_KEYS["selflift"]: "zhenzhen-MiniMax H3 SelfLift 10021（平价小屋）",
     DOUBAO_TTS_KEY: "zhenzhen-豆包 Seed TTS 2.0 音色库（平价小屋）",
+    SEED_TTS_30_KEY: "zhenzhen-Seed TTS 3.0 语音合成（平价小屋）",
     "T8Zhenzhen_Minimax_H3_ComfyUI_Max_LowPrice": "zhenzhen-MiniMax H3 ComfyUI Max 视频（平价小屋）",
     "T8Zhenzhen_Minimax_H3_Image_LowPrice": "zhenzhen-MiniMax H3 Image 生成/编辑（平价小屋）",
     "T8Zhenzhen_Qwen_Image_21_Turbo_LowPrice": "zhenzhen-Qwen Image 2.1 Turbo 生成/编辑（平价小屋）",
